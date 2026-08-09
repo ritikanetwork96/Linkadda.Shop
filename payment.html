@@ -1,0 +1,2574 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Payment — Linkadda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+
+    /* â•â• GATEWAY LOADER â•â• */
+    #gatewayLoader {
+      position: fixed;
+      inset: 0;
+      background: #070710;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #gatewayLoader.hide {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+    .gl-lock-wrap {
+      position: relative;
+      width: 80px; height: 80px;
+    }
+    .gl-lock-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: #f0247a;
+      animation: glSpin 1s linear infinite;
+    }
+    .gl-lock-ring.r2 {
+      inset: 8px;
+      border-top-color: #7c3aed;
+      animation-duration: 1.4s;
+      animation-direction: reverse;
+    }
+    .gl-lock-ring.r3 {
+      inset: 16px;
+      border-top-color: rgba(240,36,122,0.4);
+      animation-duration: 2s;
+    }
+    @keyframes glSpin { to { transform: rotate(360deg); } }
+    .gl-lock-icon {
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: linear-gradient(135deg,#f0247a,#7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes glPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .gl-text-wrap { text-align: center; }
+    .gl-title {
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg,#f0247a,#7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    .gl-sub {
+      font-size: 12px;
+      color: #8b8baa;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .gl-bar-wrap {
+      width: 220px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .gl-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg,#f0247a,#7c3aed);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(240,36,122,0.5);
+    }
+    .gl-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 200px;
+    }
+    .gl-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.25);
+      font-weight: 500;
+      transition: color 0.4s ease;
+    }
+    .gl-step.active { color: rgba(255,255,255,0.85); }
+    .gl-step.done { color: #22c55e; }
+    .gl-step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      flex-shrink: 0;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    .gl-step.active .gl-step-dot {
+      background: #f0247a;
+      box-shadow: 0 0 8px rgba(240,36,122,0.7);
+      animation: glDotPulse 0.8s ease infinite;
+    }
+    .gl-step.done .gl-step-dot { background: #22c55e; box-shadow: none; animation: none; }
+    @keyframes glDotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.6)} }
+    .gl-badges {
+      display: flex;
+      gap: 10px;
+    }
+    .gl-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #8b8baa;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    .gl-badge i { font-size: 9px; color: #22c55e; }
+  </style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #f0247a;
+      --pink-soft: #e84393;
+      --purple: #7c3aed;
+      --purple-light: #9d5ff5;
+      --dark: #070710;
+      --dark2: #0d0d1a;
+      --card: #111124;
+      --card2: #16162e;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --text: #f0f0f8;
+      --muted: #8b8baa;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --grad: linear-gradient(135deg, #f0247a 0%, #7c3aed 100%);
+      --grad2: linear-gradient(135deg, #f0247a 0%, #9d5ff5 50%, #7c3aed 100%);
+      --glow-pink: 0 0 30px rgba(240,36,122,0.25);
+      --glow-purple: 0 0 30px rgba(124,58,237,0.25);
+      --shadow-card: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* â”€â”€ AMBIENT BG â”€â”€ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 0%, rgba(240,36,122,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 80% 100%, rgba(124,58,237,0.10) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* â”€â”€ HEADER â”€â”€ */
+    .pay-header {
+      background: rgba(7,7,16,0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .back-btn {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .2s;
+      font-weight: 500;
+    }
+    .back-btn:hover { color: var(--pink); }
+    .logo {
+      margin-left: auto;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--green);
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* â”€â”€ STEPS BAR â”€â”€ */
+    .steps-wrap {
+      padding: 28px 16px 8px;
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .steps-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+    }
+    .step-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 60%;
+      right: -40%;
+      height: 1px;
+      background: var(--border2);
+      z-index: 0;
+      transition: background 0.5s;
+    }
+    .step-item.done:not(:last-child)::after {
+      background: linear-gradient(90deg, #f0247a, #7c3aed);
+    }
+    .step-num {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      position: relative; z-index: 1;
+      background: var(--dark);
+      transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      color: var(--muted);
+    }
+    .step-item.active .step-num {
+      border-color: var(--pink);
+      color: var(--pink);
+      box-shadow: 0 0 0 4px rgba(240,36,122,0.12);
+    }
+    .step-item.done .step-num {
+      background: var(--grad);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: var(--glow-pink);
+    }
+    .step-label { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; }
+    .step-item.active .step-label { color: var(--pink); font-weight: 600; }
+    .step-item.done .step-label { color: var(--text); }
+
+    /* â”€â”€ MAIN CONTAINER â”€â”€ */
+    .pay-container {
+      max-width: 520px;
+      margin: 20px auto 80px;
+      padding: 0 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* â”€â”€ SCREENS â”€â”€ */
+    .screen { display: none; animation: fadeInUp 0.35s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* â”€â”€ CARDS â”€â”€ */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    }
+
+    /* â”€â”€ SUMMARY CARD â”€â”€ */
+    .card-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .summary-row:last-child { border: none; padding-bottom: 0; }
+    .summary-row .lbl { color: var(--muted); font-size: 13px; }
+    .summary-row .val { font-weight: 600; }
+    .summary-row.total .val {
+      font-size: 22px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .crypto-note {
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: var(--muted);
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.5;
+    }
+    .crypto-note i { color: var(--purple-light); margin-top: 2px; flex-shrink: 0; }
+
+    /* â”€â”€ SECTION TITLE â”€â”€ */
+    .sec-title {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* â”€â”€ METHOD CARDS â”€â”€ */
+    .method-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .method-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 12px 14px;
+      cursor: pointer;
+      transition: all .25s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+    .method-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad);
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .method-card:hover {
+      border-color: rgba(240,36,122,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(240,36,122,0.15);
+    }
+    .method-card.selected {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 1px rgba(240,36,122,0.3), var(--glow-pink);
+    }
+    .method-card.selected::after { opacity: 0.05; }
+    .method-check {
+      position: absolute;
+      top: 9px; right: 9px;
+      width: 20px; height: 20px;
+      background: var(--grad);
+      border-radius: 50%;
+      display: none;
+      align-items: center; justify-content: center;
+      font-size: 9px;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(240,36,122,0.4);
+    }
+    .method-card.selected .method-check { display: flex; }
+    .method-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      position: relative; z-index: 1;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .icon-upi    { background: linear-gradient(135deg,#6b21a8,#4f46e5); }
+    .icon-bep20  { background: linear-gradient(135deg,#f0b90b,#c8870a); }
+    .icon-eth    { background: linear-gradient(135deg,#627eea,#454fbf); }
+    .icon-binance { background: linear-gradient(135deg,#f0b90b,#f59e0b); }
+    .icon-paypal { background: linear-gradient(135deg,#003087,#009cde); }
+    .method-name { font-size: 13px; font-weight: 700; position: relative; z-index: 1; letter-spacing: -0.2px; }
+    .method-sub  { font-size: 10px; color: var(--muted); position: relative; z-index: 1; line-height: 1.4; }
+    .method-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      position: relative; z-index: 1;
+    }
+    .tag-inr  { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+    .tag-intl { background: rgba(124,58,237,0.12); color: var(--purple-light); border: 1px solid rgba(124,58,237,0.2); }
+    .tag-usdt { background: rgba(240,180,11,0.12); color: #f0b90b; border: 1px solid rgba(240,180,11,0.2); }
+
+    /* â”€â”€ PROCEED BUTTON â”€â”€ */
+    .btn-proceed {
+      width: 100%;
+      padding: 16px;
+      background: var(--grad);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.2px;
+      box-shadow: 0 4px 20px rgba(240,36,122,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-proceed::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transition: left 0.5s;
+    }
+    .btn-proceed:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(240,36,122,0.45); }
+    .btn-proceed:hover::before { left: 100%; }
+    .btn-proceed:active { transform: translateY(0); }
+
+    /* â”€â”€ DETAIL SCREEN â”€â”€ */
+    .detail-top {
+      text-align: center;
+      padding: 8px 0 20px;
+    }
+    .method-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(240,36,122,0.08);
+      border: 1px solid rgba(240,36,122,0.25);
+      border-radius: 24px;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--pink);
+      margin-bottom: 18px;
+      letter-spacing: 0.2px;
+    }
+    .amount-big {
+      font-size: 40px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 6px;
+      letter-spacing: -1.5px;
+    }
+    .amount-sub {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* â”€â”€ QR SECTION â”€â”€ */
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 8px;
+    }
+    .qr-frame {
+      position: relative;
+      padding: 18px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(240,36,122,0.2), 0 0 0 1px rgba(240,36,122,0.1);
+      margin-bottom: 16px;
+    }
+    .qr-frame::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      background: var(--grad);
+      z-index: -1;
+      opacity: 0.6;
+    }
+    .qr-frame canvas, .qr-frame img { display: block; border-radius: 4px; }
+    .qr-frame img {
+      max-width: 180px;
+      max-height: 180px;
+      object-fit: contain;
+    }
+    .qr-empty {
+      width: 180px;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 600;
+      padding: 20px;
+    }
+
+    .qr-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .network-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .net-bsc    { background: rgba(240,185,11,0.12); color: #f0b90b; border: 1px solid rgba(240,185,11,0.25); }
+    .net-erc    { background: rgba(98,126,234,0.12); color: #627eea; border: 1px solid rgba(98,126,234,0.25); }
+    .net-trc    { background: rgba(255,6,10,0.1); color: #ff060a; border: 1px solid rgba(255,6,10,0.2); }
+    .net-upi    { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+
+    /* â”€â”€ ADDRESS BOX â”€â”€ */
+    .addr-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .addr-text {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      word-break: break-all;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .copy-btn {
+      background: rgba(240,36,122,0.1);
+      border: 1px solid rgba(240,36,122,0.25);
+      color: var(--pink);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover { background: rgba(240,36,122,0.2); }
+    .copy-btn.copied { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); color: var(--green); }
+
+    .pay-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 10px;
+      border-left: 2px solid rgba(240,36,122,0.3);
+    }
+    .warn-note {
+      font-size: 12px;
+      color: #f59e0b;
+      line-height: 1.7;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(245,158,11,0.06);
+      border-radius: 10px;
+      border-left: 2px solid rgba(245,158,11,0.4);
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    /* â”€â”€ TIMER â”€â”€ */
+    .timer-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+    }
+    .timer-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: rgba(240,36,122,0.1);
+      border: 1px solid rgba(240,36,122,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--pink);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .timer-info { flex: 1; }
+    .timer-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; font-weight: 500; }
+    .timer-num { font-size: 22px; font-weight: 800; color: var(--pink); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+    .timer-num.expiring { color: #f59e0b; animation: pulse 1s ease infinite; }
+    .timer-num.expired { color: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .timer-progress {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      background: var(--grad);
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+
+    /* â”€â”€ ALERT â”€â”€ */
+    .alert {
+      background: rgba(240,36,122,0.08);
+      border: 1px solid rgba(240,36,122,0.25);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--pink);
+      margin-bottom: 14px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+    .alert.show { display: flex; animation: shake .3s ease; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+    }
+
+    /* â”€â”€ BACK LINK â”€â”€ */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 18px;
+      transition: color .2s;
+      font-weight: 500;
+    }
+    .back-link:hover { color: var(--pink); }
+
+    /* â”€â”€ UPLOAD SCREEN â”€â”€ */
+    .upload-zone {
+      border: 2px dashed rgba(240,36,122,0.3);
+      border-radius: 18px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s;
+      background: rgba(240,36,122,0.02);
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .upload-zone:hover { border-color: var(--pink); background: rgba(240,36,122,0.05); }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .up-icon { font-size: 36px; color: var(--pink); margin-bottom: 12px; display: block; }
+    .upload-zone h4 { font-size: 15px; margin-bottom: 6px; font-weight: 700; }
+    .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .preview-img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 14px;
+      display: none;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    /* â”€â”€ SUCCESS SCREEN â”€â”€ */
+    .success-card {
+      background: var(--card);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 20px;
+      padding: 40px 24px 30px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 0 40px rgba(34,197,94,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .success-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+    .success-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg,#16a34a,#22c55e);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 18px;
+      box-shadow: 0 0 30px rgba(34,197,94,0.3);
+      animation: popIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .success-card h2 { font-size: 24px; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
+    .success-card p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+    .tg-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #229ed9, #1a7ab5);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all .2s;
+      box-shadow: 0 4px 20px rgba(34,158,217,0.3);
+    }
+    .tg-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34,158,217,0.4); }
+
+    /* â”€â”€ CONFETTI PARTICLES â”€â”€ */
+    .confetti-container {
+      position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* â”€â”€ SHIMMER LOADING â”€â”€ */
+    .qr-loading {
+      width: 180px; height: 180px;
+      background: linear-gradient(90deg, #1a1a2e 25%, #252540 50%, #1a1a2e 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* â”€â”€ DIVIDER â”€â”€ */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* â”€â”€ TRUST BADGES â”€â”€ */
+    .trust-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .trust-badge i { font-size: 11px; }
+    .trust-badge.green i { color: var(--green); }
+    .trust-badge.purple i { color: var(--purple-light); }
+
+    /* â”€â”€ RESPONSIVE â”€â”€ */
+    @media (max-width: 400px) {
+      .method-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .method-card { padding: 14px 8px 12px; }
+      .amount-big { font-size: 32px; }
+    }
+
+    /* â”€â”€ DESIGN ENHANCEMENTS â”€â”€ */
+    /* Floating particles */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
+      top: 30%; left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatBg 8s ease-in-out infinite;
+    }
+    @keyframes floatBg {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-30px); }
+    }
+
+    /* Enhanced header glow */
+    .pay-header {
+      background: rgba(7,7,16,0.92);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Card glass shimmer on hover */
+    .card:hover { border-color: rgba(255,255,255,0.1); }
+
+    /* Method card — better hover */
+    .method-card:hover .method-icon {
+      transform: scale(1.08);
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    .method-icon { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+
+    /* Method card selected glow pulse */
+    .method-card.selected {
+      animation: selectedPulse 2s ease infinite;
+    }
+    @keyframes selectedPulse {
+      0%,100% { box-shadow: 0 0 0 1px rgba(240,36,122,0.3), 0 0 20px rgba(240,36,122,0.15); }
+      50% { box-shadow: 0 0 0 1px rgba(240,36,122,0.5), 0 0 35px rgba(240,36,122,0.25); }
+    }
+
+    /* QR frame glow enhanced */
+    .qr-frame {
+      transition: box-shadow 0.3s ease;
+    }
+    .qr-frame:hover {
+      box-shadow: 0 8px 50px rgba(240,36,122,0.35), 0 0 0 1px rgba(240,36,122,0.2);
+    }
+
+    /* Timer card glow when expiring */
+    .timer-num.expiring ~ .timer-progress .timer-bar-fill {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+    }
+
+    /* Proceed button shine effect improved */
+    .btn-proceed {
+      box-shadow: 0 4px 20px rgba(240,36,122,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    }
+
+    /* Success icon glow */
+    .success-icon {
+      box-shadow: 0 0 40px rgba(34,197,94,0.4), 0 0 80px rgba(34,197,94,0.15);
+    }
+
+    /* Upload zone improved */
+    .upload-zone { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .upload-zone:hover { transform: scale(1.01); }
+
+    /* Network badge enhanced */
+    .network-badge {
+      animation: badgeFadeIn 0.4s ease;
+    }
+    @keyframes badgeFadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Step done checkmark */
+    .step-item.done .step-num::after {
+      content: 'âœ“';
+      position: absolute;
+      font-size: 10px;
+    }
+
+    /* Addr box hover */
+    .addr-box {
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .addr-box:hover { border-color: rgba(240,36,122,0.3); background: rgba(240,36,122,0.03); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: rgba(240,36,122,0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(240,36,122,0.5); }
+  </style>
+</head>
+<body>
+
+<!-- â•â• GATEWAY LOADER â•â• -->
+<div id="gatewayLoader">
+  <div class="gl-lock-wrap">
+    <div class="gl-lock-ring"></div>
+    <div class="gl-lock-ring r2"></div>
+    <div class="gl-lock-ring r3"></div>
+    <div class="gl-lock-icon"><i class="fa-solid fa-lock"></i></div>
+  </div>
+  <div class="gl-text-wrap">
+    <div class="gl-title">Linkadda Pay</div>
+    <div class="gl-sub" id="glSubText">Initializing secure connection...</div>
+  </div>
+  <div class="gl-bar-wrap">
+    <div class="gl-bar" id="glBar"></div>
+  </div>
+  <div class="gl-steps">
+    <div class="gl-step" id="glStep1"><div class="gl-step-dot"></div> Establishing encrypted tunnel</div>
+    <div class="gl-step" id="glStep2"><div class="gl-step-dot"></div> Verifying payment gateway</div>
+    <div class="gl-step" id="glStep3"><div class="gl-step-dot"></div> Loading order details</div>
+    <div class="gl-step" id="glStep4"><div class="gl-step-dot"></div> Ready to proceed</div>
+  </div>
+  <div class="gl-badges">
+    <div class="gl-badge"><i class="fa-solid fa-shield-halved"></i> 256-bit SSL</div>
+    <div class="gl-badge"><i class="fa-solid fa-lock"></i> Secure</div>
+    <div class="gl-badge"><i class="fa-solid fa-bolt"></i> Fast Pay</div>
+  </div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+<header class="pay-header">
+  <a class="back-btn" href="index.html"><i class="fa-solid fa-arrow-left"></i> Shop</a>
+  <div class="secure-badge"><i class="fa-solid fa-lock"></i> Secure</div>
+  <div class="logo"><i class="fa-solid fa-fire-flame-curved"></i> Linkadda</div>
+</header>
+
+<!-- STEPS -->
+<div class="steps-wrap">
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-item active" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-label">Method</div>
+    </div>
+    <div class="step-item" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-label">Pay</div>
+    </div>
+    <div class="step-item" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-label">Upload</div>
+    </div>
+    <div class="step-item" id="step4">
+      <div class="step-num"><i class="fa-solid fa-check" style="font-size:10px"></i></div>
+      <div class="step-label">Done</div>
+    </div>
+  </div>
+</div>
+
+<div class="pay-container">
+
+  <!-- â•â• SCREEN 1 — SELECT METHOD â•â• -->
+  <div class="screen active" id="screen1">
+
+    <div class="card">
+      <div class="card-label"><i class="fa-solid fa-receipt" style="color:var(--pink)"></i> Order Summary</div>
+      <div class="summary-row">
+        <span class="lbl">Package</span>
+        <span class="val" id="orderName">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Price (INR)</span>
+        <span class="val" id="orderPriceINR">—</span>
+      </div>
+      <div class="summary-row total">
+        <span class="lbl">Total (USD)</span>
+        <span class="val" id="orderPriceUSD">—</span>
+      </div>
+      <div class="crypto-note">
+        <i class="fa-solid fa-circle-info"></i>
+        Crypto payments are accepted in <strong>USDT</strong> equivalent of the USD amount shown.
+      </div>
+    </div>
+
+    <div class="sec-title">Choose Payment Method</div>
+
+    <div class="method-grid">
+      <div class="method-card" onclick="selectMethod('upi')" id="m-upi">
+        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
+        <div class="method-icon icon-upi" style="background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0">
+          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/upi-icon.png" style="width:100%;height:100%;object-fit:contain;padding:6px" alt="UPI" />
+        </div>
+        <div class="method-name">UPI</div>
+        <div class="method-sub">GPay · PhonePe · Paytm</div>
+        <div class="method-tag tag-inr">₹ INR</div>
+      </div>
+
+      <div class="method-card" onclick="selectMethod('bep20')" id="m-bep20">
+        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
+        <div class="method-icon icon-bep20" style="overflow:hidden;padding:0">
+          <img src="https://pypi-camo.freetls.fastly.net/e5a6147a5b426934a5fd2df6696c4f1577f3452d/68747470733a2f2f616c70686177616c6c65742e636f6d2f77702d636f6e74656e742f75706c6f6164732f323032312f30322f424e422e706e67" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="BEP20" />
+        </div>
+        <div class="method-name">USDT BEP-20</div>
+        <div class="method-sub">Binance Smart Chain</div>
+        <div class="method-tag tag-usdt">USDT</div>
+      </div>
+
+      <div class="method-card" onclick="selectMethod('eth')" id="m-eth">
+        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
+        <div class="method-icon icon-eth" style="overflow:hidden;padding:0">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSndiDvD9neFlHtoY2t-gkLPPYgfyaKf7kANA&s" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="ERC20" />
+        </div>
+        <div class="method-name">USDT ERC-20</div>
+        <div class="method-sub">Ethereum Network</div>
+        <div class="method-tag tag-usdt">USDT</div>
+      </div>
+
+      <div class="method-card" onclick="selectMethod('binancepay')" id="m-binancepay">
+        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
+        <div class="method-icon" style="background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0">
+          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="Binance Pay" />
+        </div>
+        <div class="method-name">Binance Pay</div>
+        <div class="method-sub">Direct ID Transfer</div>
+        <div class="method-tag tag-usdt">USDT</div>
+      </div>
+
+      <div class="method-card" onclick="selectMethod('paypal')" id="m-paypal">
+        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
+        <div class="method-icon icon-paypal" style="overflow:hidden;padding:0">
+          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="PayPal" />
+        </div>
+        <div class="method-name">PayPal</div>
+        <div class="method-sub">Secure Transfer</div>
+        <div class="method-tag tag-intl">INTL</div>
+      </div>
+    </div>
+
+    <div class="alert" id="alertMethod"><i class="fa-solid fa-circle-exclamation"></i> Please select a payment method to continue.</div>
+
+    <button class="btn-proceed" onclick="gotoPayScreen()">
+      <i class="fa-solid fa-lock"></i> Proceed to Payment
+    </button>
+
+    <div class="trust-row">
+      <div class="trust-badge green"><i class="fa-solid fa-shield-halved"></i> 256-bit Encrypted</div>
+      <div class="trust-badge purple"><i class="fa-solid fa-bolt"></i> Instant Delivery</div>
+      <div class="trust-badge"><i class="fa-brands fa-telegram"></i> 24/7 Support</div>
+    </div>
+
+  </div>
+
+  <!-- â•â• SCREEN 2 — PAY â•â• -->
+  <div class="screen" id="screen2">
+    <div class="back-link" onclick="goBack(1)"><i class="fa-solid fa-arrow-left"></i> Change Method</div>
+
+      <div class="card">
+      <div class="sec-title" style="margin-bottom:16px">Payment Details</div>
+      <div class="summary-row">
+        <span class="lbl">Product Name</span>
+        <span class="val" id="detailProductName">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Amount</span>
+        <span class="val" id="detailProductAmount">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">USD</span>
+        <span class="val" id="detailProductUSD">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Payment Method</span>
+        <span class="val" id="detailPaymentMethodLabel">—</span>
+      </div>
+      <div id="paymentLoadError" style="display:none;margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.18);color:#fecdd3;font-size:13px;line-height:1.5;"></div>
+      <div class="detail-top">
+        <div class="method-pill" id="detailBadge"><i class="fa-solid fa-wallet"></i> <span id="detailBadgeText">—</span></div>
+        <div class="amount-big" id="detailAmount">—</div>
+        <div class="amount-sub" id="detailAmountINR">—</div>
+      </div>
+
+      <!-- UPI SECTION -->
+      <div id="upiSection" style="display:none">
+        <div class="qr-wrapper">
+          <div class="network-badge net-upi"><i class="fa-solid fa-mobile-screen"></i> UPI Payment</div>
+          <div class="qr-frame" id="upiQRFrame">
+            <div class="qr-loading" id="upiQRLoading"></div>
+            <div id="upiQRGenerated" style="display:none"></div>
+            <img id="upiQRImage" alt="Payment QR" style="display:none" />
+            <div id="upiQRError" class="qr-empty" style="display:none">Payment QR is not configured.</div>
+          </div>
+          <div class="qr-label">Scan with GPay · PhonePe · Paytm · Any UPI App</div>
+        </div>
+        <div class="or-divider">or copy UPI ID</div>
+        <div class="addr-box">
+          <div class="addr-text" id="upiIdText">—</div>
+          <button class="copy-btn" id="copyUpi" onclick="copyText(CONFIG.upiId, this)"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+        <div class="pay-note">Open Google Pay, PhonePe or Paytm → Scan QR or enter UPI ID → Send <strong>exact amount</strong> as shown above.</div>
+      </div>
+
+      <!-- BEP20 SECTION -->
+      <div id="bep20Section" style="display:none">
+        <div class="qr-wrapper">
+          <div class="network-badge net-bsc"><i class="fa-solid fa-hexagon-nodes"></i> BNB Smart Chain (BEP-20)</div>
+          <div class="qr-frame" id="bep20QRFrame">
+            <div id="bep20QR"></div>
+          </div>
+          <div class="qr-label">Send <strong>USDT on BEP-20 (BSC)</strong> only</div>
+        </div>
+        <div class="or-divider">or copy wallet address</div>
+        <div class="addr-box">
+          <div class="addr-text" id="bep20Addr">—</div>
+          <button class="copy-btn" onclick="copyText(document.getElementById('bep20Addr').innerText, this)"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+        <div class="warn-note"><i class="fa-solid fa-triangle-exclamation"></i> <span>Only send <strong>USDT on BNB Smart Chain (BEP-20)</strong>. Sending on wrong network will result in loss of funds.</span></div>
+      </div>
+
+      <!-- ETH SECTION -->
+      <div id="ethSection" style="display:none">
+        <div class="qr-wrapper">
+          <div class="network-badge net-erc"><i class="fa-brands fa-ethereum"></i> Ethereum (ERC-20)</div>
+          <div class="qr-frame" id="ethQRFrame">
+            <div id="ethQR"></div>
+          </div>
+          <div class="qr-label">Send <strong>USDT on Ethereum ERC-20</strong> only</div>
+        </div>
+        <div class="or-divider">or copy wallet address</div>
+        <div class="addr-box">
+          <div class="addr-text" id="ethAddr">—</div>
+          <button class="copy-btn" onclick="copyText(document.getElementById('ethAddr').innerText, this)"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+        <div class="warn-note"><i class="fa-solid fa-triangle-exclamation"></i> <span>Only send <strong>USDT on Ethereum (ERC-20)</strong> network. Wrong network = lost funds.</span></div>
+      </div>
+
+      <!-- BINANCE SECTION -->
+      <div id="binanceSection" style="display:none">
+        <div class="qr-wrapper">
+          <div class="network-badge" style="background: rgba(240,185,11,0.12); color: #f0b90b; border: 1px solid rgba(240,185,11,0.25);"><i class="fa-solid fa-coins"></i> Binance Gift Card</div>
+          <div style="padding: 20px 0; text-align: center;">
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, #f0b90b, #e84393); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">100% Anonymous & Instant</div>
+          </div>
+        </div>
+        <div class="card" style="background: linear-gradient(135deg, rgba(240,185,11,0.08), rgba(232,67,147,0.08)); border-color: rgba(240,185,11,0.2);">
+          <div class="addr-box">
+            <div class="addr-text" id="binanceId" style="font-size: 16px; font-weight: 700;">969887942</div>
+            <button class="copy-btn" onclick="copyText(document.getElementById('binanceId').innerText, this)"><i class="fa-solid fa-copy"></i> Copy ID</button>
+          </div>
+        </div>
+        <div class="pay-note" style="margin-top: 16px;">
+          <strong>Payment Steps:</strong>
+          <br>1. Send money to Binance ID: <strong>969887942</strong>
+          <br>2. Buy a Binance Gift Card (100% anonymous)
+          <br>3. Send the gift card code to our Telegram
+        </div>
+        <a id="binanceGiftLink" href="https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061" target="_blank" rel="noreferrer" style="display: inline-flex; align-items: center; gap: 8px; color: var(--pink); text-decoration: none; margin-top: 12px; font-weight: 600; transition: all 0.2s;">
+          <i class="fa-solid fa-external-link"></i> Buy Gift Card on G2A
+        </a>
+      </div>
+
+      <!-- BINANCE PAY SECTION -->
+      <div id="binancepaySection" style="display:none">
+        <div style="display:flex; justify-content:center; align-items:center; padding: 20px 0;">
+          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+        </div>
+      </div>
+
+      <!-- PAYPAL SECTION -->
+      <div id="paypalSection" style="display:none">
+        <div style="display:flex; justify-content:center; align-items:center; padding: 20px 0;">
+          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="timer-card">
+      <div class="timer-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+      <div class="timer-info">
+        <div class="timer-label">Payment window closes in</div>
+        <div class="timer-num" id="timerDisplay">15:00</div>
+        <div class="timer-progress"><div class="timer-bar-fill" id="timerBarFill" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <button class="btn-proceed" onclick="gotoUploadScreen()">
+      <i class="fa-solid fa-image"></i> I've Paid — Upload Screenshot
+    </button>
+  </div>
+
+  <!-- â•â• SCREEN 3 — UPLOAD SCREENSHOT â•â• -->
+  <div class="screen" id="screen3">
+    <div class="back-link" onclick="goBack(2)"><i class="fa-solid fa-arrow-left"></i> Back to Payment</div>
+
+    <div class="card">
+      <div class="card-label"><i class="fa-solid fa-file-invoice" style="color:var(--pink)"></i> Order Details</div>
+      <div class="summary-row">
+        <span class="lbl">Package</span>
+        <span class="val" id="uploadOrderName">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Amount Paid</span>
+        <span class="val" id="uploadAmount">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Method</span>
+        <span class="val" id="uploadMethod">—</span>
+      </div>
+    </div>
+
+    <div class="sec-title">Upload Payment Proof</div>
+
+    <img id="previewImg" class="preview-img" alt="Preview" />
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" accept="image/*" id="screenshotInput" onchange="handleScreenshot(event)" />
+      <i class="fa-solid fa-cloud-arrow-up up-icon"></i>
+      <h4>Upload Screenshot</h4>
+      <p>Tap to choose your payment confirmation screenshot<br><span style="color:var(--border2)">JPG · PNG · WEBP supported</span></p>
+    </div>
+
+    <div class="alert" id="alertUpload"><i class="fa-solid fa-circle-exclamation"></i> Please upload your payment screenshot first.</div>
+
+    <button class="btn-proceed" onclick="confirmUpload()">
+      <i class="fa-solid fa-paper-plane"></i> Submit & Contact on Telegram
+    </button>
+  </div>
+
+  <!-- â•â• SCREEN 4 — SUCCESS â•â• -->
+  <div class="screen" id="screen4">
+
+    <div class="success-card">
+      <div class="success-icon">âœ…</div>
+      <h2>Payment Submitted!</h2>
+
+      <!-- Category name highlight -->
+      <div style="
+        background: rgba(240,36,122,0.08);
+        border: 1px solid rgba(240,36,122,0.25);
+        border-radius: 14px;
+        padding: 14px 18px;
+        margin: 0 0 18px;
+        text-align: left;
+      ">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:6px">Order For</div>
+        <div style="font-size:18px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="successCatName">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px" id="successAmtLine">—</div>
+      </div>
+
+      <p>
+        Telegram mein <strong style="color:var(--text)">screenshot attach</strong> karke message send karo — order <strong style="color:var(--green)">5â€“15 minutes</strong> mein deliver ho jaayega.
+      </p>
+      <a id="tgLink" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn">
+        <i class="fa-brands fa-telegram" style="font-size:20px"></i>
+        Send Screenshot on Telegram
+      </a>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted);">
+        <i class="fa-solid fa-circle-info" style="color:var(--purple-light)"></i>
+        Message auto pre-filled hai category name + amount ke saath. Bas screenshot attach karo aur Send!
+      </p>
+    </div>
+
+    <div class="card" style="background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.15);text-align:center;">
+      <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:14px;">
+        <i class="fa-solid fa-triangle-exclamation" style="color:var(--yellow)"></i>
+        If Telegram didn't open automatically, tap the button below:
+      </p>
+      <a id="tgLinkBottom" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn" style="display:inline-flex;">
+        <i class="fa-brands fa-telegram" style="font-size:18px"></i>
+        Open Telegram DM
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="fa-solid fa-receipt" style="color:var(--pink)"></i> Your Order</div>
+      <div class="summary-row">
+        <span class="lbl">Package</span>
+        <span class="val" id="finalName">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Amount</span>
+        <span class="val" id="finalAmount">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Payment Via</span>
+        <span class="val" id="finalMethod">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="lbl">Status</span>
+        <span class="val" style="color:var(--yellow)"><i class="fa-solid fa-circle-notch fa-spin"></i> Pending Confirmation</span>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;background:rgba(33,150,243,0.04);border-color:rgba(33,150,243,0.12)">
+      <p style="color:var(--muted);font-size:13px;line-height:1.8">
+        ðŸ“Œ Telegram message is <strong style="color:var(--green)">pre-filled</strong> with your order details.<br>
+        Just <strong style="color:var(--text)">attach your payment screenshot</strong> and hit Send!
+      </p>
+    </div>
+
+  </div>
+
+</div><!-- /pay-container -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getDatabase, ref, push, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCD_cZXyfYd01FNg-DmRpyKKBIGR3NqeT4",
+  authDomain: "linkadda-cd1da.firebaseapp.com",
+  databaseURL: "https://linkadda-cd1da-default-rtdb.firebaseio.com",
+  projectId: "linkadda-cd1da",
+  storageBucket: "linkadda-cd1da.firebasestorage.app",
+    messagingSenderId: "989651324387",
+    appId: "1:989651324387:web:f6e44be3daa9f4fc0c24d6",
+    measurementId: "G-PCH50PK2N7"
+};
+
+(async () => {
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+    window.__linkaddaDb = db;
+    const storage = getStorage(app);
+
+    window._firebaseReady = true;
+    window.ref = ref;
+    window.get = get;
+    window.onValue = onValue;
+    window.push = push;
+    window.set = set;
+    window._fbDB = db;
+    window._fbRef = ref;
+    window._fbPush = push;
+    window._fbSet = set;
+    window._fbGet = get;
+    window._fbOnValue = onValue;
+    window._fbStorage = storage;
+    window._fbSRef = sRef;
+    window._fbUploadString = uploadString;
+    window._fbGetDownloadURL = getDownloadURL;
+    await ensurePaymentConfigLoaded();
+    await ensureCheckoutOrderLoaded();
+  } catch(e) {
+    console.warn('Firebase init failed:', e);
+    window._firebaseReady = false;
+  }
+})();
+</script>
+<script>
+(function() {
+  const loader   = document.getElementById('gatewayLoader');
+  const bar      = document.getElementById('glBar');
+  const subText  = document.getElementById('glSubText');
+  const steps    = [
+    document.getElementById('glStep1'),
+    document.getElementById('glStep2'),
+    document.getElementById('glStep3'),
+    document.getElementById('glStep4'),
+  ];
+  const msgs = [
+    'Establishing encrypted tunnel...',
+    'Verifying payment gateway...',
+    'Loading your order...',
+    'All systems ready âœ“',
+  ];
+
+  let pct = 0;
+  let stepIdx = 0;
+  steps[0].classList.add('active');
+
+  const forceExitLoader = () => {
+    if (loader.classList.contains('hide')) return;
+    const state = window.__paymentDataState || 'loading';
+    if (state === 'loading') {
+      window.__paymentDataState = 'error';
+      subText.textContent = 'Unable to load order details.';
+      if (steps[2]) steps[2].classList.replace('active', 'done');
+      if (steps[3]) steps[3].classList.add('done');
+    }
+    loader.classList.add('hide');
+    setTimeout(() => loader.remove(), 700);
+  };
+
+  setTimeout(forceExitLoader, 12000);
+
+  const tick = setInterval(() => {
+    pct += pct < 30 ? 4 : pct < 70 ? 2 : pct < 90 ? 1.2 : 3;
+    if (pct > 100) pct = 100;
+    bar.style.width = pct + '%';
+
+    // Step transitions
+    if (pct >= 25  && stepIdx === 0) { steps[0].classList.replace('active','done'); steps[1].classList.add('active'); stepIdx=1; subText.textContent = msgs[1]; }
+    if (pct >= 55  && stepIdx === 1) { steps[1].classList.replace('active','done'); steps[2].classList.add('active'); stepIdx=2; subText.textContent = msgs[2]; }
+    if (pct >= 80  && stepIdx === 2) { steps[2].classList.replace('active','done'); steps[3].classList.add('active'); stepIdx=3; subText.textContent = msgs[3]; }
+
+    if (pct >= 100) {
+      clearInterval(tick);
+      steps[3].classList.replace('active','done');
+      const deadline = Date.now() + 8000;
+      const waitForData = () => {
+        const state = window.__paymentDataState || 'loading';
+        if (state === 'ready' || state === 'error' || Date.now() >= deadline) {
+          forceExitLoader();
+          return;
+        }
+        subText.textContent = state === 'loading' ? 'Loading order details...' : subText.textContent;
+        setTimeout(waitForData, 120);
+      };
+      waitForData();
+    }
+  }, 35);
+})();
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// CONFIG — Update your details here
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+const CONFIG = {
+  upiId: 'Ritikane@ptyes',
+  qrImage: '',
+  telegramUrl: 'https://t.me/TRUSTED_BROTHER1234',
+  bep20Address: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+  ethAddress: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+  binanceId: '969887942',
+  binanceGiftCardUrl: 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
+  paypalLink: 'https://paypal.me/Johnguzman456',
+};
+
+let paymentConfigPromise = null;
+let paymentConfigSubscribed = false;
+
+function normalizeUpiId(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const cleaned = raw.replace(/\s+/g, '');
+  if (cleaned.toLowerCase() === 'ritikane@ptyesbinance') return 'Ritikane@ptyes';
+  return cleaned;
+}
+
+function applyPaymentConfigToUI() {
+  const mapping = [
+    ['upiIdText', CONFIG.upiId],
+    ['bep20Addr', CONFIG.bep20Address],
+    ['ethAddr', CONFIG.ethAddress],
+    ['binanceId', CONFIG.binanceId],
+    ['binancepayId', CONFIG.binanceId],
+    ['paypalLink', CONFIG.paypalLink],
+  ];
+  mapping.forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el && value) el.textContent = value;
+  });
+  const binanceGiftLink = document.getElementById('binanceGiftLink');
+  if (binanceGiftLink) binanceGiftLink.href = safeUrl(CONFIG.binanceGiftCardUrl, binanceGiftLink.href);
+  renderUpiQr();
+}
+
+function safeUrl(value, fallback = '') {
+  const raw = String(value || '').trim();
+  if (!raw) return fallback;
+  try {
+    const parsed = new URL(raw, window.location.origin);
+    const protocol = parsed.protocol.toLowerCase();
+    if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:' || protocol === 'tel:' || protocol === 'blob:' || protocol === 'data:') {
+      return parsed.href;
+    }
+  } catch (_) {
+    if (/^(\/|\.\/|\.\.\/|#|\?)/.test(raw)) return raw;
+  }
+  return fallback;
+}
+
+function extractMoneyNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const raw = String(value || '').trim();
+  if (!raw) return NaN;
+  const match = raw.replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
+  if (!match) return NaN;
+  const parsed = Number.parseFloat(match[0]);
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function formatCurrencyValue(value, currency = 'INR') {
+  const amount = extractMoneyNumber(value);
+  if (!Number.isFinite(amount)) return '';
+  const locale = currency === 'USD' ? 'en-US' : 'en-IN';
+  const formatted = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+  }).format(amount);
+  return `${currency === 'USD' ? '$' : '₹'}${formatted}`;
+}
+
+function describeLoadError(error, fallback = 'Unable to load order details.') {
+  const code = String(error?.code || '').trim();
+  const message = String(error?.message || '').trim();
+  if (!code && !message) return fallback;
+  if (code.includes('permission-denied')) return 'Firebase denied read access to this order.';
+  if (code.includes('network-request-failed')) return 'Network error while loading order details.';
+  if (message) return message;
+  return fallback;
+}
+
+async function loadPaymentConfigFromFirebase() {
+  try {
+    if (!window.__linkaddaDb) return CONFIG;
+    const applyConfig = () => {
+      const settings = window.__paymentSettings || {};
+      const payment = window.__paymentPayment || {};
+      const telegramValue = payment.telegramUrl || settings.telegram || CONFIG.telegramUrl;
+      const telegramUrl = safeUrl(
+        /^https?:\/\//i.test(String(telegramValue || '')) || String(telegramValue || '').startsWith('/')
+          ? String(telegramValue)
+          : `https://t.me/${String(telegramValue || '').replace(/^@/, '')}`,
+        CONFIG.telegramUrl
+      );
+      const upiId = normalizeUpiId(payment.upiId || settings.upiId || CONFIG.upiId);
+
+      Object.assign(CONFIG, {
+        upiId,
+        qrImage: payment.qrImage || settings.qrImage || CONFIG.qrImage,
+        telegramUrl,
+        bep20Address: payment.bep20Address || CONFIG.bep20Address,
+        ethAddress: payment.ethAddress || CONFIG.ethAddress,
+        binanceId: payment.binanceId || CONFIG.binanceId,
+        binanceGiftCardUrl: payment.binanceGiftCardUrl || CONFIG.binanceGiftCardUrl,
+        paypalLink: payment.paypalLink || CONFIG.paypalLink,
+      });
+
+      applyPaymentConfigToUI();
+    };
+
+    if (!paymentConfigSubscribed) {
+      paymentConfigSubscribed = true;
+      onValue(ref(window.__linkaddaDb, 'settings'), (snap) => {
+        window.__paymentSettings = snap.val() || {};
+        applyConfig();
+      });
+      onValue(ref(window.__linkaddaDb, 'payment'), (snap) => {
+        window.__paymentPayment = snap.val() || {};
+        applyConfig();
+      });
+    }
+
+    const [settingsSnap, paymentSnap] = await Promise.all([
+      get(ref(window.__linkaddaDb, 'settings')),
+      get(ref(window.__linkaddaDb, 'payment')),
+    ]);
+    window.__paymentSettings = settingsSnap.val() || {};
+    window.__paymentPayment = paymentSnap.val() || {};
+    applyConfig();
+  } catch (error) {
+    console.warn('Payment config load failed:', error);
+  }
+  return CONFIG;
+}
+
+function ensurePaymentConfigLoaded() {
+  if (!paymentConfigPromise) {
+    paymentConfigPromise = loadPaymentConfigFromFirebase();
+  }
+  return paymentConfigPromise;
+}
+
+const params = new URLSearchParams(window.location.search);
+const requestedCheckout = {
+  orderId: params.get('orderId') || params.get('order') || '',
+  productId: params.get('productId') || params.get('id') || '',
+  token: params.get('token') || params.get('checkoutToken') || '',
+};
+
+let productCatalogPromise = null;
+let productCatalogSubscribed = false;
+let productCatalog = [];
+let orderData = {
+  orderId: requestedCheckout.orderId || '',
+  id: requestedCheckout.productId || '',
+  slug: '',
+  name: 'Loading order details...',
+  inr: 'Loading...',
+  usd: 'Loading...',
+  rawINR: '',
+  rawUSD: '',
+  amountINRValue: NaN,
+  amountUSDValue: NaN,
+  paymentStatus: 'pending',
+  orderStatus: 'pending',
+  paymentMethod: '',
+  screenshotUrl: '',
+  available: false,
+};
+
+function normalizeOrderRecord(record = {}, key = '') {
+  const amountINR = readRecordMoney(record, ['lockedAmountINR', 'amountINR', 'priceINR', 'inr', 'amountDisplay', 'amount', 'price', 'total']);
+  const amountUSD = readRecordMoney(record, ['amountUSD', 'priceUSD', 'usd']);
+  const productName = readRecordText(record, ['productName', 'package', 'title', 'name']) || 'Product';
+  const productId = readRecordText(record, ['productId', 'product', 'catalogId']) || '';
+  const productSlug = readRecordText(record, ['productSlug', 'slug']) || '';
+  const orderId = readRecordText(record, ['orderId', 'id']) || key || '';
+  return {
+    orderId,
+    id: productId || orderId,
+    slug: productSlug,
+    name: productName,
+    inr: amountINR.display || formatCurrencyValue(amountINR.value, 'INR') || '—',
+    usd: amountUSD.display || formatCurrencyValue(amountUSD.value, 'USD') || '—',
+    rawINR: amountINR.raw,
+    rawUSD: amountUSD.raw,
+    amountINRValue: amountINR.value,
+    amountUSDValue: amountUSD.value,
+    paymentStatus: readRecordText(record, ['paymentStatus', 'status']) || 'pending',
+    orderStatus: readRecordText(record, ['orderStatus', 'status']) || 'pending',
+    paymentMethod: readRecordText(record, ['paymentMethod', 'method']) || '',
+    screenshotUrl: readRecordText(record, ['screenshotUrl', 'paymentProof', 'proofUrl', 'proof']) || '',
+    checkoutToken: readRecordText(record, ['checkoutToken', 'token', 'checkoutKey']) || '',
+    createdAt: record.createdAt || record.timestamp || null,
+    updatedAt: record.updatedAt || null,
+    available: true,
+  };
+}
+
+function applyOrderToUI(nextOrder = {}) {
+  orderData = {
+    ...orderData,
+    ...nextOrder,
+    available: nextOrder.available !== undefined ? nextOrder.available : true,
+  };
+  updateOrderSummaryUI();
+}
+
+function normalizeLookupValue(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^\p{L}\p{N}-]+/gu, '');
+}
+
+function parseMoneyValue(value) {
+  const numeric = String(value || '').replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+  const parsed = Number.parseFloat(numeric);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatMoneyValue(value, currency = 'INR') {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const prefix = currency === 'USD' ? '$' : '₹';
+  if (text.startsWith('₹') || text.startsWith('$')) return text;
+  return `${prefix}${text}`;
+}
+
+function normalizeDisplayLookup(value) {
+  return normalizeLookupValue(String(value || '').replace(/\([^)]*\)/g, ''));
+}
+
+function buildProductCatalog(records = []) {
+  return records.map((entry) => {
+    const value = entry.value || {};
+    const title = readRecordText(value, ['title', 'name', 'productName', 'package', 'label']);
+    const slug = readRecordText(value, ['slug', 'productSlug']);
+    const id = readRecordText(value, ['id', 'productId']) || entry.key;
+    const inrMoney = readRecordMoney(value, ['priceINR', 'inr', 'amountINR', 'price', 'amount']);
+    const usdMoney = readRecordMoney(value, ['priceUSD', 'usd', 'amountUSD']);
+    return {
+      key: entry.key,
+      id,
+      slug,
+      title,
+      name: title || slug || id,
+      rawINR: inrMoney.raw,
+      rawUSD: usdMoney.raw,
+      amountINRValue: inrMoney.value,
+      amountUSDValue: usdMoney.value,
+      inr: inrMoney.display,
+      usd: usdMoney.display,
+      status: readRecordText(value, ['status']) || 'active',
+      record: value,
+    };
+  });
+}
+
+function normalizeProductMatchTargets(orderInfo = {}) {
+  return [
+    orderInfo.id,
+    orderInfo.slug,
+    orderInfo.name,
+    orderInfo.orderId,
+    orderInfo.package,
+    requestedCheckout.productId,
+    requestedCheckout.orderId,
+  ]
+    .map(normalizeDisplayLookup)
+    .filter(Boolean);
+}
+
+function findLiveProductForOrder(orderInfo = {}) {
+  const targets = new Set(normalizeProductMatchTargets(orderInfo));
+  if (!targets.size) return null;
+  return productCatalog.find((item) => {
+    const haystacks = [item.id, item.key, item.slug, item.title, item.name].map(normalizeDisplayLookup).filter(Boolean);
+    return haystacks.some((value) => targets.has(value) || [...targets].some((target) => value.includes(target) || target.includes(value)));
+  }) || null;
+}
+
+function mergeOrderWithProduct(orderInfo = {}, productRecord = null) {
+  if (!productRecord) return orderInfo;
+  return {
+    ...orderInfo,
+    id: productRecord.id || orderInfo.id || '',
+    slug: productRecord.slug || orderInfo.slug || '',
+    name: productRecord.title || productRecord.name || orderInfo.name || 'Product',
+    inr: orderInfo.inr || productRecord.inr || formatCurrencyValue(productRecord.amountINRValue ?? productRecord.rawINR, 'INR') || '—',
+    usd: productRecord.usd || formatCurrencyValue(productRecord.amountUSDValue ?? productRecord.rawUSD, 'USD') || orderInfo.usd || '—',
+    rawINR: productRecord.rawINR || orderInfo.rawINR || '',
+    rawUSD: productRecord.rawUSD || orderInfo.rawUSD || '',
+    amountINRValue: productRecord.amountINRValue ?? orderInfo.amountINRValue,
+    amountUSDValue: productRecord.amountUSDValue ?? orderInfo.amountUSDValue,
+    available: true,
+    reason: '',
+  };
+}
+
+function refreshOrderSummaryFromLiveCatalog() {
+  const matched = findLiveProductForOrder(orderData);
+  if (!matched) return;
+  applyOrderToUI(mergeOrderWithProduct(orderData, matched));
+}
+
+function unwrapRecords(snapshotValue) {
+  if (!snapshotValue) return [];
+  if (Array.isArray(snapshotValue)) {
+    return snapshotValue
+      .map((item, index) => ({ key: String(index), value: item }))
+      .filter(item => item.value && typeof item.value === 'object');
+  }
+  if (typeof snapshotValue === 'object') {
+    return Object.entries(snapshotValue).map(([key, value]) => ({ key, value }));
+  }
+  return [];
+}
+
+function readRecordText(record, keys = []) {
+  for (const key of keys) {
+    const value = record?.[key];
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return String(value).trim();
+    }
+  }
+  return '';
+}
+
+function readRecordMoney(record, keys = []) {
+  const raw = readRecordText(record, keys);
+  if (!raw) return { raw: '', display: '' };
+  const value = extractMoneyNumber(raw);
+  return {
+    raw,
+    value,
+    display: formatCurrencyValue(value, keys.some(key => String(key).toLowerCase().includes('usd')) ? 'USD' : 'INR'),
+  };
+}
+
+function getUpiPaymentAmount() {
+  const amount = Number.isFinite(orderData.amountINRValue)
+    ? orderData.amountINRValue
+    : extractMoneyNumber(orderData.rawINR || orderData.inr || orderData.amountDisplay);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function buildUpiPaymentUri() {
+  const amount = getUpiPaymentAmount();
+  const params = new URLSearchParams({
+    pa: CONFIG.upiId || '',
+    pn: 'HotMyNet',
+    cu: 'INR',
+    mode: '02',
+    purpose: '00',
+  });
+  if (amount > 0) {
+    params.set('am', amount.toFixed(2));
+  }
+  const orderRef = String(orderData.orderId || requestedCheckout.orderId || '').trim();
+  if (orderRef) {
+    params.set('tn', `Order ${orderRef}`);
+    params.set('tr', orderRef);
+  } else {
+    params.set('tn', `Order ${orderData.name || 'Payment'}`);
+  }
+  return `upi://pay?${params.toString()}`;
+}
+
+function renderUpiQr() {
+  const frame = document.getElementById('upiQRFrame');
+  const qrGeneratedEl = document.getElementById('upiQRGenerated');
+  const qrImage = document.getElementById('upiQRImage');
+  const qrError = document.getElementById('upiQRError');
+  const qrLoading = document.getElementById('upiQRLoading');
+  if (!frame || !qrGeneratedEl || !qrImage || !qrError || !qrLoading) return;
+
+  const imageSrc = safeUrl(CONFIG.qrImage, '');
+  qrLoading.style.display = 'none';
+
+  if (imageSrc) {
+    qrGeneratedEl.style.display = 'none';
+    qrGeneratedEl.innerHTML = '';
+    qrImage.src = imageSrc;
+    qrImage.style.display = 'block';
+    qrError.style.display = 'none';
+    return;
+  }
+
+  if (window.QRCode && CONFIG.upiId) {
+    qrImage.style.display = 'none';
+    qrError.style.display = 'none';
+    qrGeneratedEl.style.display = 'block';
+    qrGeneratedEl.innerHTML = '';
+    try {
+      new QRCode(qrGeneratedEl, {
+        text: buildUpiPaymentUri(),
+        width: 180,
+        height: 180,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+      return;
+    } catch (_) {
+      qrGeneratedEl.style.display = 'none';
+    }
+  }
+
+  qrGeneratedEl.style.display = 'none';
+  qrGeneratedEl.innerHTML = '';
+  qrImage.removeAttribute('src');
+  qrImage.style.display = 'none';
+  qrError.style.display = 'flex';
+}
+
+let selectedMethod = null;
+
+function updateOrderSummaryUI() {
+  const detailProductNameEl = document.getElementById('detailProductName');
+  const detailProductAmountEl = document.getElementById('detailProductAmount');
+  const detailProductUSDEl = document.getElementById('detailProductUSD');
+  const detailPaymentMethodLabelEl = document.getElementById('detailPaymentMethodLabel');
+  const paymentLoadErrorEl = document.getElementById('paymentLoadError');
+  const orderNameEl = document.getElementById('orderName');
+  const orderPriceINREl = document.getElementById('orderPriceINR');
+  const orderPriceUSDEl = document.getElementById('orderPriceUSD');
+  const detailAmountEl = document.getElementById('detailAmount');
+  const detailAmountINREl = document.getElementById('detailAmountINR');
+  const uploadOrderNameEl = document.getElementById('uploadOrderName');
+
+  if (detailProductNameEl) detailProductNameEl.textContent = orderData.name || '—';
+  if (detailProductAmountEl) detailProductAmountEl.textContent = orderData.inr || formatCurrencyValue(orderData.amountINRValue ?? orderData.rawINR ?? orderData.amountDisplay, 'INR') || '—';
+  if (detailProductUSDEl) detailProductUSDEl.textContent = orderData.usd || '—';
+  if (detailPaymentMethodLabelEl) {
+    detailPaymentMethodLabelEl.textContent = selectedMethod ? (selectedMethod === 'upi' ? 'UPI' : selectedMethod.toUpperCase()) : '—';
+  }
+  if (orderNameEl) orderNameEl.textContent = orderData.name || '—';
+  if (orderPriceINREl) orderPriceINREl.textContent = orderData.inr || formatCurrencyValue(orderData.amountINRValue ?? orderData.rawINR ?? orderData.amountDisplay, 'INR') || '—';
+  if (orderPriceUSDEl) orderPriceUSDEl.textContent = orderData.usd || '—';
+
+  if (detailAmountEl) {
+    detailAmountEl.textContent = paymentAmountForMethod(selectedMethod || 'upi');
+  }
+  if (detailAmountINREl) {
+    detailAmountINREl.textContent = paymentCurrencyLabel(selectedMethod || 'upi');
+  }
+  if (uploadOrderNameEl) uploadOrderNameEl.textContent = orderData.name || '—';
+  if (paymentLoadErrorEl) {
+    const errorText = !orderData.available && orderData.reason ? orderData.reason : '';
+    paymentLoadErrorEl.textContent = errorText;
+    paymentLoadErrorEl.style.display = errorText ? 'block' : 'none';
+  }
+}
+
+function paymentAmountForMethod(method) {
+  return method === 'upi'
+    ? (formatCurrencyValue(orderData.amountINRValue ?? orderData.rawINR ?? orderData.inr, 'INR') || orderData.inr || '—')
+    : `${Number.isFinite(orderData.amountUSDValue)
+      ? String(orderData.amountUSDValue).replace(/\.00$/, '')
+      : (extractMoneyNumber(orderData.rawUSD || orderData.usd).toString().replace(/\.00$/, '') || '0.00')} USDT`;
+}
+
+function paymentCurrencyLabel(method) {
+  return method === 'upi'
+    ? 'via UPI · Indian Rupees'
+    : `${formatCurrencyValue(orderData.amountUSDValue ?? orderData.rawUSD ?? orderData.usd, 'USD') || orderData.usd || '—'} USD equivalent`;
+}
+
+async function loadProductsCatalog() {
+  if (window.__linkaddaDb && !productCatalogSubscribed) {
+    productCatalogSubscribed = true;
+    onValue(ref(window.__linkaddaDb, 'products'), (snap) => {
+      const records = unwrapRecords(snap.val());
+      productCatalog = buildProductCatalog(records);
+      if (window.__paymentDataState !== 'loading') {
+        refreshOrderSummaryFromLiveCatalog();
+      }
+    });
+  }
+
+  if (productCatalogPromise) {
+    await productCatalogPromise;
+    return productCatalog;
+  }
+
+  productCatalogPromise = (async () => {
+    if (!window.__linkaddaDb) return [];
+    const snap = await get(ref(window.__linkaddaDb, 'products'));
+    const records = unwrapRecords(snap.val());
+    productCatalog = buildProductCatalog(records);
+    return productCatalog;
+  })();
+
+  await productCatalogPromise;
+  return productCatalog;
+}
+
+async function createCheckoutOrder(baseOrder, productRecord = null) {
+  if (!window.__linkaddaDb) return null;
+  const orderRef = push(ref(window.__linkaddaDb, 'orders'));
+  const inrAmount = Number.isFinite(baseOrder.amountINRValue) ? baseOrder.amountINRValue : productRecord?.amountINRValue ?? extractMoneyNumber(baseOrder.rawINR || productRecord?.rawINR);
+  const usdAmount = Number.isFinite(baseOrder.amountUSDValue) ? baseOrder.amountUSDValue : productRecord?.amountUSDValue ?? extractMoneyNumber(baseOrder.rawUSD || productRecord?.rawUSD);
+  const checkoutToken = baseOrder.checkoutToken || (window.crypto?.randomUUID?.() || `ck_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`);
+  const payload = {
+    orderId: orderRef.key,
+    id: orderRef.key,
+    productId: baseOrder.id || productRecord?.id || null,
+    productSlug: baseOrder.slug || productRecord?.slug || null,
+    productName: baseOrder.name || productRecord?.title || productRecord?.name || 'Product',
+    checkoutToken,
+    lockedAmountINR: Number.isFinite(inrAmount) ? inrAmount : null,
+    lockedAmountUSD: Number.isFinite(usdAmount) ? usdAmount : null,
+    amount: Number.isFinite(inrAmount) ? inrAmount : null,
+    amountINR: Number.isFinite(inrAmount) ? inrAmount : null,
+    amountUSD: Number.isFinite(usdAmount) ? usdAmount : null,
+    currency: 'INR',
+    paymentStatus: 'pending',
+    orderStatus: 'pending',
+    status: 'pending',
+    paymentMethod: '',
+    screenshotUrl: '',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    source: 'public-site',
+  };
+  await set(orderRef, payload);
+  history.replaceState({}, '', `payment.html?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(baseOrder.id || productRecord?.id || '')}&token=${encodeURIComponent(checkoutToken)}`);
+  applyOrderToUI(normalizeOrderRecord(payload, orderRef.key));
+  return payload;
+}
+
+async function findOrderRecordByIdentifier(identifier) {
+  const target = normalizeLookupValue(identifier);
+  if (!target || !window.__linkaddaDb) return null;
+  const snap = await get(ref(window.__linkaddaDb, 'orders'));
+  const records = unwrapRecords(snap.val());
+  const matched = records.find((entry) => {
+    const value = entry.value || {};
+    const haystacks = [
+      entry.key,
+      value.orderId,
+      value.id,
+      value.productId,
+      value.productSlug,
+      value.productName,
+      value.package,
+      value.title,
+      value.name,
+    ].map(normalizeLookupValue);
+    return haystacks.includes(target);
+  });
+  if (!matched) return null;
+  return normalizeOrderRecord(matched.value || {}, matched.key);
+}
+
+async function ensureCheckoutOrderLoaded() {
+  window.__paymentDataState = 'loading';
+  if (!window.__linkaddaDb) {
+    applyOrderToUI({
+      name: 'Unable to load order details.',
+      inr: 'Unavailable',
+      usd: 'Unavailable',
+      available: false,
+      reason: 'Payment database is not connected.',
+    });
+    window.__paymentDataState = 'error';
+    return orderData;
+  }
+
+  if (requestedCheckout.orderId) {
+    try {
+      const orderSnap = await get(ref(window.__linkaddaDb, `orders/${requestedCheckout.orderId}`));
+      if (orderSnap.exists()) {
+        const normalizedOrder = normalizeOrderRecord(orderSnap.val() || {}, orderSnap.key);
+        if (normalizedOrder.checkoutToken && normalizedOrder.checkoutToken !== requestedCheckout.token) {
+          applyOrderToUI({
+            name: 'Invalid checkout session.',
+            inr: 'Unavailable',
+            usd: 'Unavailable',
+            available: false,
+            reason: 'Checkout token mismatch. Please start a fresh checkout from the product page.',
+          });
+          window.__paymentDataState = 'error';
+          return orderData;
+        }
+        await loadProductsCatalog();
+        applyOrderToUI(mergeOrderWithProduct(normalizedOrder, findLiveProductForOrder(normalizedOrder)));
+        window.__paymentDataState = 'ready';
+        return orderData;
+      }
+      const indexedOrder = await findOrderRecordByIdentifier(requestedCheckout.orderId);
+      if (indexedOrder) {
+        if (indexedOrder.checkoutToken && indexedOrder.checkoutToken !== requestedCheckout.token) {
+          applyOrderToUI({
+            name: 'Invalid checkout session.',
+            inr: 'Unavailable',
+            usd: 'Unavailable',
+            available: false,
+            reason: 'Checkout token mismatch. Please start a fresh checkout from the product page.',
+          });
+          window.__paymentDataState = 'error';
+          return orderData;
+        }
+        await loadProductsCatalog();
+        applyOrderToUI(mergeOrderWithProduct(indexedOrder, findLiveProductForOrder(indexedOrder)));
+        window.__paymentDataState = 'ready';
+        return orderData;
+      }
+    } catch (error) {
+      console.warn('Order load failed:', error);
+    }
+  }
+
+  try {
+    await loadProductsCatalog();
+    const reqId = normalizeLookupValue(requestedCheckout.productId);
+
+    const matched = productCatalog.find((item) => {
+      const haystacks = [item.id, item.key, item.slug, item.title, item.name].map(normalizeLookupValue);
+      return reqId && haystacks.includes(reqId);
+    }) || null;
+
+    if (!matched) {
+      applyOrderToUI({
+        name: 'Unable to load order details.',
+        id: requestedCheckout.productId || orderData.id || '',
+        slug: '',
+        inr: 'Unavailable',
+        usd: 'Unavailable',
+        available: false,
+        reason: requestedCheckout.productId
+          ? `Product not found: ${requestedCheckout.productId}`
+          : 'Unable to load order details.',
+      });
+      window.__paymentDataState = 'error';
+      return orderData;
+    }
+
+    const nextOrder = {
+      orderId: requestedCheckout.orderId || '',
+      checkoutToken: requestedCheckout.token || '',
+      id: matched.id || matched.key || '',
+      slug: matched.slug || '',
+      name: matched.title || matched.name || 'Product',
+      inr: matched.inr || formatCurrencyValue(matched.amountINRValue ?? matched.rawINR, 'INR') || '—',
+      usd: matched.usd || formatCurrencyValue(matched.amountUSDValue ?? matched.rawUSD, 'USD') || '—',
+      rawINR: matched.rawINR || '',
+      rawUSD: matched.rawUSD || '',
+      amountINRValue: matched.amountINRValue,
+      amountUSDValue: matched.amountUSDValue,
+      paymentStatus: 'pending',
+      orderStatus: 'pending',
+      paymentMethod: '',
+      screenshotUrl: '',
+      available: true,
+      reason: '',
+    };
+
+    if (!requestedCheckout.orderId || !(await findOrderRecordByIdentifier(requestedCheckout.orderId))) {
+      const created = await createCheckoutOrder(nextOrder, matched);
+      if (created) {
+        refreshOrderSummaryFromLiveCatalog();
+        window.__paymentDataState = 'ready';
+        return orderData;
+      }
+    }
+
+    applyOrderToUI(nextOrder);
+    refreshOrderSummaryFromLiveCatalog();
+    window.__paymentDataState = 'ready';
+    return orderData;
+  } catch (error) {
+    console.warn('Product lookup failed:', error);
+    applyOrderToUI({
+      name: 'Unable to load order details.',
+      id: requestedCheckout.productId || orderData.id || '',
+      inr: 'Unavailable',
+      usd: 'Unavailable',
+      available: false,
+      reason: describeLoadError(error, 'Unable to load order details.'),
+    });
+    window.__paymentDataState = 'error';
+    return orderData;
+  }
+}
+
+let screenshotUploaded = false;
+let timerInterval = null;
+let totalTimeSecs = 15 * 60;
+let remainingSecs = totalTimeSecs;
+let qrGenerated = {};
+
+// â”€â”€ METHOD SELECTION â”€â”€
+function selectMethod(m) {
+  selectedMethod = m;
+  document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('m-' + m).classList.add('selected');
+  document.getElementById('alertMethod').classList.remove('show');
+}
+
+// â”€â”€ SCREEN NAVIGATION â”€â”€
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach((s, i) => {
+    s.classList.remove('active');
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.screen')[n - 1].classList.add('active');
+  }, 10);
+  updateSteps(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateSteps(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+}
+
+function goBack(n) { showScreen(n); }
+
+// â”€â”€ GENERATE QR â”€â”€
+function generateQR(containerId, text, size) {
+  size = size || 180;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  try {
+    new QRCode(container, {
+      text: text,
+      width: size, height: size,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    container.innerHTML = '<div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;text-align:center;padding:20px">QR unavailable</div>';
+  }
+}
+
+// â”€â”€ GOTO PAY SCREEN â”€â”€
+async function gotoPayScreen() {
+  await ensurePaymentConfigLoaded();
+  await ensureCheckoutOrderLoaded();
+  if (!selectedMethod) {
+    document.getElementById('alertMethod').classList.add('show');
+    return;
+  }
+
+  if (!orderData.available) {
+    document.getElementById('alertMethod').textContent = orderData.reason || 'This product is not available right now.';
+    document.getElementById('alertMethod').classList.add('show');
+    return;
+  }
+
+  const inrNum = parseMoneyValue(orderData.rawINR || orderData.inr);
+
+  const isUPI = selectedMethod === 'upi';
+  document.getElementById('detailAmount').textContent = paymentAmountForMethod(selectedMethod);
+  document.getElementById('detailAmountINR').textContent = paymentCurrencyLabel(selectedMethod);
+
+  const names = { upi: 'UPI Payment', bep20: 'USDT · BEP-20', eth: 'USDT · ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal Transfer' };
+  document.getElementById('detailBadgeText').textContent = names[selectedMethod];
+  document.getElementById('detailPaymentMethodLabel').textContent = selectedMethod === 'upi' ? 'UPI' : selectedMethod.toUpperCase();
+
+  // hide all sections
+  ['upi', 'bep20', 'eth', 'binancepay', 'paypal'].forEach(m => {
+    document.getElementById(m + 'Section').style.display = 'none';
+  });
+  document.getElementById(selectedMethod + 'Section').style.display = 'block';
+
+  // Generate QRs (only once)
+  if (!qrGenerated[selectedMethod]) {
+    qrGenerated[selectedMethod] = true;
+
+    if (selectedMethod === 'upi') {
+      setTimeout(() => {
+        document.getElementById('upiIdText').textContent = CONFIG.upiId || 'Not configured';
+        renderUpiQr();
+      }, 300);
+
+    } else if (selectedMethod === 'bep20') {
+      generateQR('bep20QR', CONFIG.bep20Address, 180);
+      document.getElementById('bep20Addr').textContent = CONFIG.bep20Address;
+
+    } else if (selectedMethod === 'eth') {
+      generateQR('ethQR', CONFIG.ethAddress, 180);
+      document.getElementById('ethAddr').textContent = CONFIG.ethAddress;
+
+    } else if (selectedMethod === 'binance') {
+      document.getElementById('binanceId').textContent = CONFIG.binanceId;
+
+    } else if (selectedMethod === 'binancepay') {
+      document.getElementById('binancepayId').textContent = CONFIG.binanceId;
+      generateQR('binancepayQR', 'https://app.binance.com/en/send-crypto-payment?recipientId=' + CONFIG.binanceId, 180);
+
+    } else if (selectedMethod === 'paypal') {
+      document.getElementById('paypalLink').textContent = CONFIG.paypalLink;
+    }
+  }
+
+  startTimer(15 * 60);
+  showScreen(2);
+}
+
+// â”€â”€ TIMER â”€â”€
+function startTimer(secs) {
+  clearInterval(timerInterval);
+  remainingSecs = secs;
+  totalTimeSecs = secs;
+  const el = document.getElementById('timerDisplay');
+  const bar = document.getElementById('timerBarFill');
+
+  function tick() {
+    if (remainingSecs <= 0) {
+      clearInterval(timerInterval);
+      el.textContent = 'Expired';
+      el.className = 'timer-num expired';
+      if (bar) bar.style.width = '0%';
+      return;
+    }
+    const m = Math.floor(remainingSecs / 60).toString().padStart(2, '0');
+    const s = (remainingSecs % 60).toString().padStart(2, '0');
+    el.textContent = m + ':' + s;
+    el.className = 'timer-num' + (remainingSecs <= 120 ? ' expiring' : '');
+    if (bar) bar.style.width = ((remainingSecs / totalTimeSecs) * 100) + '%';
+    remainingSecs--;
+  }
+
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// â”€â”€ GOTO UPLOAD SCREEN â”€â”€
+function gotoUploadScreen() {
+  clearInterval(timerInterval);
+  const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
+  document.getElementById('uploadOrderName').textContent = orderData.name;
+  document.getElementById('uploadAmount').textContent = selectedMethod === 'upi'
+    ? (orderData.inr || '—') : paymentAmountForMethod(selectedMethod);
+  document.getElementById('uploadMethod').textContent = names[selectedMethod];
+  showScreen(3);
+}
+
+// â”€â”€ SCREENSHOT HANDLER â”€â”€
+function handleScreenshot(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('previewImg');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    const zone = document.getElementById('uploadZone');
+    zone.style.borderColor = 'var(--green)';
+    zone.style.background = 'rgba(34,197,94,0.04)';
+    screenshotUploaded = true;
+    document.getElementById('alertUpload').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+// â”€â”€ CONFIRM UPLOAD â”€â”€
+async function confirmUpload() {
+  if (!screenshotUploaded) {
+    document.getElementById('alertUpload').classList.add('show');
+    return;
+  }
+  const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
+  const amountText = paymentAmountForMethod(selectedMethod);
+  const methodName = names[selectedMethod];
+
+  const savedOrder = await saveOrderToFirebase(amountText, methodName);
+  const orderId = savedOrder?.orderId || orderData.orderId || requestedCheckout.orderId || 'pending';
+
+  document.getElementById('finalName').textContent = orderData.name;
+  document.getElementById('finalAmount').textContent = amountText;
+  document.getElementById('finalMethod').textContent = methodName;
+
+  // Show category name on success screen
+  document.getElementById('successCatName').textContent = orderData.name;
+  document.getElementById('successAmtLine').textContent = amountText + ' via ' + methodName;
+
+  // Build Telegram message with order details
+  const tgUrl = buildTelegramOrderUrl(orderId, amountText, methodName);
+  document.getElementById('tgLink').href = tgUrl;
+  document.getElementById('tgLinkBottom').href = tgUrl;
+
+  showScreen(4);
+  launchConfetti();
+
+  // Redirect to Telegram after payment is saved
+  setTimeout(() => {
+    window.location.href = tgUrl;
+  }, 1500);
+}
+
+// â”€â”€ SAVE ORDER TO FIREBASE â”€â”€
+async function saveOrderToFirebase(amountText, methodName) {
+  try {
+    if (!window._firebaseReady) return;
+
+    const screenshotBase64 = document.getElementById('previewImg').src;
+    let screenshotUrl = null;
+    let orderId = orderData.orderId || requestedCheckout.orderId || '';
+    const inrAmount = Number.isFinite(orderData.amountINRValue) ? orderData.amountINRValue : extractMoneyNumber(orderData.rawINR || orderData.inr);
+    const usdAmount = Number.isFinite(orderData.amountUSDValue) ? orderData.amountUSDValue : extractMoneyNumber(orderData.rawUSD || orderData.usd);
+
+    if (!orderId) {
+      const orderRef = window._fbPush(window._fbRef(window._fbDB, 'orders'));
+      orderId = orderRef.key;
+      orderData.orderId = orderId;
+    }
+
+    // Upload screenshot to Firebase Storage
+    if (screenshotBase64 && screenshotBase64.startsWith('data:')) {
+      const timestamp = Date.now();
+      const imgRef = window._fbSRef(window._fbStorage, `payment_screenshots/${orderId || timestamp}.jpg`);
+      const uploadResult = await window._fbUploadString(imgRef, screenshotBase64, 'data_url');
+      screenshotUrl = await window._fbGetDownloadURL(uploadResult.ref);
+    }
+
+    // Save order record to DB
+    const payload = {
+      orderId: orderId || null,
+      id: orderId || null,
+      productId: orderData.id || null,
+      productSlug: orderData.slug || null,
+      productName: orderData.name,
+      checkoutToken: orderData.checkoutToken || requestedCheckout.token || null,
+      lockedAmountINR: Number.isFinite(inrAmount) ? inrAmount : null,
+      lockedAmountUSD: Number.isFinite(usdAmount) ? usdAmount : null,
+      amount: selectedMethod === 'upi'
+        ? (Number.isFinite(inrAmount) ? inrAmount : null)
+        : (Number.isFinite(usdAmount) ? usdAmount : null),
+      amountDisplay: amountText,
+      amountINR: Number.isFinite(inrAmount) ? inrAmount : null,
+      amountUSD: Number.isFinite(usdAmount) ? usdAmount : null,
+      currency: selectedMethod === 'upi' ? 'INR' : 'USD',
+      paymentMethod: methodName,
+      method: methodName,
+      screenshotUrl: screenshotUrl || null,
+      paymentProof: screenshotUrl || null,
+      paymentStatus: 'pending',
+      orderStatus: 'pending',
+      status: 'pending',
+      timestamp: Date.now(),
+      date: new Date().toISOString(),
+      updatedAt: Date.now()
+    };
+
+    if (orderId) {
+      await window._fbSet(window._fbRef(window._fbDB, `orders/${orderId}`), {
+        ...payload,
+        createdAt: orderData.createdAt || Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+    orderData.orderId = orderId;
+    return { orderId };
+  } catch(e) {
+    console.warn('Firebase save failed:', e.message);
+    // Silent fail — user still gets redirected to Telegram
+    return { orderId: orderData.orderId || requestedCheckout.orderId || '' };
+  }
+}
+
+function buildTelegramOrderUrl(orderId, amountText, methodName) {
+  const tgMessage = `🛒 New Order — HotMyNet\n\n` +
+    `🧾 Order ID: ${orderId || 'pending'}\n` +
+    `📦 Category: ${orderData.name}\n` +
+    `💰 Amount Paid: ${amountText}\n` +
+    `💳 Payment Method: ${methodName}\n` +
+    `─────────────────\n` +
+    `✅ Payment done! Screenshot attached below.\n` +
+    `Please confirm my order. 🙏`;
+  return safeUrl(CONFIG.telegramUrl, 'https://t.me/TRUSTED_BROTHER1234') + '?text=' + encodeURIComponent(tgMessage);
+}
+
+// â”€â”€ COPY TEXT â”€â”€
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// â”€â”€ CONFETTI â”€â”€
+function launchConfetti() {
+  const colors = ['#f0247a','#7c3aed','#22c55e','#f59e0b','#60a5fa','#f0f0f8'];
+  const container = document.getElementById('confettiContainer');
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (Math.random() * 8 + 4) + 'px';
+    piece.style.height = (Math.random() * 8 + 4) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.8) + 's';
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+</script>
+<script type="module" src="/media-resolver.js"></script>
+</body>
+</html>

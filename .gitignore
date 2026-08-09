@@ -1,0 +1,78 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.mail
+*.env
+# Keep .env.example committed
+!.env.example
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# Cloudflare Wrangler local state & caches
+.wrangler/
+
+# Firebase local files
+.firebase/
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
+
+# Secret keys and service accounts
+*service-account*.json
+*serviceAccount*.json
+*adminsdk*.json
+*private-key*.json
+fb-key.json
+firebase-key.json
+google-services.json
+client_secret*.json
+oauth2*.json
+secrets*.json
+credentials*.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS metadata files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build outputs and cache directories
+dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+out/

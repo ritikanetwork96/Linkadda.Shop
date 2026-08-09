@@ -1,0 +1,2137 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linkadda Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="style.css?v=6" />
+</head>
+<body>
+
+  <!-- ===== LOADING SCREEN ===== -->
+  <div class="loader-wrap" id="loaderWrap">
+    <div class="loader-bg"></div>
+    <div class="loader-content">
+      <div class="loader-rings">
+        <div class="lr lr1"></div>
+        <div class="lr lr2"></div>
+        <div class="lr lr3"></div>
+      </div>
+      <div class="loader-icon-wrap">
+        <i class="fa-solid fa-fire-flame-curved loader-icon"></i>
+      </div>
+      <div class="loader-text-wrap">
+        <h2 class="loader-title">Linkadda <span class="loader-accent">Shop</span></h2>
+        <p class="loader-sub">Loading premium content...</p>
+      </div>
+      <div class="loader-bar-wrap">
+        <div class="loader-bar" id="loaderBar"></div>
+      </div>
+      <p class="loader-pct" id="loaderPct">0%</p>
+    </div>
+    <div class="loader-particles" id="loaderParticles"></div>
+  </div>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Header -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <div class="logo">
+        <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+        <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
+      </div>
+      <nav class="nav">
+        <a href="index.html#home" class="nav-link">Home</a>
+        <a href="index.html#services" class="nav-link">Services</a>
+        <a href="index.html#pricing" class="nav-link">Pricing</a>
+        <a href="index.html#faq" class="nav-link">FAQ</a>
+        <a href="index.html#contact" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-header">Get Started</a>
+      <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <!-- Mobile nav -->
+    <div class="mobile-nav" id="mobileNav">
+      <a href="index.html#home" class="mob-link">Home</a>
+      <a href="index.html#services" class="mob-link">Services</a>
+      <a href="index.html#pricing" class="mob-link">Pricing</a>
+      <a href="index.html#faq" class="mob-link">FAQ</a>
+      <a href="index.html#contact" class="mob-link">Contact</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <p class="hero-tag"><i class="fa-solid fa-star"></i> Adult Content Seller </p>
+      <!-- Verified Badge -->
+      <div class="verified-badge">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Verified Trusted Seller</span>
+        <span class="vb-dot"></span>
+        <span class="vb-since">Since 2022</span>
+      </div>
+      <h1 class="hero-title">TRUSTED BROTHER<br /><span class="gradient-text">CONTENT SELLER</span></h1>
+      <p class="hero-sub">Premium 4K quality videos at the cheapest price in the market. Trusted by thousands &#8212; fast delivery, zero compromise on quality.</p>
+      <div class="hero-btns">
+        <a href="index.html#services" class="btn-primary"><i class="fa-solid fa-layer-group"></i> Browse Services</a>
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-ghost"><i class="fa-brands fa-telegram"></i> DM Now</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">500+</span>
+          <span class="stat-label">Happy Clients</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num">24/7</span>
+          <span class="stat-label">Support</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Satisfaction</span>
+        </div>
+      </div>
+      <!-- Trust Bar -->
+      <div class="trust-bar">
+        <div class="trust-item">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Selling since <strong>2022</strong></span>
+        </div>
+        <div class="trust-sep"></div>
+        <div class="trust-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span><strong>1,200+</strong> orders done</span>
+        </div>
+        <div class="trust-sep"></div>
+        <div class="trust-item">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span><strong>Zero</strong> scam cases</span>
+        </div>
+        <div class="trust-sep"></div>
+        <div class="trust-item">
+          <i class="fa-brands fa-telegram"></i>
+          <span>Active on <strong>Telegram</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="glow-ring ring1"></div>
+      <div class="glow-ring ring2"></div>
+      <div class="glow-ring ring3"></div>
+      <div class="center-icon">
+        <i class="fa-solid fa-fire-flame-curved"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Us -->
+  <section class="why-us">
+    <div class="container">
+      <div class="why-grid">
+        <div class="why-card">
+          <i class="fa-solid fa-bolt why-icon"></i>
+          <h3>Instant Delivery</h3>
+          <p>Most orders processed and delivered within minutes of payment.</p>
+        </div>
+        <div class="why-card">
+          <i class="fa-solid fa-shield-halved why-icon"></i>
+          <h3>Since 3 Years</h3>
+          <p>Trusted by hundreds of customers for over 3 years of premium service.</p>
+        </div>
+        <div class="why-card">
+          <i class="fa-solid fa-headset why-icon"></i>
+          <h3>24/7 Support</h3>
+          <p>Round-the-clock support available via Telegram. Always online for you.</p>
+        </div>
+        <div class="why-card">
+          <i class="fa-solid fa-tags why-icon"></i>
+          <h3>Cheapest Price Ever</h3>
+          <p>Lowest prices in the whole market &#8212; no one beats us. Guaranteed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services / Categories -->
+  <section class="services" id="services">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-tag"><i class="fa-solid fa-grid-2"></i> What We Offer</p>
+        <h2 class="section-title">Our <span class="gradient-text">Services</span></h2>
+        <p class="section-sub">Choose our services and get instant delivery at the cheapest price in the market.</p>
+      </div>
+
+      <div class="pcard-grid" id="categoriesGrid">
+
+        <!-- ------ ALL COLLECTION PACK &#8212; PINNED TOP ------ -->
+        <div class="collection-pack-banner">
+          <div class="cpb-pin"><i class="fa-solid fa-thumbtack"></i> PINNED DEAL</div>
+          <div class="cpb-left">
+            <div class="cpb-icon"><i class="fa-solid fa-gem"></i></div>
+            <div>
+              <h3 class="cpb-title">All Collection Pack</h3>
+              <p class="cpb-desc">ðŸ”¥ Mega Pack &#8212; 1,14,000+ Videos | Every category bundled together &#8212; the ultimate deal.</p>
+            </div>
+          </div>
+          <div class="cpb-prices">
+            <div class="cpb-original">&#8377;10,900</div>
+            <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
+          </div>
+          <a href="payment.html" class="btn-primary cpb-btn">
+            <i class="fa-solid fa-gem"></i> Claim Deal
+          </a>
+        </div>
+
+        <!-- -- CARD 1 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category1.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_1_2026-06-15_18-29-57.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_2_2026-06-15_18-29-57.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_3_2026-06-15_18-29-57.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_4_2026-06-15_18-29-57.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_5_2026-06-15_18-29-57.jpg" alt="MOM SON" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-layer-group"></i> ALL IN ONE</span>
+          </div>
+          <h3 class="pcard-title">MOM SON</h3>
+          <div class="pcard-creators">
+            Mom Son Leaks, Santoor Mom, , Teen Son, Mom Son Relationship, Vansheen Verma, Sas-sy Poonam, Rachel Sharma, M@llu Models, luckyrajorr, Simran Kaur &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Celebrity Content</li>
+          </ul>
+          <div class="pcard-platforms">
+            Des!, 121 TangoLive, Ch@met, Uncut Webseries, OnlyF@ns, JoinMyApp, AnglsDrop, P@id App Contents (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$39</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 2 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category2.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_6_2026-06-15_18-29-57.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_7_2026-06-15_18-29-57.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_8_2026-06-15_18-29-57.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_9_2026-06-15_18-29-57.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_1_2026-06-15_18-30-46.jpg" alt="SIS BRO" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> HOT PACK</span>
+          </div>
+          <h3 class="pcard-title">SIS BRO</h3>
+          <div class="pcard-creators">
+            Brother Sister, Caught, 4k , Bro Sis Live, Indian, Viral bro sis, Teen bro sis,&amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Premium Content</li>
+          </ul>
+          <div class="pcard-platforms">
+            JoinMyApp, F@nsa, P@treon, P@id App Contents, Exclu$ive Leaks (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$34</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 3 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category3.png" alt="BEST QUALITY CP" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_2_2026-06-15_18-30-46.jpg" alt="CP" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_3_2026-06-15_18-30-46.jpg" alt="CP" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_4_2026-06-15_18-30-46.jpg" alt="CP" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_5_2026-06-15_18-30-46.jpg" alt="CP" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_6_2026-06-15_18-30-46.jpg" alt="CP" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill pcard-pill-gold"><i class="fa-solid fa-crown"></i>CP</span>
+          </div>
+          <h3 class="pcard-title">Child Kids</h3>
+          <div class="pcard-creators">
+            5000+ Premium Videos | Top Quality Videos | Daily Updated Content | Full HD &amp; 4K Quality | Exclusive Originals &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> 4K Quality</li>
+          </ul>
+          <div class="pcard-platforms">
+            Foreign Kids, Small Kids, Des! K!ds, High Quality, FOreign Kids, Cheap Price (All Included)
+          </div>
+
+          <!-- Video Tier Selector -->
+          <div class="vid-tier-label"><i class="fa-solid fa-film"></i> All Exclusive Collections Included &#8212; Direct Access</div>
+          <div class="vid-tier-list" id="vidTierMega">
+            <div class="vid-tier-item" data-vids="1000" data-inr="499" data-usd="53">
+              <span class="vid-tier-count">1000 Videos</span>
+              <span class="vid-tier-price">&#8377;499</span>
+            </div>
+            <div class="vid-tier-item" data-vids="2000" data-inr="799" data-usd="99">
+              <span class="vid-tier-count">2000 Videos</span>
+              <span class="vid-tier-price">&#8377;799</span>
+            </div>
+            <div class="vid-tier-item" data-vids="3000" data-inr="1199" data-usd="142">
+              <span class="vid-tier-count">3000 Videos</span>
+              <span class="vid-tier-price">&#8377;1199</span>
+            </div>
+            <div class="vid-tier-item" data-vids="4000" data-inr="1599" data-usd="183">
+              <span class="vid-tier-count">4000 Videos</span>
+              <span class="vid-tier-price">&#8377;1599</span>
+            </div>
+            <div class="vid-tier-item" data-vids="5000" data-inr="1999" data-usd="201">
+              <span class="vid-tier-count">5000 Videos</span>
+              <span class="vid-tier-price">&#8377;1999</span>
+            </div>
+            <div class="vid-tier-item vid-tier-selected" data-vids="6000" data-inr="2299" data-usd="239">
+              <span class="vid-tier-count">6000 Videos</span>
+              <span class="vid-tier-price">&#8377;2299</span>
+            </div>
+          </div>
+
+          <div class="pcard-price-row" style="display:none">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;799</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card vid-tier-btn" id="vidBtnMega" data-name="Child%20Kids">
+            <i class="fa-brands fa-telegram"></i> Buy Now &#8212; 6000 Videos &#8377;2299
+          </a>
+        </div>
+
+        <!-- -- CARD 4 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category4.jpg" alt="Star Creator Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_7_2026-06-15_18-30-46.jpg" alt="RP VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_8_2026-06-15_18-30-46.jpg" alt="RP VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_9_2026-06-15_18-30-46.jpg" alt="RP VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_10_2026-06-15_18-29-58.jpg" alt="RP VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_10_2026-06-15_18-30-46.jpg" alt="RP VIDEOS" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-star"></i> TOP RATED</span>
+          </div>
+          <h3 class="pcard-title">RP VIDEOS</h3>
+          <div class="pcard-creators">
+            Latest Videos, Most Viral Videos, Bhojpuri RP, Foreign RP, Tranding RP, Best Quality RP &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> High Quality</li>
+          </ul>
+          <div class="pcard-platforms">
+            Indian, Russian, Foreign, Hidden, 4K Quality, Exclu$ive Drops (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;699</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$35</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 5 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category5.jpg" alt="Value Membership" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_11_2026-06-15_18-29-58.jpg" alt="TEEN VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_11_2026-06-15_18-30-46.jpg" alt="TEEN VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_12_2026-06-15_18-29-58.jpg" alt="TEEN VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_12_2026-06-15_18-30-46.jpg" alt="TEEN VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_13_2026-06-15_18-29-58.jpg" alt="TEEN VIDEOS" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-bolt"></i>TEEN</span>
+          </div>
+          <h3 class="pcard-title">TEEN VIDEOS</h3>
+          <div class="pcard-creators">
+            College Teen Girls, Teen Boys, Indian Teens, Public Teens, Viral Teens, Teens In Classroom &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> HD Quality</li>
+          </ul>
+          <div class="pcard-platforms">
+            Classroom, Teen With Teacher, Teen For Money, Teen Live, Uncut Teens, P@id Contents (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$30</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 6 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category6.jpg" alt="Ullu Web Series Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_13_2026-06-15_18-30-46.jpg" alt="Hidden Camera" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_14_2026-06-15_18-29-58.jpg" alt="Hidden Camera" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_14_2026-06-15_18-30-46.jpg" alt="Hidden Camera" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_15_2026-06-15_18-29-58.jpg" alt="Hidden Camera" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_15_2026-06-15_18-30-46.jpg" alt="Hidden Camera" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-film"></i>HIDDEN CAMERA</span>
+          </div>
+          <h3 class="pcard-title">Hidden Camers Pack</h3>
+          <div class="pcard-creators">
+            Caught In 4K, Secret V!deos, Celebrity Cam, Viral Cam Videos, Influencer Leak, Hidden Cam &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Leaks</li>
+          </ul>
+          <div class="pcard-platforms">
+            Viral, High Quality, Dark, Gore, Unexpected, Hot, Trending (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$31</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 7 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category7.jpg" alt="Insta & Snap" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_16_2026-06-15_18-29-58.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_16_2026-06-15_18-30-46.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_17_2026-06-15_18-29-58.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_17_2026-06-15_18-30-46.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_18_2026-06-15_18-29-58.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_18_2026-06-15_18-30-46.jpg" alt="Insta Snapchat" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-video"></i> Snap & Insta Le@ks</span>
+          </div>
+          <h3 class="pcard-title">Insta Influencer & Snapchat</h3>
+          <div class="pcard-creators">
+            Top Creators, Insta Influencer Leak, Live Leak, Without Clothes, Stripchat, LiveJasmin Performers &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Live Recordings</li>
+          </ul>
+          <div class="pcard-platforms">
+            Insta Models, Snapchat, Adult, Trending, Accidently Leaked, LiveJasmin, Papaya Live (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$28</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 8 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category8.jpg" alt="Paid App Content Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_19_2026-06-15_18-29-58.jpg" alt="Japanese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_19_2026-06-15_18-30-46.jpg" alt="Japanese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_20_2026-06-15_18-29-58.jpg" alt="Japanese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_20_2026-06-15_18-30-46.jpg" alt="Japanese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_21_2026-06-15_18-29-58.jpg" alt="Japanese Videos" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-mobile-screen"></i> JAPANESE VIDEOS</span>
+          </div>
+          <h3 class="pcard-title">Japanese Videos Pack</h3>
+          <div class="pcard-creators">
+            Japanese Models, Japanese Cutie, Japanese Exclusives, Japanese Content, Boo$ty Stars &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> App Exclusives</li>
+          </ul>
+          <div class="pcard-platforms">
+            Japanese On Road, Japanese Girl, Japanese Model, Japanese 4K, Boo$ty, Japanese Teen, Fanz (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;399</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$19</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 9 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category9.jpg" alt="Desi Content Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_21_2026-06-15_18-30-46.jpg" alt="Animal Girl" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_22_2026-06-15_18-29-58.jpg" alt="Animal Girl" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_22_2026-06-15_18-30-46.jpg" alt="Animal Girl" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_23_2026-06-15_18-29-58.jpg" alt="Animal Girl" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_23_2026-06-15_18-30-46.jpg" alt="Animal Girl" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-heart"></i> ANIMAL WITH GIRL</span>
+          </div>
+          <h3 class="pcard-title">Animal Girl</h3>
+          <div class="pcard-creators">
+            Animal With Aunties, Animal Series, Animal With Housewife, Live Animal, Girl With Dog &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Animal Originals</li>
+          </ul>
+          <div class="pcard-platforms">
+            Des!, Hot Girl, Young Girl With Horse, Big Horse, Girl And Dog, MoodX, BullApp (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$17</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 10 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category10.jpg" alt="Classic Collection" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_24_2026-06-15_18-29-58.jpg" alt="GAY Collection" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_24_2026-06-15_18-30-46.jpg" alt="GAY Collection" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_25_2026-06-15_18-29-58.jpg" alt="GAY Collection" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_25_2026-06-15_18-30-46.jpg" alt="GAY Collection" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_26_2026-06-15_18-29-58.jpg" alt="GAY Collection" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-gem"></i> GAY PACK</span>
+          </div>
+          <h3 class="pcard-title">GAY Collection</h3>
+          <div class="pcard-creators">
+            Muscular Gay, Gay Actor, Retro Bollywood Gays, Old Gold Creators, Vintage Leaks &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Classic Content</li>
+          </ul>
+          <div class="pcard-platforms">
+            Archive Leaks, Old Platforms, Classic Des!, Vintage Streams, Retro Collections (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;399</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$16</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 11 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category11.jpg" alt="Budget Starter Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_26_2026-06-15_18-30-46.jpg" alt="Indian Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_27_2026-06-15_18-29-58.jpg" alt="Indian Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_27_2026-06-15_18-30-46.jpg" alt="Indian Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_28_2026-06-15_18-29-58.jpg" alt="Indian Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_28_2026-06-15_18-30-46.jpg" alt="Indian Pack" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-indian-rupee-sign"></i> INDIAN DESI PACK</span>
+          </div>
+          <h3 class="pcard-title">Indian Pack</h3>
+          <div class="pcard-creators">
+            New Bhabhi, Rising Stars, Up &amp; Coming Models, Fresh Content Makers, Viral Shorts Creators &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Fresh Content</li>
+          </ul>
+          <div class="pcard-platforms">
+            Telegram Exclusives, Instagram Leaks, YouTube Privates, Shorts Collections (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;399</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$14</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 12 &#8212; ULTRA -- -->
+        <div class="pcard pcard-gold">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category12.jpg" alt="Ultra Premium Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_29_2026-06-15_18-29-58.jpg" alt="Tamil Mallu" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_29_2026-06-15_18-30-46.jpg" alt="Tamil Mallu" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_30_2026-06-15_18-29-58.jpg" alt="Tamil Mallu" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_30_2026-06-15_18-30-46.jpg" alt="Tamil Mallu" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_31_2026-06-15_18-29-58.jpg" alt="Tamil Mallu" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill pcard-pill-gold"><i class="fa-solid fa-crown"></i> TAMIL MALLU</span>
+          </div>
+          <h3 class="pcard-title">Tamil Mallu Premium Pack</h3>
+          <div class="pcard-creators">
+            30,000+ Videos | Top Creators, Mallu Premium, Tamilian Leaks, South Indain Stars, A-List South Models &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Ultra 4K Quality</li>
+          </ul>
+          <div class="pcard-platforms">
+            Mallu Aunty, South Premium, South VIP, South Pro,Top Tier, South Indian Elite (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price pcard-price-gold">&#8377;799</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$153</span>
+            </div>
+          </div>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 13 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category13.jpg" alt="OTT Web Series Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_31_2026-06-15_18-30-46.jpg" alt="College Girls" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_32_2026-06-15_18-29-58.jpg" alt="College Girls" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_32_2026-06-15_18-30-47.jpg" alt="College Girls" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_33_2026-06-15_18-29-58.jpg" alt="College Girls" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_33_2026-06-15_18-30-47.jpg" alt="College Girls" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-clapperboard"></i> COLLEGE GIRLS</span>
+          </div>
+          <h3 class="pcard-title">Hot College Girls Pack</h3>
+          <div class="pcard-creators">
+            College Originals, College Girls Exclusives, NeonX Series, PrimeShots, HotShots, Premium Pack &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Top Quality Videos</li>
+          </ul>
+          <div class="pcard-platforms">
+            Girls With Boyfriend In College, In Classroom, Girl With Maths Sir, Tenn Yound College Baddie, GupChup (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$27</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 14 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category14.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_34_2026-06-15_18-29-58.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_34_2026-06-15_18-30-47.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_35_2026-06-15_18-29-58.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_35_2026-06-15_18-30-47.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_36_2026-06-15_18-29-58.jpg" alt="Chinese Videos" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-photo-film"></i> Chinese Videos Pack</span>
+          </div>
+          <h3 class="pcard-title">Chinese Top Quality</h3>
+          <div class="pcard-creators">
+            Chinese Models, Photo Sets, Bikini Shoots, Boudoir Collections, High-Res Galleries &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Files</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> HD Photos + Videos</li>
+          </ul>
+          <div class="pcard-platforms">
+          Chines Privates, Hot Chinese Girl Photos, Chinese Sets, With Boss Gallery, Sexy Photos (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$14</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 15 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category15.jpg" alt="STREAM CHAT" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_36_2026-06-15_18-30-47.jpg" alt="Stream Chat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_37_2026-06-15_18-29-58.jpg" alt="Stream Chat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_37_2026-06-15_18-30-47.jpg" alt="Stream Chat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_38_2026-06-15_18-29-58.jpg" alt="Stream Chat" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_38_2026-06-15_18-30-47.jpg" alt="Stream Chat" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-globe"></i> INTERNATIONAL</span>
+          </div>
+          <h3 class="pcard-title">Stream Chat Pack</h3>
+          <div class="pcard-creators">
+            MilfMom, SaraH, Lexi Belle, Sofia Lee, Asian Stars, European Models, International OnlyF@ns Creators &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Viral Stars</li>
+          </ul>
+          <div class="pcard-platforms">
+            OnlyF@ns, F@nsa, P@treon, Boo$ty, ManyVids, Fanz International (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$17</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 16 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category16.jpg" alt="BSDM VIDEOS" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_39_2026-06-15_18-29-58.jpg" alt="BSDM Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_39_2026-06-15_18-30-47.jpg" alt="BSDM Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_40_2026-06-15_18-29-58.jpg" alt="BSDM Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_40_2026-06-15_18-30-47.jpg" alt="BSDM Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_41_2026-06-15_18-29-58.jpg" alt="BSDM Pack" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-building-columns"></i> BSDM PACK</span>
+          </div>
+          <h3 class="pcard-title">BSDM Premium Pack</h3>
+          <div class="pcard-creators">
+            College Freshers, University Girls, Campus Leaked BSDM, Hostel Recordings BSDM, Student Creators BSDM &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> BSDM Content</li>
+          </ul>
+          <div class="pcard-platforms">
+            Telegram Channels, Private Groups, Exclusive Shares, Campus Collections (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$21</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 17 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category17.jpg" alt="Shemale Content Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_42_2026-06-15_18-29-58.jpg" alt="Shemale Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_43_2026-06-15_18-29-58.jpg" alt="Shemale Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_44_2026-06-15_18-29-58.jpg" alt="Shemale Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_45_2026-06-15_18-29-58.jpg" alt="Shemale Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_46_2026-06-15_18-29-58.jpg" alt="Shemale Pack" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-circle-play"></i> SHEMALE PACK</span>
+          </div>
+          <h3 class="pcard-title">Shemale Content Pack</h3>
+          <div class="pcard-creators">
+            Shemale, Indian Shemale , Shemale Stars, Shemale Roleplay, South Indian Shemale, Shemale Leaks &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Shemale Exclusives</li>
+          </ul>
+          <div class="pcard-platforms">
+            Des!, Shemale, Shemale In 4K, Shemale Leaked, Shemale Creators (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$16</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 18 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category18.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_47_2026-06-15_18-29-58.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_48_2026-06-15_18-29-58.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_49_2026-06-15_18-29-58.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_50_2026-06-15_18-29-58.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_51_2026-06-15_18-29-58.jpg" alt="Hijabi Pack" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-wand-magic-sparkles"></i> Hijabi Chick</span>
+          </div>
+          <h3 class="pcard-title">Hijabi Pack</h3>
+          <div class="pcard-creators">
+            Arab Influencers, Muslim Stars, Viral Videos, Reels Models Hijab, Social Media Celebrities &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Hijabi Cutie</li>
+          </ul>
+          <div class="pcard-platforms">
+            Muslim Girl, Uncut Hijab, Snapchat Hijab, TikTok Privates (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$16</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 19 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category19.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_52_2026-06-15_18-29-58.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_1_2026-06-15_18-30-46.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_2_2026-06-15_18-30-46.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_3_2026-06-15_18-30-46.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_4_2026-06-15_18-30-46.jpg" alt="Lesbian Videos" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> ???????????????? PACK</span>
+          </div>
+          <h3 class="pcard-title">???????????????????????????????</h3>
+          <div class="pcard-creators">
+            1100+ Videos | Lesbian Premium, Lesbian Live, Lesbian Exclusive, Lesbian Models &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> 1100+ Videos</li>
+          </ul>
+          <div class="pcard-platforms">
+            P@treon, OnlyF@ns, F@nsa, Exclusive Bundles (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;399</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$19</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 20 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category20.jpg" alt="20 Mix Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_5_2026-06-15_18-30-46.jpg" alt="Mix Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_6_2026-06-15_18-30-46.jpg" alt="Mix Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_7_2026-06-15_18-30-46.jpg" alt="Mix Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_8_2026-06-15_18-30-46.jpg" alt="Mix Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_9_2026-06-15_18-30-46.jpg" alt="Mix Videos" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> ?????? PACK</span>
+          </div>
+          <h3 class="pcard-title">?????????? ?? ?????????????</h3>
+          <div class="pcard-creators">
+            9000+ Videos | Mix Premium, Mix Live, Mix Exclusive, All Genre Mix &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> 9000+ Videos</li>
+          </ul>
+          <div class="pcard-platforms">
+            Private Telegram, GupChup, Des!, Voovi, JoinMyApp (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$35</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 21 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category21.jpg" alt="Tango Hot Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="images/photo_41_2026-06-15_18-30-46.jpg.html" alt="Tango Combo" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_10_2026-06-15_18-30-46.jpg" alt="Tango Combo" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_11_2026-06-15_18-30-46.jpg" alt="Tango Combo" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_12_2026-06-15_18-30-46.jpg" alt="Tango Combo" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_13_2026-06-15_18-30-46.jpg" alt="Tango Combo" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-box-open"></i> Tango Hot Videos</span>
+          </div>
+          <h3 class="pcard-title">All Tango Combo</h3>
+          <div class="pcard-creators">
+            7000+ Videos | Mixed Genres, All Creators, Every Category, Best Sellers Combined &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> All Genres</li>
+          </ul>
+          <div class="pcard-platforms">
+            Des!, TangoLive, OnlyF@ns, Ullu, GupChup, JoinMyApp, AnglsDrop (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;499</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$16</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 22 -- -->
+        <div class="pcard">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category22.jpg" alt="Bhabhi Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_14_2026-06-15_18-30-46.jpg" alt="Bhabhi Hot Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_15_2026-06-15_18-30-46.jpg" alt="Bhabhi Hot Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_16_2026-06-15_18-30-46.jpg" alt="Bhabhi Hot Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_17_2026-06-15_18-30-46.jpg" alt="Bhabhi Hot Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_18_2026-06-15_18-30-46.jpg" alt="Bhabhi Hot Pack" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill"><i class="fa-solid fa-database"></i>BHABHI HOT PACK</span>
+          </div>
+          <h3 class="pcard-title">Bhabhi Hot Pack</h3>
+          <div class="pcard-creators">
+            2500+ Videos | All-Time Best Content, Old Leaks, Rare Finds, Deleted Content, Hard-to-Find Videos &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Rare Archive</li>
+          </ul>
+          <div class="pcard-platforms">
+            Deleted Channels, Archive Sites, Old Platform Leaks, Rare Collections (All Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price">&#8377;599</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$18</span>
+            </div>
+          </div>
+          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <!-- -- CARD 23 &#8212; INFINITY -- -->
+        <div class="pcard pcard-gold">
+          <div class="pcard-img-wrap pcard-slideshow" data-index="0">
+            <div class="pslide pslide-active"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/category23.jpg" alt="Infinity Unlimited Pack" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_19_2026-06-15_18-30-46.jpg" alt="English Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_20_2026-06-15_18-30-46.jpg" alt="English Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_21_2026-06-15_18-30-46.jpg" alt="English Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_22_2026-06-15_18-30-46.jpg" alt="English Videos" class="pcard-img" /></div>
+            <div class="pslide"><img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/photo_23_2026-06-15_18-30-46.jpg" alt="English Videos" class="pcard-img" /></div>
+            <div class="pslide-dots"></div>
+          </div>
+          <div class="pcard-badge-row">
+            <span class="pcard-pill pcard-pill-gold"><i class="fa-solid fa-infinity"></i> ENGLISH PACK</span>
+          </div>
+          <h3 class="pcard-title">English Videos Unlimited Pack</h3>
+          <div class="pcard-creators">
+            30,000+ Videos | Unlimited Access, Every Creator, All Platforms, No Restrictions, Lifetime Updates &amp; Many More
+          </div>
+          <ul class="pcard-features">
+            <li><i class="fa-solid fa-check"></i> No link</li>
+            <li><i class="fa-solid fa-check"></i> Direct Videos</li>
+            <li><i class="fa-solid fa-check"></i> 24*7 Updates</li>
+            <li><i class="fa-solid fa-check"></i> Unlimited Access</li>
+          </ul>
+          <div class="pcard-platforms">
+            OnlyF@ns, Brazzers, Xhamster, P-Hub, JoinMyApp, AnglsDrop, Ch@met, P@treon (Everything Included)
+          </div>
+          <div class="pcard-price-row">
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">INR</span>
+              <span class="pcard-price pcard-price-gold">&#8377;399</span>
+            </div>
+            <div class="pcard-price-block">
+              <span class="pcard-price-label">USD</span>
+              <span class="pcard-price-usd">$19</span>
+            </div>
+          </div>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing CTA banner -->
+  <section class="pricing-banner" id="pricing">
+    <div class="container">
+      <div class="pb-content">
+        <i class="fa-solid fa-tags pb-icon"></i>
+        <div>
+          <h2>All Prices in <span class="gradient-text">Indian Rupees (&#8377;)</span></h2>
+          <p>No hidden fees. No foreign charges. Pay via UPI, Paytm, GPay, PhonePe & more.</p>
+        </div>
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-primary">Place an Order</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-tag"><i class="fa-solid fa-quote-left"></i> Client Love</p>
+        <h2 class="section-title">What Our <span class="gradient-text">Clients Say</span></h2>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p>"Pehle bahut dar lag raha tha, socha tha yeh bhi scam kar lega baaki logo ki tarah. But bhai ne time pe deliver kiya, ekdum trusted hai. Ab regularly leta hoon!"</p>
+          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>New Buyer</span></div>
+        </div>
+        <div class="testi-card">
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p>"Sach mein pehle bahut doubt tha, itne saste mein kaisa hoga. But yeh bhai real deal hai &#8212; scam bilkul nahi, seedha kaam karta hai. 100% recommend!"</p>
+          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>New User</span></div>
+        </div>
+        <div class="testi-card">
+          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          <p>"Maine pehle dusre sellers se scam khaya tha toh trust nahi tha. Iss bhai ko try kiya toh maan gaya &#8212; bilkul genuine, fast delivery, aur price bhi market se kam. Thanks bhai!"</p>
+          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>Regular Buyer</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-tag"><i class="fa-solid fa-paper-plane"></i> Get In Touch</p>
+        <h2 class="section-title">Place Your <span class="gradient-text">Order</span></h2>
+        <p class="section-sub">Reach out via any channel below &#8212; we respond fast!</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <i class="fa-brands fa-telegram contact-icon"></i>
+          <h3>Telegram</h3>
+          <p>Join our Telegram channel or DM us for exclusive deals.</p>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-contact">Open Telegram</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-tag"><i class="fa-solid fa-circle-question"></i> Got Questions?</p>
+        <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+        <p class="section-sub">Sab kuch clear kar lo order karne se pehle.</p>
+      </div>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Kya yeh safe hai? Scam toh nahi?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>Bilkul safe hai bhai. Main 2022 se sell kar raha hoon, 1,200+ orders complete ho chuke hain. Ek bhi scam case nahi. Tum pehle review dekh sakte ho, phir order karo.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Order karne ke baad kitne time mein milega?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>Payment ke baad mostly 5&#8211;15 minutes ke andar Telegram pe deliver ho jaata hai. Kabhi kabhi zyada load ho toh max 1 ghanta lag sakta hai.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Payment kaise karni hai?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>UPI, Paytm, GPay, PhonePe &#8212; sab accept karta hoon. International ke liye crypto ya other methods bhi available hain. Telegram pe DM karo, sab bata dunga.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Content ki quality kaisi hogi?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>Premium 4K quality videos hain. Koi low-quality ya blurry content nahi. Jo dikhaya wahi milega &#8212; full HD aur 4K resolution mein.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Ek baar kharida toh lifetime access milega?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>Haan, jo content kharidoge woh tumhara permanently rahega. Koi expiry nahi, koi renewal nahi. Ek baar pay karo, hamesha ke liye apna.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>All Collection Pack mein kya kya milega?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>Sabhi 23 categories ka full content ek saath milega &#8212; total 1,14,000+ videos. Yeh sabse best value deal hai. Alag alag kharido toh &#8377;10,900 lagenge, pack mein sirf &#8377;4,399.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q">
+            <span>Support kaise milega order ke baad?</span>
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </button>
+          <div class="faq-a">
+            <p>24/7 Telegram pe available hoon. Koi bhi problem ho &#8212; delivery issue, quality concern &#8212; seedha DM karo, resolve kar dunga.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+          <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
+          <p>Premium 4K content at the cheapest rate. No one beats our price.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <a href="index.html#home">Home</a>
+          <a href="index.html#services">Services</a>
+          <a href="index.html#pricing">Pricing</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="footer-links">
+          <h4>Connect</h4>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank"><i class="fa-brands fa-telegram"></i> Telegram</a>
+          <a href="index.html#"><i class="fa-brands fa-instagram"></i> Instagram</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Linkadda Shop. All rights reserved.</p>
+        <p>Made with <i class="fa-solid fa-heart" style="color:#e84393;"></i> in India</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== LIGHTBOX MODAL ===== -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <button class="lightbox-close" id="lightboxClose"><i class="fa-solid fa-xmark"></i></button>
+    <div class="lightbox-content" id="lightboxContent"></div>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <!-- ------ FIREBASE INTEGRATION ------ -->
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getDatabase, ref, get, push, set, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCD_cZXyfYd01FNg-DmRpyKKBIGR3NqeT4",
+    authDomain: "linkadda-cd1da.firebaseapp.com",
+    projectId: "linkadda-cd1da",
+    storageBucket: "linkadda-cd1da.firebasestorage.app",
+    messagingSenderId: "989651324387",
+    appId: "1:989651324387:web:f6e44be3daa9f4fc0c24d6",
+    measurementId: "G-PCH50PK2N7",
+    databaseURL: "https://linkadda-cd1da-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window.__linkaddaDb = db;
+
+  function safeUrl(value, fallback = '') {
+    const raw = String(value || '').trim();
+    if (!raw) return fallback;
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      const protocol = parsed.protocol.toLowerCase();
+      if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:' || protocol === 'tel:' || protocol === 'blob:' || protocol === 'data:') {
+        return parsed.href;
+      }
+    } catch (_) {
+      if (/^(\/|\.\/|\.\.\/|#|\?)/.test(raw)) return raw;
+    }
+    return fallback;
+  }
+
+  function normalizeCheckoutUrl(value, item = {}) {
+    const raw = String(value || '').trim();
+    const fallbackId = String(item.id || '').trim();
+    const fallback = fallbackId
+      ? `payment.html?productId=${encodeURIComponent(fallbackId)}`
+      : 'payment.html';
+    if (!raw) return fallback;
+
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      const host = parsed.hostname.toLowerCase();
+      const isCheckoutUrl = /payment\.html$/i.test(parsed.pathname) || parsed.pathname.endsWith('/payment.html');
+      if (isCheckoutUrl) {
+        const params = new URLSearchParams(parsed.search);
+        const nextId = params.get('productId') || params.get('id') || fallbackId;
+        return nextId ? `payment.html?productId=${encodeURIComponent(nextId)}` : 'payment.html';
+      }
+    } catch (_) {
+      // fall back below
+    }
+
+    return safeUrl(raw, fallback);
+  }
+
+  function resolveCheckoutMeta(link) {
+    const cleanPrice = (value) => String(value || '').replace(/\s+/g, ' ').replace(/[^\d$₹\/.,-]+/g, '').trim();
+    const card = link.closest('.pcard');
+    const tierList = link.closest('.vid-tier-list');
+    const tierItem = link.closest('.vid-tier-item');
+    const selectedTier = tierList?.querySelector('.vid-tier-item.vid-tier-selected') || tierItem;
+    const inr = cleanPrice(
+      selectedTier?.dataset?.inr ||
+      card?.querySelector('.pcard-price')?.textContent ||
+      link.dataset?.inr ||
+      ''
+    );
+    const usd = cleanPrice(
+      selectedTier?.dataset?.usd ||
+      card?.querySelector('.pcard-price-usd')?.textContent ||
+      link.dataset?.usd ||
+      ''
+    );
+    const title = decodeURIComponent(link.dataset.name || card?.querySelector('.pcard-title')?.textContent?.trim() || link.textContent?.trim() || '');
+    const slug = link.dataset.slug || card?.dataset?.slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '');
+    const id = link.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || link.dataset.fbId || slug || title || '';
+    return { id, slug, title, inr, usd };
+  }
+
+  function createCheckoutToken() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `ck_${Math.random().toString(36).slice(2)}_${Date.now().toString(36)}`;
+  }
+
+  function syncCheckoutLinks() {
+    document.querySelectorAll('a.btn-card[href*="payment.html"], a.cpb-btn[href*="payment.html"], a.vid-tier-btn[href*="payment.html"]').forEach((link) => {
+      const meta = resolveCheckoutMeta(link);
+      if (meta.id) link.dataset.productId = meta.id;
+      if (meta.slug) link.dataset.slug = meta.slug;
+      link.href = normalizeCheckoutUrl(link.href || 'payment.html', meta);
+    });
+  }
+
+  // -- VISITOR TRACKING (once per session) --
+  if (!sessionStorage.getItem('visit_tracked')) {
+    sessionStorage.setItem('visit_tracked', '1');
+    const today = new Date().toISOString().slice(0, 10);
+    const visitRef = push(ref(db, 'visitors'));
+    set(visitRef, { date: today, timestamp: Date.now(), page: 'index' });
+  }
+
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  const liveCollections = {
+    categories: {},
+    products: {}
+  };
+  const USE_LIVE_GRID = true;
+  const defaultSiteState = {
+    title: document.title,
+    logoHtml: Array.from(document.querySelectorAll('.logo-text')).map(el => el.innerHTML),
+    faviconHref: document.querySelector("link[rel~='icon']")?.href || '',
+    footerHtml: document.querySelector('.footer-bottom p')?.innerHTML || '',
+    hero: {
+      title: document.querySelector('.hero-title')?.innerHTML || '',
+      subtitle: document.querySelector('.hero-sub')?.textContent || '',
+      primaryText: document.querySelector('.hero-btns .btn-primary')?.textContent || '',
+      primaryHref: document.querySelector('.hero-btns .btn-primary')?.href || '',
+      secondaryText: document.querySelector('.hero-btns .btn-ghost')?.textContent || '',
+      secondaryHref: document.querySelector('.hero-btns .btn-ghost')?.href || '',
+      stat1: document.querySelectorAll('.stat-num')[0]?.textContent || '',
+      stat2: document.querySelectorAll('.stat-num')[1]?.textContent || '',
+      stat3: document.querySelectorAll('.stat-num')[2]?.textContent || '',
+      backgroundImage: document.querySelector('.hero-bg')?.style.backgroundImage || '',
+    },
+    banner: {
+      title: document.querySelector('.pricing-banner h2')?.innerHTML || '',
+      offer: document.querySelector('.pricing-banner p')?.textContent || '',
+      buttonText: document.querySelector('.pricing-banner .btn-primary')?.textContent || '',
+      buttonHref: document.querySelector('.pricing-banner .btn-primary')?.href || '',
+      backgroundImage: document.querySelector('.pricing-banner')?.style.backgroundImage || '',
+    },
+    faqHtml: document.querySelector('.faq-list')?.innerHTML || '',
+    testimonialsHtml: document.querySelector('.testi-grid')?.innerHTML || '',
+    liveGridHtml: document.getElementById('categoriesGrid')?.innerHTML || '',
+    payment: {
+      telegramUrl: 'https://t.me/TRUSTED_BROTHER1234',
+      telegramChannel: 'https://t.me/TRUSTED_BROTHER1234',
+    },
+  };
+
+  function normalizeRecords(records) {
+    if (!records || typeof records !== 'object') return [];
+    return Object.entries(records)
+      .map(([id, item]) => ({ id, ...(item || {}) }))
+      .filter(item => item && (item.status === undefined || item.status === 'active'))
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.updatedAt || 0) - (b.updatedAt || 0));
+  }
+
+  function getLiveRecords() {
+    const products = normalizeRecords(liveCollections.products);
+    const categories = normalizeRecords(liveCollections.categories);
+    const merged = [];
+    const seen = new Set();
+    [...products, ...categories].forEach((item) => {
+      const key = item.slug || item.title || item.id;
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      merged.push(item);
+    });
+    return merged;
+  }
+
+  function applySiteSettings(s) {
+    if (!s) {
+      document.title = defaultSiteState.title;
+      document.querySelectorAll('.logo-text').forEach((el, index) => {
+        if (defaultSiteState.logoHtml[index]) el.innerHTML = defaultSiteState.logoHtml[index];
+      });
+      if (defaultSiteState.faviconHref) {
+        let link = document.querySelector("link[rel~='icon']");
+        if (link) link.href = defaultSiteState.faviconHref;
+      }
+      if (defaultSiteState.footerHtml) {
+        const footerP = document.querySelector('.footer-bottom p');
+        if (footerP) footerP.innerHTML = defaultSiteState.footerHtml;
+      }
+      return;
+    }
+    if (s.siteName) {
+      document.title = s.siteName;
+      document.querySelectorAll('.logo-text').forEach(el => {
+        el.innerHTML = esc(s.siteName);
+      });
+    }
+    if (s.favicon) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = safeUrl(s.favicon, link.href);
+    }
+    if (s.footer) {
+      const footerP = document.querySelector('.footer-bottom p');
+      if (footerP) footerP.innerHTML = esc(s.footer);
+    }
+  }
+
+  function applyHero(h) {
+    const heroSec = document.querySelector('.hero');
+    const heroBg = document.querySelector('.hero-bg');
+    if (!h) {
+      if (heroSec) heroSec.style.display = '';
+      const titleEl = document.querySelector('.hero-title');
+      if (titleEl) titleEl.innerHTML = defaultSiteState.hero.title;
+      const subtitleEl = document.querySelector('.hero-sub');
+      if (subtitleEl) subtitleEl.textContent = defaultSiteState.hero.subtitle;
+      const primaryBtn = document.querySelector('.hero-btns .btn-primary');
+      if (primaryBtn) {
+        primaryBtn.textContent = defaultSiteState.hero.primaryText;
+        primaryBtn.href = defaultSiteState.hero.primaryHref;
+      }
+      const secondaryBtn = document.querySelector('.hero-btns .btn-ghost');
+      if (secondaryBtn) {
+        secondaryBtn.textContent = defaultSiteState.hero.secondaryText;
+        secondaryBtn.href = defaultSiteState.hero.secondaryHref;
+      }
+      const nums = document.querySelectorAll('.stat-num');
+      if (nums[0]) nums[0].textContent = defaultSiteState.hero.stat1;
+      if (nums[1]) nums[1].textContent = defaultSiteState.hero.stat2;
+      if (nums[2]) nums[2].textContent = defaultSiteState.hero.stat3;
+      if (heroBg) heroBg.style.backgroundImage = defaultSiteState.hero.backgroundImage;
+      return;
+    }
+    if (h.status === 'hidden') {
+      if (heroSec) heroSec.style.display = 'none';
+      return;
+    }
+    if (heroSec) heroSec.style.display = '';
+    if (h.title) {
+      const el = document.querySelector('.hero-title');
+      if (el) {
+        const parts = h.title.split('\n');
+        if (parts.length > 1) {
+          el.innerHTML = esc(parts[0]) + '<br/><span class="gradient-text">' + esc(parts.slice(1).join(' ')) + '</span>';
+        } else {
+          el.innerHTML = esc(h.title);
+        }
+      }
+    }
+    if (h.subtitle) {
+      const el = document.querySelector('.hero-sub');
+      if (el) el.textContent = h.subtitle;
+    }
+    if (h.primaryButtonText) {
+      const el = document.querySelector('.hero-btns .btn-primary');
+      if (el) el.textContent = h.primaryButtonText;
+    }
+    if (h.primaryButtonLink) {
+      const el = document.querySelector('.hero-btns .btn-primary');
+      if (el) el.href = safeUrl(h.primaryButtonLink, el.href);
+    }
+    if (h.secondaryButtonText) {
+      const el = document.querySelector('.hero-btns .btn-ghost');
+      if (el) el.textContent = h.secondaryButtonText;
+    }
+    if (h.secondaryButtonLink) {
+      const el = document.querySelector('.hero-btns .btn-ghost');
+      if (el) el.href = safeUrl(h.secondaryButtonLink, el.href);
+    }
+    const nums = document.querySelectorAll('.stat-num');
+    if (h.stat1 && nums[0]) nums[0].textContent = h.stat1;
+    if (h.stat2 && nums[1]) nums[1].textContent = h.stat2;
+    if (h.stat3 && nums[2]) nums[2].textContent = h.stat3;
+    if (heroBg) heroBg.style.backgroundImage = h.backgroundImage ? `url(${safeUrl(h.backgroundImage)})` : defaultSiteState.hero.backgroundImage;
+  }
+
+  function applyBanner(b) {
+    const sec = document.querySelector('.pricing-banner');
+    if (!b) {
+      if (!sec) return;
+      sec.style.display = '';
+      const h2 = sec.querySelector('h2');
+      if (h2) h2.innerHTML = defaultSiteState.banner.title;
+      const p = sec.querySelector('p');
+      if (p) p.textContent = defaultSiteState.banner.offer;
+      const btn = sec.querySelector('.btn-primary');
+      if (btn) {
+        btn.textContent = defaultSiteState.banner.buttonText;
+        btn.href = defaultSiteState.banner.buttonHref;
+      }
+      sec.style.backgroundImage = defaultSiteState.banner.backgroundImage;
+      return;
+    }
+    if (!sec) return;
+    if (b.status === 'hidden') {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = '';
+    if (b.title) {
+      const h2 = sec.querySelector('h2');
+      if (h2) h2.innerHTML = esc(b.title);
+    }
+    if (b.offer) {
+      const p = sec.querySelector('p');
+      if (p) p.textContent = b.offer;
+    }
+    const btn = sec.querySelector('.btn-primary');
+    if (btn) {
+      if (b.buttonText) btn.textContent = b.buttonText;
+      if (b.link) btn.href = safeUrl(b.link, btn.href);
+    }
+    sec.style.backgroundImage = b.image ? `url(${safeUrl(b.image)})` : defaultSiteState.banner.backgroundImage;
+  }
+
+  function applyFaq(data) {
+    const faqList = document.querySelector('.faq-list');
+    if (!faqList) return;
+    if (!data || !Object.keys(data).length) {
+      faqList.innerHTML = defaultSiteState.faqHtml;
+      return;
+    }
+    const items = Object.entries(data)
+      .map(([id, item]) => ({ id, ...item }))
+      .filter(item => item && (item.status === undefined || item.status === 'active'))
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (!items.length) {
+      faqList.innerHTML = defaultSiteState.faqHtml;
+      return;
+    }
+    faqList.innerHTML = '';
+    items.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'faq-item';
+      div.innerHTML = `
+        <button class="faq-q">
+          <span>${esc(item.question)}</span>
+          <i class="fa-solid fa-chevron-down faq-icon"></i>
+        </button>
+        <div class="faq-a">
+          <p>${esc(item.answer).replace(/\n/g, '<br/>')}</p>
+        </div>
+      `;
+      const btn = div.querySelector('.faq-q');
+      btn.addEventListener('click', () => {
+        const isOpen = div.classList.contains('open');
+        faqList.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!isOpen) div.classList.add('open');
+      });
+      faqList.appendChild(div);
+    });
+  }
+
+  function applyTestimonials(data) {
+    const testiGrid = document.querySelector('.testi-grid');
+    if (!testiGrid) return;
+    if (!data || !Object.keys(data).length) {
+      testiGrid.innerHTML = defaultSiteState.testimonialsHtml;
+      return;
+    }
+    const items = Object.entries(data)
+      .map(([id, item]) => ({ id, ...item }))
+      .filter(item => item && (item.status === undefined || item.status === 'active'))
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    if (!items.length) {
+      testiGrid.innerHTML = defaultSiteState.testimonialsHtml;
+      return;
+    }
+    testiGrid.innerHTML = '';
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'testi-card';
+      let starsHtml = '';
+      const rating = Math.min(5, Math.max(1, Number(item.rating || 5)));
+      for (let i = 0; i < rating; i++) {
+        starsHtml += '<i class="fa-solid fa-star"></i>';
+      }
+      let avatarHtml = `<i class="fa-solid fa-circle-user testi-avatar"></i>`;
+      if (item.photo) {
+        avatarHtml = `<img src="${esc(item.photo)}" class="testi-avatar" style="border-radius: 50%; width: 1.8rem; height: 1.8rem; object-fit: cover;" alt="${esc(item.name)}" />`;
+      }
+      card.innerHTML = `
+        <div class="stars">${starsHtml}</div>
+        <p>"${esc(item.review)}"</p>
+        <div class="testi-author">
+          ${avatarHtml}
+          <span>${esc(item.name)}</span>
+        </div>
+      `;
+      testiGrid.appendChild(card);
+    });
+  }
+
+  function applyPaymentLinks(p) {
+    const telegramUrl = p?.telegramUrl || defaultSiteState.payment.telegramUrl;
+    const telegramChannel = p?.telegramChannel || defaultSiteState.payment.telegramChannel;
+    document.querySelectorAll('a[href*="TRUSTED_BROTHER"]').forEach(a => { a.href = telegramUrl; });
+    document.querySelectorAll('a[href*="TRUSTED_BROTHER"]').forEach(a => { a.href = telegramUrl; });
+  }
+
+  // -- LIVE DATA LISTENERS --
+  onValue(ref(db, 'settings'), snap => applySiteSettings(snap.val()));
+  onValue(ref(db, 'hero'), snap => applyHero(snap.val()));
+  onValue(ref(db, 'banner'), snap => applyBanner(snap.val()));
+  onValue(ref(db, 'faq'), snap => applyFaq(snap.val()));
+  onValue(ref(db, 'testimonials'), snap => applyTestimonials(snap.val()));
+  onValue(ref(db, 'payment'), snap => applyPaymentLinks(snap.val()));
+
+  function getOrderClickMeta(link) {
+    const url = new URL(link.href, window.location.href);
+    const title = link.dataset.name
+      ? decodeURIComponent(link.dataset.name)
+      : link.closest('.pcard')?.querySelector('.pcard-title')?.textContent?.trim()
+        || url.searchParams.get('name')
+        || 'Order';
+    return {
+      type: 'order_click',
+      title,
+      package: title,
+      amountINR: '',
+      amountUSD: '',
+      href: url.href,
+      page: 'index',
+      source: 'public-site',
+      date: new Date().toISOString().slice(0, 10),
+      timestamp: Date.now()
+    };
+  }
+
+  document.addEventListener('click', async (event) => {
+    const link = event.target.closest('a.btn-card[href*="payment.html"], a.cpb-btn[href*="payment.html"], a.vid-tier-btn[href*="payment.html"]');
+    if (!link) return;
+    event.preventDefault();
+    try {
+      const checkoutMeta = resolveCheckoutMeta(link);
+      const orderRef = push(ref(db, 'orders'));
+      const checkoutToken = createCheckoutToken();
+      const payload = {
+        orderId: orderRef.key,
+        id: orderRef.key,
+        productId: checkoutMeta.id || null,
+        productSlug: checkoutMeta.slug || null,
+        productName: checkoutMeta.title || 'Product',
+        amount: checkoutMeta.inr || checkoutMeta.usd || '',
+        amountINR: checkoutMeta.inr || '',
+        amountUSD: checkoutMeta.usd || '',
+        lockedAmountINR: checkoutMeta.inr || '',
+        lockedAmountUSD: checkoutMeta.usd || '',
+        checkoutToken,
+        currency: 'INR',
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
+        status: 'pending',
+        paymentMethod: '',
+        screenshotUrl: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        source: 'public-site',
+      };
+      await set(orderRef, payload);
+      link.href = `payment.html?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}`;
+      await set(push(ref(db, 'events')), getOrderClickMeta(link));
+    } catch (error) {
+      console.warn('Order click tracking failed', error);
+    } finally {
+      window.location.href = link.href;
+    }
+  });
+
+  // -- BUILD SLIDESHOW --
+  function buildSlideshow(images, videos, title) {
+    const all = [];
+    (images||[]).forEach(u=>all.push({t:'img',u}));
+    (videos||[]).forEach(u=>all.push({t:'vid',u}));
+    if(!all.length) return '<div class="pcard-img-wrap" style="background:#111;height:180px;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-image" style="font-size:36px;color:#333"></i></div>';
+    if(all.length===1) {
+      const m=all[0];
+      return m.t==='img'
+        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" loading="lazy" draggable="false"/></div>`
+        : `<div class="pcard-img-wrap"><video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video></div>`;
+    }
+    const uid='ss_'+Math.random().toString(36).slice(2,7);
+    const slides=all.map((m,i)=>`<div class="fb-slide${i===0?' fb-slide-active':''}">${m.t==='img'?`<img src="${esc(m.u)}" loading="lazy" alt="${esc(title)}" draggable="false"/>`:`<video src="${esc(m.u)}" autoplay muted loop playsinline></video>`}</div>`).join('');
+    const dots=all.map((_,i)=>`<span class="fb-dot${i===0?' fb-dot-active':''}" data-i="${i}"></span>`).join('');
+    return `<div class="pcard-img-wrap fb-slideshow" id="${uid}" data-idx="0">${slides}<div class="fb-dots">${dots}</div><button class="fb-prev">&#8249;</button><button class="fb-next">&#8250;</button></div>`;
+  }
+
+  function resolveMediaList(cat) {
+    const primary = Array.isArray(cat.images) ? cat.images : [];
+    const fallback = [cat.image, ...(Array.isArray(cat.galleryImages) ? cat.galleryImages : [])].filter(Boolean);
+    const images = [...new Set([...primary, ...fallback].map(u => String(u || '').trim()).filter(Boolean))];
+    const videoList = Array.isArray(cat.videos) ? cat.videos : [];
+    const videoFallback = cat.video ? [cat.video] : [];
+    const videos = [...new Set([...videoList, ...videoFallback].map(u => String(u || '').trim()).filter(Boolean))];
+    return { images, videos };
+  }
+
+  function normalizeFeatureList(value) {
+    if (Array.isArray(value)) {
+      return value.map(item => String(item || '').trim()).filter(Boolean);
+    }
+    if (typeof value === 'string') {
+      return value
+        .split(/\n|,/)
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
+
+  function buildMediaItems(images, videos) {
+    const items = [];
+    (images || []).forEach((u) => {
+      const src = String(u || '').trim();
+      if (src) items.push({ type: 'img', src });
+    });
+    (videos || []).forEach((u) => {
+      const src = String(u || '').trim();
+      if (src) items.push({ type: 'vid', src });
+    });
+    return items;
+  }
+
+  const mediaViewerState = {
+    items: [],
+    index: 0,
+    zoom: 1,
+    dragging: false,
+    startX: 0,
+    currentX: 0,
+  };
+
+  function ensureMediaViewer() {
+    let viewer = document.getElementById('mediaViewer');
+    if (viewer) return viewer;
+    viewer = document.createElement('div');
+    viewer.id = 'mediaViewer';
+    viewer.className = 'media-viewer';
+    viewer.setAttribute('aria-hidden', 'true');
+    viewer.innerHTML = `
+      <button type="button" class="media-viewer-close" data-viewer-close aria-label="Close viewer"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" class="media-viewer-zoom" data-viewer-zoom aria-label="Zoom"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+      <button type="button" class="media-viewer-full" data-viewer-full aria-label="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+      <button type="button" class="media-viewer-prev" data-viewer-prev aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+      <div class="media-viewer-stage" data-viewer-stage>
+        <div class="media-viewer-media" data-viewer-media></div>
+      </div>
+      <button type="button" class="media-viewer-next" data-viewer-next aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+      <div class="media-viewer-footer">
+        <div class="media-viewer-title" data-viewer-title></div>
+        <div class="media-viewer-dots" data-viewer-dots></div>
+      </div>
+    `;
+    document.body.appendChild(viewer);
+    viewer.addEventListener('click', (event) => {
+      if (event.target === viewer) closeMediaViewer();
+    });
+    viewer.querySelector('[data-viewer-close]')?.addEventListener('click', closeMediaViewer);
+    viewer.querySelector('[data-viewer-prev]')?.addEventListener('click', () => moveMediaViewer(-1));
+    viewer.querySelector('[data-viewer-next]')?.addEventListener('click', () => moveMediaViewer(1));
+    viewer.querySelector('[data-viewer-zoom]')?.addEventListener('click', toggleMediaZoom);
+    viewer.querySelector('[data-viewer-full]')?.addEventListener('click', toggleMediaFullscreen);
+    const stage = viewer.querySelector('[data-viewer-stage]');
+    stage?.addEventListener('pointerdown', (event) => {
+      mediaViewerState.dragging = true;
+      mediaViewerState.startX = event.clientX;
+      mediaViewerState.currentX = event.clientX;
+      stage.setPointerCapture?.(event.pointerId);
+    });
+    stage?.addEventListener('pointermove', (event) => {
+      if (!mediaViewerState.dragging) return;
+      mediaViewerState.currentX = event.clientX;
+    });
+    const endDrag = () => {
+      if (!mediaViewerState.dragging) return;
+      const delta = mediaViewerState.currentX - mediaViewerState.startX;
+      mediaViewerState.dragging = false;
+      if (Math.abs(delta) > 40) {
+        moveMediaViewer(delta < 0 ? 1 : -1);
+      }
+    };
+    stage?.addEventListener('pointerup', endDrag);
+    stage?.addEventListener('pointercancel', endDrag);
+    return viewer;
+  }
+
+  function renderMediaViewer() {
+    const viewer = ensureMediaViewer();
+    const mediaWrap = viewer.querySelector('[data-viewer-media]');
+    const dotsWrap = viewer.querySelector('[data-viewer-dots]');
+    const titleWrap = viewer.querySelector('[data-viewer-title]');
+    const item = mediaViewerState.items[mediaViewerState.index];
+    if (!item) return;
+    titleWrap.textContent = `${mediaViewerState.index + 1} / ${mediaViewerState.items.length}`;
+    dotsWrap.innerHTML = mediaViewerState.items.map((entry, index) => `
+      <button type="button" class="media-viewer-dot${index === mediaViewerState.index ? ' active' : ''}" data-viewer-dot="${index}" aria-label="Go to slide ${index + 1}"></button>
+    `).join('');
+    mediaWrap.innerHTML = item.type === 'vid'
+      ? `<video class="media-viewer-item${mediaViewerState.zoom > 1 ? ' zoomed' : ''}" src="${esc(item.src)}" autoplay muted loop playsinline controls></video>`
+      : `<img class="media-viewer-item${mediaViewerState.zoom > 1 ? ' zoomed' : ''}" src="${esc(item.src)}" alt="Viewer image" draggable="false" />`;
+    mediaWrap.querySelector('.media-viewer-item')?.style?.setProperty('transform', `scale(${mediaViewerState.zoom})`);
+    viewer.classList.add('open');
+    viewer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('media-viewer-open');
+    viewer.querySelectorAll('[data-viewer-dot]').forEach((dot) => {
+      dot.addEventListener('click', () => {
+        mediaViewerState.index = Number(dot.dataset.viewerDot || 0);
+        mediaViewerState.zoom = 1;
+        renderMediaViewer();
+      });
+    });
+  }
+
+  function openMediaViewerFromWrap(wrap) {
+    const slides = [...wrap.querySelectorAll('.fb-slide')];
+    const items = slides.map((slide) => {
+      const img = slide.querySelector('img');
+      const vid = slide.querySelector('video');
+      if (img) return { type: 'img', src: img.getAttribute('src') || '' };
+      if (vid) return { type: 'vid', src: vid.getAttribute('src') || '' };
+      return null;
+    }).filter((item) => item && item.src);
+    if (!items.length) return;
+    mediaViewerState.items = items;
+    mediaViewerState.index = Math.max(0, Number(wrap.dataset.idx || 0) || 0);
+    mediaViewerState.zoom = 1;
+    renderMediaViewer();
+  }
+
+  function closeMediaViewer() {
+    const viewer = document.getElementById('mediaViewer');
+    if (!viewer) return;
+    viewer.classList.remove('open');
+    viewer.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('media-viewer-open');
+    mediaViewerState.zoom = 1;
+  }
+
+  function moveMediaViewer(direction) {
+    if (!mediaViewerState.items.length) return;
+    const next = mediaViewerState.index + direction;
+    mediaViewerState.index = (next + mediaViewerState.items.length) % mediaViewerState.items.length;
+    mediaViewerState.zoom = 1;
+    renderMediaViewer();
+  }
+
+  function toggleMediaZoom() {
+    mediaViewerState.zoom = mediaViewerState.zoom > 1 ? 1 : 1.8;
+    renderMediaViewer();
+  }
+
+  function toggleMediaFullscreen() {
+    const viewer = document.getElementById('mediaViewer');
+    if (!viewer) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+      return;
+    }
+    viewer.requestFullscreen?.().catch(() => {});
+  }
+
+  // -- BUILD CARD --
+  function buildCard(id, cat) {
+    const media = resolveMediaList(cat);
+    const hasTiers = cat.tiers&&cat.tiers.length;
+    const features = normalizeFeatureList(cat.features).map(f=>`<li><i class="fa-solid fa-check"></i> ${esc(f)}</li>`).join('');
+    const pill = cat.badge ? `<span class="pcard-pill${cat.badgeStyle?' '+esc(cat.badgeStyle):''}">${cat.badgeIcon?`<i class="fa-solid ${esc(cat.badgeIcon)}"></i> `:''}${esc(cat.badge)}</span>` : '';
+    const orderLink = normalizeCheckoutUrl(cat.orderLink, { id, slug: cat.slug, title: cat.title });
+
+    let bottom = '';
+    if(hasTiers) {
+      const btnId='vb_'+id;
+      const tierItems=cat.tiers.map((t,i)=>`<div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd)}"><span class="vid-tier-count">${esc(t.label)}</span><span class="vid-tier-price">&#8377;${esc(t.inr)}</span></div>`).join('');
+      const first=cat.tiers[0];
+      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div><div class="vid-tier-list" id="${btnId}_list">${tierItems}</div><a href="${esc(normalizeCheckoutUrl(`payment.html?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}"><i class="fa-brands fa-telegram"></i> Buy Now &#8211; ${esc(first.label)} &#8377;${esc(first.inr)}</a>`;
+    } else {
+      bottom=`<div class="pcard-price-row">${cat.priceINR?`<div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">${esc(cat.priceINR)}</span></div>`:''} ${cat.priceUSD?`<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">${esc(cat.priceUSD)}</span></div>`:''}</div><a href="${esc(orderLink)}" class="btn-card" data-product-id="${esc(id)}"><i class="fa-solid fa-arrow-right"></i> Order Now</a>`;
+    }
+
+    return `<div class="pcard" data-fb-id="${esc(id)}">
+      ${buildSlideshow(media.images,media.videos,cat.title)}
+      ${pill?`<div class="pcard-badge-row">${pill}</div>`:''}
+      <h3 class="pcard-title">${esc(cat.title)}</h3>
+      ${cat.creators?`<div class="pcard-creators">${esc(cat.creators)}</div>`:''}
+      ${features?`<ul class="pcard-features">${features}</ul>`:''}
+      ${cat.platforms?`<div class="pcard-platforms">${esc(cat.platforms)}</div>`:''}
+      ${bottom}
+    </div>`;
+  }
+
+  function renderLiveGrid() {
+    if (!USE_LIVE_GRID) return;
+    const grid = document.getElementById('categoriesGrid');
+    if (!grid) return;
+    const banner = grid.querySelector('.collection-pack-banner');
+    const records = getLiveRecords();
+    if (!records.length) {
+      grid.innerHTML = defaultSiteState.liveGridHtml;
+      initSlideshows();
+      initVidTiers();
+      return;
+    }
+    grid.innerHTML = (banner ? banner.outerHTML : '') + records.map(item => buildCard(item.id, item)).join('');
+    initSlideshows();
+    initVidTiers();
+    syncCheckoutLinks();
+  }
+
+  // -- LIVE CATEGORIES / PRODUCTS --
+  onValue(ref(db,'categories'), snap => {
+    liveCollections.categories = snap.val() || {};
+    renderLiveGrid();
+  });
+
+  onValue(ref(db,'products'), snap => {
+    liveCollections.products = snap.val() || {};
+    renderLiveGrid();
+  });
+
+  document.addEventListener('click', (event) => {
+    const wrap = event.target.closest('.fb-slideshow');
+    if (!wrap) return;
+    if (event.target.closest('.fb-prev, .fb-next, .fb-dot')) return;
+    openMediaViewerFromWrap(wrap);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const viewer = document.getElementById('mediaViewer');
+    if (!viewer || !viewer.classList.contains('open')) return;
+    if (event.key === 'Escape') closeMediaViewer();
+    if (event.key === 'ArrowLeft') moveMediaViewer(-1);
+    if (event.key === 'ArrowRight') moveMediaViewer(1);
+  });
+
+  syncCheckoutLinks();
+
+  // -- SLIDESHOW INIT --
+  function initSlideshows() {
+    document.querySelectorAll('.fb-slideshow').forEach(ss=>{
+      const slides=ss.querySelectorAll('.fb-slide');
+      const dots=ss.querySelectorAll('.fb-dot');
+      if(slides.length<=1) return;
+      function goTo(i){
+        slides.forEach(s=>s.classList.remove('fb-slide-active'));
+        dots.forEach(d=>d.classList.remove('fb-dot-active'));
+        slides[i].classList.add('fb-slide-active');
+        if(dots[i]) dots[i].classList.add('fb-dot-active');
+        ss.dataset.idx=i;
+      }
+      ss.querySelector('.fb-prev')?.addEventListener('click',e=>{e.preventDefault();let i=+ss.dataset.idx-1;goTo(i<0?slides.length-1:i);});
+      ss.querySelector('.fb-next')?.addEventListener('click',e=>{e.preventDefault();let i=+ss.dataset.idx+1;goTo(i>=slides.length?0:i);});
+      dots.forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.i)));
+      setInterval(()=>{let i=+ss.dataset.idx+1;goTo(i>=slides.length?0:i);},3000);
+    });
+  }
+
+  // -- VID TIERS INIT --
+  function initVidTiers() {
+    document.querySelectorAll('.vid-tier-list').forEach(list=>{
+      const btnId=list.id.replace('_list','');
+      const btn=document.getElementById(btnId);
+      list.querySelectorAll('.vid-tier-item').forEach(item=>{
+        item.addEventListener('click',()=>{
+          list.querySelectorAll('.vid-tier-item').forEach(i=>i.classList.remove('vid-tier-selected'));
+          item.classList.add('vid-tier-selected');
+          if(btn){
+            btn.innerHTML=`<i class="fa-brands fa-telegram"></i> Buy Now \u2013 ${item.dataset.vids} \u20B9${item.dataset.inr}`;
+            btn.href=normalizeCheckoutUrl(`payment.html?productId=${encodeURIComponent(btn.dataset.productId || '')}`, { id: btn.dataset.productId || '', slug: '', title: btn.dataset.name ? decodeURIComponent(btn.dataset.name) : '' });
+          }
+        });
+      });
+    });
+  }
+  </script>
+
+  <style>
+    .fb-slideshow{position:relative;overflow:hidden;}
+    .fb-slide{display:none;width:100%;height:100%;}
+    .fb-slide.fb-slide-active{display:block;}
+    .fb-slide img,.fb-slide video{width:100%;height:100%;object-fit:cover;pointer-events:none;}
+    .fb-dots{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2;}
+    .fb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:.2s;}
+    .fb-dot.fb-dot-active{background:#f0247a;transform:scale(1.3);}
+    .fb-prev,.fb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:none;color:#fff;font-size:20px;padding:2px 8px;border-radius:6px;cursor:pointer;z-index:2;}
+    .fb-prev{left:5px;} .fb-next{right:5px;}
+    .fb-prev:hover,.fb-next:hover{background:rgba(240,36,122,.7);}
+    .media-viewer{position:fixed;inset:0;width:100vw;height:100dvh;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.985);z-index:2147483647;padding:24px;overflow:hidden;isolation:isolate;}
+    .media-viewer.open{display:flex;}
+    .media-viewer-stage{position:relative;max-width:min(92vw, 1180px);max-height:82vh;width:100%;height:100%;display:flex;align-items:center;justify-content:center;touch-action:pan-y;}
+    .media-viewer-media{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:24px;background:rgba(7,7,11,.99);box-shadow:0 20px 90px rgba(0,0,0,.72);}
+    .media-viewer-item{max-width:100%;max-height:100%;object-fit:contain;transition:transform .2s ease;user-select:none;-webkit-user-drag:none;}
+    .media-viewer-item.zoomed{cursor:zoom-out;}
+    .media-viewer-close,.media-viewer-prev,.media-viewer-next,.media-viewer-zoom,.media-viewer-full{position:absolute;border:1px solid rgba(255,255,255,.12);background:rgba(20,20,28,.72);color:#fff;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px);}
+    .media-viewer-close{top:22px;right:22px;width:56px;height:56px;font-size:24px;}
+    .media-viewer-zoom{top:22px;right:88px;width:56px;height:56px;font-size:18px;}
+    .media-viewer-full{top:22px;right:154px;width:56px;height:56px;font-size:18px;}
+    .media-viewer-prev,.media-viewer-next{top:50%;transform:translateY(-50%);width:64px;height:64px;font-size:24px;}
+    .media-viewer-prev{left:18px;}
+    .media-viewer-next{right:18px;}
+    .media-viewer-footer{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:min(92vw, 1180px);display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;}
+    .media-viewer-title{color:#fff;font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.9;}
+    .media-viewer-dots{display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;}
+    .media-viewer-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(255,255,255,.28);cursor:pointer;}
+    .media-viewer-dot.active{background:#f0247a;transform:scale(1.2);}
+  </style>
+  <script type="module" src="/media-resolver.js"></script>
+</body>
+</html>
+

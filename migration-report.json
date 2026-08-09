@@ -1,0 +1,17 @@
+{
+  "migrated": 118,
+  "cached": 0,
+  "uploaded": 118,
+  "foldersUsed": [
+    "categories",
+    "logos",
+    "products"
+  ],
+  "failures": [],
+  "filesModified": [
+    "index.html",
+    "payment.html",
+    "firebase rtdb media"
+  ],
+  "generatedAt": "2026-08-08T00:46:14.140Z"
+}
