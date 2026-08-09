@@ -295,11 +295,12 @@ async function main() {
   const supabaseUrl = env.SUPABASE_URL;
   const supabaseKey = env.SUPABASE_KEY || env.SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY;
   const bucket = env.SUPABASE_BUCKET || 'media';
-  const firebaseApiKey = env.FIREBASE_API_KEY || env.apiKey || 'AIzaSyCD_cZXyfYd01FNg-DmRpyKKBIGR3NqeT4';
+  const firebaseApiKey = env.FIREBASE_API_KEY || env.apiKey;
   const firebaseDbUrl = env.FIREBASE_DATABASE_URL || env.databaseURL || 'https://linkadda-cd1da-default-rtdb.firebaseio.com';
   const firebaseEmail = env.admin || env.ADMIN_EMAIL;
   const firebasePassword = env.password || env.ADMIN_PASSWORD;
 
+  if (!firebaseApiKey) throw new Error('Missing FIREBASE_API_KEY in .env');
   if (!supabaseUrl || !supabaseKey) throw new Error('Missing Supabase configuration in .env');
   if (!firebaseEmail || !firebasePassword) throw new Error('Missing Firebase admin credentials in .env');
 

@@ -200,9 +200,11 @@ if (heroSub) {
   const typeSpeed = 28;
   function typeChar() {
     if (i < originalText.length) {
-      heroSub.insertBefore(document.createTextNode(originalText[i]), cursor);
-      i++;
-      setTimeout(typeChar, typeSpeed);
+      if (cursor.parentNode === heroSub) {
+        heroSub.insertBefore(document.createTextNode(originalText[i]), cursor);
+        i++;
+        setTimeout(typeChar, typeSpeed);
+      }
     }
   }
   setTimeout(typeChar, 900);

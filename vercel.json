@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "statusCode": 301 },
+    { "source": "/payment.html", "destination": "/payment", "statusCode": 301 },
+    { "source": "/admin/index.html", "destination": "/admin/", "statusCode": 301 },
+    { "source": "/admin/login.html", "destination": "/admin/login", "statusCode": 301 }
+  ]
+}
