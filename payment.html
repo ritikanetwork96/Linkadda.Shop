@@ -1,7 +1,23 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function() {
+      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocal) return;
+      var path = window.location.pathname;
+      var cleanPath = null;
+      if (path.endsWith('/index.html')) {
+        cleanPath = path.substring(0, path.length - 10) || '/';
+      } else if (path.endsWith('.html')) {
+        cleanPath = path.substring(0, path.length - 5);
+      }
+      if (cleanPath !== null) {
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Secure Payment — Linkadda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1894,7 +1910,7 @@ function buildUpiPaymentUri() {
   const amount = getUpiPaymentAmount();
   const params = new URLSearchParams({
     pa: CONFIG.upiId || '',
-    pn: 'HotMyNet',
+    pn: 'Linkadda',
     cu: 'INR',
     mode: '02',
     purpose: '00',
@@ -2070,7 +2086,9 @@ async function createCheckoutOrder(baseOrder, productRecord = null) {
     source: 'public-site',
   };
   await set(orderRef, payload);
-  history.replaceState({}, '', `payment.html?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(baseOrder.id || productRecord?.id || '')}&token=${encodeURIComponent(checkoutToken)}`);
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+  const paymentPage = isLocal ? 'payment.html' : 'payment';
+  history.replaceState({}, '', `${paymentPage}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(baseOrder.id || productRecord?.id || '')}&token=${encodeURIComponent(checkoutToken)}`);
   applyOrderToUI(normalizeOrderRecord(payload, orderRef.key));
   return payload;
 }
@@ -2514,7 +2532,7 @@ async function saveOrderToFirebase(amountText, methodName) {
 }
 
 function buildTelegramOrderUrl(orderId, amountText, methodName) {
-  const tgMessage = `🛒 New Order — HotMyNet\n\n` +
+  const tgMessage = `🛒 New Order — Linkadda\n\n` +
     `🧾 Order ID: ${orderId || 'pending'}\n` +
     `📦 Category: ${orderData.name}\n` +
     `💰 Amount Paid: ${amountText}\n` +

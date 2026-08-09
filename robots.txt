@@ -26,6 +26,8 @@
 User-agent: *
 Content-Signal: search=yes,ai-train=no
 Allow: /
+Disallow: /admin/
+Disallow: /admin
 
 User-agent: Amazonbot
 Disallow: /

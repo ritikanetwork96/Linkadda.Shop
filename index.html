@@ -1,7 +1,23 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function() {
+      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocal) return;
+      var path = window.location.pathname;
+      var cleanPath = null;
+      if (path.endsWith('/index.html')) {
+        cleanPath = path.substring(0, path.length - 10) || '/';
+      } else if (path.endsWith('.html')) {
+        cleanPath = path.substring(0, path.length - 5);
+      }
+      if (cleanPath !== null) {
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Linkadda Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -48,22 +64,22 @@
         <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
       </div>
       <nav class="nav">
-        <a href="index.html#home" class="nav-link">Home</a>
-        <a href="index.html#services" class="nav-link">Services</a>
-        <a href="index.html#pricing" class="nav-link">Pricing</a>
-        <a href="index.html#faq" class="nav-link">FAQ</a>
-        <a href="index.html#contact" class="nav-link">Contact</a>
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="#contact" class="nav-link">Contact</a>
       </nav>
       <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-header">Get Started</a>
       <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
     </div>
     <!-- Mobile nav -->
     <div class="mobile-nav" id="mobileNav">
-      <a href="index.html#home" class="mob-link">Home</a>
-      <a href="index.html#services" class="mob-link">Services</a>
-      <a href="index.html#pricing" class="mob-link">Pricing</a>
-      <a href="index.html#faq" class="mob-link">FAQ</a>
-      <a href="index.html#contact" class="mob-link">Contact</a>
+      <a href="#home" class="mob-link">Home</a>
+      <a href="#services" class="mob-link">Services</a>
+      <a href="#pricing" class="mob-link">Pricing</a>
+      <a href="#faq" class="mob-link">FAQ</a>
+      <a href="#contact" class="mob-link">Contact</a>
     </div>
   </header>
 
@@ -82,7 +98,7 @@
       <h1 class="hero-title">TRUSTED BROTHER<br /><span class="gradient-text">CONTENT SELLER</span></h1>
       <p class="hero-sub">Premium 4K quality videos at the cheapest price in the market. Trusted by thousands &#8212; fast delivery, zero compromise on quality.</p>
       <div class="hero-btns">
-        <a href="index.html#services" class="btn-primary"><i class="fa-solid fa-layer-group"></i> Browse Services</a>
+        <a href="#services" class="btn-primary"><i class="fa-solid fa-layer-group"></i> Browse Services</a>
         <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-ghost"><i class="fa-brands fa-telegram"></i> DM Now</a>
       </div>
       <div class="hero-stats">
@@ -1300,15 +1316,15 @@
         </div>
         <div class="footer-links">
           <h4>Quick Links</h4>
-          <a href="index.html#home">Home</a>
-          <a href="index.html#services">Services</a>
-          <a href="index.html#pricing">Pricing</a>
-          <a href="index.html#contact">Contact</a>
+          <a href="#home">Home</a>
+          <a href="#services">Services</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#contact">Contact</a>
         </div>
         <div class="footer-links">
           <h4>Connect</h4>
           <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank"><i class="fa-brands fa-telegram"></i> Telegram</a>
-          <a href="index.html#"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          <a href="#"><i class="fa-brands fa-instagram"></i> Instagram</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -1365,19 +1381,21 @@
   function normalizeCheckoutUrl(value, item = {}) {
     const raw = String(value || '').trim();
     const fallbackId = String(item.id || '').trim();
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const ext = isLocal ? '.html' : '';
     const fallback = fallbackId
-      ? `payment.html?productId=${encodeURIComponent(fallbackId)}`
-      : 'payment.html';
+      ? `payment${ext}?productId=${encodeURIComponent(fallbackId)}`
+      : `payment${ext}`;
     if (!raw) return fallback;
 
     try {
       const parsed = new URL(raw, window.location.origin);
       const host = parsed.hostname.toLowerCase();
-      const isCheckoutUrl = /payment\.html$/i.test(parsed.pathname) || parsed.pathname.endsWith('/payment.html');
+      const isCheckoutUrl = /\/payment(?:\.html)?$/i.test(parsed.pathname);
       if (isCheckoutUrl) {
         const params = new URLSearchParams(parsed.search);
         const nextId = params.get('productId') || params.get('id') || fallbackId;
-        return nextId ? `payment.html?productId=${encodeURIComponent(nextId)}` : 'payment.html';
+        return nextId ? `payment${ext}?productId=${encodeURIComponent(nextId)}` : `payment${ext}`;
       }
     } catch (_) {
       // fall back below
@@ -1416,11 +1434,11 @@
   }
 
   function syncCheckoutLinks() {
-    document.querySelectorAll('a.btn-card[href*="payment.html"], a.cpb-btn[href*="payment.html"], a.vid-tier-btn[href*="payment.html"]').forEach((link) => {
+    document.querySelectorAll('a.btn-card[href*="payment"], a.cpb-btn[href*="payment"], a.vid-tier-btn[href*="payment"]').forEach((link) => {
       const meta = resolveCheckoutMeta(link);
       if (meta.id) link.dataset.productId = meta.id;
       if (meta.slug) link.dataset.slug = meta.slug;
-      link.href = normalizeCheckoutUrl(link.href || 'payment.html', meta);
+      link.href = normalizeCheckoutUrl(link.href || 'payment', meta);
     });
   }
 
@@ -1756,7 +1774,7 @@
   }
 
   document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a.btn-card[href*="payment.html"], a.cpb-btn[href*="payment.html"], a.vid-tier-btn[href*="payment.html"]');
+    const link = event.target.closest('a.btn-card[href*="payment"], a.cpb-btn[href*="payment"], a.vid-tier-btn[href*="payment"]');
     if (!link) return;
     event.preventDefault();
     try {
@@ -1786,7 +1804,9 @@
         source: 'public-site',
       };
       await set(orderRef, payload);
-      link.href = `payment.html?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}`;
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      const ext = isLocal ? '.html' : '';
+      link.href = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}`;
       await set(push(ref(db, 'events')), getOrderClickMeta(link));
     } catch (error) {
       console.warn('Order click tracking failed', error);
@@ -2000,7 +2020,7 @@
       const btnId='vb_'+id;
       const tierItems=cat.tiers.map((t,i)=>`<div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd)}"><span class="vid-tier-count">${esc(t.label)}</span><span class="vid-tier-price">&#8377;${esc(t.inr)}</span></div>`).join('');
       const first=cat.tiers[0];
-      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div><div class="vid-tier-list" id="${btnId}_list">${tierItems}</div><a href="${esc(normalizeCheckoutUrl(`payment.html?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}"><i class="fa-brands fa-telegram"></i> Buy Now &#8211; ${esc(first.label)} &#8377;${esc(first.inr)}</a>`;
+      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div><div class="vid-tier-list" id="${btnId}_list">${tierItems}</div><a href="${esc(normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}"><i class="fa-brands fa-telegram"></i> Buy Now &#8211; ${esc(first.label)} &#8377;${esc(first.inr)}</a>`;
     } else {
       bottom=`<div class="pcard-price-row">${cat.priceINR?`<div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">${esc(cat.priceINR)}</span></div>`:''} ${cat.priceUSD?`<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">${esc(cat.priceUSD)}</span></div>`:''}</div><a href="${esc(orderLink)}" class="btn-card" data-product-id="${esc(id)}"><i class="fa-solid fa-arrow-right"></i> Order Now</a>`;
     }
@@ -2024,14 +2044,24 @@
     const records = getLiveRecords();
     if (!records.length) {
       grid.innerHTML = defaultSiteState.liveGridHtml;
-      initSlideshows();
-      initVidTiers();
-      return;
+    } else {
+      grid.innerHTML = (banner ? banner.outerHTML : '') + records.map(item => buildCard(item.id, item)).join('');
     }
-    grid.innerHTML = (banner ? banner.outerHTML : '') + records.map(item => buildCard(item.id, item)).join('');
     initSlideshows();
     initVidTiers();
     syncCheckoutLinks();
+
+    // Re-initialize shine effects and last sold badges for dynamic cards
+    grid.querySelectorAll('.pcard').forEach(card => {
+      if (!card.querySelector('.shine')) {
+        const shine = document.createElement('div');
+        shine.className = 'shine';
+        card.appendChild(shine);
+      }
+    });
+    if (typeof updateLastSoldBadges === 'function') {
+      updateLastSoldBadges();
+    }
   }
 
   // -- LIVE CATEGORIES / PRODUCTS --
@@ -2093,7 +2123,7 @@
           item.classList.add('vid-tier-selected');
           if(btn){
             btn.innerHTML=`<i class="fa-brands fa-telegram"></i> Buy Now \u2013 ${item.dataset.vids} \u20B9${item.dataset.inr}`;
-            btn.href=normalizeCheckoutUrl(`payment.html?productId=${encodeURIComponent(btn.dataset.productId || '')}`, { id: btn.dataset.productId || '', slug: '', title: btn.dataset.name ? decodeURIComponent(btn.dataset.name) : '' });
+            btn.href=normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(btn.dataset.productId || '')}`, { id: btn.dataset.productId || '', slug: '', title: btn.dataset.name ? decodeURIComponent(btn.dataset.name) : '' });
           }
         });
       });

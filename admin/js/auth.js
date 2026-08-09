@@ -48,7 +48,7 @@ export function mountLoginPage(root) {
     note.textContent = 'Signing in...';
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = './index.html';
+      window.location.href = '/admin/';
     } catch (error) {
       note.textContent = error?.message || 'Login failed';
     }
@@ -72,8 +72,8 @@ export function mountLoginPage(root) {
 export function protectRoute(onReady) {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      if (!window.location.pathname.endsWith('/login.html')) {
-        window.location.href = './login.html';
+      if (!/\/login(?:\.html)?\/?$/i.test(window.location.pathname)) {
+        window.location.href = '/admin/login';
       }
       return;
     }
@@ -83,7 +83,7 @@ export function protectRoute(onReady) {
 
 export async function logout() {
   await signOut(auth);
-  window.location.href = './login.html';
+  window.location.href = '/admin/login';
 }
 
 export function whenAuthenticated(callback) {

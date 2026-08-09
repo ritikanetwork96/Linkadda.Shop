@@ -2,6 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function() {
+      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocal) return;
+      var path = window.location.pathname;
+      var cleanPath = null;
+      if (path.endsWith('/index.html')) {
+        cleanPath = path.substring(0, path.length - 10) || '/';
+      } else if (path.endsWith('.html')) {
+        cleanPath = path.substring(0, path.length - 5);
+      }
+      if (cleanPath !== null) {
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Login - Linkadda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,7 +32,7 @@
     import { mountLoginPage, whenAuthenticated } from './js/auth.js';
     const mount = document.getElementById('authMount');
     whenAuthenticated((user) => {
-      if (user) window.location.href = './index.html';
+      if (user) window.location.href = '/admin/';
     });
     mountLoginPage(mount);
     if (window.lucide) lucide.createIcons();

@@ -2,6 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>
+    (function() {
+      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocal) return;
+      var path = window.location.pathname;
+      var cleanPath = null;
+      if (path.endsWith('/index.html')) {
+        cleanPath = path.substring(0, path.length - 10) || '/';
+      } else if (path.endsWith('.html')) {
+        cleanPath = path.substring(0, path.length - 5);
+      }
+      if (cleanPath !== null) {
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Linkadda Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,7 +33,7 @@
       <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close navigation menu">
         <i data-lucide="x"></i>
       </button>
-      <a class="brand" href="./index.html">
+      <a class="brand" href="./">
         <div class="brand-mark">L</div>
         <div>
           <h1>Linkadda Admin</h1>
