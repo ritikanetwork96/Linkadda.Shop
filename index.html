@@ -2120,6 +2120,63 @@
 
   let activeCategoryFilter = 'all';
 
+  function renderPinnedBanner() {
+    const wrapper = document.getElementById('pinnedDealWrapper');
+    if (!wrapper) return;
+    const data = liveCollections.banner;
+    
+    // Default fallback state (if database has no custom banner config yet)
+    if (!data || Object.keys(data).length === 0) {
+      wrapper.style.display = 'block';
+      wrapper.innerHTML = `
+        <div class="collection-pack-banner">
+          <div class="cpb-pin"><i class="fa-solid fa-thumbtack"></i> PINNED DEAL</div>
+          <div class="cpb-left">
+            <div class="cpb-icon"><i class="fa-solid fa-gem"></i></div>
+            <div>
+              <h3 class="cpb-title">All Collection Pack</h3>
+              <p class="cpb-desc">🔥 Mega Pack — 1,14,000+ Videos | Every category bundled together — the ultimate deal.</p>
+            </div>
+          </div>
+          <div class="cpb-prices">
+            <div class="cpb-original">&#8377;10,900</div>
+            <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
+          </div>
+          <a href="payment.html" class="btn-primary cpb-btn">
+            <i class="fa-solid fa-gem"></i> Claim Deal
+          </a>
+        </div>
+      `;
+      return;
+    }
+
+    if (data.status === 'hidden') {
+      wrapper.style.display = 'none';
+      return;
+    }
+
+    wrapper.style.display = 'block';
+    wrapper.innerHTML = `
+      <div class="collection-pack-banner">
+        <div class="cpb-pin"><i class="fa-solid fa-thumbtack"></i> PINNED DEAL</div>
+        <div class="cpb-left">
+          <div class="cpb-icon"><i class="fa-solid fa-gem"></i></div>
+          <div>
+            <h3 class="cpb-title">${esc(data.title || 'All Collection Pack')}</h3>
+            <p class="cpb-desc">${esc(data.description || '')}</p>
+          </div>
+        </div>
+        <div class="cpb-prices">
+          ${data.priceOriginal ? `<div class="cpb-original">${esc(data.priceOriginal)}</div>` : ''}
+          <div class="cpb-offer">${esc(data.priceOfferINR || '')} ${data.priceOfferUSD ? `<span class="cpb-usd">/ ${esc(data.priceOfferUSD)}</span>` : ''}</div>
+        </div>
+        <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn">
+          <i class="fa-solid fa-gem"></i> ${esc(data.buttonText || 'Claim Deal')}
+        </a>
+      </div>
+    `;
+  }
+
   function renderCategoryFilters() {
     const pillsWrapper = document.getElementById('categoryFilterPills');
     if (!pillsWrapper) return;
@@ -2268,6 +2325,11 @@
   onValue(ref(db,'products'), snap => {
     liveCollections.products = snap.val() || {};
     renderLiveGrid();
+  });
+
+  onValue(ref(db,'banner'), snap => {
+    liveCollections.banner = snap.val() || {};
+    renderPinnedBanner();
   });
 
   let hasFocusedProduct = false;

@@ -243,14 +243,16 @@ const singleEditors = {
     ],
   },
   banner: {
-    title: 'Banner',
-    description: 'Manage the banner block used by the public site.',
+    title: 'Pinned Deal Banner',
+    description: 'Manage the special pinned deal banner shown on the home page.',
     fields: [
       { key: 'title', label: 'Banner Title', type: 'text' },
-      { key: 'offer', label: 'Offer Text', type: 'text' },
+      { key: 'description', label: 'Description', type: 'textarea' },
+      { key: 'priceOriginal', label: 'Original Price (e.g. ₹10,900)', type: 'text' },
+      { key: 'priceOfferINR', label: 'Offer Price INR (e.g. ₹4,399)', type: 'text' },
+      { key: 'priceOfferUSD', label: 'Offer Price USD (e.g. $109)', type: 'text' },
       { key: 'buttonText', label: 'Button Text', type: 'text' },
-      { key: 'link', label: 'Button Link', type: 'url' },
-      { key: 'image', label: 'Banner Image', type: 'url' },
+      { key: 'buttonLink', label: 'Button Link', type: 'text' },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'hidden'] },
     ],
   },
@@ -3717,6 +3719,7 @@ function singleEditorDisplaySubtitle(node, record = {}) {
   if (node === 'hero') return String(record.subtitle || 'Homepage hero copy and calls to action.');
   if (node === 'settings') return String(record.footer || record.publicSiteSync || record.maintenanceMode || 'Website configuration and checkout settings.');
   if (node === 'payment') return String(record.instructions || record.telegramUrl || record.telegramChannel || 'Checkout payment methods and proof handling.');
+  if (node === 'banner') return String(record.description || record.offer || 'Homepage promotional banner and CTA.');
   return String(record.offer || 'Homepage promotional banner and CTA.');
 }
 
