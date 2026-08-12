@@ -2779,8 +2779,15 @@ body {
   box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+  .category-filter-wrapper {
+    justify-content: space-between;
+  }
+}
+
 .category-filter-pills {
   display: flex;
+  justify-content: center;
   gap: 10px;
   overflow-x: auto;
   padding: 4px 8px;
@@ -2788,6 +2795,13 @@ body {
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
   min-width: 0; /* Prevents flex from squeezing container and cutting off pills */
+}
+
+@media (max-width: 768px) {
+  .category-filter-pills {
+    justify-content: flex-start;
+    flex-grow: 1;
+  }
 }
 
 .category-filter-pills::-webkit-scrollbar {

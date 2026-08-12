@@ -3815,9 +3815,12 @@ function renderSingleEditorSummaryGrid(node, record = {}) {
   return `
     <div class="single-editor-summary-grid">
       ${renderInfoTile('Banner Title', record.title || 'Not set')}
-      ${renderInfoTile('Offer Text', record.offer || 'Not set')}
+      ${renderInfoTile('Description', record.description || record.offer || 'Not set')}
+      ${renderInfoTile('Original Price', record.priceOriginal || 'Not set')}
+      ${renderInfoTile('Offer INR', record.priceOfferINR || 'Not set')}
+      ${renderInfoTile('Offer USD', record.priceOfferUSD || 'Not set')}
       ${renderInfoTile('Button Text', record.buttonText || 'Not set')}
-      ${renderInfoTile('Button Link', record.link || 'Not set')}
+      ${renderInfoTile('Button Link', record.buttonLink || record.link || 'Not set')}
       ${renderInfoTile('Status', record.status || 'active')}
       ${renderInfoTile('Last Updated', singleEditorLastUpdated(record))}
     </div>
@@ -3889,17 +3892,22 @@ function renderSingleEditorFieldSections(node, schema, record = {}) {
         {
           title: 'Banner Content',
           description: 'Title and promotional copy for the banner.',
-          keys: ['title', 'offer'],
+          keys: ['title', 'description'],
+        },
+        {
+          title: 'Pricing Details',
+          description: 'Original and promotional prices for INR and USD.',
+          keys: ['priceOriginal', 'priceOfferINR', 'priceOfferUSD'],
         },
         {
           title: 'Call to Action',
           description: 'Banner button label and destination.',
-          keys: ['buttonText', 'link'],
+          keys: ['buttonText', 'buttonLink'],
         },
         {
-          title: 'Media & Publishing',
-          description: 'Banner image and publishing status.',
-          keys: ['image', 'status'],
+          title: 'Publishing',
+          description: 'Publishing status of the banner.',
+          keys: ['status'],
         },
       ];
 

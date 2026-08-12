@@ -979,9 +979,9 @@
             <div class="pslide-dots"></div>
           </div>
           <div class="pcard-badge-row">
-            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> ???????????????? PACK</span>
+            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> LESBIAN PACK</span>
           </div>
-          <h3 class="pcard-title">???????????????????????????????</h3>
+          <h3 class="pcard-title">Lesbian Videos</h3>
           <div class="pcard-creators">
             1100+ Videos | Lesbian Premium, Lesbian Live, Lesbian Exclusive, Lesbian Models &amp; Many More
           </div>
@@ -1019,9 +1019,9 @@
             <div class="pslide-dots"></div>
           </div>
           <div class="pcard-badge-row">
-            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> ?????? PACK</span>
+            <span class="pcard-pill"><i class="fa-solid fa-fire-flame-curved"></i> MIX PACK</span>
           </div>
-          <h3 class="pcard-title">?????????? ?? ?????????????</h3>
+          <h3 class="pcard-title">20 Mix Videos</h3>
           <div class="pcard-creators">
             9000+ Videos | Mix Premium, Mix Live, Mix Exclusive, All Genre Mix &amp; Many More
           </div>
@@ -2142,7 +2142,11 @@
             <div class="cpb-original">&#8377;10,900</div>
             <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
           </div>
-          <a href="payment.html" class="btn-primary cpb-btn">
+          <a href="payment.html" class="btn-primary cpb-btn"
+             data-product-id="pinned-deal"
+             data-name="All Collection Pack"
+             data-inr="4399"
+             data-usd="109">
             <i class="fa-solid fa-gem"></i> Claim Deal
           </a>
         </div>
@@ -2170,7 +2174,11 @@
           ${data.priceOriginal ? `<div class="cpb-original">${esc(data.priceOriginal)}</div>` : ''}
           <div class="cpb-offer">${esc(data.priceOfferINR || '')} ${data.priceOfferUSD ? `<span class="cpb-usd">/ ${esc(data.priceOfferUSD)}</span>` : ''}</div>
         </div>
-        <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn">
+        <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn"
+           data-product-id="pinned-deal"
+           data-name="${esc(data.title || 'All Collection Pack')}"
+           data-inr="${esc(data.priceOfferINR || '')}"
+           data-usd="${esc(data.priceOfferUSD || '')}">
           <i class="fa-solid fa-gem"></i> ${esc(data.buttonText || 'Claim Deal')}
         </a>
       </div>
