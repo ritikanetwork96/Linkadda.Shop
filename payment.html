@@ -312,7 +312,7 @@
     .step-item.done .step-num {
       background: var(--grad);
       border-color: transparent;
-      color: #fff;
+      color: transparent;
       box-shadow: var(--glow-pink);
     }
     .step-label { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; }
@@ -1019,7 +1019,11 @@
     .step-item.done .step-num::after {
       content: '\2713';
       position: absolute;
-      font-size: 10px;
+      font-size: 12px;
+      color: #fff;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
 
     /* Addr box hover */
