@@ -76,3 +76,10 @@ build/
 .next/
 .nuxt/
 out/
+
+# Local dev/migration scripts (not needed in production)
+scratch/
+scripts/
+migration-report.json
+migration-report.md
+*.mjs

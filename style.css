@@ -601,23 +601,33 @@ section:not(.hero) {
 
 /* ===== ALL COLLECTION PACK — PINNED BANNER ===== */
 .collection-pack-banner {
-  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 36px;
   position: relative;
-  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(232,67,147,0.12), rgba(124,58,237,0.12));
-  border: 1px solid rgba(245,158,11,0.4);
-  border-radius: var(--radius);
-  padding: 28px 32px;
+  background: rgba(22, 22, 31, 0.85) url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E") !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  border-radius: 16px !important;
+  padding: 24px 32px !important;
   display: flex;
   align-items: center;
   gap: 28px;
   flex-wrap: wrap;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(245,158,11,0.1), 0 0 80px rgba(232,67,147,0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   animation: cpbPulse 3s ease-in-out infinite;
+  box-sizing: border-box;
 }
+
 @keyframes cpbPulse {
-  0%, 100% { box-shadow: 0 0 30px rgba(245,158,11,0.12), 0 0 60px rgba(232,67,147,0.08); border-color: rgba(245,158,11,0.4); }
-  50%       { box-shadow: 0 0 50px rgba(245,158,11,0.22), 0 0 100px rgba(232,67,147,0.14); border-color: rgba(245,158,11,0.65); }
+  0%, 100% {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-color: rgba(245, 158, 11, 0.45);
+  }
+  50% {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 50px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-color: rgba(245, 158, 11, 0.7);
+  }
 }
 .collection-pack-banner::before {
   content: '';
@@ -2727,4 +2737,96 @@ body {
 .vid-tier-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(232,67,147,0.5);
+}
+
+/* Premium Card Highlight pulse animation */
+@keyframes premiumGlow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    border-color: rgba(232, 67, 147, 0.2);
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(240, 36, 122, 0.85), 0 0 10px rgba(240, 36, 122, 0.5);
+    border-color: #f0247a;
+    transform: scale(1.03) translateY(-6px);
+  }
+}
+
+.pcard-highlight {
+  animation: premiumGlow 2s ease-in-out infinite;
+  z-index: 100;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pcard-focused-steady {
+  box-shadow: 0 0 20px rgba(240, 36, 122, 0.4);
+  border-color: #f0247a !important;
+  transform: translateY(-2px);
+  transition: all 0.5s ease;
+}
+
+/* Category Filters Styling */
+.category-filter-wrapper {
+  margin: 0 auto 32px;
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: center;
+}
+
+.category-filter-pills {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 8px;
+  max-width: 100%;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+.category-filter-pills::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.category-pill {
+  white-space: nowrap;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-pill:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.category-pill.active {
+  background: linear-gradient(135deg, #f0247a, #7c3aed) !important;
+  border-color: transparent !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(240, 36, 122, 0.4), 0 0 5px rgba(124, 58, 237, 0.2);
+}
+
+.category-select-element {
+  outline: none;
+}
+
+.category-select-element option {
+  background: #16161f;
+  color: #fafafa;
+}
+
+/* Button Click Press Compression Animation */
+.btn-card:active, .btn-primary:active, .category-pill:active, .vid-tier-item:active, .cpb-btn:active {
+  transform: scale(0.96) translateY(0) !important;
+  transition: transform 0.1s ease !important;
 }

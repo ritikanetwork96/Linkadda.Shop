@@ -51,6 +51,7 @@ export const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', icon: 'settings-2' },
   { key: 'payment', label: 'Payment', icon: 'credit-card' },
   { key: 'orders', label: 'Orders', icon: 'receipt-text' },
+  { key: 'screenshots', label: 'Screenshots', icon: 'image' },
   { key: 'analytics', label: 'Analytics', icon: 'bar-chart-3' },
 ];
 

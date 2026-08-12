@@ -73,7 +73,8 @@ export function protectRoute(onReady) {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       if (!/\/login(?:\.html)?\/?$/i.test(window.location.pathname)) {
-        window.location.href = '/admin/login';
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+        window.location.href = isLocal ? '/admin/login.html' : '/admin/login';
       }
       return;
     }
@@ -83,7 +84,8 @@ export function protectRoute(onReady) {
 
 export async function logout() {
   await signOut(auth);
-  window.location.href = '/admin/login';
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+  window.location.href = isLocal ? '/admin/login.html' : '/admin/login';
 }
 
 export function whenAuthenticated(callback) {

@@ -1033,6 +1033,37 @@
     ::-webkit-scrollbar-track { background: var(--dark); }
     ::-webkit-scrollbar-thumb { background: rgba(240,36,122,0.3); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(240,36,122,0.5); }
+
+    /* Protect Toast Style */
+    .protect-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(13, 13, 27, 0.95);
+      border: 1px solid rgba(240, 36, 122, 0.3);
+      padding: 12px 24px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 10000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .protect-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .protect-toast i {
+      color: #f0247a;
+    }
   </style>
 </head>
 <body>
@@ -1067,7 +1098,7 @@
 
 <div class="confetti-container" id="confettiContainer"></div>
 <header class="pay-header">
-  <a class="back-btn" href="index.html"><i class="fa-solid fa-arrow-left"></i> Shop</a>
+  <a class="back-btn" id="headerBackBtn" href="index.html"><i class="fa-solid fa-arrow-left"></i> Shop</a>
   <div class="secure-badge"><i class="fa-solid fa-lock"></i> Secure</div>
   <div class="logo"><i class="fa-solid fa-fire-flame-curved"></i> Linkadda</div>
 </header>
@@ -1442,7 +1473,6 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getDatabase, ref, push, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCD_cZXyfYd01FNg-DmRpyKKBIGR3NqeT4",
@@ -1460,7 +1490,6 @@ const firebaseConfig = {
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
     window.__linkaddaDb = db;
-    const storage = getStorage(app);
 
     window._firebaseReady = true;
     window.ref = ref;
@@ -1474,10 +1503,6 @@ const firebaseConfig = {
     window._fbSet = set;
     window._fbGet = get;
     window._fbOnValue = onValue;
-    window._fbStorage = storage;
-    window._fbSRef = sRef;
-    window._fbUploadString = uploadString;
-    window._fbGetDownloadURL = getDownloadURL;
     await ensurePaymentConfigLoaded();
     await ensureCheckoutOrderLoaded();
   } catch(e) {
@@ -1524,7 +1549,7 @@ const firebaseConfig = {
   setTimeout(forceExitLoader, 12000);
 
   const tick = setInterval(() => {
-    pct += pct < 30 ? 4 : pct < 70 ? 2 : pct < 90 ? 1.2 : 3;
+    pct += pct < 30 ? 16 : pct < 70 ? 8 : pct < 90 ? 5 : 12;
     if (pct > 100) pct = 100;
     bar.style.width = pct + '%';
 
@@ -1563,6 +1588,52 @@ const CONFIG = {
   binanceGiftCardUrl: 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
   paypalLink: 'https://paypal.me/Johnguzman456',
 };
+
+const SUPABASE_CONFIG = {
+  url: 'https://noecylfqhtfwbjfkjxoo.supabase.co',
+  anonKey: 'sb_publishable_HHXzUZGaMXTpCXQVqiNBwQ_ZEbe_E2z',
+  bucket: 'media',
+};
+
+async function uploadScreenshotToSupabase(orderId, base64Data) {
+  if (!base64Data || !base64Data.startsWith('data:')) return null;
+  try {
+    const supabaseUrl = SUPABASE_CONFIG.url;
+    const anonKey = SUPABASE_CONFIG.anonKey;
+    const bucket = SUPABASE_CONFIG.bucket;
+    const folder = 'user-screenshots';
+    
+    const response = await fetch(base64Data);
+    const blob = await response.blob();
+    
+    const ext = blob.type.split('/')[1] || 'jpg';
+    const fileName = `${orderId || Date.now()}_screenshot.${ext}`;
+    const storagePath = `${folder}/${fileName}`;
+    
+    const uploadUrl = `${supabaseUrl.replace(/\/+$/, '')}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeURI(storagePath)}`;
+    
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
+        'x-upsert': 'true',
+        'Content-Type': blob.type || 'image/jpeg',
+      },
+      body: blob,
+    });
+    
+    if (!uploadResponse.ok) {
+      const errText = await uploadResponse.text();
+      throw new Error(errText || 'Supabase storage upload failed');
+    }
+    
+    return `${supabaseUrl.replace(/\/+$/, '')}/storage/v1/object/public/${encodeURIComponent(bucket)}/${encodeURI(storagePath)}`;
+  } catch (error) {
+    console.error('Supabase upload error:', error);
+    throw error;
+  }
+}
 
 let paymentConfigPromise = null;
 let paymentConfigSubscribed = false;
@@ -1764,6 +1835,14 @@ function applyOrderToUI(nextOrder = {}) {
     available: nextOrder.available !== undefined ? nextOrder.available : true,
   };
   updateOrderSummaryUI();
+
+  const backBtn = document.getElementById('headerBackBtn');
+  const targetId = orderData.id || requestedCheckout.productId;
+  if (backBtn && targetId) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const ext = isLocal ? '.html' : '';
+    backBtn.href = `index${ext}?product=${encodeURIComponent(targetId)}`;
+  }
 }
 
 function normalizeLookupValue(value) {
@@ -2031,12 +2110,15 @@ function paymentCurrencyLabel(method) {
 async function loadProductsCatalog() {
   if (window.__linkaddaDb && !productCatalogSubscribed) {
     productCatalogSubscribed = true;
-    onValue(ref(window.__linkaddaDb, 'products'), (snap) => {
-      const records = unwrapRecords(snap.val());
-      productCatalog = buildProductCatalog(records);
+    const updateCatalog = (pVal) => {
+      const pRecords = unwrapRecords(pVal);
+      productCatalog = buildProductCatalog(pRecords);
       if (window.__paymentDataState !== 'loading') {
         refreshOrderSummaryFromLiveCatalog();
       }
+    };
+    onValue(ref(window.__linkaddaDb, 'products'), (snap) => {
+      updateCatalog(snap.val() || {});
     });
   }
 
@@ -2047,9 +2129,9 @@ async function loadProductsCatalog() {
 
   productCatalogPromise = (async () => {
     if (!window.__linkaddaDb) return [];
-    const snap = await get(ref(window.__linkaddaDb, 'products'));
-    const records = unwrapRecords(snap.val());
-    productCatalog = buildProductCatalog(records);
+    const pSnap = await get(ref(window.__linkaddaDb, 'products'));
+    const pRecords = unwrapRecords(pSnap.val());
+    productCatalog = buildProductCatalog(pRecords);
     return productCatalog;
   })();
 
@@ -2397,7 +2479,7 @@ function startTimer(secs) {
   timerInterval = setInterval(tick, 1000);
 }
 
-// â”€â”€ GOTO UPLOAD SCREEN â”€â”€
+// ———— GOTO UPLOAD SCREEN ————
 function gotoUploadScreen() {
   clearInterval(timerInterval);
   const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
@@ -2408,7 +2490,7 @@ function gotoUploadScreen() {
   showScreen(3);
 }
 
-// â”€â”€ SCREENSHOT HANDLER â”€â”€
+// ———— SCREENSHOT HANDLER ————
 function handleScreenshot(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -2426,42 +2508,51 @@ function handleScreenshot(e) {
   reader.readAsDataURL(file);
 }
 
-// â”€â”€ CONFIRM UPLOAD â”€â”€
+// ———— CONFIRM UPLOAD ————
 async function confirmUpload() {
   if (!screenshotUploaded) {
     document.getElementById('alertUpload').classList.add('show');
     return;
   }
-  const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
-  const amountText = paymentAmountForMethod(selectedMethod);
-  const methodName = names[selectedMethod];
+  const submitBtn = document.querySelector('#screen3 .btn-proceed');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting payment...';
 
-  const savedOrder = await saveOrderToFirebase(amountText, methodName);
-  const orderId = savedOrder?.orderId || orderData.orderId || requestedCheckout.orderId || 'pending';
+  try {
+    const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
+    const amountText = paymentAmountForMethod(selectedMethod);
+    const methodName = names[selectedMethod];
 
-  document.getElementById('finalName').textContent = orderData.name;
-  document.getElementById('finalAmount').textContent = amountText;
-  document.getElementById('finalMethod').textContent = methodName;
+    const savedOrder = await saveOrderToFirebase(amountText, methodName);
+    const orderId = savedOrder?.orderId || orderData.orderId || requestedCheckout.orderId || 'pending';
 
-  // Show category name on success screen
-  document.getElementById('successCatName').textContent = orderData.name;
-  document.getElementById('successAmtLine').textContent = amountText + ' via ' + methodName;
+    document.getElementById('finalName').textContent = orderData.name;
+    document.getElementById('finalAmount').textContent = amountText;
+    document.getElementById('finalMethod').textContent = methodName;
 
-  // Build Telegram message with order details
-  const tgUrl = buildTelegramOrderUrl(orderId, amountText, methodName);
-  document.getElementById('tgLink').href = tgUrl;
-  document.getElementById('tgLinkBottom').href = tgUrl;
+    // Show category name on success screen
+    document.getElementById('successCatName').textContent = orderData.name;
+    document.getElementById('successAmtLine').textContent = amountText + ' via ' + methodName;
 
-  showScreen(4);
-  launchConfetti();
+    // Build Telegram message with order details
+    const tgUrl = buildTelegramOrderUrl(orderId, amountText, methodName);
+    document.getElementById('tgLink').href = tgUrl;
+    document.getElementById('tgLinkBottom').href = tgUrl;
 
-  // Redirect to Telegram after payment is saved
-  setTimeout(() => {
-    window.location.href = tgUrl;
-  }, 1500);
+    showScreen(4);
+    launchConfetti();
+
+  } catch (err) {
+    console.error('Submission error:', err);
+    alert('Something went wrong. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
 }
 
-// â”€â”€ SAVE ORDER TO FIREBASE â”€â”€
+// ———— SAVE ORDER TO FIREBASE ————
 async function saveOrderToFirebase(amountText, methodName) {
   try {
     if (!window._firebaseReady) return;
@@ -2478,12 +2569,19 @@ async function saveOrderToFirebase(amountText, methodName) {
       orderData.orderId = orderId;
     }
 
-    // Upload screenshot to Firebase Storage
+    // Upload screenshot to Supabase Storage
     if (screenshotBase64 && screenshotBase64.startsWith('data:')) {
-      const timestamp = Date.now();
-      const imgRef = window._fbSRef(window._fbStorage, `payment_screenshots/${orderId || timestamp}.jpg`);
-      const uploadResult = await window._fbUploadString(imgRef, screenshotBase64, 'data_url');
-      screenshotUrl = await window._fbGetDownloadURL(uploadResult.ref);
+      const uploadPromise = uploadScreenshotToSupabase(orderId, screenshotBase64);
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Upload timed out (CORS/Network)')), 5000);
+      });
+      
+      try {
+        screenshotUrl = await Promise.race([uploadPromise, timeoutPromise]);
+      } catch (err) {
+        console.warn('Screenshot upload skipped/failed due to:', err.message);
+      }
     }
 
     // Save order record to DB
@@ -2532,8 +2630,8 @@ async function saveOrderToFirebase(amountText, methodName) {
 }
 
 function buildTelegramOrderUrl(orderId, amountText, methodName) {
-  const tgMessage = `🛒 New Order — Linkadda\n\n` +
-    `🧾 Order ID: ${orderId || 'pending'}\n` +
+  const cleanUrl = String(CONFIG.telegramUrl || 'https://t.me/TRUSTED_BROTHER1234').trim().replace(/\/$/, '');
+  const tgMessage = `🛒 New Order — Linkadda Shop\n` +
     `📦 Category: ${orderData.name}\n` +
     `💰 Amount Paid: ${amountText}\n` +
     `💳 Payment Method: ${methodName}\n` +
@@ -2586,6 +2684,76 @@ function launchConfetti() {
     setTimeout(() => piece.remove(), 4000);
   }
 }
+
+// ===== SCREENSHOT & COPY PROTECTION =====
+(function() {
+  // Skip protection on localhost so developer can inspect console errors
+  const isLocal = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' || 
+                  window.location.hostname.startsWith('192.168.') ||
+                  window.location.hostname.startsWith('10.') ||
+                  window.location.hostname.endsWith('.local');
+  if (isLocal) return;
+
+  // Warning toast helper
+  function showProtectToast(msg) {
+    let t = document.querySelector('.protect-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'protect-toast';
+      document.body.appendChild(t);
+    }
+    t.innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${msg}`;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Disable right click
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    showProtectToast('Content is protected. Right click disabled.');
+  });
+
+  // Disable text selection via keyboard (Ctrl+A, Ctrl+C, Ctrl+U, Ctrl+S, F12)
+  document.addEventListener('keydown', (e) => {
+    const blocked = (
+      (e.ctrlKey && ['a','c','u','s','p'].includes(e.key.toLowerCase())) ||
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase()))
+    );
+    if (blocked) {
+      e.preventDefault();
+      showProtectToast('Content is protected. This action is disabled.');
+    }
+  });
+
+  // Disable drag
+  document.addEventListener('dragstart', (e) => e.preventDefault());
+
+  // Disable print
+  window.addEventListener('beforeprint', (e) => {
+    e.preventDefault();
+    showProtectToast('Printing is disabled on this site.');
+  });
+
+  // DevTools open detection (basic)
+  let devOpen = false;
+  const devCheck = setInterval(() => {
+    const threshold = 160;
+    if (
+      window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold
+    ) {
+      if (!devOpen) {
+        devOpen = true;
+        showProtectToast('DevTools detected. Content is protected.');
+      }
+    } else {
+      devOpen = false;
+    }
+  }, 1000);
+})();
 </script>
 <script type="module" src="/media-resolver.js"></script>
 </body>

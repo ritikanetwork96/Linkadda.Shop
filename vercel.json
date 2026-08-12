@@ -1,9 +1,23 @@
 {
   "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     { "source": "/index.html", "destination": "/", "statusCode": 301 },
-    { "source": "/payment.html", "destination": "/payment", "statusCode": 301 },
-    { "source": "/admin/index.html", "destination": "/admin/", "statusCode": 301 },
+    { "source": "/admin/index.html", "destination": "/admin", "statusCode": 301 },
     { "source": "/admin/login.html", "destination": "/admin/login", "statusCode": 301 }
+  ],
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/admin/login", "destination": "/admin/login.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
   ]
 }

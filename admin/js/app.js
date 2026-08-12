@@ -1,4 +1,4 @@
-﻿import { APP_CONFIG, NAV_ITEMS } from './config.js';
+import { APP_CONFIG, NAV_ITEMS } from './config.js';
 import { RTDB_NODES } from './config.js';
 import { protectRoute, logout } from './auth.js';
 import {
@@ -154,7 +154,7 @@ const collectionSchemas = {
       { key: 'creators', label: 'Creators', type: 'textarea', hint: 'Comma or line separated' },
       { key: 'platforms', label: 'Platforms', type: 'textarea', hint: 'Comma or line separated' },
       { key: 'features', label: 'Features', type: 'textarea', hint: 'One feature per line' },
-      { key: 'orderLink', label: 'Order Link', type: 'url' },
+      { key: 'orderLink', label: 'Order Link', type: 'text' },
       { key: 'status', label: 'Status', type: 'select', options: ['active', 'hidden', 'draft', 'deleted'] },
       { key: 'displayOrder', label: 'Display Order', type: 'number' },
     ],
@@ -761,7 +761,7 @@ function renderProductEditor(record = {}, schema = null) {
               </div>
               <div class="field">
                 <label for="orderLink">Order Link</label>
-                <input class="input" type="url" name="orderLink" id="orderLink" value="${escapeHtml(data.orderLink || '')}" placeholder="https://" />
+                <input class="input" type="text" name="orderLink" id="orderLink" value="${escapeHtml(data.orderLink || '')}" placeholder="https:// or /payment.html" />
               </div>
               <div class="field">
                 <label for="displayOrder">Display Order</label>
@@ -778,17 +778,38 @@ function renderProductEditor(record = {}, schema = null) {
               </div>
             </div>
             <div class="media-manager">
-              <div class="media-manager-panel">
-                <div class="media-manager-preview" data-role="main-image-preview">${data.image ? `<img src="${escapeHtml(data.image)}" alt="${escapeHtml(data.title || 'Main image')}" loading="lazy" />` : renderMediaFallback('No main image selected')}</div>
-                <div class="media-manager-actions">
-                  <div class="toolbar media-manager-toolbar">
-                    <button type="button" class="btn btn-ghost" data-role="main-image-replace">Replace Image</button>
-                    <button type="button" class="btn btn-ghost" data-role="main-image-remove">Remove Image</button>
-                    <input type="file" class="sr-only" accept="image/*" data-role="main-image-file" />
+              <div class="media-manager-panel" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; padding: 20px;">
+                <!-- Main Image Column -->
+                <div class="main-media-column" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+                  <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 16px; height: 16px; color: #6366f1;"></i> Main Image</div>
+                  <div class="media-manager-preview" data-role="main-image-preview" style="width: 100% !important; max-width: 100% !important; height: 220px !important; min-height: 220px !important; max-height: 220px !important; border-radius: 12px; margin-bottom: 4px;">${data.image ? `<img src="${escapeHtml(data.image)}" alt="${escapeHtml(data.title || 'Main image')}" loading="lazy" />` : renderMediaFallback('No main image selected')}</div>
+                  <div class="media-manager-actions">
+                    <div class="toolbar media-manager-toolbar" style="margin-bottom: 4px;">
+                      <button type="button" class="btn btn-ghost" data-role="main-image-replace">Replace Image</button>
+                      <button type="button" class="btn btn-ghost" data-role="main-image-remove">Remove Image</button>
+                      <input type="file" class="sr-only" accept="image/*" data-role="main-image-file" />
+                    </div>
+                    <div class="field">
+                      <label for="image">Main Image URL</label>
+                      <input class="input" type="text" name="image" id="image" value="${escapeHtml(data.image || '')}" placeholder="https://..." data-role="main-image-url" />
+                    </div>
                   </div>
-                  <div class="field">
-                    <label for="image">Main Image URL</label>
-                    <input class="input" type="text" name="image" id="image" value="${escapeHtml(data.image || '')}" placeholder="https://..." data-role="main-image-url" />
+                </div>
+
+                <!-- Main Video Column -->
+                <div class="main-media-column" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+                  <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); display: flex; align-items: center; gap: 6px;"><i data-lucide="video" style="width: 16px; height: 16px; color: #ec4899;"></i> Main Video</div>
+                  <div class="media-manager-preview" data-role="main-video-preview" style="width: 100% !important; max-width: 100% !important; height: 220px !important; min-height: 220px !important; max-height: 220px !important; border-radius: 12px; margin-bottom: 4px;">${data.video ? `<video src="${escapeHtml(data.video)}" autoplay muted loop playsinline class="thumb-media" style="width:100%;height:100%;object-fit:cover;"></video>` : renderMediaFallback('No main video selected')}</div>
+                  <div class="media-manager-actions">
+                    <div class="toolbar media-manager-toolbar" style="margin-bottom: 4px;">
+                      <button type="button" class="btn btn-ghost" data-role="main-video-replace">Replace Video</button>
+                      <button type="button" class="btn btn-ghost" data-role="main-video-remove">Remove Video</button>
+                      <input type="file" class="sr-only" accept="video/*" data-role="main-video-file" />
+                    </div>
+                    <div class="field">
+                      <label for="video">Main Video URL</label>
+                      <input class="input" type="text" name="video" id="video" value="${escapeHtml(data.video || '')}" placeholder="https://..." data-role="main-video-url" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -980,6 +1001,12 @@ function attachCategoryEditorBehaviors(form) {
   };
 
   form.addEventListener('input', (event) => {
+    if (event.target.name === 'title') {
+      const slugInput = form.querySelector('[name="slug"]');
+      if (slugInput) {
+        slugInput.value = slugify(event.target.value);
+      }
+    }
     if (event.target === imageUrlInput || event.target.matches('[name="title"],[name="slug"],[name="description"],[name="status"],[name="displayOrder"]')) {
       refreshPreview();
     }
@@ -1066,6 +1093,7 @@ function getProductEditorRecord(form) {
     badgeStyle: form.querySelector('[name="badgeStyle"]')?.value || '',
     badgeIcon: form.querySelector('[name="badgeIcon"]')?.value || '',
     image: form.querySelector('[name="image"]')?.value || '',
+    video: form.querySelector('[name="video"]')?.value || '',
     galleryImages: gallery,
     creators,
     platforms,
@@ -1111,7 +1139,8 @@ async function uploadEditorFile(file, folder, stateEl, source = 'product-editor'
   const result = await uploadAsset(file, folder, (value) => {
     progress.textContent = `Uploading ${file.name}... ${value}%`;
   });
-  await saveUploadedMediaRecord(file, result, folder, 'image', source, `${folder}:${file.name}`);
+  const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+  await saveUploadedMediaRecord(file, result, folder, mediaType, source, `${folder}:${file.name}`);
   progress.textContent = `Uploaded ${file.name}`;
   return result.publicUrl;
 }
@@ -1122,6 +1151,11 @@ function attachProductEditorBehaviors(form) {
   const mainPreview = form.querySelector('[data-role="main-image-preview"]');
   const mainImageInput = form.querySelector('[data-role="main-image-url"]');
   const mainFileInput = form.querySelector('[data-role="main-image-file"]');
+  
+  const videoPreview = form.querySelector('[data-role="main-video-preview"]');
+  const videoUrlInput = form.querySelector('[data-role="main-video-url"]');
+  const videoFileInput = form.querySelector('[data-role="main-video-file"]');
+  
   const gallerySource = form.querySelector('[data-role="gallery-source"]');
   const galleryInput = form.querySelector('[data-role="gallery-url-input"]');
   const galleryFileInput = form.querySelector('[data-role="gallery-file-input"]');
@@ -1144,6 +1178,14 @@ function attachProductEditorBehaviors(form) {
     if (!mainPreview) return;
     const value = String(mainImageInput?.value || '').trim();
     mainPreview.innerHTML = value ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(form.querySelector('[name="title"]')?.value || 'Main image')}" loading="lazy" />` : renderMediaFallback('No main image selected');
+    updateProductEditorPreview(form);
+    if (window.lucide) lucide.createIcons();
+  };
+
+  const updateVideoPreview = () => {
+    if (!videoPreview) return;
+    const value = String(videoUrlInput?.value || '').trim();
+    videoPreview.innerHTML = value ? `<video src="${escapeHtml(value)}" autoplay muted loop playsinline class="thumb-media" style="width:100%;height:100%;object-fit:cover;"></video>` : renderMediaFallback('No main video selected');
     updateProductEditorPreview(form);
     if (window.lucide) lucide.createIcons();
   };
@@ -1192,8 +1234,15 @@ function attachProductEditorBehaviors(form) {
   };
 
   form.addEventListener('input', (event) => {
-    if (event.target === mainImageInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"]')) {
+    if (event.target.name === 'title') {
+      const slugInput = form.querySelector('[name="slug"]');
+      if (slugInput) {
+        slugInput.value = slugify(event.target.value);
+      }
+    }
+    if (event.target === mainImageInput || event.target === videoUrlInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"],[name="video"]')) {
       updateMainPreview();
+      updateVideoPreview();
       return;
     }
     if (event.target.matches('[data-role="tag-input"]')) {
@@ -1222,6 +1271,22 @@ function attachProductEditorBehaviors(form) {
       }
       return;
     }
+    if (event.target === videoFileInput && event.target.files?.[0]) {
+      const file = event.target.files[0];
+      try {
+        setBusy(true, `Uploading ${file.name}...`);
+        const url = await uploadEditorFile(file, mediaFolderForNode('products', 'video'), stateEl);
+        if (videoUrlInput) videoUrlInput.value = url;
+        event.target.value = '';
+        updateVideoPreview();
+      } catch (error) {
+        stateEl.textContent = error?.message || 'Video upload failed';
+        showToast(error?.message || 'Video upload failed', 'danger');
+      } finally {
+        setBusy(false, 'Ready.');
+      }
+      return;
+    }
     if (event.target === galleryFileInput && event.target.files?.length) {
       const files = [...event.target.files];
       try {
@@ -1245,7 +1310,7 @@ function attachProductEditorBehaviors(form) {
     if (event.target.matches('[data-role="tag-input"]')) {
       return;
     }
-    if (event.target === mainImageInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"]')) {
+    if (event.target === mainImageInput || event.target === videoUrlInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"],[name="video"]')) {
       updateProductEditorPreview(form);
     }
   });
@@ -1304,6 +1369,17 @@ function attachProductEditorBehaviors(form) {
     if (mainRemove) {
       if (mainImageInput) mainImageInput.value = '';
       updateMainPreview();
+      return;
+    }
+    const videoReplace = event.target.closest('[data-role="main-video-replace"]');
+    if (videoReplace) {
+      videoFileInput?.click();
+      return;
+    }
+    const videoRemove = event.target.closest('[data-role="main-video-remove"]');
+    if (videoRemove) {
+      if (videoUrlInput) videoUrlInput.value = '';
+      updateVideoPreview();
       return;
     }
   });
@@ -1428,6 +1504,92 @@ function openRecordEditor(node, schema, record = {}) {
       </div>
     </form>
   `);
+}
+
+window.copyShareLink = function(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="check" style="width: 14px; height: 14px;"></i> Copied!';
+    
+    btn.style.setProperty('background', '#10b981', 'important');
+    btn.style.setProperty('border', 'none', 'important');
+    btn.style.setProperty('color', '#ffffff', 'important');
+    btn.style.setProperty('box-shadow', '0 4px 12px rgba(16, 185, 129, 0.3)', 'important');
+    
+    if (window.lucide) lucide.createIcons();
+    showToast('Link copied to clipboard!');
+    setTimeout(() => {
+      btn.innerHTML = origHtml;
+      btn.style.setProperty('background', 'linear-gradient(135deg, #6366f1, #ec4899)', 'important');
+      btn.style.setProperty('border', 'none', 'important');
+      btn.style.setProperty('color', '#ffffff', 'important');
+      btn.style.setProperty('box-shadow', '0 4px 12px rgba(99, 102, 241, 0.3)', 'important');
+      if (window.lucide) lucide.createIcons();
+    }, 2000);
+  }).catch((err) => {
+    console.error('Copy failed:', err);
+    showToast('Copy failed, please select and copy manually.', 'danger');
+  });
+};
+
+function openShareModal(node, id) {
+  const item = getItem(node, id);
+  if (!item) return;
+
+  const homeUrl = `${window.location.origin}/?product=${encodeURIComponent(id)}`;
+
+  const html = `
+    <div class="panel shadow-lg share-product-modal modal-sm" style="width: 100%; padding: 28px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--border); overflow: hidden; position: relative;">
+      <!-- Subtle top color accent line -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #6366f1, #ec4899);"></div>
+
+      <!-- Header -->
+      <div class="panel-head flex items-center justify-between" style="padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <h3 class="panel-title flex items-center gap-2" style="font-size: 16px; font-weight: 700; color: var(--text); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="share-2" style="color: #6366f1; width: 20px; height: 20px;"></i>
+          <span>Share Product Link</span>
+        </h3>
+        <button class="btn btn-ghost" data-close-modal type="button" style="padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center;">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <!-- Product Preview Block -->
+      <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 8px; display: grid; place-items: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
+          ${escapeHtml((item.title || item.name || 'P')[0].toUpperCase())}
+        </div>
+        <div>
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.05em;">Product Selected</div>
+          <div style="font-size: 14px; font-weight: 600; color: var(--text);">${escapeHtml(item.title || item.name || '')}</div>
+        </div>
+      </div>
+
+      <!-- Link Box -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">
+          Customer Link (Opens page & highlights product)
+        </label>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <input type="text" readonly value="${escapeHtml(homeUrl)}" onclick="this.select();" style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); color: var(--text); outline: none; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);" />
+          <button class="btn" onclick="copyShareLink(this, '${escapeHtml(homeUrl)}');" style="padding: 0 20px; font-size: 13px; font-weight: 700; border-radius: 8px; flex-shrink: 0; background: linear-gradient(135deg, #6366f1, #ec4899) !important; border: none !important; color: white !important; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+            <i data-lucide="copy" style="width: 14px; height: 14px;"></i> Copy Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Help Text -->
+      <div style="font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.4;">
+        When customers open this link, the site will automatically scroll to the product and highlight it with a premium glow.
+      </div>
+
+      <!-- Footer Buttons -->
+      <div style="margin-top: 24px; display: flex; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 16px;">
+        <button type="button" class="btn" data-close-modal style="padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; background: transparent; border: 1px solid var(--border); color: var(--text); cursor: pointer; transition: all 0.2s ease;">Close</button>
+      </div>
+    </div>
+  `;
+  openModal(html);
 }
 
 function openSingleEditor(node, schema, record = {}) {
@@ -2184,6 +2346,7 @@ function resolveMediaSource(value) {
 
 function mediaPreview(item) {
   const rawSrc = item.publicUrl
+    || item.video
     || item.image
     || (Array.isArray(item.images) ? item.images[0] : '')
     || (Array.isArray(item.galleryImages) ? item.galleryImages[0] : '')
@@ -2378,6 +2541,7 @@ function renderCatalogActionMenu(item, node) {
     <details class="catalog-card-menu">
       <summary aria-label="More actions"><i data-lucide="ellipsis"></i><span>More</span></summary>
       <div class="catalog-card-menu-panel">
+        <button type="button" class="catalog-card-menu-item" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share Product</button>
         ${isCategory ? `
           <button type="button" class="catalog-card-menu-item" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-up"></i> Move up</button>
           <button type="button" class="catalog-card-menu-item" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-down"></i> Move down</button>
@@ -2744,32 +2908,8 @@ async function syncFirebaseCollection(node, records) {
   return list.length;
 }
 
-async function syncCurrentSiteCatalog() {
-  const confirmed = confirm('Import the current public product and category cards into Firebase RTDB? Existing matching records will be updated.');
-  if (!confirmed) return;
-  try {
-    showToast('Reading public site catalog...');
-    const catalog = await fetchCurrentSiteCatalog();
-    const sourceItems = normalizeCatalogRecords(catalog.products || catalog.items || []);
-    const sourceKeys = new Set(sourceItems.map((item) => item.slug || item.title || item.id).filter(Boolean));
-    const products = listCollection('products');
-    for (const item of products) {
-      const key = item.slug || item.title || item.id;
-      if (item.source === 'public-site' || (key && sourceKeys.has(key))) {
-        await deleteRecord('products', item.id);
-      }
-    }
-    const importedProducts = await syncFirebaseCollection('products', sourceItems.map((item, index) => ({
-      ...item,
-      source: 'public-site',
-      sourceOrder: index + 1,
-    })));
-    renderView(ui.data || {});
-    showToast(`Synced ${importedProducts} website cards into Products`);
-  } catch (error) {
-    showToast(error?.message || 'Catalog sync failed', 'danger');
-  }
-}
+// syncCurrentSiteCatalog: REMOVED — was overwriting Firebase data from HTML scraping,
+// causing all admin changes to revert. Do not restore.
 
 async function syncCurrentSiteMedia() {
   const confirmed = confirm('Import the current public site images into Supabase Storage and save media metadata in Firebase?');
@@ -2871,7 +3011,7 @@ function renderCollectionInner(node, schema, data) {
   if (isCatalog) {
     contentHtml = `
       ${buildCatalogFilters(node, items)}
-      <div class="catalog-results ${ui.catalogView}">
+      <div class="catalog-results ${ui.catalogView}" id="catalogResultsGrid">
         ${paged.length ? paged.map((item) => (node === 'categories'
           ? renderCatalogCategoryCard(item, node)
           : renderCatalogProductCard(item, node))).join('') : `
@@ -2966,7 +3106,6 @@ function renderDashboard(data) {
             <div class="toolbar hero-actions">
               ${renderRangeSwitch()}
               <button class="btn btn-ghost" data-action="refresh" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
-              <button class="btn btn-ghost" data-action="sync-site-catalog" type="button"><i data-lucide="download"></i> Sync Catalog</button>
               <button class="btn btn-primary" data-action="goto" data-route="products" type="button"><i data-lucide="plus"></i> Add Product</button>
             </div>
           </div>
@@ -3166,14 +3305,12 @@ function renderCatalogView(data) {
             <div class="catalog-secondary-actions">
               <button class="btn btn-ghost" data-action="add" data-node="categories"><i data-lucide="tag"></i> Add Category</button>
               <button class="btn btn-ghost" data-action="goto" data-route="media"><i data-lucide="image-plus"></i> Media Library</button>
-              <button class="btn btn-ghost" data-action="sync-site-catalog"><i data-lucide="refresh-cw"></i> Sync</button>
             </div>
             <details class="catalog-mobile-actions">
               <summary class="btn btn-ghost"><i data-lucide="more-horizontal"></i> More</summary>
               <div class="catalog-mobile-actions-panel">
                 <button class="catalog-mobile-actions-item" type="button" data-action="add" data-node="categories"><i data-lucide="tag"></i> Add Category</button>
                 <button class="catalog-mobile-actions-item" type="button" data-action="goto" data-route="media"><i data-lucide="image-plus"></i> Media Library</button>
-                <button class="catalog-mobile-actions-item" type="button" data-action="sync-site-catalog"><i data-lucide="refresh-cw"></i> Sync</button>
               </div>
             </details>
           </div>
@@ -4339,6 +4476,276 @@ function renderOrdersManagementView(data = {}, fullData = {}) {
   `;
 }
 
+function renderScreenshotsGalleryView(data = {}, fullData = {}) {
+  const allOrders = listCollection('orders');
+  
+  // Filter for orders that have screenshots
+  const itemsWithScreenshot = allOrders.filter(item => {
+    const proof = orderPaymentProof(item);
+    return proof && String(proof).trim() !== '';
+  });
+  
+  // Sort items (newest first)
+  const sortedItems = itemsWithScreenshot.sort((a, b) => orderDateValue(b) - orderDateValue(a));
+  
+  const methods = [...new Set(sortedItems.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
+  
+  // Apply filters
+  const search = String(ui.management.search || '').trim().toLowerCase();
+  const statusFilter = String(ui.management.status || 'all');
+  const methodFilter = String(ui.management.method || 'all');
+  const dateFilter = String(ui.management.date || 'all');
+  
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const thisMonthStr = new Date().toISOString().slice(0, 7);
+  
+  const filteredItems = sortedItems.filter(item => {
+    const name = orderProductName(item).toLowerCase();
+    const txn = orderTransactionId(item).toLowerCase();
+    const customer = orderCustomerLabel(item).toLowerCase();
+    const status = orderStatusValue(item);
+    const method = orderMethodLabel(item);
+    const dateValue = orderDateValue(item);
+    const dateStr = dateValue ? new Date(dateValue).toISOString() : '';
+    
+    // Search match
+    const matchesSearch = !search || 
+      name.includes(search) || 
+      txn.includes(search) || 
+      customer.includes(search) || 
+      String(item.id || '').toLowerCase().includes(search);
+      
+    // Status match
+    let matchesStatus = true;
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'paid' || statusFilter === 'approved') {
+        matchesStatus = isPaidOrder(item);
+      } else if (statusFilter === 'pending') {
+        matchesStatus = isPendingOrder(item);
+      } else if (statusFilter === 'failed' || statusFilter === 'rejected') {
+        matchesStatus = isFailedOrder(item);
+      } else {
+        matchesStatus = status === statusFilter;
+      }
+    }
+    
+    // Method match
+    const matchesMethod = methodFilter === 'all' || method === methodFilter;
+    
+    // Date match
+    let matchesDate = true;
+    if (dateFilter === 'today') {
+      matchesDate = dateStr.slice(0, 10) === todayStr;
+    } else if (dateFilter === 'month') {
+      matchesDate = dateStr.slice(0, 7) === thisMonthStr;
+    }
+    
+    return matchesSearch && matchesStatus && matchesMethod && matchesDate;
+  });
+
+  const totals = {
+    total: itemsWithScreenshot.length,
+    pending: itemsWithScreenshot.filter(item => isPendingOrder(item)).length,
+    paid: itemsWithScreenshot.filter(item => isPaidOrder(item)).length,
+    failed: itemsWithScreenshot.filter(item => isFailedOrder(item)).length,
+  };
+
+  return `
+    <style>
+      .screenshots-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+        width: 100%;
+      }
+      .screenshot-card {
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: var(--panel-glass);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .screenshot-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      }
+      .screenshot-img-wrap {
+        width: 100%;
+        height: 240px;
+        position: relative;
+        overflow: hidden;
+        background: #09090e;
+        border-bottom: 1px solid var(--border);
+      }
+      .screenshot-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      .screenshot-img-wrap img:hover {
+        transform: scale(1.05);
+      }
+      .screenshot-card-content {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex-grow: 1;
+      }
+      .screenshot-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .screenshot-card-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .screenshot-meta-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .screenshot-meta-value {
+        color: var(--text-bright);
+        font-weight: 500;
+      }
+      .screenshot-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-light);
+      }
+      .screenshot-actions .btn {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        height: auto;
+      }
+    </style>
+
+    <div class="page active management-page-shell">
+      <section class="panel glass management-page">
+        <div class="panel-head management-page-head">
+          <div>
+            <div class="section-kicker">Payment Verification</div>
+            <h2 class="section-title">Order Screenshots</h2>
+            <p class="section-subtitle">Review payment screenshots and manage order statuses directly.</p>
+          </div>
+          <div class="toolbar management-actions">
+            <button class="btn btn-ghost" type="button" data-action="goto" data-route="orders"><i data-lucide="receipt-text"></i> Orders List</button>
+          </div>
+        </div>
+        <div class="management-summary-grid">
+          ${renderManagementSummaryCard('Total Screenshots', totals.total, 'All uploaded proofs', 'primary')}
+          ${renderManagementSummaryCard('Pending Review', totals.pending, 'Awaiting verification', 'warning')}
+          ${renderManagementSummaryCard('Approved', totals.paid, 'Verified payments', 'success')}
+          ${renderManagementSummaryCard('Rejected', totals.failed, 'Failed / rejected', 'danger')}
+        </div>
+      </section>
+
+      ${renderFieldGroup('Search & Filters', 'Filter screenshots by status, payment method, and date.', `
+        <div class="management-filterbar">
+          <div class="field">
+            <label for="orderSearch">Search</label>
+            <input class="input" id="orderSearch" type="search" placeholder="Search product, customer, order or txn ID..." value="${escapeHtml(ui.management.search || '')}" />
+          </div>
+          <div class="field">
+            <label for="orderStatusFilter">Status</label>
+            <select class="select" id="orderStatusFilter">
+              ${['all', 'pending', 'paid', 'failed', 'approved', 'rejected', 'expired'].map((status) => `<option value="${status}" ${ui.management.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label for="orderMethodFilter">Payment Method</label>
+            <select class="select" id="orderMethodFilter">
+              <option value="all">All Methods</option>
+              ${methods.map((method) => `<option value="${escapeHtml(method)}" ${ui.management.method === method ? 'selected' : ''}>${escapeHtml(method)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label for="orderDateFilter">Date</label>
+            <select class="select" id="orderDateFilter">
+              <option value="all" ${ui.management.date === 'all' ? 'selected' : ''}>All Time</option>
+              <option value="today" ${ui.management.date === 'today' ? 'selected' : ''}>Today</option>
+              <option value="month" ${ui.management.date === 'month' ? 'selected' : ''}>This Month</option>
+            </select>
+          </div>
+        </div>
+      `)}
+
+      <div class="screenshots-gallery-grid">
+        ${filteredItems.length ? filteredItems.map(item => {
+          const proof = orderPaymentProof(item);
+          const status = orderStatusValue(item);
+          const resolvedProof = resolveMediaSource(proof) || proof;
+          return `
+            <div class="screenshot-card">
+              <div class="screenshot-img-wrap">
+                <img src="${escapeHtml(resolvedProof)}" alt="Payment proof" onclick="window.open('${escapeHtml(resolvedProof)}', '_blank')" title="Click to view full image" />
+              </div>
+              <div class="screenshot-card-content">
+                <h3 class="screenshot-card-title">${escapeHtml(orderProductName(item))}</h3>
+                <div class="screenshot-card-meta">
+                  <div class="screenshot-meta-item">
+                    <span>Order ID:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(item.id || '-')}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Customer:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(orderCustomerLabel(item))}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Amount:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(formatCurrencyCompact(item.amount))}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Method:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(orderMethodLabel(item))}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Txn / Ref:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(orderTransactionId(item))}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Status:</span>
+                    <span>${renderStatusBadge(status)}</span>
+                  </div>
+                  <div class="screenshot-meta-item">
+                    <span>Date:</span>
+                    <span class="screenshot-meta-value">${escapeHtml(formatDateTime(orderDateValue(item)))}</span>
+                  </div>
+                </div>
+                <div class="screenshot-actions">
+                  <button class="btn btn-ghost" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Details</button>
+                  ${isPendingOrder(item) ? `
+                    <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id)}"><i data-lucide="check"></i> Approve</button>
+                    <button class="btn btn-danger" type="button" data-action="reject-order" data-id="${escapeHtml(item.id)}"><i data-lucide="x"></i> Reject</button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('') : `<div style="grid-column: 1/-1;"><div class="empty-state">${itemsWithScreenshot.length ? 'No screenshots match the current filters.' : 'No uploaded screenshots found.'}</div></div>`}
+      </div>
+    </div>
+  `;
+}
+
 const MEDIA_FOLDER_FILTERS = [
   { value: 'all', label: 'All' },
   { value: 'products', label: 'Products' },
@@ -4773,6 +5180,7 @@ function renderView(data) {
     else if (current === 'settings') html = renderSettingsManagementView(data.settings || {}, data || {});
     else if (current === 'payment') html = renderPaymentManagementView(data.payment || {}, data || {});
     else if (current === 'orders') html = renderOrdersManagementView(data.orders || {}, data || {});
+    else if (current === 'screenshots') html = renderScreenshotsGalleryView(data.orders || {}, data || {});
     else if (current === 'analytics') html = renderAnalyticsView(data);
     else if (current === 'hero') html = renderSingleEditorPage('hero', singleEditors.hero, data.hero || {});
     else if (current === 'banner') html = renderSingleEditorPage('banner', singleEditors.banner, data.banner || {});
@@ -4791,6 +5199,66 @@ function renderView(data) {
       </div>
     `;
   }
+}
+
+let _searchDebounceTimer = null;
+function softUpdateCatalog() {
+  // Update only catalog results + pagination without destroying the whole view
+  // This keeps search input focused and cursor position intact
+  const resultsEl = document.getElementById('catalogResultsGrid');
+  const paginationEl = document.querySelector('.catalog-pagination');
+  if (!resultsEl) {
+    // Fallback: full render if not in catalog view
+    renderView(ui.data || {});
+    return;
+  }
+  const meta = getCatalogMeta();
+  const nodeData = listCollection(meta.node);
+  const items = filterItems(nodeData, meta.node);
+  const pageSize = Math.max(4, Number(ui.catalogPageSize) || 8);
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const page = Math.min(Math.max(1, ui.page), totalPages);
+  const paged = items.slice((page - 1) * pageSize, page * pageSize);
+  ui.page = page;
+  const node = meta.node;
+  const itemLabel = node === 'categories' ? 'categories' : 'products';
+  const itemSingular = meta.schema?.label?.toLowerCase() || 'item';
+  const isCatalog = node === 'products' || node === 'categories';
+
+  if (paged.length) {
+    resultsEl.className = `catalog-results ${ui.catalogView}`;
+    resultsEl.innerHTML = paged.map((item) => (node === 'categories'
+      ? renderCatalogCategoryCard(item, node)
+      : renderCatalogProductCard(item, node))).join('');
+  } else {
+    resultsEl.className = `catalog-results ${ui.catalogView}`;
+    resultsEl.innerHTML = `
+      <div class="catalog-empty glass">
+        <div class="catalog-empty-art">
+          <div class="orb orb-a"></div>
+          <div class="orb orb-b"></div>
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h3>No ${escapeHtml(itemLabel)} matched your search.</h3>
+        <p>Try a different search term or reset filters.</p>
+      </div>
+    `;
+  }
+  if (paginationEl) {
+    const visibleStart = items.length ? ((page - 1) * pageSize) + 1 : 0;
+    const visibleEnd = Math.min(items.length, page * pageSize);
+    const totalSelected = ui.selection.size;
+    paginationEl.innerHTML = `
+      <span class="section-subtitle">Showing ${escapeHtml(String(visibleStart))}-${escapeHtml(String(visibleEnd))} of ${escapeHtml(String(items.length))} ${escapeHtml(itemLabel)}${totalSelected ? ` · ${escapeHtml(String(totalSelected))} selected` : ''}</span>
+      <div class="toolbar catalog-pagination-actions">
+        <span class="chip">Rows ${escapeHtml(String(pageSize))}</span>
+        <button class="btn btn-ghost" data-page="prev"><i data-lucide="chevron-left"></i></button>
+        <span class="chip">Page ${escapeHtml(String(page))} / ${escapeHtml(String(totalPages))}</span>
+        <button class="btn btn-ghost" data-page="next"><i data-lucide="chevron-right"></i></button>
+      </div>
+    `;
+  }
+  if (window.lucide) lucide.createIcons();
 }
 
 function applyRoute(path) {
@@ -4930,7 +5398,8 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'sync-site-catalog') {
-      await syncCurrentSiteCatalog();
+      // DISABLED: Sync was overwriting Firebase data from HTML scraping, reverting admin changes.
+      showToast('Sync disabled to prevent data loss. Manage products directly in the catalog.', 'warning');
       return;
     }
     if (action === 'sync-site-media') {
@@ -4967,6 +5436,10 @@ function attachGlobalHandlers() {
     if (action === 'view-products' && node === 'categories') {
       const category = getItem('categories', id);
       if (category) openCategoryProducts(category);
+      return;
+    }
+    if (action === 'share-product') {
+      openShareModal(node, id);
       return;
     }
     if (action === 'duplicate') {
@@ -5224,7 +5697,9 @@ function attachGlobalHandlers() {
       ui.search = event.target.value;
       ui.page = 1;
       persistCatalogPrefs();
-      renderView(ui.data || {});
+      // Debounced soft update — preserves focus and cursor position
+      clearTimeout(_searchDebounceTimer);
+      _searchDebounceTimer = setTimeout(() => softUpdateCatalog(), 180);
       return;
     }
     if (event.target.id === 'mediaSearch') {
@@ -5337,7 +5812,7 @@ function openMediaUpload() {
         </div>
         <div class="field full">
           <label>File</label>
-          <input class="input" type="file" name="file" accept="image/*" required />
+          <input class="input" type="file" name="file" accept="image/*,video/*" required />
         </div>
       </div>
       <div class="toolbar" style="margin-top:16px;justify-content:flex-end;">
@@ -5363,8 +5838,9 @@ async function handleMediaUpload(form) {
     const result = await uploadAsset(file, folder, (value) => {
       progress.textContent = `Uploading... ${value}%`;
     });
+    const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
     try {
-      await saveUploadedMediaRecord(file, result, folder, 'image', 'manual-upload');
+      await saveUploadedMediaRecord(file, result, folder, mediaType, 'manual-upload');
     } catch (metaError) {
       try {
         await deletePublicAsset(result.path);

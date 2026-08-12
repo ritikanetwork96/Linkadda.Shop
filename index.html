@@ -187,16 +187,16 @@
         <p class="section-sub">Choose our services and get instant delivery at the cheapest price in the market.</p>
       </div>
 
-      <div class="pcard-grid" id="categoriesGrid">
-
-        <!-- ------ ALL COLLECTION PACK &#8212; PINNED TOP ------ -->
+      <!-- Pinned Deal Wrapper -->
+      <div id="pinnedDealWrapper">
+        <!-- ------ ALL COLLECTION PACK — PINNED TOP ------ -->
         <div class="collection-pack-banner">
           <div class="cpb-pin"><i class="fa-solid fa-thumbtack"></i> PINNED DEAL</div>
           <div class="cpb-left">
             <div class="cpb-icon"><i class="fa-solid fa-gem"></i></div>
             <div>
               <h3 class="cpb-title">All Collection Pack</h3>
-              <p class="cpb-desc">ðŸ”¥ Mega Pack &#8212; 1,14,000+ Videos | Every category bundled together &#8212; the ultimate deal.</p>
+              <p class="cpb-desc">🔥 Mega Pack — 1,14,000+ Videos | Every category bundled together — the ultimate deal.</p>
             </div>
           </div>
           <div class="cpb-prices">
@@ -207,6 +207,16 @@
             <i class="fa-solid fa-gem"></i> Claim Deal
           </a>
         </div>
+      </div>
+
+      <!-- Responsive Category Filters below Pinned Banner -->
+      <div class="category-filter-wrapper">
+        <div class="category-filter-pills" id="categoryFilterPills">
+          <!-- Category pills dynamically injected -->
+        </div>
+      </div>
+
+      <div class="pcard-grid" id="categoriesGrid">
 
         <!-- -- CARD 1 -- -->
         <div class="pcard">
@@ -714,7 +724,7 @@
               <span class="pcard-price-usd">$153</span>
             </div>
           </div>
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <a href="payment.html" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
         </div>
 
         <!-- -- CARD 13 -- -->
@@ -1154,7 +1164,7 @@
               <span class="pcard-price-usd">$19</span>
             </div>
           </div>
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <a href="payment.html" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
         </div>
 
       </div>
@@ -1167,7 +1177,7 @@
       <div class="pb-content">
         <i class="fa-solid fa-tags pb-icon"></i>
         <div>
-          <h2>All Prices in <span class="gradient-text">Indian Rupees (&#8377;)</span></h2>
+          <h2>All Prices in Indian Rupees</h2>
           <p>No hidden fees. No foreign charges. Pay via UPI, Paytm, GPay, PhonePe & more.</p>
         </div>
         <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-primary">Place an Order</a>
@@ -1390,18 +1400,15 @@
 
     try {
       const parsed = new URL(raw, window.location.origin);
-      const host = parsed.hostname.toLowerCase();
       const isCheckoutUrl = /\/payment(?:\.html)?$/i.test(parsed.pathname);
       if (isCheckoutUrl) {
         const params = new URLSearchParams(parsed.search);
         const nextId = params.get('productId') || params.get('id') || fallbackId;
         return nextId ? `payment${ext}?productId=${encodeURIComponent(nextId)}` : `payment${ext}`;
       }
-    } catch (_) {
-      // fall back below
-    }
+    } catch (_) {}
 
-    return safeUrl(raw, fallback);
+    return raw;
   }
 
   function resolveCheckoutMeta(link) {
@@ -1434,7 +1441,11 @@
   }
 
   function syncCheckoutLinks() {
-    document.querySelectorAll('a.btn-card[href*="payment"], a.cpb-btn[href*="payment"], a.vid-tier-btn[href*="payment"]').forEach((link) => {
+    document.querySelectorAll('a.btn-card, a.cpb-btn, a.vid-tier-btn').forEach((link) => {
+      const href = link.getAttribute('href') || '';
+      const isCustomLink = href && !/\/payment(?:\.html)?/i.test(href) && !href.startsWith('payment');
+      if (isCustomLink) return;
+
       const meta = resolveCheckoutMeta(link);
       if (meta.id) link.dataset.productId = meta.id;
       if (meta.slug) link.dataset.slug = meta.slug;
@@ -1501,17 +1512,7 @@
   }
 
   function getLiveRecords() {
-    const products = normalizeRecords(liveCollections.products);
-    const categories = normalizeRecords(liveCollections.categories);
-    const merged = [];
-    const seen = new Set();
-    [...products, ...categories].forEach((item) => {
-      const key = item.slug || item.title || item.id;
-      if (!key || seen.has(key)) return;
-      seen.add(key);
-      merged.push(item);
-    });
-    return merged;
+    return normalizeRecords(liveCollections.products);
   }
 
   function applySiteSettings(s) {
@@ -1645,7 +1646,7 @@
     sec.style.display = '';
     if (b.title) {
       const h2 = sec.querySelector('h2');
-      if (h2) h2.innerHTML = esc(b.title);
+      if (h2) h2.innerHTML = b.title;
     }
     if (b.offer) {
       const p = sec.querySelector('p');
@@ -1774,8 +1775,13 @@
   }
 
   document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a.btn-card[href*="payment"], a.cpb-btn[href*="payment"], a.vid-tier-btn[href*="payment"]');
+    const link = event.target.closest('a.btn-card, a.cpb-btn, a.vid-tier-btn');
     if (!link) return;
+
+    const href = link.getAttribute('href') || '';
+    const isCustomLink = href && !/\/payment(?:\.html)?/i.test(href) && !href.startsWith('payment');
+    if (isCustomLink) return;
+
     event.preventDefault();
     try {
       const checkoutMeta = resolveCheckoutMeta(link);
@@ -1804,6 +1810,14 @@
         source: 'public-site',
       };
       await set(orderRef, payload);
+      
+      // Update history state so that if the user clicks browser back, they return to the product-focused URL
+      try {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('product', checkoutMeta.id);
+        window.history.replaceState(null, '', currentUrl.toString());
+      } catch (_) {}
+
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
       const ext = isLocal ? '.html' : '';
       link.href = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}`;
@@ -1827,8 +1841,14 @@
         ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" loading="lazy" draggable="false"/></div>`
         : `<div class="pcard-img-wrap"><video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video></div>`;
     }
-    const uid='ss_'+Math.random().toString(36).slice(2,7);
-    const slides=all.map((m,i)=>`<div class="fb-slide${i===0?' fb-slide-active':''}">${m.t==='img'?`<img src="${esc(m.u)}" loading="lazy" alt="${esc(title)}" draggable="false"/>`:`<video src="${esc(m.u)}" autoplay muted loop playsinline></video>`}</div>`).join('');
+    const uid = 'ss_' + Math.random().toString(36).slice(2, 7);
+    const slides = all.map((m, i) => {
+      if (m.t === 'img') {
+        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" loading="lazy" alt="${esc(title)}" draggable="false"/></div>`;
+      } else {
+        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><video ${i===0?`src="${esc(m.u)}" autoplay`:`data-src="${esc(m.u)}"`} muted loop playsinline class="pcard-img"></video></div>`;
+      }
+    }).join('');
     const dots=all.map((_,i)=>`<span class="fb-dot${i===0?' fb-dot-active':''}" data-i="${i}"></span>`).join('');
     return `<div class="pcard-img-wrap fb-slideshow" id="${uid}" data-idx="0">${slides}<div class="fb-dots">${dots}</div><button class="fb-prev">&#8249;</button><button class="fb-next">&#8250;</button></div>`;
   }
@@ -2036,37 +2056,203 @@
     </div>`;
   }
 
+  // Confetti Particle Burst Animation on click
+  function createParticleBurst(e) {
+    createParticleBurstAt(e.clientX, e.clientY);
+  }
+
+  function createParticleBurstAt(x, y) {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100vw';
+    container.style.height = '100vh';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '99999';
+    document.body.appendChild(container);
+
+    const colors = ['#f0247a', '#7c3aed', '#f59e0b', '#10b981', '#3b82f6', '#ec4899'];
+    const particleCount = 20;
+
+    for (let i = 0; i < particleCount; i++) {
+      const p = document.createElement('div');
+      p.style.position = 'absolute';
+      p.style.left = `${x}px`;
+      p.style.top = `${y}px`;
+      p.style.width = `${Math.random() * 8 + 6}px`;
+      p.style.height = p.style.width;
+      p.style.borderRadius = '50%';
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      p.style.boxShadow = `0 0 10px ${p.style.backgroundColor}`;
+      p.style.transform = 'translate(-50%, -50%)';
+      container.appendChild(p);
+
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 80 + 40;
+      const targetX = Math.cos(angle) * velocity;
+      const targetY = Math.sin(angle) * velocity - (Math.random() * 50);
+
+      const animation = p.animate([
+        { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${targetX}px), calc(-50% + ${targetY}px)) scale(0)`, opacity: 0 }
+      ], {
+        duration: Math.random() * 400 + 600,
+        easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)',
+        fill: 'forwards'
+      });
+
+      animation.onfinish = () => p.remove();
+    }
+
+    setTimeout(() => {
+      container.remove();
+    }, 1200);
+  }
+
+  // Global click handler for interactive button animations
+  document.addEventListener('click', (e) => {
+    const isInteractive = e.target.closest('.btn-card, .btn-primary, .category-pill, .vid-tier-item, .pricing-banner .btn-primary');
+    if (isInteractive) {
+      createParticleBurst(e);
+    }
+  });
+
+  let activeCategoryFilter = 'all';
+
+  function renderCategoryFilters() {
+    const wrapper = document.getElementById('categoryFilterPills');
+    if (!wrapper) return;
+
+    const categories = normalizeRecords(liveCollections.categories);
+    const maxVisible = window.innerWidth < 600 ? 2 : (window.innerWidth < 1024 ? 4 : 7);
+    
+    const visibleCats = categories.slice(0, maxVisible);
+    const hiddenCats = categories.slice(maxVisible);
+
+    let html = '';
+    
+    // 1. "All" Pill
+    const isAllActive = activeCategoryFilter === 'all';
+    html += `<button class="category-pill${isAllActive ? ' active' : ''}" data-cat-id="all">All</button>`;
+    
+    // 2. Visible Categories Pills
+    visibleCats.forEach(cat => {
+      const isActive = activeCategoryFilter === cat.id;
+      html += `<button class="category-pill${isActive ? ' active' : ''}" data-cat-id="${esc(cat.id)}">${esc(cat.title)}</button>`;
+    });
+
+    // 3. "More" Dropdown Select Pill
+    if (hiddenCats.length > 0) {
+      const isHiddenActive = hiddenCats.some(cat => cat.id === activeCategoryFilter);
+      const activeCat = hiddenCats.find(cat => cat.id === activeCategoryFilter);
+      const selectLabel = isHiddenActive ? activeCat.title : 'More';
+      
+      html += `
+        <div class="category-select-wrapper" style="position: relative; display: inline-block;">
+          <select class="category-pill category-select-element${isHiddenActive ? ' active' : ''}" style="padding-right: 32px; -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; height: 100%; border-radius: 9999px;">
+            <option value="" disabled ${!isHiddenActive ? 'selected' : ''}>${esc(selectLabel)}</option>
+            ${hiddenCats.map(cat => `
+              <option value="${esc(cat.id)}" ${activeCategoryFilter === cat.id ? 'selected' : ''}>${esc(cat.title)}</option>
+            `).join('')}
+          </select>
+          <i class="fa-solid fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: ${isHiddenActive ? 'white' : 'var(--muted)'};"></i>
+        </div>
+      `;
+    }
+
+    wrapper.innerHTML = html;
+
+    // Attach click listeners to visible pills
+    wrapper.querySelectorAll('.category-pill[data-cat-id]').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        activeCategoryFilter = pill.dataset.catId;
+        renderCategoryFilters();
+        renderLiveGrid();
+      });
+    });
+
+    // Attach change listener to "More" select
+    const select = wrapper.querySelector('.category-select-element');
+    if (select) {
+      select.addEventListener('change', (e) => {
+        const rect = select.getBoundingClientRect();
+        createParticleBurstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        activeCategoryFilter = e.target.value;
+        renderCategoryFilters();
+        renderLiveGrid();
+      });
+    }
+  }
+
+  // Handle resize to re-render filters layout dynamically
+  window.removeEventListener('resize', renderCategoryFilters);
+  window.addEventListener('resize', renderCategoryFilters);
+
   function renderLiveGrid() {
     if (!USE_LIVE_GRID) return;
     const grid = document.getElementById('categoriesGrid');
     if (!grid) return;
-    const banner = grid.querySelector('.collection-pack-banner');
-    const records = getLiveRecords();
-    if (!records.length) {
-      grid.innerHTML = defaultSiteState.liveGridHtml;
-    } else {
-      grid.innerHTML = (banner ? banner.outerHTML : '') + records.map(item => buildCard(item.id, item)).join('');
-    }
-    initSlideshows();
-    initVidTiers();
-    syncCheckoutLinks();
+    
+    try {
+      let records = getLiveRecords();
 
-    // Re-initialize shine effects and last sold badges for dynamic cards
-    grid.querySelectorAll('.pcard').forEach(card => {
-      if (!card.querySelector('.shine')) {
-        const shine = document.createElement('div');
-        shine.className = 'shine';
-        card.appendChild(shine);
+      // Apply category filtering
+      if (activeCategoryFilter !== 'all') {
+        const selectedCat = liveCollections.categories[activeCategoryFilter] || {};
+        const catTitleLower = String(selectedCat.title || '').trim().toLowerCase();
+        const catSlugLower = String(selectedCat.slug || '').trim().toLowerCase();
+        const catIdLower = String(activeCategoryFilter).trim().toLowerCase();
+
+        records = records.filter(item => {
+          if (item.id === activeCategoryFilter) return true;
+          const itemCatLower = String(item.category || '').trim().toLowerCase();
+          return itemCatLower && (
+            itemCatLower === catTitleLower || 
+            itemCatLower === catSlugLower || 
+            itemCatLower === catIdLower ||
+            itemCatLower.includes(catTitleLower)
+          );
+        });
       }
-    });
-    if (typeof updateLastSoldBadges === 'function') {
-      updateLastSoldBadges();
+
+      if (!records.length) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
+      } else {
+        grid.innerHTML = records.map(item => {
+          try {
+            return buildCard(item.id, item);
+          } catch (e) {
+            console.error('Error rendering card for product:', item, e);
+            return '';
+          }
+        }).join('');
+      }
+
+      initSlideshows();
+      initVidTiers();
+      syncCheckoutLinks();
+
+      grid.querySelectorAll('.pcard').forEach(card => {
+        if (!card.querySelector('.shine')) {
+          const shine = document.createElement('div');
+          shine.className = 'shine';
+          card.appendChild(shine);
+        }
+      });
+      if (typeof updateLastSoldBadges === 'function') {
+        updateLastSoldBadges();
+      }
+      focusSharedProduct();
+    } catch (err) {
+      console.error('Failed to render live grid:', err);
     }
   }
 
   // -- LIVE CATEGORIES / PRODUCTS --
   onValue(ref(db,'categories'), snap => {
     liveCollections.categories = snap.val() || {};
+    renderCategoryFilters();
     renderLiveGrid();
   });
 
@@ -2074,6 +2260,39 @@
     liveCollections.products = snap.val() || {};
     renderLiveGrid();
   });
+
+  let hasFocusedProduct = false;
+  function focusSharedProduct() {
+    if (hasFocusedProduct) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusId = String(urlParams.get('product') || urlParams.get('productId') || '').trim();
+    if (!focusId) return;
+
+    // Find card by ID, slug, or title (case-insensitive)
+    let targetCard = null;
+    const cards = document.querySelectorAll('.pcard');
+    for (const card of cards) {
+      const fbId = String(card.dataset.fbId || '').toLowerCase();
+      const cardTitle = String(card.querySelector('.pcard-title')?.textContent || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const queryId = focusId.toLowerCase();
+      if (fbId === queryId || cardTitle === queryId || fbId.includes(queryId)) {
+        targetCard = card;
+        break;
+      }
+    }
+
+    if (targetCard) {
+      hasFocusedProduct = true;
+      setTimeout(() => {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetCard.classList.add('pcard-highlight');
+        setTimeout(() => {
+          targetCard.classList.remove('pcard-highlight');
+          targetCard.classList.add('pcard-focused-steady');
+        }, 4000);
+      }, 600);
+    }
+  }
 
   document.addEventListener('click', (event) => {
     const wrap = event.target.closest('.fb-slideshow');
@@ -2099,10 +2318,25 @@
       const dots=ss.querySelectorAll('.fb-dot');
       if(slides.length<=1) return;
       function goTo(i){
-        slides.forEach(s=>s.classList.remove('fb-slide-active'));
+        slides.forEach((s, idx)=>{
+          s.classList.remove('fb-slide-active');
+          const video = s.querySelector('video');
+          if (video && idx !== i) {
+            video.pause();
+          }
+        });
         dots.forEach(d=>d.classList.remove('fb-dot-active'));
         slides[i].classList.add('fb-slide-active');
         if(dots[i]) dots[i].classList.add('fb-dot-active');
+        
+        const activeVideo = slides[i].querySelector('video');
+        if (activeVideo) {
+          if (!activeVideo.src && activeVideo.dataset.src) {
+            activeVideo.src = activeVideo.dataset.src;
+          }
+          activeVideo.play().catch(()=>{});
+        }
+        
         ss.dataset.idx=i;
       }
       ss.querySelector('.fb-prev')?.addEventListener('click',e=>{e.preventDefault();let i=+ss.dataset.idx-1;goTo(i<0?slides.length-1:i);});

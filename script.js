@@ -40,7 +40,7 @@
 
   const timer = setInterval(() => {
     // Fast at first, slow in middle, fast at end
-    const increment = progress < 30 ? 3 : progress < 70 ? 1.2 : progress < 90 ? 0.8 : 3;
+    const increment = progress < 30 ? 12 : progress < 70 ? 5 : progress < 90 ? 3.5 : 12;
     progress = Math.min(progress + increment, 100);
 
     bar.style.width = progress + '%';
@@ -626,6 +626,14 @@ document.querySelectorAll('.faq-item').forEach(item => {
 
 // ===== SCREENSHOT & COPY PROTECTION =====
 (function() {
+  // Skip protection on localhost so developer can inspect console errors
+  const isLocal = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1' || 
+                  window.location.hostname.startsWith('192.168.') ||
+                  window.location.hostname.startsWith('10.') ||
+                  window.location.hostname.endsWith('.local');
+  if (isLocal) return;
+
   // Warning toast helper
   function showProtectToast(msg) {
     let t = document.querySelector('.protect-toast');
