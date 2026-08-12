@@ -4694,6 +4694,25 @@ button {
 
   .admin-mobile-toggle {
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: #fafafa !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px;
+  }
+
+  .admin-mobile-toggle i,
+  .admin-mobile-toggle svg {
+    width: 20px;
+    height: 20px;
+    color: #fafafa !important;
+    stroke: currentColor;
+    display: block;
   }
 
   .searchbox {
@@ -4899,7 +4918,10 @@ button {
 
   .catalog-card,
   .catalog-card-category {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    grid-template-columns: none;
   }
 
   .category-editor-shell {
@@ -4932,13 +4954,31 @@ button {
 
   .catalog-card-media,
   .catalog-card-media.compact {
-    min-height: 156px;
-    padding: 10px;
+    width: 100%;
+    min-height: 200px;
+    height: auto;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .catalog-card-media .catalog-media-frame {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 16px;
   }
 
   .catalog-card-content {
-    padding: 12px 12px 10px;
-    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    grid-column: auto;
   }
 
   .catalog-card-head {
@@ -4977,14 +5017,23 @@ button {
   }
 
   .catalog-card-actions {
-    padding: 12px;
-    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    border-left: none;
+    border-top: 1px solid var(--card-border);
+    background: rgba(15, 23, 42, 0.2);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    grid-column: auto;
   }
 
   .catalog-card-primary-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    width: 100%;
   }
 
   .catalog-card-primary-actions .icon-btn {
@@ -5000,6 +5049,10 @@ button {
   .catalog-card-menu summary {
     width: 100%;
     height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .catalog-card-menu-panel {
