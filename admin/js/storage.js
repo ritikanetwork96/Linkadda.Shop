@@ -27,13 +27,34 @@ function validateUploadFile(file) {
   if (!file || typeof file !== 'object') {
     throw new Error('No file selected.');
   }
-  const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'];
-  if (!allowed.includes(String(file.type || '').toLowerCase())) {
-    throw new Error('Only image uploads are allowed.');
+  const type = String(file.type || '').toLowerCase();
+  const isImage = type.startsWith('image/');
+  const isVideo = type.startsWith('video/');
+
+  if (!isImage && !isVideo) {
+    throw new Error('Only image and video uploads are allowed.');
   }
-  const maxBytes = 10 * 1024 * 1024;
-  if (Number(file.size || 0) > maxBytes) {
-    throw new Error('Image is too large. Max size is 10 MB.');
+
+  if (isImage) {
+    const allowedImages = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif'];
+    if (!allowedImages.includes(type)) {
+      throw new Error('Unsupported image format.');
+    }
+    const maxImageBytes = 10 * 1024 * 1024; // 10 MB
+    if (Number(file.size || 0) > maxImageBytes) {
+      throw new Error('Image is too large. Max size is 10 MB.');
+    }
+  }
+
+  if (isVideo) {
+    const allowedVideos = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/ogg'];
+    if (!allowedVideos.includes(type)) {
+      throw new Error('Unsupported video format.');
+    }
+    const maxVideoBytes = 100 * 1024 * 1024; // 100 MB
+    if (Number(file.size || 0) > maxVideoBytes) {
+      throw new Error('Video is too large. Max size is 100 MB.');
+    }
   }
 }
 
