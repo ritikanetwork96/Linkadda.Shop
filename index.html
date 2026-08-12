@@ -2121,8 +2121,9 @@
   let activeCategoryFilter = 'all';
 
   function renderCategoryFilters() {
-    const wrapper = document.getElementById('categoryFilterPills');
-    if (!wrapper) return;
+    const pillsWrapper = document.getElementById('categoryFilterPills');
+    if (!pillsWrapper) return;
+    const parentWrapper = pillsWrapper.parentElement; // category-filter-wrapper
 
     const categories = normalizeRecords(liveCollections.categories);
     const maxVisible = window.innerWidth < 600 ? 2 : (window.innerWidth < 1024 ? 4 : 7);
@@ -2130,26 +2131,34 @@
     const visibleCats = categories.slice(0, maxVisible);
     const hiddenCats = categories.slice(maxVisible);
 
-    let html = '';
+    let pillsHtml = '';
     
     // 1. "All" Pill
     const isAllActive = activeCategoryFilter === 'all';
-    html += `<button class="category-pill${isAllActive ? ' active' : ''}" data-cat-id="all">All</button>`;
+    pillsHtml += `<button class="category-pill${isAllActive ? ' active' : ''}" data-cat-id="all">All</button>`;
     
     // 2. Visible Categories Pills
     visibleCats.forEach(cat => {
       const isActive = activeCategoryFilter === cat.id;
-      html += `<button class="category-pill${isActive ? ' active' : ''}" data-cat-id="${esc(cat.id)}">${esc(cat.title)}</button>`;
+      pillsHtml += `<button class="category-pill${isActive ? ' active' : ''}" data-cat-id="${esc(cat.id)}">${esc(cat.title)}</button>`;
     });
 
-    // 3. "More" Dropdown Select Pill
+    pillsWrapper.innerHTML = pillsHtml;
+
+    // Remove any existing "More" element first
+    let moreWrapper = parentWrapper.querySelector('.category-select-wrapper');
+    if (moreWrapper) {
+      moreWrapper.remove();
+    }
+
+    // 3. "More" Dropdown Select Pill (always visible on the right)
     if (hiddenCats.length > 0) {
       const isHiddenActive = hiddenCats.some(cat => cat.id === activeCategoryFilter);
       const activeCat = hiddenCats.find(cat => cat.id === activeCategoryFilter);
       const selectLabel = isHiddenActive ? activeCat.title : 'More';
       
-      html += `
-        <div class="category-select-wrapper" style="position: relative; display: inline-block;">
+      const selectHtml = `
+        <div class="category-select-wrapper" style="position: relative; display: inline-block; flex-shrink: 0; margin-left: 10px;">
           <select class="category-pill category-select-element${isHiddenActive ? ' active' : ''}" style="padding-right: 32px; -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; height: 100%; border-radius: 9999px;">
             <option value="" disabled ${!isHiddenActive ? 'selected' : ''}>${esc(selectLabel)}</option>
             ${hiddenCats.map(cat => `
@@ -2159,30 +2168,30 @@
           <i class="fa-solid fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: ${isHiddenActive ? 'white' : 'var(--muted)'};"></i>
         </div>
       `;
+      
+      pillsWrapper.insertAdjacentHTML('afterend', selectHtml);
+
+      // Attach change listener to "More" select
+      const select = parentWrapper.querySelector('.category-select-element');
+      if (select) {
+        select.addEventListener('change', (e) => {
+          const rect = select.getBoundingClientRect();
+          createParticleBurstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+          activeCategoryFilter = e.target.value;
+          renderCategoryFilters();
+          renderLiveGrid();
+        });
+      }
     }
 
-    wrapper.innerHTML = html;
-
     // Attach click listeners to visible pills
-    wrapper.querySelectorAll('.category-pill[data-cat-id]').forEach(pill => {
+    pillsWrapper.querySelectorAll('.category-pill[data-cat-id]').forEach(pill => {
       pill.addEventListener('click', (e) => {
         activeCategoryFilter = pill.dataset.catId;
         renderCategoryFilters();
         renderLiveGrid();
       });
     });
-
-    // Attach change listener to "More" select
-    const select = wrapper.querySelector('.category-select-element');
-    if (select) {
-      select.addEventListener('change', (e) => {
-        const rect = select.getBoundingClientRect();
-        createParticleBurstAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
-        activeCategoryFilter = e.target.value;
-        renderCategoryFilters();
-        renderLiveGrid();
-      });
-    }
   }
 
   // Handle resize to re-render filters layout dynamically
