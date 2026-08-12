@@ -2787,6 +2787,7 @@ body {
   max-width: 100%;
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+  min-width: 0; /* Prevents flex from squeezing container and cutting off pills */
 }
 
 .category-filter-pills::-webkit-scrollbar {
