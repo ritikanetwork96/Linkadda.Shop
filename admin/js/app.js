@@ -150,6 +150,7 @@ const collectionSchemas = {
       { key: 'badgeStyle', label: 'Badge Style', type: 'text' },
       { key: 'badgeIcon', label: 'Badge Icon', type: 'text' },
       { key: 'image', label: 'Main Image', type: 'text', hint: 'Paste a URL or use the file picker below.' },
+      { key: 'video', label: 'Main Video', type: 'text' },
       { key: 'galleryImages', label: 'Gallery Images', type: 'textarea', hint: 'One URL per line or upload multiple files.' },
       { key: 'creators', label: 'Creators', type: 'textarea', hint: 'Comma or line separated' },
       { key: 'platforms', label: 'Platforms', type: 'textarea', hint: 'Comma or line separated' },
