@@ -370,7 +370,7 @@ if ('IntersectionObserver' in window && sections.length) {
 }
 
 // ===== RIPPLE on buttons =====
-document.querySelectorAll('.btn-primary, .btn-card, .btn-contact, .btn-header, .btn-ghost').forEach(btn => {
+document.querySelectorAll('.btn-primary, .btn-card, .btn-card-action, .btn-add-cart, .btn-contact, .btn-header, .btn-ghost').forEach(btn => {
   btn.addEventListener('click', function(e) {
     const ripple = document.createElement('span');
     const rect = this.getBoundingClientRect();
@@ -489,6 +489,10 @@ const toastMessages = [
 ];
 let toastIdx = 0;
 function showToast() {
+  const drawer = document.getElementById('cartDrawer');
+  if (drawer && drawer.classList.contains('open')) {
+    return; // Don't show toast popups when cart drawer is open
+  }
   const data = toastMessages[toastIdx % toastMessages.length];
   toastIdx++;
   const toast = document.createElement('div');
@@ -518,7 +522,7 @@ if (heroSection && pointerEffectsEnabled()) {
 }
 
 // ===== PARTICLE BURST on button click =====
-document.querySelectorAll('.btn-primary, .btn-card, .cpb-btn').forEach(btn => {
+document.querySelectorAll('.btn-primary, .btn-card, .btn-card-action, .btn-add-cart, .cpb-btn, .cpb-btn-cart').forEach(btn => {
   btn.addEventListener('click', function(e) {
     for (let i = 0; i < 12; i++) {
       const burst = document.createElement('div');

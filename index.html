@@ -70,11 +70,18 @@
         <a href="#faq" class="nav-link">FAQ</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
+      <button class="header-cart-btn" id="headerCartBtn" aria-label="Open Shopping Cart" title="View Cart">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span class="cart-badge" id="cartBadgeHeader" style="display: none;">0</span>
+      </button>
       <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-header">Get Started</a>
       <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
     </div>
     <!-- Mobile nav -->
     <div class="mobile-nav" id="mobileNav">
+      <button class="mob-cart-btn" id="mobCartBtn">
+        <i class="fa-solid fa-cart-shopping"></i> View Cart (<span id="cartBadgeMob">0</span>)
+      </button>
       <a href="#home" class="mob-link">Home</a>
       <a href="#services" class="mob-link">Services</a>
       <a href="#pricing" class="mob-link">Pricing</a>
@@ -82,6 +89,53 @@
       <a href="#contact" class="mob-link">Contact</a>
     </div>
   </header>
+
+  <!-- Floating Left Cart Dock -->
+  <button class="floating-cart-left" id="leftFloatingCart" aria-label="Shopping Cart" title="View Cart">
+    <span class="floating-cart-icon">
+      <i class="fa-solid fa-cart-shopping"></i>
+    </span>
+    <span class="floating-cart-label">Cart</span>
+    <span class="cart-badge" id="cartBadgeLeft" style="display: none;">0</span>
+  </button>
+
+  <!-- Cart Drawer & Backdrop -->
+  <div class="cart-backdrop" id="cartBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping Cart">
+    <div class="cart-drawer-header">
+      <div class="cart-drawer-title">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span>Your Cart</span>
+        <span class="cart-count-pill" id="drawerCartCount">0 items</span>
+      </div>
+      <div class="cart-drawer-actions">
+        <button class="cart-clear-btn" id="cartClearBtn" title="Clear all items"><i class="fa-solid fa-trash-can"></i> Clear</button>
+        <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="cart-drawer-body" id="cartDrawerBody">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="cart-drawer-footer" id="cartDrawerFooter">
+      <div class="cart-summary-row">
+        <span class="cart-summary-label">Total Amount:</span>
+        <div style="text-align: right;">
+          <div class="cart-summary-total" id="cartTotalINR">&#8377;0</div>
+          <div class="cart-summary-total-usd" id="cartTotalUSD">$0</div>
+        </div>
+      </div>
+      <button class="btn-primary cart-checkout-btn" id="cartCheckoutBtn">
+        <i class="fa-solid fa-bolt"></i> Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <div class="cart-trust-row">
+        <span><i class="fa-solid fa-circle-check"></i> Instant Delivery</span>
+        <span><i class="fa-solid fa-shield-halved"></i> 100% Safe Payment</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Cart Toast Notifications -->
+  <div class="cart-toast-container" id="cartToastContainer"></div>
 
   <!-- Hero -->
   <section class="hero" id="home">
@@ -203,9 +257,22 @@
             <div class="cpb-original">&#8377;10,900</div>
             <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
           </div>
-          <a href="payment.html" class="btn-primary cpb-btn">
-            <i class="fa-solid fa-gem"></i> Claim Deal
-          </a>
+          <div class="cpb-actions-wrap">
+            <button type="button" class="cpb-btn-cart btn-add-cart"
+               data-product-id="pinned-deal"
+               data-name="All Collection Pack"
+               data-inr="4399"
+               data-usd="109">
+              🛒 Add to Cart
+            </button>
+            <a href="payment.html" class="btn-primary cpb-btn"
+               data-product-id="pinned-deal"
+               data-name="All Collection Pack"
+               data-inr="4399"
+               data-usd="109">
+              <i class="fa-solid fa-gem"></i> Claim Deal
+            </a>
+          </div>
         </div>
       </div>
 
@@ -255,7 +322,14 @@
               <span class="pcard-price-usd">$39</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 2 -- -->
@@ -295,7 +369,14 @@
               <span class="pcard-price-usd">$34</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 3 -- -->
@@ -361,9 +442,14 @@
               <span class="pcard-price">&#8377;799</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card vid-tier-btn" id="vidBtnMega" data-name="Child%20Kids">
-            <i class="fa-brands fa-telegram"></i> Buy Now &#8212; 6000 Videos &#8377;2299
-          </a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now vid-tier-btn" id="vidBtnMega" data-name="Child%20Kids" data-product-id="child-kids" data-inr="2299" data-usd="239" data-tier="6000 Videos">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="vidCartBtnMega" data-product-id="child-kids" data-name="Child Kids" data-inr="2299" data-usd="239" data-tier="6000 Videos">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 4 -- -->
@@ -403,7 +489,14 @@
               <span class="pcard-price-usd">$35</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 5 -- -->
@@ -443,7 +536,14 @@
               <span class="pcard-price-usd">$30</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 6 -- -->
@@ -483,7 +583,14 @@
               <span class="pcard-price-usd">$31</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 7 -- -->
@@ -524,7 +631,14 @@
               <span class="pcard-price-usd">$28</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 8 -- -->
@@ -564,7 +678,14 @@
               <span class="pcard-price-usd">$19</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 9 -- -->
@@ -604,7 +725,14 @@
               <span class="pcard-price-usd">$17</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 10 -- -->
@@ -644,7 +772,14 @@
               <span class="pcard-price-usd">$16</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 11 -- -->
@@ -684,7 +819,14 @@
               <span class="pcard-price-usd">$14</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 12 &#8212; ULTRA -- -->
@@ -724,7 +866,14 @@
               <span class="pcard-price-usd">$153</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+            <a href="payment.html" class="btn-card-action btn-order-now btn-card-gold">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
         </div>
 
         <!-- -- CARD 13 -- -->
@@ -764,7 +913,14 @@
               <span class="pcard-price-usd">$27</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 14 -- -->
@@ -804,7 +960,14 @@
               <span class="pcard-price-usd">$14</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 15 -- -->
@@ -844,7 +1007,14 @@
               <span class="pcard-price-usd">$17</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 16 -- -->
@@ -884,7 +1054,14 @@
               <span class="pcard-price-usd">$21</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 17 -- -->
@@ -924,7 +1101,14 @@
               <span class="pcard-price-usd">$16</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 18 -- -->
@@ -964,7 +1148,14 @@
               <span class="pcard-price-usd">$16</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 19 -- -->
@@ -1004,7 +1195,14 @@
               <span class="pcard-price-usd">$19</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 20 -- -->
@@ -1044,7 +1242,14 @@
               <span class="pcard-price-usd">$35</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 21 -- -->
@@ -1084,7 +1289,14 @@
               <span class="pcard-price-usd">$16</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 22 -- -->
@@ -1124,7 +1336,14 @@
               <span class="pcard-price-usd">$18</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <a href="payment.html" class="btn-card-action btn-order-now">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
 
         <!-- -- CARD 23 &#8212; INFINITY -- -->
@@ -1164,7 +1383,14 @@
               <span class="pcard-price-usd">$19</span>
             </div>
           </div>
-          <a href="payment.html" class="btn-card btn-card-gold">Order Now <i class="fa-solid fa-arrow-right"></i></a>
+          <div class="pcard-actions">
+            <button type="button" class="btn-card-action btn-add-cart">
+              🛒 Add to Cart
+            </button>
+            <a href="payment.html" class="btn-card-action btn-order-now btn-card-gold">
+              Order Now <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
         </div>
 
       </div>
@@ -1742,16 +1968,37 @@
     const telegramUrl = p?.telegramUrl || defaultSiteState.payment.telegramUrl;
     const telegramChannel = p?.telegramChannel || defaultSiteState.payment.telegramChannel;
     document.querySelectorAll('a[href*="TRUSTED_BROTHER"]').forEach(a => { a.href = telegramUrl; });
-    document.querySelectorAll('a[href*="TRUSTED_BROTHER"]').forEach(a => { a.href = telegramUrl; });
   }
 
-  // -- LIVE DATA LISTENERS --
-  onValue(ref(db, 'settings'), snap => applySiteSettings(snap.val()));
-  onValue(ref(db, 'hero'), snap => applyHero(snap.val()));
-  onValue(ref(db, 'banner'), snap => applyBanner(snap.val()));
-  onValue(ref(db, 'faq'), snap => applyFaq(snap.val()));
-  onValue(ref(db, 'testimonials'), snap => applyTestimonials(snap.val()));
-  onValue(ref(db, 'payment'), snap => applyPaymentLinks(snap.val()));
+  // Load cached settings immediately (0ms)
+  try {
+    const cachedSettings = localStorage.getItem('linkadda_cached_settings');
+    if (cachedSettings) {
+      const s = JSON.parse(cachedSettings);
+      if (s.settings) applySiteSettings(s.settings);
+      if (s.hero) applyHero(s.hero);
+      if (s.banner) applyBanner(s.banner);
+      if (s.faq) applyFaq(s.faq);
+      if (s.testimonials) applyTestimonials(s.testimonials);
+      if (s.payment) applyPaymentLinks(s.payment);
+    }
+  } catch (_) {}
+
+  function saveSettingsCache(key, val) {
+    try {
+      const cached = JSON.parse(localStorage.getItem('linkadda_cached_settings') || '{}');
+      cached[key] = val;
+      localStorage.setItem('linkadda_cached_settings', JSON.stringify(cached));
+    } catch (_) {}
+  }
+
+  // -- LIVE DATA LISTENERS (Realtime sync from Admin Panel) --
+  onValue(ref(db, 'settings'), snap => { const val = snap.val(); saveSettingsCache('settings', val); applySiteSettings(val); });
+  onValue(ref(db, 'hero'), snap => { const val = snap.val(); saveSettingsCache('hero', val); applyHero(val); });
+  onValue(ref(db, 'banner'), snap => { const val = snap.val(); saveSettingsCache('banner', val); applyBanner(val); });
+  onValue(ref(db, 'faq'), snap => { const val = snap.val(); saveSettingsCache('faq', val); applyFaq(val); });
+  onValue(ref(db, 'testimonials'), snap => { const val = snap.val(); saveSettingsCache('testimonials', val); applyTestimonials(val); });
+  onValue(ref(db, 'payment'), snap => { const val = snap.val(); saveSettingsCache('payment', val); applyPaymentLinks(val); });
 
   function getOrderClickMeta(link) {
     const url = new URL(link.href, window.location.href);
@@ -1775,7 +2022,7 @@
   }
 
   document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a.btn-card, a.cpb-btn, a.vid-tier-btn');
+    const link = event.target.closest('a.btn-card, a.btn-order-now, a.cpb-btn, a.vid-tier-btn');
     if (!link) return;
 
     const href = link.getAttribute('href') || '';
@@ -1783,6 +2030,9 @@
     if (isCustomLink) return;
 
     event.preventDefault();
+    link.style.pointerEvents = 'none';
+    link.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opening...';
+
     try {
       const checkoutMeta = resolveCheckoutMeta(link);
       const orderRef = push(ref(db, 'orders'));
@@ -1809,23 +2059,33 @@
         updatedAt: Date.now(),
         source: 'public-site',
       };
-      await set(orderRef, payload);
-      
-      // Update history state so that if the user clicks browser back, they return to the product-focused URL
-      try {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('product', checkoutMeta.id);
-        window.history.replaceState(null, '', currentUrl.toString());
-      } catch (_) {}
 
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
       const ext = isLocal ? '.html' : '';
-      link.href = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}`;
-      await set(push(ref(db, 'events')), getOrderClickMeta(link));
+      const targetUrl = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}&name=${encodeURIComponent(checkoutMeta.title || '')}&inr=${encodeURIComponent(checkoutMeta.inr || '')}&usd=${encodeURIComponent(checkoutMeta.usd || '')}`;
+
+      // Update history state so back button returns to product
+      try {
+        const currentUrl = new URL(window.location.href);
+        if (checkoutMeta.id) currentUrl.searchParams.set('product', checkoutMeta.id);
+        window.history.replaceState(null, '', currentUrl.toString());
+      } catch (_) {}
+
+      // Fast write with 200ms timeout for instant navigation
+      const writePromise = Promise.all([
+        set(orderRef, payload),
+        set(push(ref(db, 'events')), getOrderClickMeta(link)).catch(() => {})
+      ]);
+
+      await Promise.race([
+        writePromise,
+        new Promise(r => setTimeout(r, 200))
+      ]);
+
+      window.location.href = targetUrl;
     } catch (error) {
       console.warn('Order click tracking failed', error);
-    } finally {
-      window.location.href = link.href;
+      window.location.href = link.href || 'payment.html';
     }
   });
 
@@ -2030,19 +2290,38 @@
   // -- BUILD CARD --
   function buildCard(id, cat) {
     const media = resolveMediaList(cat);
-    const hasTiers = cat.tiers&&cat.tiers.length;
+    const hasTiers = cat.tiers && cat.tiers.length;
     const features = normalizeFeatureList(cat.features).map(f=>`<li><i class="fa-solid fa-check"></i> ${esc(f)}</li>`).join('');
     const pill = cat.badge ? `<span class="pcard-pill${cat.badgeStyle?' '+esc(cat.badgeStyle):''}">${cat.badgeIcon?`<i class="fa-solid ${esc(cat.badgeIcon)}"></i> `:''}${esc(cat.badge)}</span>` : '';
     const orderLink = normalizeCheckoutUrl(cat.orderLink, { id, slug: cat.slug, title: cat.title });
+    const firstImg = media.images[0] || '';
 
     let bottom = '';
     if(hasTiers) {
       const btnId='vb_'+id;
+      const cartBtnId='vcb_'+id;
       const tierItems=cat.tiers.map((t,i)=>`<div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd)}"><span class="vid-tier-count">${esc(t.label)}</span><span class="vid-tier-price">&#8377;${esc(t.inr)}</span></div>`).join('');
       const first=cat.tiers[0];
-      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div><div class="vid-tier-list" id="${btnId}_list">${tierItems}</div><a href="${esc(normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}"><i class="fa-brands fa-telegram"></i> Buy Now &#8211; ${esc(first.label)} &#8377;${esc(first.inr)}</a>`;
+      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div>
+      <div class="vid-tier-list" id="${btnId}_list">${tierItems}</div>
+      <div class="pcard-actions">
+        <a href="${esc(normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}">
+          Order Now <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}" data-img="${esc(firstImg)}">
+          🛒 Add to Cart
+        </button>
+      </div>`;
     } else {
-      bottom=`<div class="pcard-price-row">${cat.priceINR?`<div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">${esc(cat.priceINR)}</span></div>`:''} ${cat.priceUSD?`<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">${esc(cat.priceUSD)}</span></div>`:''}</div><a href="${esc(orderLink)}" class="btn-card" data-product-id="${esc(id)}"><i class="fa-solid fa-arrow-right"></i> Order Now</a>`;
+      bottom=`<div class="pcard-price-row">${cat.priceINR?`<div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">${esc(cat.priceINR)}</span></div>`:''} ${cat.priceUSD?`<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">${esc(cat.priceUSD)}</span></div>`:''}</div>
+      <div class="pcard-actions">
+        <a href="${esc(orderLink)}" class="btn-card-action btn-order-now" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(cat.priceINR||'')}" data-usd="${esc(cat.priceUSD||'')}">
+          Order Now <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <button type="button" class="btn-card-action btn-add-cart" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(cat.priceINR||'')}" data-usd="${esc(cat.priceUSD||'')}" data-img="${esc(firstImg)}">
+          🛒 Add to Cart
+        </button>
+      </div>`;
     }
 
     return `<div class="pcard" data-fb-id="${esc(id)}">
@@ -2112,7 +2391,7 @@
 
   // Global click handler for interactive button animations
   document.addEventListener('click', (e) => {
-    const isInteractive = e.target.closest('.btn-card, .btn-primary, .category-pill, .vid-tier-item, .pricing-banner .btn-primary');
+    const isInteractive = e.target.closest('.btn-card, .btn-card-action, .btn-primary, .category-pill, .vid-tier-item, .pricing-banner .btn-primary');
     if (isInteractive) {
       createParticleBurst(e);
     }
@@ -2142,13 +2421,22 @@
             <div class="cpb-original">&#8377;10,900</div>
             <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
           </div>
-          <a href="payment.html" class="btn-primary cpb-btn"
-             data-product-id="pinned-deal"
-             data-name="All Collection Pack"
-             data-inr="4399"
-             data-usd="109">
-            <i class="fa-solid fa-gem"></i> Claim Deal
-          </a>
+          <div class="cpb-actions-wrap">
+            <a href="payment.html" class="btn-primary cpb-btn"
+               data-product-id="pinned-deal"
+               data-name="All Collection Pack"
+               data-inr="4399"
+               data-usd="109">
+              <i class="fa-solid fa-gem"></i> Claim Deal
+            </a>
+            <button type="button" class="cpb-btn-cart btn-add-cart"
+               data-product-id="pinned-deal"
+               data-name="All Collection Pack"
+               data-inr="4399"
+               data-usd="109">
+              🛒 Add to Cart
+            </button>
+          </div>
         </div>
       `;
       return;
@@ -2174,13 +2462,22 @@
           ${data.priceOriginal ? `<div class="cpb-original">${esc(data.priceOriginal)}</div>` : ''}
           <div class="cpb-offer">${esc(data.priceOfferINR || '')} ${data.priceOfferUSD ? `<span class="cpb-usd">/ ${esc(data.priceOfferUSD)}</span>` : ''}</div>
         </div>
-        <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn"
-           data-product-id="pinned-deal"
-           data-name="${esc(data.title || 'All Collection Pack')}"
-           data-inr="${esc(data.priceOfferINR || '')}"
-           data-usd="${esc(data.priceOfferUSD || '')}">
-          <i class="fa-solid fa-gem"></i> ${esc(data.buttonText || 'Claim Deal')}
-        </a>
+        <div class="cpb-actions-wrap">
+          <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn"
+             data-product-id="pinned-deal"
+             data-name="${esc(data.title || 'All Collection Pack')}"
+             data-inr="${esc(data.priceOfferINR || '')}"
+             data-usd="${esc(data.priceOfferUSD || '')}">
+            <i class="fa-solid fa-gem"></i> ${esc(data.buttonText || 'Claim Deal')}
+          </a>
+          <button type="button" class="cpb-btn-cart btn-add-cart"
+             data-product-id="pinned-deal"
+             data-name="${esc(data.title || 'All Collection Pack')}"
+             data-inr="${esc(data.priceOfferINR || '')}"
+             data-usd="${esc(data.priceOfferUSD || '')}">
+            🛒 Add to Cart
+          </button>
+        </div>
       </div>
     `;
   }
@@ -2191,7 +2488,7 @@
     const parentWrapper = pillsWrapper.parentElement; // category-filter-wrapper
 
     const categories = normalizeRecords(liveCollections.categories);
-    const maxVisible = window.innerWidth < 600 ? 2 : (window.innerWidth < 1024 ? 4 : 7);
+    const maxVisible = window.innerWidth < 600 ? 3 : (window.innerWidth < 1024 ? 5 : 8);
     
     const visibleCats = categories.slice(0, maxVisible);
     const hiddenCats = categories.slice(maxVisible);
@@ -2216,21 +2513,21 @@
       moreWrapper.remove();
     }
 
-    // 3. "More" Dropdown Select Pill (always visible on the right)
+    // 3. "More" Dropdown Select Pill (compact, perfectly sized)
     if (hiddenCats.length > 0) {
       const isHiddenActive = hiddenCats.some(cat => cat.id === activeCategoryFilter);
       const activeCat = hiddenCats.find(cat => cat.id === activeCategoryFilter);
       const selectLabel = isHiddenActive ? activeCat.title : 'More';
       
       const selectHtml = `
-        <div class="category-select-wrapper" style="position: relative; display: inline-block; flex-shrink: 0; margin-left: 10px;">
-          <select class="category-pill category-select-element${isHiddenActive ? ' active' : ''}" style="padding-right: 32px; -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; height: 100%; border-radius: 9999px;">
+        <div class="category-select-wrapper">
+          <select class="category-pill category-select-element${isHiddenActive ? ' active' : ''}" aria-label="More categories">
             <option value="" disabled ${!isHiddenActive ? 'selected' : ''}>${esc(selectLabel)}</option>
             ${hiddenCats.map(cat => `
               <option value="${esc(cat.id)}" ${activeCategoryFilter === cat.id ? 'selected' : ''}>${esc(cat.title)}</option>
             `).join('')}
           </select>
-          <i class="fa-solid fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: ${isHiddenActive ? 'white' : 'var(--muted)'};"></i>
+          <i class="fa-solid fa-chevron-down category-select-icon" style="color: ${isHiddenActive ? 'white' : 'var(--muted)'};"></i>
         </div>
       `;
       
@@ -2323,20 +2620,48 @@
     }
   }
 
-  // -- LIVE CATEGORIES / PRODUCTS --
+  // -- INSTANT LOCAL CACHED CATALOG (0ms initial load) --
+  try {
+    const cachedLive = localStorage.getItem('linkadda_cached_live_data');
+    if (cachedLive) {
+      const parsed = JSON.parse(cachedLive);
+      if (parsed.categories && Object.keys(parsed.categories).length) liveCollections.categories = parsed.categories;
+      if (parsed.products && Object.keys(parsed.products).length) liveCollections.products = parsed.products;
+      if (parsed.banner && Object.keys(parsed.banner).length) liveCollections.banner = parsed.banner;
+      renderCategoryFilters();
+      renderLiveGrid();
+      renderPinnedBanner();
+    }
+  } catch (_) {}
+
+  function saveCachedLiveData() {
+    try {
+      localStorage.setItem('linkadda_cached_live_data', JSON.stringify({
+        categories: liveCollections.categories,
+        products: liveCollections.products,
+        banner: liveCollections.banner,
+        timestamp: Date.now()
+      }));
+    } catch (_) {}
+  }
+
+  // -- LIVE CATEGORIES / PRODUCTS (Realtime sync from Admin Panel) --
   onValue(ref(db,'categories'), snap => {
     liveCollections.categories = snap.val() || {};
+    saveCachedLiveData();
     renderCategoryFilters();
     renderLiveGrid();
   });
 
   onValue(ref(db,'products'), snap => {
     liveCollections.products = snap.val() || {};
+    saveCachedLiveData();
     renderLiveGrid();
   });
 
   onValue(ref(db,'banner'), snap => {
     liveCollections.banner = snap.val() || {};
+    saveCachedLiveData();
     renderPinnedBanner();
   });
 
@@ -2430,18 +2755,422 @@
     document.querySelectorAll('.vid-tier-list').forEach(list=>{
       const btnId=list.id.replace('_list','');
       const btn=document.getElementById(btnId);
+      const card=list.closest('.pcard');
+      const cartBtn=card ? card.querySelector('.vid-tier-cart-btn, .btn-add-cart') : null;
+      
       list.querySelectorAll('.vid-tier-item').forEach(item=>{
         item.addEventListener('click',()=>{
           list.querySelectorAll('.vid-tier-item').forEach(i=>i.classList.remove('vid-tier-selected'));
           item.classList.add('vid-tier-selected');
+          const tierLabel = item.dataset.vids || item.querySelector('.vid-tier-count')?.textContent?.trim() || '';
+          const inrVal = item.dataset.inr || '';
+          const usdVal = item.dataset.usd || '';
+          
           if(btn){
-            btn.innerHTML=`<i class="fa-brands fa-telegram"></i> Buy Now \u2013 ${item.dataset.vids} \u20B9${item.dataset.inr}`;
+            btn.innerHTML=`Order Now \u2013 ${tierLabel} \u20B9${inrVal} <i class="fa-solid fa-arrow-right"></i>`;
+            btn.dataset.inr = inrVal;
+            btn.dataset.usd = usdVal;
+            btn.dataset.tier = tierLabel;
             btn.href=normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(btn.dataset.productId || '')}`, { id: btn.dataset.productId || '', slug: '', title: btn.dataset.name ? decodeURIComponent(btn.dataset.name) : '' });
+          }
+          if(cartBtn){
+            cartBtn.dataset.inr = inrVal;
+            cartBtn.dataset.usd = usdVal;
+            cartBtn.dataset.tier = tierLabel;
           }
         });
       });
     });
   }
+
+  // ========================================================
+  // ===== SHOPPING CART SYSTEM MODULE =====
+  // ========================================================
+  const CART_STORAGE_KEY = 'linkadda_cart_v1';
+
+  function getCart() {
+    try {
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.warn('Error reading cart from localStorage', e);
+      return [];
+    }
+  }
+
+  function saveCart(cart) {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      updateCartBadges();
+      renderCartDrawer();
+    } catch (e) {
+      console.warn('Error saving cart to localStorage', e);
+    }
+  }
+
+  function parseMoneyNumber(val) {
+    if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
+    if (!val) return 0;
+    const cleaned = String(val).replace(/[^0-9.]/g, '');
+    const num = parseFloat(cleaned);
+    return Number.isFinite(num) ? num : 0;
+  }
+
+  function extractProductMetaFromCard(btn) {
+    const card = btn.closest('.pcard') || btn.closest('.collection-pack-banner');
+    
+    let id = btn.dataset.productId || card?.dataset?.fbId || '';
+    let name = btn.dataset.name ? decodeURIComponent(btn.dataset.name) : (card?.querySelector('.pcard-title, .cpb-title')?.textContent?.trim() || 'Product');
+    if (!id) {
+      id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    
+    let inr = btn.dataset.inr ? parseMoneyNumber(btn.dataset.inr) : 0;
+    let usd = btn.dataset.usd ? parseMoneyNumber(btn.dataset.usd) : 0;
+    let tier = btn.dataset.tier || '';
+    
+    if (card) {
+      const selectedTier = card.querySelector('.vid-tier-item.vid-tier-selected');
+      if (selectedTier) {
+        if (!inr) inr = parseMoneyNumber(selectedTier.dataset.inr);
+        if (!usd) usd = parseMoneyNumber(selectedTier.dataset.usd);
+        if (!tier) tier = selectedTier.dataset.vids || selectedTier.querySelector('.vid-tier-count')?.textContent?.trim() || '';
+      }
+      if (!inr) {
+        const inrText = card.querySelector('.pcard-price, .cpb-offer')?.textContent?.trim() || '';
+        inr = parseMoneyNumber(inrText);
+      }
+      if (!usd) {
+        const usdText = card.querySelector('.pcard-price-usd, .cpb-usd')?.textContent?.trim() || '';
+        usd = parseMoneyNumber(usdText);
+      }
+    }
+    
+    let img = btn.dataset.img || '';
+    if (!img && card) {
+      const imgEl = card.querySelector('.pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
+      img = imgEl?.getAttribute('src') || '';
+    }
+    
+    return { id, name, inr, usd, tier, img };
+  }
+
+  function addToCart(item) {
+    const cart = getCart();
+    const itemId = String(item.id) + (item.tier ? `_${String(item.tier).replace(/\s+/g, '')}` : '');
+    const existing = cart.find(i => i.cartItemId === itemId);
+    
+    if (existing) {
+      showCartToast(item.name || 'Product', true);
+      animateCartBadges();
+      return;
+    }
+
+    cart.push({
+      cartItemId: itemId,
+      id: item.id || 'product',
+      name: item.name || 'Product',
+      tier: item.tier || '',
+      inr: parseMoneyNumber(item.inr),
+      usd: parseMoneyNumber(item.usd),
+      img: item.img || '',
+      qty: 1
+    });
+    
+    saveCart(cart);
+    showCartToast(item.name || 'Product', false);
+    animateCartBadges();
+  }
+
+  function removeCartItem(cartItemId) {
+    const cart = getCart().filter(i => i.cartItemId !== cartItemId);
+    saveCart(cart);
+  }
+
+  function clearCart() {
+    saveCart([]);
+  }
+
+  function getCartTotals() {
+    const cart = getCart();
+    let totalINR = 0;
+    let totalUSD = 0;
+    
+    cart.forEach(item => {
+      totalINR += (item.inr || 0);
+      totalUSD += (item.usd || 0);
+    });
+    
+    return { totalINR, totalUSD, totalCount: cart.length };
+  }
+
+  function updateCartBadges() {
+    const { totalCount } = getCartTotals();
+    const badges = [
+      document.getElementById('cartBadgeHeader'),
+      document.getElementById('cartBadgeLeft'),
+      document.getElementById('cartBadgeMob'),
+    ];
+    
+    badges.forEach(b => {
+      if (b) {
+        b.textContent = totalCount;
+        b.style.display = totalCount > 0 ? 'flex' : 'none';
+      }
+    });
+    
+    const drawerCount = document.getElementById('drawerCartCount');
+    if (drawerCount) {
+      drawerCount.textContent = `${totalCount} item${totalCount === 1 ? '' : 's'}`;
+    }
+  }
+
+  function animateCartBadges() {
+    const badges = [
+      document.getElementById('cartBadgeHeader'),
+      document.getElementById('cartBadgeLeft'),
+    ];
+    badges.forEach(b => {
+      if (b) {
+        b.classList.remove('bump');
+        void b.offsetWidth;
+        b.classList.add('bump');
+      }
+    });
+  }
+
+  function showCartToast(productName, alreadyInCart = false) {
+    const container = document.getElementById('cartToastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'cart-toast';
+    toast.innerHTML = `
+      <div class="cart-toast-icon"><i class="fa-solid ${alreadyInCart ? 'fa-circle-info' : 'fa-circle-check'}" style="${alreadyInCart ? 'color:#f59e0b;' : ''}"></i></div>
+      <div class="cart-toast-msg"><strong>${esc(productName)}</strong> ${alreadyInCart ? 'is already in your cart!' : 'added to cart!'}</div>
+      <button type="button" class="cart-toast-btn" id="toastViewCart">View Cart</button>
+    `;
+    container.appendChild(toast);
+    
+    toast.querySelector('#toastViewCart')?.addEventListener('click', () => {
+      openCartDrawer();
+      toast.remove();
+    });
+    
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+    });
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3500);
+  }
+
+  function renderCartDrawer() {
+    const body = document.getElementById('cartDrawerBody');
+    const totalINREl = document.getElementById('cartTotalINR');
+    const totalUSDEl = document.getElementById('cartTotalUSD');
+    const footer = document.getElementById('cartDrawerFooter');
+    if (!body) return;
+    
+    const cart = getCart();
+    const { totalINR, totalUSD } = getCartTotals();
+    
+    if (totalINREl) totalINREl.textContent = `₹${totalINR.toLocaleString('en-IN')}`;
+    if (totalUSDEl) totalUSDEl.textContent = `$${totalUSD.toLocaleString('en-US')}`;
+    
+    if (cart.length === 0) {
+      body.innerHTML = `
+        <div class="cart-empty-state">
+          <div class="cart-empty-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+          <h4>Your cart is empty</h4>
+          <p>Looks like you haven't added any premium packs to your cart yet.</p>
+          <button type="button" class="btn-primary" id="cartEmptyBrowseBtn" style="display:inline-flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-plus"></i> Add Products
+          </button>
+        </div>
+      `;
+      body.querySelector('#cartEmptyBrowseBtn')?.addEventListener('click', () => {
+        closeCartDrawer();
+        const s = document.getElementById('services') || document.querySelector('.pricing-grid') || document.querySelector('.collection-pack-banner');
+        if (s) s.scrollIntoView({ behavior: 'smooth' });
+      });
+      if (footer) footer.style.display = 'none';
+      return;
+    }
+    
+    if (footer) footer.style.display = 'flex';
+    
+    const itemsHtml = cart.map(item => {
+      const itemTotalINR = item.inr || 0;
+      const itemTotalUSD = item.usd || 0;
+      
+      let thumbHtml = '';
+      if (item.img) {
+        thumbHtml = `<img src="${esc(item.img)}" alt="${esc(item.name)}" />`;
+      } else {
+        thumbHtml = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#555;"><i class="fa-solid fa-film"></i></div>`;
+      }
+      
+      return `
+        <div class="cart-item-card" data-cart-item-id="${esc(item.cartItemId)}">
+          <div class="cart-item-thumb">${thumbHtml}</div>
+          <div class="cart-item-info">
+            <div>
+              <div class="cart-item-title" title="${esc(item.name)}">${esc(item.name)}</div>
+              ${item.tier ? `<div class="cart-item-tier"><i class="fa-solid fa-film"></i> ${esc(item.tier)}</div>` : ''}
+            </div>
+            <div class="cart-item-price-row">
+              <div>
+                <span class="cart-item-price">₹${itemTotalINR.toLocaleString('en-IN')}</span>
+                ${itemTotalUSD ? `<span class="cart-item-price-usd"> / $${itemTotalUSD}</span>` : ''}
+              </div>
+              <button type="button" class="cart-item-remove" data-id="${esc(item.cartItemId)}" title="Remove item" aria-label="Remove item">
+                <i class="fa-solid fa-trash-can"></i> Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    body.innerHTML = `
+      <div class="cart-items-list" style="display:flex;flex-direction:column;gap:12px;">${itemsHtml}</div>
+      <button type="button" class="cart-add-more-btn" id="cartAddMoreBtn">
+        <i class="fa-solid fa-plus"></i> Add More Products
+      </button>
+    `;
+
+    body.querySelectorAll('.cart-item-remove').forEach(btn => {
+      btn.addEventListener('click', () => removeCartItem(btn.dataset.id));
+    });
+
+    document.getElementById('cartAddMoreBtn')?.addEventListener('click', () => {
+      closeCartDrawer();
+      const s = document.getElementById('services') || document.querySelector('.pricing-grid') || document.querySelector('.collection-pack-banner');
+      if (s) s.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  function openCartDrawer() {
+    const drawer = document.getElementById('cartDrawer');
+    const backdrop = document.getElementById('cartBackdrop');
+    // Clear any active floating toasts from screen
+    document.querySelectorAll('.toast, .cart-toast').forEach(t => t.remove());
+    if (drawer) drawer.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderCartDrawer();
+  }
+
+  function closeCartDrawer() {
+    const drawer = document.getElementById('cartDrawer');
+    const backdrop = document.getElementById('cartBackdrop');
+    if (drawer) drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  async function checkoutCart() {
+    const cart = getCart();
+    if (cart.length === 0) return;
+    
+    const checkoutBtn = document.getElementById('cartCheckoutBtn');
+    if (checkoutBtn) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing Checkout...';
+    }
+    
+    const { totalINR, totalUSD, totalCount } = getCartTotals();
+    const orderRef = push(ref(db, 'orders'));
+    const checkoutToken = createCheckoutToken();
+    
+    const productName = cart.length === 1 
+      ? `${cart[0].name}${cart[0].tier ? ' (' + cart[0].tier + ')' : ''}`
+      : `${cart.length} Items: ${cart.map(i => `${i.name}${i.tier ? ' [' + i.tier + ']' : ''}`).join(', ')}`;
+      
+    const payload = {
+      orderId: orderRef.key,
+      id: orderRef.key,
+      isCart: true,
+      items: cart,
+      itemCount: totalCount,
+      productId: cart.length === 1 ? cart[0].id : 'cart_multi',
+      productName: productName,
+      amount: totalINR,
+      amountINR: totalINR,
+      amountUSD: totalUSD,
+      lockedAmountINR: totalINR,
+      lockedAmountUSD: totalUSD,
+      checkoutToken,
+      currency: 'INR',
+      paymentStatus: 'pending',
+      orderStatus: 'pending',
+      status: 'pending',
+      paymentMethod: '',
+      screenshotUrl: '',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      source: 'cart-checkout'
+    };
+    
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const ext = isLocal ? '.html' : '';
+    const targetUrl = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&cart=1&token=${encodeURIComponent(checkoutToken)}&inr=${encodeURIComponent(totalINR)}&usd=${encodeURIComponent(totalUSD)}`;
+
+    try {
+      await Promise.race([
+        set(orderRef, payload),
+        new Promise(r => setTimeout(r, 200))
+      ]);
+    } catch (err) {
+      console.warn('Cart async save error:', err);
+    } finally {
+      window.location.href = targetUrl;
+    }
+  }
+
+  // --- Cart System Global Listeners ---
+  document.getElementById('headerCartBtn')?.addEventListener('click', openCartDrawer);
+  document.getElementById('leftFloatingCart')?.addEventListener('click', openCartDrawer);
+  document.getElementById('mobCartBtn')?.addEventListener('click', () => {
+    const mobNav = document.getElementById('mobileNav');
+    if (mobNav) mobNav.classList.remove('open');
+    openCartDrawer();
+  });
+  document.getElementById('cartCloseBtn')?.addEventListener('click', closeCartDrawer);
+  document.getElementById('cartBackdrop')?.addEventListener('click', closeCartDrawer);
+  document.getElementById('cartClearBtn')?.addEventListener('click', () => {
+    if (confirm('Clear all items from your cart?')) {
+      clearCart();
+    }
+  });
+  document.getElementById('cartCheckoutBtn')?.addEventListener('click', checkoutCart);
+
+  // Global Add to Cart Click Delegation
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-add-cart, .cpb-btn-cart');
+    if (!btn) return;
+    
+    e.preventDefault();
+    const meta = extractProductMetaFromCard(btn);
+    addToCart(meta);
+    
+    // Temporary visual state on button
+    const origHtml = btn.innerHTML;
+    btn.classList.add('added');
+    btn.innerHTML = '✓ Added!';
+    setTimeout(() => {
+      btn.classList.remove('added');
+      btn.innerHTML = origHtml;
+    }, 1400);
+  });
+
+  // Initial cart badge update on page load
+  updateCartBadges();
   </script>
 
   <style>
@@ -2472,6 +3201,12 @@
     .media-viewer-title{color:#fff;font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.9;}
     .media-viewer-dots{display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;}
     .media-viewer-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(255,255,255,.28);cursor:pointer;}
+    .media-viewer-dot.active{background:#f0247a;transform:scale(1.2);}
+  </style>
+  <script type="module" src="/media-resolver.js"></script>
+</body>
+</html>
+
     .media-viewer-dot.active{background:#f0247a;transform:scale(1.2);}
   </style>
   <script type="module" src="/media-resolver.js"></script>

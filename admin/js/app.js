@@ -280,6 +280,13 @@ const singleEditors = {
     title: 'Payment Settings',
     description: 'Keep the payment flow intact while editing the configurable values.',
     fields: [
+      { key: 'recommendedMethod', label: 'Recommended Payment Method (Shown on Top with Badge)', type: 'select', options: [
+        { label: 'Binance Pay (Recommended Default)', value: 'binancepay' },
+        { label: 'UPI (GPay / PhonePe / Paytm)', value: 'upi' },
+        { label: 'USDT BEP-20 (Binance Smart Chain)', value: 'bep20' },
+        { label: 'USDT ERC-20 (Ethereum Network)', value: 'eth' },
+        { label: 'PayPal (International)', value: 'paypal' },
+      ] },
       { key: 'upiId', label: 'UPI ID', type: 'text' },
       { key: 'qrImage', label: 'QR Image URL', type: 'url' },
       { key: 'instructions', label: 'Payment Instructions', type: 'textarea' },
@@ -495,7 +502,11 @@ function fieldMarkup(field, value = '', options = {}) {
       <div class="field">
         <label for="${escapeHtml(field.key)}">${escapeHtml(field.label)}</label>
         <select class="select" ${common}>
-          ${(field.options || []).map((option) => `<option value="${escapeHtml(option)}" ${String(value) === String(option) ? 'selected' : ''}>${escapeHtml(option)}</option>`).join('')}
+          ${(field.options || []).map((option) => {
+            const val = typeof option === 'object' && option !== null ? option.value : option;
+            const lbl = typeof option === 'object' && option !== null ? option.label : option;
+            return `<option value="${escapeHtml(val)}" ${String(value) === String(val) ? 'selected' : ''}>${escapeHtml(lbl)}</option>`;
+          }).join('')}
         </select>
       </div>
     `;
@@ -3542,23 +3553,46 @@ function candidateText(item = {}, keys = [], fallback = '-') {
 }
 
 function orderProductName(item = {}) {
-  return candidateText(item, ['package', 'product', 'productName', 'title', 'name', 'label'], 'Order');
+  if (item.cartItems && Array.isArray(item.cartItems) && item.cartItems.length > 0) {
+    const names = item.cartItems.map((i) => i.name || i.title).filter(Boolean);
+    if (names.length > 0) return names.join(' + ');
+  }
+  const name = pickFirstValue(item, ['productName', 'package', 'product', 'title', 'name', 'label', 'collectionTitle'], '');
+  if (name && name !== 'Product') return name;
+  if (item.productId) return String(item.productId);
+  return 'Premium Pack Order';
+}
+
+function orderProductThumb(item = {}) {
+  if (item.image) return resolveMediaSource(item.image) || item.image;
+  if (item.productImage) return resolveMediaSource(item.productImage) || item.productImage;
+  if (item.cartItems && Array.isArray(item.cartItems) && item.cartItems[0]?.img) {
+    return item.cartItems[0].img;
+  }
+  return '';
 }
 
 function orderCustomerLabel(item = {}) {
   const name = pickFirstValue(item, ['customerName', 'name', 'buyerName', 'fullName'], '');
   const email = pickFirstValue(item, ['email', 'customerEmail', 'buyerEmail'], '');
-  const phone = pickFirstValue(item, ['phone', 'customerPhone', 'buyerPhone', 'mobile'], '');
+  const phone = pickFirstValue(item, ['phone', 'customerPhone', 'buyerPhone', 'mobile', 'telegram', 'whatsapp'], '');
   const parts = [name, email, phone].filter(Boolean);
-  return parts.length ? parts.join(' · ') : 'No customer details saved';
+  if (parts.length) return parts.join(' · ');
+  if (item.source) return `Direct Buyer (${item.source})`;
+  return 'Web Checkout Buyer';
 }
 
 function orderMethodLabel(item = {}) {
-  return candidateText(item, ['method', 'paymentMethod', 'gateway', 'channel', 'provider'], 'Unknown');
+  const m = candidateText(item, ['paymentMethod', 'method', 'gateway', 'channel', 'provider'], '');
+  if (!m || m.toLowerCase() === 'unknown' || m === '-') {
+    if (item.screenshotUrl || item.proofUrl || item.paymentProof) return 'UPI / Screenshot';
+    return 'Online Checkout';
+  }
+  return m;
 }
 
 function orderTransactionId(item = {}) {
-  return candidateText(item, ['transactionId', 'referenceId', 'txnId', 'paymentId', 'orderId', 'id'], '-');
+  return candidateText(item, ['transactionId', 'referenceId', 'txnId', 'paymentId', 'orderId', 'checkoutToken', 'id'], '-');
 }
 
 function orderStatusValue(item = {}) {
@@ -3799,6 +3833,7 @@ function renderSingleEditorSummaryGrid(node, record = {}) {
   if (node === 'payment') {
     return `
       <div class="single-editor-summary-grid">
+        ${renderInfoTile('Recommended Method', record.recommendedMethod || 'binancepay')}
         ${renderInfoTile('UPI ID', record.upiId || 'Not set')}
         ${renderInfoTile('QR Image', record.qrImage ? 'Configured' : 'Not set')}
         ${renderInfoTile('Instructions', record.instructions || 'Not set')}
@@ -3873,6 +3908,11 @@ function renderSingleEditorFieldSections(node, schema, record = {}) {
         ]
       : node === 'payment'
         ? [
+            {
+              title: 'Featured / Recommended Method',
+              description: 'Select which payment method appears at the very top with the RECOMMENDED badge on checkout.',
+              keys: ['recommendedMethod'],
+            },
             {
               title: 'Primary Payment',
               description: 'UPI and QR configuration used by checkout.',
@@ -4176,8 +4216,156 @@ function renderPaymentMethodCard(label, value, detail = '', tone = 'primary') {
   `;
 }
 
+function getStandardPaymentMethods(payment = {}) {
+  const custom = payment.customMethods || {};
+  const disabled = Array.isArray(payment.disabledMethods) ? payment.disabledMethods : (payment.disabledMethods ? Object.keys(payment.disabledMethods) : []);
+  const recommendedId = payment.recommendedMethod || 'binancepay';
+
+  const defaultList = [
+    {
+      id: 'binancepay',
+      name: 'Binance Pay',
+      sub: 'Zero-fee instant crypto transfer via Binance App',
+      type: 'binance',
+      iconClass: 'icon-binance',
+      icon: 'sparkles',
+      identifierLabel: 'Binance ID / Pay ID',
+      identifier: payment.binanceId || '969887942',
+      tag: '0% FEE',
+      instructions: 'Open Binance App → Pay → Enter Binance ID → Transfer exact USD amount.',
+      status: disabled.includes('binancepay') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'binancepay',
+      isDefault: true,
+    },
+    {
+      id: 'upi',
+      name: 'UPI (GPay / PhonePe / Paytm)',
+      sub: 'Instant Indian UPI transfers & Dynamic QR Code',
+      type: 'upi',
+      iconClass: 'icon-upi',
+      icon: 'smartphone',
+      identifierLabel: 'UPI VPA Address',
+      identifier: payment.upiId || 'Ritikane@ptyes',
+      qrImage: payment.qrImage || '',
+      tag: 'INR FAST',
+      instructions: 'Scan QR with GPay / PhonePe / Paytm or send to UPI ID → Upload screenshot proof.',
+      status: disabled.includes('upi') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'upi',
+      isDefault: true,
+    },
+    {
+      id: 'bep20',
+      name: 'USDT BEP-20 (BSC)',
+      sub: 'BNB Smart Chain Low-Fee Network',
+      type: 'crypto',
+      iconClass: 'icon-bep20',
+      icon: 'coins',
+      identifierLabel: 'BEP-20 Wallet Address',
+      identifier: payment.bep20Address || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+      tag: 'USDT (BSC)',
+      instructions: 'Send exact USDT on Binance Smart Chain (BEP-20) network only.',
+      status: disabled.includes('bep20') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'bep20',
+      isDefault: true,
+    },
+    {
+      id: 'eth',
+      name: 'USDT ERC-20 (ETH)',
+      sub: 'Ethereum Mainnet Network',
+      type: 'crypto',
+      iconClass: 'icon-eth',
+      icon: 'wallet',
+      identifierLabel: 'ERC-20 Wallet Address',
+      identifier: payment.ethAddress || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+      tag: 'USDT (ETH)',
+      instructions: 'Send exact USDT on Ethereum (ERC-20) network only.',
+      status: disabled.includes('eth') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'eth',
+      isDefault: true,
+    },
+    {
+      id: 'paypal',
+      name: 'PayPal',
+      sub: 'International Debit / Credit Cards',
+      type: 'paypal',
+      iconClass: 'icon-paypal',
+      icon: 'credit-card',
+      identifierLabel: 'PayPal Link',
+      identifier: payment.paypalLink || 'https://paypal.me/Johnguzman456',
+      tag: 'GLOBAL',
+      instructions: 'Click PayPal link and send exact USD amount as Friends & Family or Goods.',
+      status: disabled.includes('paypal') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'paypal',
+      isDefault: true,
+    },
+    {
+      id: 'giftcard',
+      name: 'Binance Gift Card',
+      sub: 'Digital Voucher / G2A Key',
+      type: 'giftcard',
+      iconClass: 'icon-gift',
+      icon: 'gift',
+      identifierLabel: 'Gift Card URL',
+      identifier: payment.binanceGiftCardUrl || 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
+      tag: 'VOUCHER',
+      instructions: 'Buy digital voucher key and submit voucher code in payment verification.',
+      status: disabled.includes('giftcard') ? 'disabled' : 'active',
+      isRecommended: recommendedId === 'giftcard',
+      isDefault: true,
+    },
+  ];
+
+  // Custom methods from Firebase
+  const customList = Object.entries(custom).map(([id, item]) => ({
+    id,
+    name: item.name || 'Custom Method',
+    sub: item.sub || item.description || 'Custom payment method',
+    type: item.type || 'custom',
+    iconClass: 'icon-custom',
+    icon: 'credit-card',
+    identifierLabel: item.identifierLabel || 'Account / Address / Link',
+    identifier: item.identifier || item.address || item.link || '',
+    qrImage: item.qrImage || '',
+    tag: item.tag || 'CUSTOM',
+    instructions: item.instructions || '',
+    status: item.status || 'active',
+    isRecommended: recommendedId === id,
+    isCustom: true,
+  }));
+
+  return [...defaultList, ...customList];
+}
+
 function renderPaymentManagementView(data = {}, fullData = {}) {
-  const payment = fullData.payment || {};
+  const DEFAULT_PAYMENT_CONFIG = {
+    recommendedMethod: 'binancepay',
+    upiId: 'Ritikane@ptyes',
+    qrImage: '',
+    telegramUrl: 'https://t.me/TRUSTED_BROTHER1234',
+    telegramChannel: 'https://t.me/TRUSTED_BROTHER1234',
+    bep20Address: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+    ethAddress: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+    binanceId: '969887942',
+    binanceGiftCardUrl: 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
+    paypalLink: 'https://paypal.me/Johnguzman456',
+    instructions: 'Pay exact order amount and submit screenshot for instant activation.',
+    status: 'active',
+    customMethods: {},
+    disabledMethods: [],
+  };
+
+  const rawPayment = (fullData && fullData.payment) || (data && typeof data === 'object' && Object.keys(data).length ? data : {}) || {};
+  const rawSettings = (fullData && fullData.settings) || {};
+
+  const payment = {
+    ...DEFAULT_PAYMENT_CONFIG,
+    ...(rawSettings.upiId ? { upiId: rawSettings.upiId } : {}),
+    ...(rawSettings.telegram ? { telegramUrl: rawSettings.telegram } : {}),
+    ...rawPayment,
+  };
+
+  const methodsList = getStandardPaymentMethods(payment);
+
   const allOrders = listCollection('orders');
   const records = sortManagementList(filterManagementList(allOrders, 'payment'));
   const totals = managementTotals(records);
@@ -4187,55 +4375,83 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
       const day = new Date(orderDateValue(item)).toISOString().slice(0, 10);
       return day === new Date().toISOString().slice(0, 10) && isPaidOrder(item);
     })
-    .reduce((total, item) => total + parseAmountValue(item.amount), 0);
+    .reduce((total, item) => total + parseAmountValue(item.amount || item.inr), 0);
   const monthReceived = records
     .filter((item) => new Date(orderDateValue(item)).toISOString().slice(0, 7) === new Date().toISOString().slice(0, 7) && isPaidOrder(item))
-    .reduce((total, item) => total + parseAmountValue(item.amount), 0);
+    .reduce((total, item) => total + parseAmountValue(item.amount || item.inr), 0);
   const tableItems = records;
+
   return `
     <div class="page active management-page-shell">
       <section class="panel glass management-page">
-        <div class="panel-head management-page-head">
+        <div class="panel-head payment-management-head">
           <div>
-            <div class="section-kicker">Payments</div>
-            <h2 class="section-title">Payment</h2>
-            <p class="section-subtitle">UPI configuration, payment instructions, and live payment records from orders.</p>
+            <div class="section-kicker">Checkout & Gateways</div>
+            <h2 class="section-title">Payment Methods & Gateway Hub</h2>
+            <p class="section-subtitle">Add custom payment options, enable/disable methods, set the recommended choice, and update credentials live on Linkadda Shop.</p>
           </div>
           <div class="toolbar management-actions">
-            <button class="btn btn-primary" type="button" data-action="edit-single" data-node="payment"><i data-lucide="pencil"></i> Edit Payment</button>
+            <button class="btn btn-primary" type="button" data-action="add-payment-method"><i data-lucide="plus-circle"></i> Add Payment Method</button>
+            <button class="btn btn-ghost" type="button" data-action="edit-single" data-node="payment"><i data-lucide="sliders"></i> Gateway Settings</button>
             <button class="btn btn-ghost" type="button" data-action="goto" data-route="orders"><i data-lucide="receipt-text"></i> Open Orders</button>
           </div>
         </div>
         <div class="management-summary-grid">
-          ${renderManagementSummaryCard('Total Received', formatCurrencyCompact(totals.totalReceived), 'From paid / approved records', 'success')}
-          ${renderManagementSummaryCard('Pending', String(totals.pending), 'Unverified payment records', 'warning')}
-          ${renderManagementSummaryCard('Failed', String(totals.failed), 'Rejected / expired / failed records', 'danger')}
-          ${renderManagementSummaryCard('Today', formatCurrencyCompact(todayReceived), 'Received today', 'primary')}
-          ${renderManagementSummaryCard('This Month', formatCurrencyCompact(monthReceived), 'Received this month', 'accent')}
+          ${renderManagementSummaryCard('Total Volume', formatCurrencyCompact(totals.totalReceived), 'From paid & verified orders', 'success')}
+          ${renderManagementSummaryCard('Pending Verification', String(totals.pending), 'Awaiting admin review', 'warning')}
+          ${renderManagementSummaryCard('Failed / Rejected', String(totals.failed), 'Rejected or expired payments', 'danger')}
+          ${renderManagementSummaryCard('Today Received', formatCurrencyCompact(todayReceived), 'Received today', 'primary')}
+          ${renderManagementSummaryCard('This Month', formatCurrencyCompact(monthReceived), 'Total this month', 'accent')}
         </div>
       </section>
 
-      ${renderFieldGroup('Payment Configuration', 'Current UPI and alternate payment values saved in Firebase.', `
-        <div class="management-grid">
-          ${renderPaymentMethodCard('UPI ID', payment.upiId || 'Not set', 'Used by the public checkout flow', 'success')}
-          ${renderPaymentMethodCard('UPI QR', payment.qrImage ? 'Configured' : 'Not set', 'QR image URL stored in settings', 'success')}
-          ${renderPaymentMethodCard('Instructions', payment.instructions || 'Not set', 'Shown to customers at payment time', 'primary')}
-          ${renderPaymentMethodCard('Telegram', payment.telegramUrl || payment.telegramChannel || 'Not set', 'Support or notification channel', 'accent')}
-          ${renderPaymentMethodCard('Binance', payment.binanceId || 'Not set', 'Optional crypto payment identity', 'warning')}
-          ${renderPaymentMethodCard('PayPal', payment.paypalLink || 'Not set', 'Optional PayPal checkout link', 'warning')}
+      ${renderFieldGroup('Active Payment Methods (Linkadda Shop Connected)', 'Configure payment methods shown to customers on checkout. Toggle active, edit credentials, or set recommended.', `
+        <div class="payment-methods-grid">
+          ${methodsList.map((m) => `
+            <div class="payment-card ${m.isRecommended ? 'is-recommended' : ''} ${m.status !== 'active' ? 'is-disabled' : ''}">
+              <div class="payment-card-header">
+                <div class="payment-card-brand">
+                  <div class="payment-card-icon ${escapeHtml(m.iconClass)}">
+                    <i data-lucide="${escapeHtml(m.icon)}"></i>
+                  </div>
+                  <div class="payment-card-titles">
+                    <strong>${escapeHtml(m.name)}</strong>
+                    <span>${escapeHtml(m.sub)}</span>
+                  </div>
+                </div>
+                <button class="payment-toggle-btn ${m.status === 'active' ? 'is-active' : 'is-disabled'}" data-action="toggle-payment-method" data-id="${escapeHtml(m.id)}" title="Click to Toggle Active/Disabled">
+                  <i data-lucide="${m.status === 'active' ? 'check-circle' : 'x-circle'}"></i> ${m.status === 'active' ? 'Active' : 'Disabled'}
+                </button>
+              </div>
+
+              <div class="payment-card-badges">
+                <span class="badge ${m.isRecommended ? 'warning' : 'primary'}">${escapeHtml(m.tag)}</span>
+                ${m.isRecommended ? '<span class="badge warning"><i data-lucide="star"></i> Recommended on Top</span>' : ''}
+              </div>
+
+              <div class="payment-card-body">
+                <div class="payment-data-row">
+                  <span class="payment-data-label">${escapeHtml(m.identifierLabel)}</span>
+                  <button class="icon-btn" data-action="copy-payment-val" data-val="${escapeHtml(m.identifier)}" title="Copy Value"><i data-lucide="copy"></i></button>
+                </div>
+                <div class="payment-data-val">${escapeHtml(m.identifier || 'Not set')}</div>
+              </div>
+
+              <div class="payment-card-actions">
+                <button class="payment-make-rec-btn ${m.isRecommended ? 'active' : ''}" data-action="set-recommended-method" data-id="${escapeHtml(m.id)}">
+                  <i data-lucide="star"></i> ${m.isRecommended ? '⭐ Recommended' : 'Make Recommended'}
+                </button>
+                <div class="toolbar" style="gap: 4px;">
+                  <button class="icon-btn" data-action="edit-payment-method" data-id="${escapeHtml(m.id)}" title="Edit Method"><i data-lucide="pencil"></i></button>
+                  <button class="icon-btn danger" data-action="delete-payment-method" data-id="${escapeHtml(m.id)}" title="${m.isCustom ? 'Delete Custom Method' : 'Disable / Remove Method'}"><i data-lucide="trash-2"></i></button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `)}
 
-      ${renderFieldGroup('Payment Methods', 'Configured methods currently available in the admin data.', `
-        <div class="management-grid">
-          ${renderInfoTile('Configured Methods', paidMethods.length ? paidMethods.join(', ') : 'No methods detected', 'Based on existing payment records')}
-          ${renderInfoTile('UPI', payment.upiId || 'Not set')}
-          ${renderInfoTile('QR Code', payment.qrImage || 'Not set')}
-          ${renderInfoTile('Instructions', payment.instructions || 'Not set')}
-        </div>
-      `)}
-
-      ${renderFieldGroup('Payment Records', 'Live records pulled from the orders collection.', `
+      ${renderFieldGroup('Live Payment Records', 'Real customer payment submissions pulled from Firebase orders collection.', `
         <div class="management-filterbar">
           <div class="field">
             <label for="paymentSearch">Search</label>
@@ -4277,20 +4493,22 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
               </tr>
             </thead>
             <tbody>
-              ${tableItems.length ? tableItems.map((item) => `
+              ${tableItems.length ? tableItems.map((item) => {
+                const thumb = orderProductThumb(item);
+                return `
                 <tr>
                   <td>
                     <div class="management-product-cell">
-                      <div class="management-product-thumb">${item.image ? `<img src="${escapeHtml(resolveMediaSource(item.image) || item.image)}" alt="${escapeHtml(orderProductName(item))}" loading="lazy" />` : '<div class="preview-fallback">No image</div>'}</div>
+                      <div class="management-product-thumb">${thumb ? `<img src="${escapeHtml(thumb)}" alt="${escapeHtml(orderProductName(item))}" loading="lazy" />` : '<div class="preview-fallback"><i data-lucide="film"></i></div>'}</div>
                       <div>
                         <strong>${escapeHtml(orderProductName(item))}</strong>
                         <div class="meta">${escapeHtml(orderCustomerLabel(item))}</div>
                       </div>
                     </div>
                   </td>
-                  <td>${escapeHtml(orderTransactionId(item))}</td>
-                  <td>${escapeHtml(orderMethodLabel(item))}</td>
-                  <td>${escapeHtml(formatCurrencyCompact(item.amount))}</td>
+                  <td><code>${escapeHtml(orderTransactionId(item))}</code></td>
+                  <td><span class="badge">${escapeHtml(orderMethodLabel(item))}</span></td>
+                  <td><strong>${escapeHtml(formatCurrencyCompact(item.amount || item.inr || 0))}</strong></td>
                   <td>${renderStatusBadge(orderStatusValue(item))}</td>
                   <td>${escapeHtml(formatDateTime(orderDateValue(item)))}</td>
                   <td>
@@ -4299,12 +4517,84 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
                     </div>
                   </td>
                 </tr>
-              `).join('') : `<tr><td colspan="7"><div class="empty-state">${allOrders.length ? 'No payment records match the current filters.' : 'No payment records found.'}</div></td></tr>`}
+              `;
+              }).join('') : `<tr><td colspan="7"><div class="empty-state">${allOrders.length ? 'No payment records match the current filters.' : 'No payment records found.'}</div></td></tr>`}
             </tbody>
           </table>
         </div>
       `)}
     </div>
+  `;
+}
+
+
+
+function renderPaymentMethodModal(method = {}, isEdit = false) {
+  const isRecommended = Boolean(method.isRecommended);
+  const status = method.status || 'active';
+  const type = method.type || 'crypto';
+  return `
+    <div class="panel-head management-modal-head">
+      <div>
+        <h2 class="section-title">${isEdit ? 'Edit Payment Method' : 'Add New Payment Method'}</h2>
+        <p class="section-subtitle">${isEdit ? `Update credentials for ${escapeHtml(method.name || 'method')}` : 'Add a custom gateway or crypto wallet connected to checkout.'}</p>
+      </div>
+      <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
+    </div>
+    <form class="form" id="paymentMethodForm" data-method-id="${escapeHtml(method.id || '')}" data-is-edit="${isEdit ? 'true' : 'false'}" data-is-custom="${method.isCustom ? 'true' : 'false'}">
+      <div class="form-grid">
+        <div class="field">
+          <label for="pmName">Payment Method Name *</label>
+          <input class="input" id="pmName" name="name" type="text" placeholder="e.g. USDT TRC-20, Toncoin, Paytm Direct, Google Pay" value="${escapeHtml(method.name || '')}" required />
+        </div>
+        <div class="field">
+          <label for="pmType">Category / Network</label>
+          <select class="select" id="pmType" name="type">
+            <option value="crypto" ${type === 'crypto' ? 'selected' : ''}>Crypto Wallet (USDT / BTC / TON / BSC / ETH)</option>
+            <option value="upi" ${type === 'upi' ? 'selected' : ''}>Indian UPI (GPay / PhonePe / Paytm / BHIM)</option>
+            <option value="binance" ${type === 'binance' ? 'selected' : ''}>Binance Pay</option>
+            <option value="paypal" ${type === 'paypal' ? 'selected' : ''}>PayPal</option>
+            <option value="giftcard" ${type === 'giftcard' ? 'selected' : ''}>Digital Gift Card / Voucher</option>
+            <option value="custom" ${type === 'custom' ? 'selected' : ''}>Custom Payment Link / Gateway</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="pmIdentifier">Account ID / Wallet Address / Payment Link *</label>
+          <input class="input" id="pmIdentifier" name="identifier" type="text" placeholder="e.g. 0x... / UPI VPA / Binance ID / https://..." value="${escapeHtml(method.identifier || '')}" required />
+        </div>
+        <div class="field">
+          <label for="pmTag">Tag Badge Text</label>
+          <input class="input" id="pmTag" name="tag" type="text" placeholder="e.g. USDT, 0% FEE, FAST, INTL" value="${escapeHtml(method.tag || '')}" />
+        </div>
+        <div class="field">
+          <label for="pmQrImage">QR Code Image URL (Optional)</label>
+          <input class="input" id="pmQrImage" name="qrImage" type="text" placeholder="https://..." value="${escapeHtml(method.qrImage || '')}" />
+        </div>
+        <div class="field full">
+          <label for="pmSub">Subtitle / Short Note</label>
+          <input class="input" id="pmSub" name="sub" type="text" placeholder="e.g. Tron network low-fee transfers" value="${escapeHtml(method.sub || '')}" />
+        </div>
+        <div class="field full">
+          <label for="pmInstructions">Instructions for Buyer</label>
+          <textarea class="textarea" id="pmInstructions" name="instructions" rows="2" placeholder="Send exact amount and upload transaction screenshot for fast verification.">${escapeHtml(method.instructions || '')}</textarea>
+        </div>
+        <div class="field">
+          <label for="pmStatus">Live Status</label>
+          <select class="select" id="pmStatus" name="status">
+            <option value="active" ${status === 'active' ? 'selected' : ''}>Active (Visible on checkout)</option>
+            <option value="disabled" ${status === 'disabled' ? 'selected' : ''}>Disabled (Hidden)</option>
+          </select>
+        </div>
+        <div class="field" style="display:flex;align-items:center;gap:10px;padding-top:24px;">
+          <input type="checkbox" id="pmIsRecommended" name="isRecommended" style="width:18px;height:18px;cursor:pointer;" ${isRecommended ? 'checked' : ''} />
+          <label for="pmIsRecommended" style="cursor:pointer;margin:0;font-weight:600;">⭐ Make this the Recommended Choice</label>
+        </div>
+      </div>
+      <div class="toolbar management-actions-inline" style="margin-top:16px;">
+        <button class="btn btn-primary" type="submit"><i data-lucide="check"></i> Save Payment Method</button>
+        <button class="btn btn-ghost" data-close-modal type="button">Cancel</button>
+      </div>
+    </form>
   `;
 }
 
@@ -5481,7 +5771,25 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'edit-single') {
-      openSingleEditor(node, singleEditors[node], ui.data?.[node] || {});
+      const fallbackPayment = node === 'payment' ? {
+        recommendedMethod: 'binancepay',
+        upiId: 'Ritikane@ptyes',
+        qrImage: '',
+        telegramUrl: 'https://t.me/TRUSTED_BROTHER1234',
+        telegramChannel: 'https://t.me/TRUSTED_BROTHER1234',
+        bep20Address: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+        ethAddress: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
+        binanceId: '969887942',
+        binanceGiftCardUrl: 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
+        paypalLink: 'https://paypal.me/Johnguzman456',
+        instructions: 'Pay exact order amount and submit screenshot for instant activation.',
+        status: 'active',
+      } : {};
+      const currentVal = {
+        ...fallbackPayment,
+        ...(ui.data?.[node] || {}),
+      };
+      openSingleEditor(node, singleEditors[node], currentVal);
       return;
     }
     if (action === 'set-media-view') {
@@ -5530,6 +5838,73 @@ function attachGlobalHandlers() {
         setMediaStatus('Media deleted.');
         closeModal();
         renderView(ui.data || {});
+      }
+      return;
+    }
+    if (action === 'add-payment-method') {
+      openModal(renderPaymentMethodModal({}, false));
+      return;
+    }
+    if (action === 'edit-payment-method') {
+      const currentPayment = ui.data?.payment || {};
+      const methods = getStandardPaymentMethods(currentPayment);
+      const targetMethod = methods.find((m) => m.id === id) || { id };
+      openModal(renderPaymentMethodModal(targetMethod, true));
+      return;
+    }
+    if (action === 'toggle-payment-method') {
+      const currentPayment = { ...(ui.data?.payment || {}) };
+      const customMethods = { ...(currentPayment.customMethods || {}) };
+      let disabledMethods = Array.isArray(currentPayment.disabledMethods) ? [...currentPayment.disabledMethods] : [];
+
+      if (customMethods[id]) {
+        customMethods[id].status = customMethods[id].status === 'disabled' ? 'active' : 'disabled';
+        currentPayment.customMethods = customMethods;
+      } else {
+        if (disabledMethods.includes(id)) {
+          disabledMethods = disabledMethods.filter((mId) => mId !== id);
+        } else {
+          disabledMethods.push(id);
+        }
+      }
+      currentPayment.disabledMethods = disabledMethods;
+
+      await updateRecord('payment', null, currentPayment);
+      showToast('Payment method visibility updated live');
+      return;
+    }
+    if (action === 'set-recommended-method') {
+      const currentPayment = { ...(ui.data?.payment || {}) };
+      currentPayment.recommendedMethod = id;
+      if (Array.isArray(currentPayment.disabledMethods)) {
+        currentPayment.disabledMethods = currentPayment.disabledMethods.filter((mId) => mId !== id);
+      }
+      await updateRecord('payment', null, currentPayment);
+      showToast('⭐ Recommended payment method updated live');
+      return;
+    }
+    if (action === 'delete-payment-method') {
+      if (confirm('Are you sure you want to remove this payment method?')) {
+        const currentPayment = { ...(ui.data?.payment || {}) };
+        const customMethods = { ...(currentPayment.customMethods || {}) };
+        if (customMethods[id]) {
+          delete customMethods[id];
+          currentPayment.customMethods = customMethods;
+        } else {
+          let disabledMethods = Array.isArray(currentPayment.disabledMethods) ? [...currentPayment.disabledMethods] : [];
+          if (!disabledMethods.includes(id)) disabledMethods.push(id);
+          currentPayment.disabledMethods = disabledMethods;
+        }
+        await updateRecord('payment', null, currentPayment);
+        showToast('Payment method removed');
+      }
+      return;
+    }
+    if (action === 'copy-payment-val') {
+      const val = actionBtn.dataset.val;
+      if (val && val !== 'Not set') {
+        await navigator.clipboard.writeText(val);
+        showToast('Payment credential copied to clipboard');
       }
       return;
     }
@@ -5607,6 +5982,71 @@ function attachGlobalHandlers() {
   document.addEventListener('submit', async (event) => {
     event.preventDefault();
     const form = event.target;
+    if (form.id === 'paymentMethodForm') {
+      const methodId = form.dataset.methodId || (`custom_${Date.now()}`);
+      const isCustom = form.dataset.isCustom === 'true' || methodId.startsWith('custom_');
+      
+      const formData = new FormData(form);
+      const name = (formData.get('name') || '').trim();
+      const type = (formData.get('type') || 'crypto').trim();
+      const identifier = (formData.get('identifier') || '').trim();
+      const tag = (formData.get('tag') || 'ACTIVE').trim().toUpperCase();
+      const qrImage = (formData.get('qrImage') || '').trim();
+      const sub = (formData.get('sub') || '').trim();
+      const instructions = (formData.get('instructions') || '').trim();
+      const status = formData.get('status') || 'active';
+      const isRecommended = form.querySelector('#pmIsRecommended')?.checked || false;
+
+      const currentPayment = { ...(ui.data?.payment || {}) };
+      const customMethods = { ...(currentPayment.customMethods || {}) };
+      let disabledMethods = Array.isArray(currentPayment.disabledMethods) ? [...currentPayment.disabledMethods] : [];
+
+      if (status === 'disabled') {
+        if (!disabledMethods.includes(methodId)) disabledMethods.push(methodId);
+      } else {
+        disabledMethods = disabledMethods.filter((id) => id !== methodId);
+      }
+
+      const updatedPayment = { ...currentPayment, disabledMethods };
+
+      if (isRecommended) {
+        updatedPayment.recommendedMethod = methodId;
+      }
+
+      if (isCustom || !['binancepay', 'upi', 'bep20', 'eth', 'paypal', 'giftcard'].includes(methodId)) {
+        customMethods[methodId] = {
+          id: methodId,
+          name,
+          type,
+          identifier,
+          tag,
+          qrImage,
+          sub,
+          instructions,
+          status,
+          updatedAt: Date.now(),
+        };
+        updatedPayment.customMethods = customMethods;
+      } else {
+        if (methodId === 'binancepay') updatedPayment.binanceId = identifier;
+        else if (methodId === 'upi') {
+          updatedPayment.upiId = identifier;
+          if (qrImage) updatedPayment.qrImage = qrImage;
+        } else if (methodId === 'bep20') updatedPayment.bep20Address = identifier;
+        else if (methodId === 'eth') updatedPayment.ethAddress = identifier;
+        else if (methodId === 'paypal') updatedPayment.paypalLink = identifier;
+        else if (methodId === 'giftcard') updatedPayment.binanceGiftCardUrl = identifier;
+      }
+
+      try {
+        await updateRecord('payment', null, updatedPayment);
+        showToast(`Payment method "${name}" saved successfully!`, 'success');
+        closeModal();
+      } catch (err) {
+        showToast(err?.message || 'Failed to save payment method', 'danger');
+      }
+      return;
+    }
     if (form.id === 'recordForm') {
       const node = form.dataset.node;
       const id = form.dataset.id;
