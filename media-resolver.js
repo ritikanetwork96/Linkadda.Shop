@@ -1,13 +1,11 @@
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
-const db = window.__linkaddaDb;
-if (!db) {
-  console.warn('Media resolver skipped: Firebase DB not ready');
-}
-
 const mediaMap = new Map();
 let observer = null;
 let rafId = 0;
+
+// High-quality fallback SVG data URI for broken images
+const FALLBACK_SVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="100%" height="100%" fill="%2314141e"/><g fill="none" stroke="%237c3aed" stroke-width="2"><rect x="90" y="50" width="120" height="100" rx="16"/><circle cx="130" cy="85" r="12"/><path d="M100 135 l25-25 20 20 25-30 20 35"/></g><text x="50%" y="175" fill="%238b8baa" font-family="sans-serif" font-size="12" text-anchor="middle" font-weight="600">Linkadda Media</text></svg>';
 
 function stripQuery(value) {
   return String(value || '').trim().split('#')[0].split('?')[0];
@@ -96,10 +94,39 @@ function resolveValue(value) {
 }
 
 function updateImage(el) {
+  if (!el) return;
+
+  // Attach error resilience listener if not present
+  if (!el.dataset.hasErrHandler) {
+    el.dataset.hasErrHandler = 'true';
+    el.addEventListener('error', function handleImgErr() {
+      const retries = Number(this.dataset.retryCount || 0);
+      if (retries >= 2) {
+        if (!this.src.startsWith('data:image')) {
+          this.src = FALLBACK_SVG;
+        }
+        return;
+      }
+      this.dataset.retryCount = String(retries + 1);
+
+      const currentSrc = this.getAttribute('src') || '';
+      const resolved = resolveValue(currentSrc);
+      if (resolved && resolved !== currentSrc) {
+        this.src = resolved;
+      } else if (currentSrc && !currentSrc.startsWith('data:image')) {
+        const joiner = currentSrc.includes('?') ? '&' : '?';
+        this.src = `${currentSrc}${joiner}_r=${Date.now()}`;
+      } else {
+        this.src = FALLBACK_SVG;
+      }
+    });
+  }
+
   const current = el.getAttribute('src') || '';
   const next = resolveValue(current);
-  if (!next || next === current) return;
-  el.setAttribute('src', next);
+  if (next && next !== current) {
+    el.setAttribute('src', next);
+  }
 }
 
 function syncDocument() {
@@ -114,18 +141,58 @@ function scheduleSync() {
   });
 }
 
-if (db) {
-  onValue(ref(db, 'media'), (snap) => {
-    rebuildIndex(snap.val() || {});
-    scheduleSync();
-  });
+// Global capture error listener for image load failures
+if (typeof document !== 'undefined') {
+  document.addEventListener('error', (e) => {
+    if (e.target && e.target.tagName === 'IMG') {
+      updateImage(e.target);
+    }
+  }, true);
+}
 
-  observer = new MutationObserver(() => scheduleSync());
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+function startResolver(db) {
+  if (!db || window.__mediaResolverActive) return;
+  window.__mediaResolverActive = true;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', scheduleSync, { once: true });
-  } else {
+  try {
+    onValue(ref(db, 'media'), (snap) => {
+      rebuildIndex(snap.val() || {});
+      scheduleSync();
+    });
+
+    if (!observer) {
+      observer = new MutationObserver(() => scheduleSync());
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+
     scheduleSync();
+  } catch (e) {
+    console.warn('Media resolver init warning:', e);
   }
 }
+
+function checkAndInit() {
+  const db = window.__linkaddaDb || window._fbDB;
+  if (db) {
+    startResolver(db);
+  } else {
+    window.addEventListener('linkadda-firebase-ready', () => {
+      const readyDb = window.__linkaddaDb || window._fbDB;
+      if (readyDb) startResolver(readyDb);
+    }, { once: true });
+
+    let tries = 0;
+    const interval = setInterval(() => {
+      tries++;
+      const currentDb = window.__linkaddaDb || window._fbDB;
+      if (currentDb) {
+        clearInterval(interval);
+        startResolver(currentDb);
+      } else if (tries > 20) {
+        clearInterval(interval);
+      }
+    }, 250);
+  }
+}
+
+checkAndInit();

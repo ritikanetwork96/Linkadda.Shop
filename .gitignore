@@ -27,6 +27,9 @@ web_modules/
 .classpath
 .settings/
 
+# Vercel local files & build outputs
+.vercel/
+
 # Cloudflare Wrangler local state & caches
 .wrangler/
 

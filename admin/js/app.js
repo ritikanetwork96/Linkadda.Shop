@@ -1555,13 +1555,23 @@ function openShareModal(node, id) {
   const item = getItem(node, id);
   if (!item) return;
 
+  const isCategory = node === 'categories';
   const origin = window.location.origin;
   const pathname = window.location.pathname;
   const adminIdx = pathname.toLowerCase().indexOf('/admin');
   const baseFolder = adminIdx !== -1 ? pathname.substring(0, adminIdx) : '';
   const cleanBase = `${origin}${baseFolder}`.replace(/\/+$/, '');
-  const targetParam = item.id || id;
-  const homeUrl = `${cleanBase}/?product=${encodeURIComponent(targetParam)}`;
+  const slugify = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const targetParam = item.slug || slugify(item.title || item.name) || item.id || id;
+  const paramName = isCategory ? 'category' : 'product';
+  const homeUrl = `${cleanBase}/?${paramName}=${encodeURIComponent(targetParam)}`;
+
+  const modalTitle = isCategory ? 'Share Category Link' : 'Share Product Link';
+  const typeLabel = isCategory ? 'Category Selected' : 'Product Selected';
+  const inputLabel = isCategory ? 'Customer Link (Opens page & filters to category)' : 'Customer Link (Opens page & highlights product)';
+  const footerHelpText = isCategory
+    ? 'When customers open this link, the site will automatically filter the catalog and scroll directly to this category.'
+    : 'When customers open this link, the site will automatically scroll to the product and highlight it with a premium glow.';
 
   const html = `
     <div class="panel shadow-lg share-product-modal modal-sm" style="width: 100%; padding: 28px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--border); overflow: hidden; position: relative;">
@@ -1572,20 +1582,20 @@ function openShareModal(node, id) {
       <div class="panel-head flex items-center justify-between" style="padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
         <h3 class="panel-title flex items-center gap-2" style="font-size: 16px; font-weight: 700; color: var(--text); margin: 0; display: flex; align-items: center; gap: 8px;">
           <i data-lucide="share-2" style="color: #6366f1; width: 20px; height: 20px;"></i>
-          <span>Share Product Link</span>
+          <span>${escapeHtml(modalTitle)}</span>
         </h3>
         <button class="btn btn-ghost" data-close-modal type="button" style="padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center;">
           <i data-lucide="x" style="width: 18px; height: 18px;"></i>
         </button>
       </div>
 
-      <!-- Product Preview Block -->
+      <!-- Preview Block -->
       <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 10px; padding: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
         <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 8px; display: grid; place-items: center; color: white; font-weight: bold; font-size: 18px; flex-shrink: 0;">
-          ${escapeHtml((item.title || item.name || 'P')[0].toUpperCase())}
+          ${escapeHtml((item.title || item.name || 'C')[0].toUpperCase())}
         </div>
         <div>
-          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.05em;">Product Selected</div>
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.05em;">${escapeHtml(typeLabel)}</div>
           <div style="font-size: 14px; font-weight: 600; color: var(--text);">${escapeHtml(item.title || item.name || '')}</div>
         </div>
       </div>
@@ -1593,7 +1603,7 @@ function openShareModal(node, id) {
       <!-- Link Box -->
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">
-          Customer Link (Opens page & highlights product)
+          ${escapeHtml(inputLabel)}
         </label>
         <div style="display: flex; gap: 8px; width: 100%;">
           <input type="text" readonly value="${escapeHtml(homeUrl)}" onclick="this.select();" style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--bg); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); color: var(--text); outline: none; width: 100%; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);" />
@@ -1605,7 +1615,7 @@ function openShareModal(node, id) {
 
       <!-- Footer Help Text -->
       <div style="font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.4;">
-        When customers open this link, the site will automatically scroll to the product and highlight it with a premium glow.
+        ${escapeHtml(footerHelpText)}
       </div>
 
       <!-- Footer Buttons -->
@@ -2203,22 +2213,30 @@ function renderTopProductsAnalytics(products, totalClicks) {
   }
   return `
     <div class="analytics-product-list">
-      ${products.map((item, index) => `
-        <div class="analytics-product-row">
-          <div class="analytics-product-rank">${escapeHtml(String(index + 1))}</div>
+      ${products.map((item, index) => {
+        const share = item.share || 0;
+        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+        const rankLabel = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+        return `
+        <div class="analytics-product-row ${rankClass}">
+          <div class="analytics-row-progress-fill" style="width: ${share}%;"></div>
+          <div class="analytics-product-rank">${rankLabel}</div>
           <div class="analytics-product-thumb">
-            ${item.image ? `<img src="${escapeHtml(resolveMediaSource(item.image) || item.image)}" alt="${escapeHtml(item.title || 'Product')}" loading="lazy" />` : '<div class="analytics-thumb-fallback">No image</div>'}
+            ${item.image ? `<img src="${escapeHtml(resolveMediaSource(item.image) || item.image)}" alt="${escapeHtml(item.title || 'Product')}" loading="lazy" />` : '<div class="analytics-thumb-fallback"><i data-lucide="package"></i></div>'}
           </div>
           <div class="analytics-product-meta">
-            <strong>${escapeHtml(item.title || item.name || item.slug || 'Untitled product')}</strong>
-            <span>${escapeHtml(item.category || 'Uncategorized')}</span>
+            <div class="analytics-product-head-line">
+              <strong class="analytics-product-title">${escapeHtml(item.title || item.name || item.slug || 'Untitled product')}</strong>
+              <span class="analytics-category-badge">${escapeHtml(item.category || 'General')}</span>
+            </div>
           </div>
           <div class="analytics-product-stats">
-            <strong>${escapeHtml(formatNumber(item.clicks || 0))}</strong>
-            <span>${escapeHtml(totalClicks ? `${item.share || 0}% share` : '0% share')}</span>
+            <span class="analytics-clicks-count">${escapeHtml(formatNumber(item.clicks || 0))} clicks</span>
+            <span class="analytics-share-badge">${escapeHtml(String(share))}%</span>
           </div>
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
 }
@@ -2246,8 +2264,13 @@ function mountAnalyticsCharts() {
         <strong>${escapeHtml(label)}</strong>
         <span>${escapeHtml(formatNumber(value))} ${escapeHtml(series)}</span>
       `;
-      tooltip.style.left = `${Math.min(rect.width - 12, Math.max(12, x))}px`;
+      tooltip.style.left = `${Math.min(rect.width - 60, Math.max(60, x))}px`;
       tooltip.style.top = `${Math.min(rect.height - 12, Math.max(12, y))}px`;
+      if (y < 55) {
+        tooltip.classList.add('tooltip-bottom');
+      } else {
+        tooltip.classList.remove('tooltip-bottom');
+      }
       tooltip.classList.add('visible');
       tooltip.setAttribute('aria-hidden', 'false');
     };
@@ -2603,9 +2626,20 @@ function renderCatalogProductCard(item, node) {
     item.image || (Array.isArray(item.galleryImages) && item.galleryImages.length) ? `<span class="chip">${escapeHtml(itemMediaCountLabel(item))}</span>` : '',
   ].filter(Boolean).join('');
 
+  const cleanPriceINR = (val) => {
+    if (!val) return '—';
+    const raw = String(val).replace(/^[₹$\s]+/, '').trim();
+    return raw ? `₹${raw}` : '—';
+  };
+  const cleanPriceUSD = (val) => {
+    if (!val) return '—';
+    const raw = String(val).replace(/^[₹$\s]+/, '').trim();
+    return raw ? `$${raw}` : '—';
+  };
+
   const metricsList = [
-    { label: 'INR', value: item.priceINR ? `₹${item.priceINR}` : '—' },
-    { label: 'USD', value: item.priceUSD ? `$${item.priceUSD}` : '—' },
+    { label: 'INR', value: cleanPriceINR(item.priceINR) },
+    { label: 'USD', value: cleanPriceUSD(item.priceUSD) },
     { label: 'Media', value: itemMediaCountLabel(item) },
   ];
   if (item.orderCount || item.orders) {

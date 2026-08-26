@@ -2643,6 +2643,7 @@
         updateLastSoldBadges();
       }
       focusSharedProduct();
+      if (typeof focusSharedCategory === 'function') focusSharedCategory();
     } catch (err) {
       console.error('Failed to render live grid:', err);
     }
@@ -2790,19 +2791,84 @@
     }
   }
 
+  let sharedCategoryDone = false;
+  let sharedCategoryTargetId = '';
+
+  function getSharedCategoryFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let raw = urlParams.get('category') || urlParams.get('cat') || urlParams.get('c');
+    if (!raw && window.location.hash) {
+      const match = window.location.hash.match(/#\/?(category|cat)[\/=-]?([^&]+)/i);
+      if (match) raw = match[2];
+    }
+    try {
+      return decodeURIComponent(String(raw || '').trim());
+    } catch (_) {
+      return String(raw || '').trim();
+    }
+  }
+
+  function focusSharedCategory() {
+    const catQuery = getSharedCategoryFromUrl();
+    if (!catQuery) return;
+
+    if (sharedCategoryTargetId !== catQuery) {
+      sharedCategoryDone = false;
+      sharedCategoryTargetId = catQuery;
+    }
+
+    const queryLower = catQuery.toLowerCase();
+    const categories = normalizeRecords(liveCollections.categories);
+
+    // Match category by ID, slug, or title
+    let matchedCat = categories.find(c =>
+      String(c.id).toLowerCase() === queryLower ||
+      String(c.slug || '').toLowerCase() === queryLower ||
+      String(c.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === queryLower ||
+      String(c.title || '').toLowerCase() === queryLower
+    );
+
+    const targetCatId = matchedCat ? matchedCat.id : catQuery;
+
+    if (activeCategoryFilter !== targetCatId) {
+      activeCategoryFilter = targetCatId;
+      renderCategoryFilters();
+      renderLiveGrid();
+    }
+
+    if (!sharedCategoryDone) {
+      sharedCategoryDone = true;
+      const performCatScroll = () => {
+        const catalogEl = document.getElementById('catalog') || document.querySelector('.category-filter-wrapper') || document.getElementById('categoriesGrid');
+        if (catalogEl) {
+          catalogEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+      performCatScroll();
+      setTimeout(performCatScroll, 300);
+      setTimeout(performCatScroll, 800);
+    }
+  }
+
   window.addEventListener('hashchange', () => {
     sharedFocusDone = false;
     focusSharedProduct();
+    sharedCategoryDone = false;
+    focusSharedCategory();
   });
   window.addEventListener('popstate', () => {
     sharedFocusDone = false;
     focusSharedProduct();
+    sharedCategoryDone = false;
+    focusSharedCategory();
   });
   window.addEventListener('load', () => {
     focusSharedProduct();
+    focusSharedCategory();
   });
   document.addEventListener('DOMContentLoaded', () => {
     focusSharedProduct();
+    focusSharedCategory();
   });
 
   document.addEventListener('click', (event) => {
@@ -3313,10 +3379,3 @@
   <script type="module" src="/media-resolver.js"></script>
 </body>
 </html>
-
-    .media-viewer-dot.active{background:#f0247a;transform:scale(1.2);}
-  </style>
-  <script type="module" src="/media-resolver.js"></script>
-</body>
-</html>
-

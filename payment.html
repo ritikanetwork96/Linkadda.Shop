@@ -662,6 +662,35 @@
       font-weight: 500;
     }
 
+    .download-qr-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 9px 20px;
+      background: linear-gradient(135deg, rgba(240, 36, 122, 0.14), rgba(124, 58, 237, 0.14));
+      border: 1px solid rgba(240, 36, 122, 0.32);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      box-shadow: 0 4px 15px rgba(240, 36, 122, 0.15);
+      letter-spacing: 0.2px;
+    }
+    .download-qr-btn:hover {
+      background: linear-gradient(135deg, rgba(240, 36, 122, 0.28), rgba(124, 58, 237, 0.28));
+      border-color: rgba(240, 36, 122, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(240, 36, 122, 0.3);
+      color: #ffffff;
+    }
+    .download-qr-btn:active {
+      transform: scale(0.97);
+    }
+
     .network-badge {
       display: inline-flex;
       align-items: center;
@@ -1297,6 +1326,7 @@
             <div id="upiQRError" class="qr-empty" style="display:none">Payment QR is not configured.</div>
           </div>
           <div class="qr-label">Scan with GPay · PhonePe · Paytm · Any UPI App</div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('upi')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
         <div class="or-divider">or copy UPI ID</div>
         <div class="addr-box">
@@ -1314,6 +1344,7 @@
             <div id="bep20QR"></div>
           </div>
           <div class="qr-label">Send <strong>USDT on BEP-20 (BSC)</strong> only</div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('bep20')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
         <div class="or-divider">or copy wallet address</div>
         <div class="addr-box">
@@ -1331,6 +1362,7 @@
             <div id="ethQR"></div>
           </div>
           <div class="qr-label">Send <strong>USDT on Ethereum ERC-20</strong> only</div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('eth')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
         <div class="or-divider">or copy wallet address</div>
         <div class="addr-box">
@@ -1367,15 +1399,21 @@
 
       <!-- BINANCE PAY SECTION -->
       <div id="binancepaySection" style="display:none">
-        <div style="display:flex; justify-content:center; align-items:center; padding: 20px 0;">
-          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+        <div class="qr-wrapper">
+          <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
+            <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+          </div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('binancepay')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
       </div>
 
       <!-- PAYPAL SECTION -->
       <div id="paypalSection" style="display:none">
-        <div style="display:flex; justify-content:center; align-items:center; padding: 20px 0;">
-          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+        <div class="qr-wrapper">
+          <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
+            <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+          </div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('paypal')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
       </div>
 
@@ -1387,6 +1425,7 @@
             <div id="customQR"></div>
           </div>
           <div class="qr-label" id="customQRLabel">Scan to Pay</div>
+          <button class="download-qr-btn" onclick="downloadCurrentQRCode('custom')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
         <div class="or-divider" id="customDivider">or copy address / ID / link</div>
         <div class="addr-box">
@@ -1614,7 +1653,7 @@ function esc(str) {
 // CONFIG — Update your details here
 // â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
 let selectedMethod = 'binancepay';
-
+var userSelectedMethodManually = false;
 const CONFIG = {
   recommendedMethod: 'binancepay',
   upiId: 'Ritikane@ptyes',
@@ -1694,44 +1733,7 @@ function normalizeUpiId(value) {
   return cleaned;
 }
 
-function applyPaymentConfigToUI() {
-  const mapping = [
-    ['upiIdText', CONFIG.upiId],
-    ['bep20Addr', CONFIG.bep20Address],
-    ['ethAddr', CONFIG.ethAddress],
-    ['binanceId', CONFIG.binanceId],
-    ['binancepayId', CONFIG.binanceId],
-    ['paypalLink', CONFIG.paypalLink],
-  ];
-  mapping.forEach(([id, value]) => {
-    const el = document.getElementById(id);
-    if (el && value) el.textContent = value;
-  });
-  const binanceGiftLink = document.getElementById('binanceGiftLink');
-  if (binanceGiftLink) binanceGiftLink.href = safeUrl(CONFIG.binanceGiftCardUrl, binanceGiftLink.href);
-  renderUpiQr();
-
-  // Dynamic Recommended Payment Method Re-ordering & Badge
-  const methodGrid = document.getElementById('methodGrid') || document.querySelector('.method-grid');
-  const recMethod = String(CONFIG.recommendedMethod || 'binancepay').toLowerCase().trim();
-  if (methodGrid) {
-    document.querySelectorAll('.method-card').forEach(card => {
-      card.classList.remove('is-recommended');
-      const pill = card.querySelector('.recommended-pill');
-      if (pill) pill.remove();
-    });
-
-    const targetCard = document.getElementById(`m-${recMethod}`);
-    if (targetCard) {
-      targetCard.classList.add('is-recommended');
-      const badge = document.createElement('div');
-      badge.className = 'recommended-pill';
-      badge.innerHTML = '<i class="fa-solid fa-star"></i> Recommended';
-      targetCard.prepend(badge);
-      methodGrid.prepend(targetCard);
-    }
-  }
-}
+// applyPaymentConfigToUI — defined after renderDynamicPaymentMethods below
 
 function safeUrl(value, fallback = '') {
   const raw = String(value || '').trim();
@@ -1854,8 +1856,12 @@ function renderDynamicPaymentMethods() {
 
   const payment = window.__paymentPayment || {};
   const settings = window.__paymentSettings || {};
-  const disabled = Array.isArray(payment.disabledMethods) ? payment.disabledMethods : (payment.disabledMethods ? Object.keys(payment.disabledMethods) : []);
-  const recommendedId = payment.recommendedMethod || settings.recommendedMethod || CONFIG.recommendedMethod || 'binancepay';
+  const disabled = Array.isArray(payment.disabledMethods)
+    ? payment.disabledMethods
+    : (payment.disabledMethods ? Object.keys(payment.disabledMethods) : []);
+  const recommendedId = String(
+    payment.recommendedMethod || settings.recommendedMethod || CONFIG.recommendedMethod || 'binancepay'
+  ).toLowerCase().trim();
   const customMethods = payment.customMethods || {};
 
   const builtInMethods = [
@@ -1865,11 +1871,9 @@ function renderDynamicPaymentMethods() {
       sub: 'Direct ID Transfer',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconClass: 'icon-binance',
       iconStyle: 'background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0',
       logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png',
       alt: 'Binance Pay',
-      isRecommended: recommendedId === 'binancepay',
     },
     {
       id: 'upi',
@@ -1877,11 +1881,9 @@ function renderDynamicPaymentMethods() {
       sub: 'GPay · PhonePe · Paytm',
       tag: '₹ INR',
       tagClass: 'tag-inr',
-      iconClass: 'icon-upi',
       iconStyle: 'background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0',
       logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/upi-icon.png',
       alt: 'UPI',
-      isRecommended: recommendedId === 'upi',
     },
     {
       id: 'bep20',
@@ -1889,11 +1891,9 @@ function renderDynamicPaymentMethods() {
       sub: 'Binance Smart Chain',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconClass: 'icon-bep20',
       iconStyle: 'overflow:hidden;padding:0',
       logo: 'https://pypi-camo.freetls.fastly.net/e5a6147a5b426934a5fd2df6696c4f1577f3452d/68747470733a2f2f616c70686177616c6c65742e636f6d2f77702d636f6e74656e742f75706c6f6164732f323032312f30322f424e422e706e67',
       alt: 'BEP20',
-      isRecommended: recommendedId === 'bep20',
     },
     {
       id: 'eth',
@@ -1901,11 +1901,9 @@ function renderDynamicPaymentMethods() {
       sub: 'Ethereum Network',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconClass: 'icon-eth',
       iconStyle: 'overflow:hidden;padding:0',
       logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSndiDvD9neFlHtoY2t-gkLPPYgfyaKf7kANA&s',
       alt: 'ERC20',
-      isRecommended: recommendedId === 'eth',
     },
     {
       id: 'paypal',
@@ -1913,11 +1911,9 @@ function renderDynamicPaymentMethods() {
       sub: 'Secure Transfer',
       tag: 'INTL',
       tagClass: 'tag-intl',
-      iconClass: 'icon-paypal',
       iconStyle: 'overflow:hidden;padding:0',
       logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg',
       alt: 'PayPal',
-      isRecommended: recommendedId === 'paypal',
     },
   ];
 
@@ -1927,58 +1923,71 @@ function renderDynamicPaymentMethods() {
     sub: item.sub || item.description || 'Fast Transfer',
     tag: item.tag || (item.type === 'upi' ? '₹ INR' : item.type === 'crypto' ? 'USDT' : 'INTL'),
     tagClass: item.type === 'upi' ? 'tag-inr' : item.type === 'crypto' ? 'tag-usdt' : 'tag-intl',
-    iconClass: 'icon-custom',
     iconStyle: 'background:linear-gradient(135deg,#059669,#10b981);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
     logo: item.qrImage || '',
     iconFallback: '<i class="fa-solid fa-credit-card" style="color:#fff;font-size:22px"></i>',
     alt: item.name || 'Payment',
-    isRecommended: recommendedId === id,
     status: item.status || 'active',
-    isCustom: true,
   }));
 
-  // Filter out disabled methods
-  const allMethods = [...builtInMethods, ...customList].filter(m => !disabled.includes(m.id) && m.status !== 'disabled');
+  // Merge, mark recommended, filter disabled
+  const allMethods = [...builtInMethods, ...customList]
+    .map(m => ({ ...m, isRecommended: m.id === recommendedId }))
+    .filter(m => !disabled.includes(m.id) && m.status !== 'disabled');
 
-  // Sort recommended to top
+  // Sort: recommended always first
   allMethods.sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0));
 
-  grid.innerHTML = allMethods.map(m => `
-    <div class="method-card ${m.isRecommended ? 'is-recommended' : ''} ${selectedMethod === m.id ? 'selected' : ''}" onclick="selectMethod('${m.id}')" id="m-${m.id}">
+  // Auto-sync selectedMethod to recommended UNLESS user manually chose a different one
+  if (!userSelectedMethodManually) {
+    const rec = allMethods.find(m => m.isRecommended);
+    if (rec && rec.id !== selectedMethod) {
+      selectedMethod = rec.id;
+    } else if (!selectedMethod && allMethods.length > 0) {
+      selectedMethod = allMethods[0].id;
+    }
+  }
+
+  grid.innerHTML = allMethods.map(m => {
+    const isSelected = selectedMethod === m.id;
+    return `<div class="method-card ${m.isRecommended ? 'is-recommended' : ''} ${isSelected ? 'selected' : ''}" onclick="selectMethod('${m.id}', true)" id="m-${m.id}">
       ${m.isRecommended ? '<div class="recommended-pill"><i class="fa-solid fa-star"></i> Recommended</div>' : ''}
       <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-      <div class="method-icon ${m.iconClass || ''}" style="${m.iconStyle || ''}">
+      <div class="method-icon" style="${m.iconStyle || ''}">
         ${m.logo ? `<img src="${m.logo}" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="${m.alt || ''}" />` : (m.iconFallback || '<i class="fa-solid fa-wallet" style="color:#fff;font-size:20px"></i>')}
       </div>
       <div class="method-name">${m.name}</div>
       <div class="method-sub">${m.sub}</div>
       <div class="method-tag ${m.tagClass || 'tag-inr'}">${m.tag}</div>
-    </div>
-  `).join('');
-
-  // Auto-select recommended if no selection yet
-  if (!selectedMethod && allMethods.length > 0) {
-    const defaultSelect = allMethods.find(m => m.isRecommended) || allMethods[0];
-    if (defaultSelect) selectMethod(defaultSelect.id);
-  }
+    </div>`;
+  }).join('');
 }
 
 function applyPaymentConfigToUI() {
+  // 1. Re-render method grid from Firebase (recommended badge + ordering)
   renderDynamicPaymentMethods();
+
+  // 2. Update payment credential displays (IDs, addresses, links)
   const upiIdEl = document.getElementById('upiIdText');
-  if (upiIdEl) upiIdEl.textContent = CONFIG.upiId || 'Ritikane@ptyes';
+  if (upiIdEl && CONFIG.upiId) upiIdEl.textContent = CONFIG.upiId;
   const binanceIdEl = document.getElementById('binanceId');
-  if (binanceIdEl) binanceIdEl.textContent = CONFIG.binanceId || '969887942';
+  if (binanceIdEl && CONFIG.binanceId) binanceIdEl.textContent = CONFIG.binanceId;
   const binancepayIdEl = document.getElementById('binancepayId');
-  if (binancepayIdEl) binancepayIdEl.textContent = CONFIG.binanceId || '969887942';
+  if (binancepayIdEl && CONFIG.binanceId) binancepayIdEl.textContent = CONFIG.binanceId;
   const bep20AddrEl = document.getElementById('bep20Addr');
-  if (bep20AddrEl) bep20AddrEl.textContent = CONFIG.bep20Address || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a';
+  if (bep20AddrEl && CONFIG.bep20Address) bep20AddrEl.textContent = CONFIG.bep20Address;
   const ethAddrEl = document.getElementById('ethAddr');
-  if (ethAddrEl) ethAddrEl.textContent = CONFIG.ethAddress || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a';
+  if (ethAddrEl && CONFIG.ethAddress) ethAddrEl.textContent = CONFIG.ethAddress;
   const paypalLinkEl = document.getElementById('paypalLink');
-  if (paypalLinkEl) paypalLinkEl.textContent = CONFIG.paypalLink || 'https://paypal.me/Johnguzman456';
+  if (paypalLinkEl && CONFIG.paypalLink) paypalLinkEl.textContent = CONFIG.paypalLink;
   const binanceGiftLinkEl = document.getElementById('binanceGiftLink');
   if (binanceGiftLinkEl && CONFIG.binanceGiftCardUrl) binanceGiftLinkEl.href = CONFIG.binanceGiftCardUrl;
+
+  // 3. Refresh UPI QR code
+  if (typeof renderUpiQr === 'function') renderUpiQr();
+
+  // 4. Refresh order summary (shows correct currency/method labels)
+  if (typeof updateOrderSummaryUI === 'function') updateOrderSummaryUI();
 }
 
 function ensurePaymentConfigLoaded() {
@@ -2772,11 +2781,78 @@ let remainingSecs = totalTimeSecs;
 let qrGenerated = {};
 
 // â”€â”€ METHOD SELECTION â”€â”€
-function selectMethod(m) {
+function selectMethod(m, isUserAction) {
+  if (isUserAction) userSelectedMethodManually = true;
   selectedMethod = m;
   document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('m-' + m).classList.add('selected');
-  document.getElementById('alertMethod').classList.remove('show');
+  var card = document.getElementById('m-' + m);
+  if (card) card.classList.add('selected');
+  var alertEl = document.getElementById('alertMethod');
+  if (alertEl) alertEl.classList.remove('show');
+  if (typeof updateOrderSummaryUI === 'function') updateOrderSummaryUI();
+}
+
+function downloadCurrentQRCode(methodId) {
+  const method = methodId || selectedMethod || 'qr';
+  const sec = document.getElementById(method + 'Section') || document.querySelector('#screen2 div[id$="Section"]:not([style*="display: none"]):not([style*="display:none"])');
+  if (!sec) return;
+
+  const canvas = sec.querySelector('canvas');
+  const img = sec.querySelector('.qr-frame img, .qr-wrapper img, img');
+
+  let dataUrl = '';
+  const filename = `Linkadda-QR-${method.toUpperCase()}.png`;
+
+  if (canvas) {
+    try {
+      dataUrl = canvas.toDataURL('image/png');
+    } catch (e) {
+      console.warn('Canvas toDataURL failed:', e);
+    }
+  }
+
+  if (!dataUrl && img && img.src) {
+    if (img.src.startsWith('data:image')) {
+      dataUrl = img.src;
+    } else {
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth || img.width || 300;
+        c.height = img.naturalHeight || img.height || 300;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        dataUrl = c.toDataURL('image/png');
+      } catch (_) {
+        fetch(img.src)
+          .then(res => res.blob())
+          .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+          })
+          .catch(() => {
+            window.open(img.src, '_blank');
+          });
+        return;
+      }
+    }
+  }
+
+  if (dataUrl) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    alert('QR Code image is currently loading or unavailable.');
+  }
 }
 
 // â”€â”€ SCREEN NAVIGATION â”€â”€
@@ -2823,112 +2899,158 @@ function generateQR(containerId, text, size) {
 
 // â”€â”€ GOTO PAY SCREEN â”€â”€
 async function gotoPayScreen() {
-  await ensurePaymentConfigLoaded();
-  await ensureCheckoutOrderLoaded();
-  if (!selectedMethod) {
-    document.getElementById('alertMethod').classList.add('show');
-    return;
+  const btn = document.querySelector('.btn-proceed');
+  const alertEl = document.getElementById('alertMethod');
+  if (alertEl) alertEl.classList.remove('show');
+
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
   }
 
-  if (!orderData.available) {
-    document.getElementById('alertMethod').textContent = orderData.reason || 'This product is not available right now.';
-    document.getElementById('alertMethod').classList.add('show');
-    return;
-  }
-
-  const inrNum = parseMoneyValue(orderData.rawINR || orderData.inr);
-
-  const isUPI = selectedMethod === 'upi';
-  document.getElementById('detailAmount').textContent = paymentAmountForMethod(selectedMethod);
-  document.getElementById('detailAmountINR').textContent = paymentCurrencyLabel(selectedMethod);
-
-  const names = {
-    upi: 'UPI Payment',
-    bep20: 'USDT · BEP-20',
-    eth: 'USDT · ERC-20',
-    binancepay: 'Binance Pay',
-    binance: 'Binance Gift Card',
-    paypal: 'PayPal Transfer',
+  const resetBtn = () => {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.innerHTML = originalHtml || '<i class="fa-solid fa-lock"></i> Proceed to Payment';
+    }
   };
 
-  const customMethods = (window.__paymentPayment && window.__paymentPayment.customMethods) || {};
-  const isCustom = Boolean(customMethods[selectedMethod]);
-  const customMethod = isCustom ? customMethods[selectedMethod] : null;
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
 
-  document.getElementById('detailBadgeText').textContent = isCustom ? (customMethod.name || 'Custom Payment') : (names[selectedMethod] || selectedMethod.toUpperCase());
-  document.getElementById('detailPaymentMethodLabel').textContent = isCustom ? (customMethod.name || 'CUSTOM') : (selectedMethod === 'upi' ? 'UPI' : selectedMethod.toUpperCase());
+  const setHtml = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = val;
+  };
 
-  // hide all sections
-  ['upi', 'bep20', 'eth', 'binance', 'binancepay', 'paypal', 'custom'].forEach((m) => {
-    const sec = document.getElementById(m + 'Section');
-    if (sec) sec.style.display = 'none';
-  });
+  try {
+    // Fast 1.5s race timeout so slow network never hangs the transition
+    const loadTimeout = new Promise((resolve) => setTimeout(resolve, 1500));
+    await Promise.race([
+      Promise.all([
+        ensurePaymentConfigLoaded().catch(() => {}),
+        ensureCheckoutOrderLoaded().catch(() => {}),
+      ]),
+      loadTimeout,
+    ]);
 
-  if (isCustom && customMethod) {
-    const customSec = document.getElementById('customSection');
-    if (customSec) {
-      customSec.style.display = 'block';
-      const addrEl = document.getElementById('customAddr');
-      if (addrEl) addrEl.textContent = customMethod.identifier || 'Not configured';
-      const badgeEl = document.getElementById('customNetworkName');
-      if (badgeEl) badgeEl.textContent = customMethod.name || 'Custom Payment';
-      const noteEl = document.getElementById('customPayNote');
-      if (noteEl) {
-        if (customMethod.instructions) {
-          noteEl.style.display = 'block';
-          noteEl.innerHTML = customMethod.instructions;
-        } else {
-          noteEl.style.display = 'none';
+    if (!selectedMethod) {
+      if (alertEl) {
+        alertEl.textContent = 'Please select a payment method to continue.';
+        alertEl.classList.add('show');
+      }
+      resetBtn();
+      return;
+    }
+
+    if (orderData.available === false && !orderData.name && !requestedCheckout.productId) {
+      if (alertEl) {
+        alertEl.textContent = orderData.reason || 'This product is not available right now.';
+        alertEl.classList.add('show');
+      }
+      resetBtn();
+      return;
+    }
+
+    setText('detailAmount', paymentAmountForMethod(selectedMethod));
+    setText('detailAmountINR', paymentCurrencyLabel(selectedMethod));
+
+    const names = {
+      upi: 'UPI Payment',
+      bep20: 'USDT · BEP-20',
+      eth: 'USDT · ERC-20',
+      binancepay: 'Binance Pay',
+      binance: 'Binance Gift Card',
+      paypal: 'PayPal Transfer',
+    };
+
+    const customMethods = (window.__paymentPayment && window.__paymentPayment.customMethods) || {};
+    const isCustom = Boolean(customMethods[selectedMethod]);
+    const customMethod = isCustom ? customMethods[selectedMethod] : null;
+
+    setText('detailBadgeText', isCustom ? (customMethod.name || 'Custom Payment') : (names[selectedMethod] || selectedMethod.toUpperCase()));
+    setText('detailPaymentMethodLabel', isCustom ? (customMethod.name || 'CUSTOM') : (selectedMethod === 'upi' ? 'UPI' : selectedMethod.toUpperCase()));
+
+    // hide all sections
+    ['upi', 'bep20', 'eth', 'binance', 'binancepay', 'paypal', 'custom'].forEach((m) => {
+      const sec = document.getElementById(m + 'Section');
+      if (sec) sec.style.display = 'none';
+    });
+
+    if (isCustom && customMethod) {
+      const customSec = document.getElementById('customSection');
+      if (customSec) {
+        customSec.style.display = 'block';
+        setText('customAddr', customMethod.identifier || 'Not configured');
+        setText('customNetworkName', customMethod.name || 'Custom Payment');
+        const noteEl = document.getElementById('customPayNote');
+        if (noteEl) {
+          if (customMethod.instructions) {
+            noteEl.style.display = 'block';
+            noteEl.innerHTML = customMethod.instructions;
+          } else {
+            noteEl.style.display = 'none';
+          }
+        }
+        if (customMethod.qrImage) {
+          setHtml('customQRFrame', `<img src="${customMethod.qrImage}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="QR" />`);
+          const qrWrap = document.getElementById('customQRWrapper');
+          if (qrWrap) qrWrap.style.display = 'block';
+        } else if (customMethod.type === 'crypto' || customMethod.type === 'upi') {
+          const qrWrap = document.getElementById('customQRWrapper');
+          if (qrWrap) qrWrap.style.display = 'block';
+          generateQR('customQR', customMethod.identifier, 180);
         }
       }
-      if (customMethod.qrImage) {
-        const qrFrame = document.getElementById('customQRFrame');
-        if (qrFrame) qrFrame.innerHTML = `<img src="${customMethod.qrImage}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="QR" />`;
-        const qrWrap = document.getElementById('customQRWrapper');
-        if (qrWrap) qrWrap.style.display = 'block';
-      } else if (customMethod.type === 'crypto' || customMethod.type === 'upi') {
-        const qrWrap = document.getElementById('customQRWrapper');
-        if (qrWrap) qrWrap.style.display = 'block';
-        generateQR('customQR', customMethod.identifier, 180);
+    } else {
+      const targetSection = document.getElementById(selectedMethod + 'Section');
+      if (targetSection) targetSection.style.display = 'block';
+    }
+
+    // Generate QRs (only once)
+    if (!qrGenerated[selectedMethod]) {
+      qrGenerated[selectedMethod] = true;
+
+      if (selectedMethod === 'upi') {
+        setTimeout(() => {
+          setText('upiIdText', CONFIG.upiId || 'Not configured');
+          renderUpiQr();
+        }, 100);
+
+      } else if (selectedMethod === 'bep20') {
+        generateQR('bep20QR', CONFIG.bep20Address, 180);
+        setText('bep20Addr', CONFIG.bep20Address);
+
+      } else if (selectedMethod === 'eth') {
+        generateQR('ethQR', CONFIG.ethAddress, 180);
+        setText('ethAddr', CONFIG.ethAddress);
+
+      } else if (selectedMethod === 'binance') {
+        setText('binanceId', CONFIG.binanceId);
+
+      } else if (selectedMethod === 'binancepay') {
+        setText('binancepayId', CONFIG.binanceId);
+        generateQR('binancepayQR', 'https://app.binance.com/en/send-crypto-payment?recipientId=' + CONFIG.binanceId, 180);
+
+      } else if (selectedMethod === 'paypal') {
+        setText('paypalLink', CONFIG.paypalLink);
       }
     }
-  } else {
-    const targetSection = document.getElementById(selectedMethod + 'Section');
-    if (targetSection) targetSection.style.display = 'block';
+
+    startTimer(15 * 60);
+    showScreen(2);
+    setTimeout(resetBtn, 400);
+  } catch (err) {
+    console.error('gotoPayScreen error:', err);
+    resetBtn();
   }
-
-  // Generate QRs (only once)
-  if (!qrGenerated[selectedMethod]) {
-    qrGenerated[selectedMethod] = true;
-
-    if (selectedMethod === 'upi') {
-      setTimeout(() => {
-        document.getElementById('upiIdText').textContent = CONFIG.upiId || 'Not configured';
-        renderUpiQr();
-      }, 300);
-
-    } else if (selectedMethod === 'bep20') {
-      generateQR('bep20QR', CONFIG.bep20Address, 180);
-      document.getElementById('bep20Addr').textContent = CONFIG.bep20Address;
-
-    } else if (selectedMethod === 'eth') {
-      generateQR('ethQR', CONFIG.ethAddress, 180);
-      document.getElementById('ethAddr').textContent = CONFIG.ethAddress;
-
-    } else if (selectedMethod === 'binance') {
-      document.getElementById('binanceId').textContent = CONFIG.binanceId;
-
-    } else if (selectedMethod === 'binancepay') {
-      document.getElementById('binancepayId').textContent = CONFIG.binanceId;
-      generateQR('binancepayQR', 'https://app.binance.com/en/send-crypto-payment?recipientId=' + CONFIG.binanceId, 180);
-
-    } else if (selectedMethod === 'paypal') {
-      document.getElementById('paypalLink').textContent = CONFIG.paypalLink;
-    }
-  }
-
-  startTimer(15 * 60);
-  showScreen(2);
 }
 
 // â”€â”€ TIMER â”€â”€
@@ -3238,18 +3360,32 @@ function launchConfetti() {
   }, 1000);
 })();
 
-// Auto initialize UI immediately
+// Auto initialize UI immediately (before Firebase, for instant render)
 document.addEventListener('DOMContentLoaded', () => {
   renderDynamicPaymentMethods();
   updateOrderSummaryUI();
+});
+
+// Load payment config and order details only after Firebase is ready
+function initAfterFirebase() {
   ensurePaymentConfigLoaded();
   ensureCheckoutOrderLoaded();
-});
+}
+
+if (window._firebaseReady || window.__linkaddaDb) {
+  // Firebase already initialized (cached / fast path)
+  initAfterFirebase();
+} else {
+  // Wait for Firebase module to finish initializing
+  window.addEventListener('linkadda-firebase-ready', initAfterFirebase, { once: true });
+  // Safety fallback: try again after 2s in case event was missed
+  setTimeout(() => {
+    if (!paymentConfigSubscribed) initAfterFirebase();
+  }, 2000);
+}
 
 renderDynamicPaymentMethods();
 updateOrderSummaryUI();
-ensurePaymentConfigLoaded();
-ensureCheckoutOrderLoaded();
 </script>
 <script type="module" src="/media-resolver.js"></script>
 </body>
