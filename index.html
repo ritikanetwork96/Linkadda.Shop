@@ -1422,17 +1422,41 @@
         <div class="testi-card">
           <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
           <p>"Pehle bahut dar lag raha tha, socha tha yeh bhi scam kar lega baaki logo ki tarah. But bhai ne time pe deliver kiya, ekdum trusted hai. Ab regularly leta hoon!"</p>
-          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>New Buyer</span></div>
+          <div class="testi-author">
+            <div class="testi-avatar-wrap">
+              <span class="testi-avatar-initial">S</span>
+            </div>
+            <div class="testi-author-info">
+              <span class="testi-author-name">Singisking</span>
+              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+            </div>
+          </div>
         </div>
         <div class="testi-card">
           <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
           <p>"Sach mein pehle bahut doubt tha, itne saste mein kaisa hoga. But yeh bhai real deal hai &#8212; scam bilkul nahi, seedha kaam karta hai. 100% recommend!"</p>
-          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>New User</span></div>
+          <div class="testi-author">
+            <div class="testi-avatar-wrap">
+              <span class="testi-avatar-initial">A</span>
+            </div>
+            <div class="testi-author-info">
+              <span class="testi-author-name">Aman Verma</span>
+              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+            </div>
+          </div>
         </div>
         <div class="testi-card">
           <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
           <p>"Maine pehle dusre sellers se scam khaya tha toh trust nahi tha. Iss bhai ko try kiya toh maan gaya &#8212; bilkul genuine, fast delivery, aur price bhi market se kam. Thanks bhai!"</p>
-          <div class="testi-author"><i class="fa-solid fa-circle-user testi-avatar"></i><span>Regular Buyer</span></div>
+          <div class="testi-author">
+            <div class="testi-avatar-wrap">
+              <span class="testi-avatar-initial">R</span>
+            </div>
+            <div class="testi-author-info">
+              <span class="testi-author-name">Rahul Singh</span>
+              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1948,16 +1972,20 @@
       for (let i = 0; i < rating; i++) {
         starsHtml += '<i class="fa-solid fa-star"></i>';
       }
-      let avatarHtml = `<i class="fa-solid fa-circle-user testi-avatar"></i>`;
+      const initial = esc(String(item.name || 'U').charAt(0).toUpperCase());
+      let avatarHtml = `<div class="testi-avatar-wrap"><span class="testi-avatar-initial">${initial}</span></div>`;
       if (item.photo) {
-        avatarHtml = `<img src="${esc(item.photo)}" class="testi-avatar" style="border-radius: 50%; width: 1.8rem; height: 1.8rem; object-fit: cover;" alt="${esc(item.name)}" />`;
+        avatarHtml = `<div class="testi-avatar-wrap"><img src="${esc(item.photo)}" class="testi-avatar-img" alt="${esc(item.name)}" /></div>`;
       }
       card.innerHTML = `
         <div class="stars">${starsHtml}</div>
         <p>"${esc(item.review)}"</p>
         <div class="testi-author">
           ${avatarHtml}
-          <span>${esc(item.name)}</span>
+          <div class="testi-author-info">
+            <span class="testi-author-name">${esc(item.name || 'Verified Customer')}</span>
+            <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+          </div>
         </div>
       `;
       testiGrid.appendChild(card);
