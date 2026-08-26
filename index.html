@@ -2098,13 +2098,13 @@
     if(all.length===1) {
       const m=all[0];
       return m.t==='img'
-        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" loading="lazy" draggable="false"/></div>`
+        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" loading="lazy" decoding="async" draggable="false"/></div>`
         : `<div class="pcard-img-wrap"><video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video></div>`;
     }
     const uid = 'ss_' + Math.random().toString(36).slice(2, 7);
     const slides = all.map((m, i) => {
       if (m.t === 'img') {
-        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" loading="lazy" alt="${esc(title)}" draggable="false"/></div>`;
+        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" loading="lazy" decoding="async" alt="${esc(title)}" draggable="false"/></div>`;
       } else {
         return `<div class="fb-slide${i===0?' fb-slide-active':''}"><video ${i===0?`src="${esc(m.u)}" autoplay`:`data-src="${esc(m.u)}"`} muted loop playsinline class="pcard-img"></video></div>`;
       }

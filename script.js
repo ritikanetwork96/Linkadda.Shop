@@ -5,10 +5,13 @@
   const pct     = document.getElementById('loaderPct');
   const lParts  = document.getElementById('loaderParticles');
   const colors  = ['#e84393','#7c3aed','#f472b6','#a855f7','#f59e0b'];
+  if (!wrap || !bar || !pct) return;
+
   document.body.classList.add('loading');
 
   // Spawn loader particles
   function spawnLP() {
+    if (!lParts || wrap.classList.contains('hide')) return;
     const p = document.createElement('div');
     p.className = 'lp';
     const size = Math.random() * 4 + 2;
@@ -23,10 +26,10 @@
       box-shadow:0 0 ${size*2}px ${color};
     `;
     lParts.appendChild(p);
-    setTimeout(() => p.remove(), 10000);
+    setTimeout(() => p.remove(), 6000);
   }
-  const lpInterval = setInterval(spawnLP, 300);
-  for (let i = 0; i < 15; i++) spawnLP();
+  const lpInterval = setInterval(spawnLP, 350);
+  for (let i = 0; i < 8; i++) spawnLP();
 
   // Progress animation
   let progress = 0;
@@ -39,17 +42,17 @@
   const subEl = wrap.querySelector('.loader-sub');
 
   const timer = setInterval(() => {
-    // Fast at first, slow in middle, fast at end
-    const increment = progress < 30 ? 12 : progress < 70 ? 5 : progress < 90 ? 3.5 : 12;
+    const increment = progress < 40 ? 16 : progress < 75 ? 8 : progress < 92 ? 5 : 16;
     progress = Math.min(progress + increment, 100);
 
     bar.style.width = progress + '%';
     pct.textContent = Math.floor(progress) + '%';
 
-    // Change message at checkpoints
-    if (progress >= 25  && progress < 26)  subEl.textContent = messages[1];
-    if (progress >= 65  && progress < 66)  subEl.textContent = messages[2];
-    if (progress >= 95  && progress < 96)  subEl.textContent = messages[3];
+    if (subEl) {
+      if (progress >= 25 && progress < 26) subEl.textContent = messages[1];
+      if (progress >= 65 && progress < 66) subEl.textContent = messages[2];
+      if (progress >= 95 && progress < 96) subEl.textContent = messages[3];
+    }
 
     if (progress >= 100) {
       clearInterval(timer);
@@ -57,10 +60,15 @@
       setTimeout(() => {
         wrap.classList.add('hide');
         document.body.classList.remove('loading');
-        setTimeout(() => wrap.remove(), 700);
-      }, 400);
+        setTimeout(() => wrap.remove(), 400);
+      }, 200);
     }
-  }, 30);
+  }, 20);
+
+  // Instant smooth completion on window load
+  window.addEventListener('load', () => {
+    progress = Math.max(progress, 90);
+  }, { once: true });
 })();
 
 const finePointerQuery = window.matchMedia('(hover: hover) and (pointer: fine)');

@@ -25,6 +25,7 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+  scroll-padding-top: 90px;
 }
 
 body {
@@ -35,6 +36,26 @@ body {
   overscroll-behavior-x: none;
   line-height: 1.7;
   touch-action: pan-y;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* GPU Hardware Acceleration for 60fps Smooth Animations & Stutter-free Scroll */
+.header,
+.pcard,
+.cat-card,
+.btn-card-action,
+.floating-badge,
+.cart-drawer,
+.hero-visual,
+.why-card,
+.testi-card,
+.contact-card,
+.vid-tier-item {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 body.media-viewer-open {
