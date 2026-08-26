@@ -2665,38 +2665,117 @@
     renderPinnedBanner();
   });
 
-  let hasFocusedProduct = false;
-  function focusSharedProduct() {
-    if (hasFocusedProduct) return;
+  let sharedFocusDone = false;
+  let sharedFocusTargetId = '';
+
+  function getSharedProductIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    const focusId = String(urlParams.get('product') || urlParams.get('productId') || '').trim();
+    let raw = urlParams.get('product') || urlParams.get('productId') || urlParams.get('id') || urlParams.get('p') || urlParams.get('item') || '';
+    if (!raw && window.location.hash) {
+      raw = window.location.hash.replace(/^#\/?(product[\/=-]?)?/, '');
+    }
+    try {
+      return decodeURIComponent(String(raw || '').trim());
+    } catch (_) {
+      return String(raw || '').trim();
+    }
+  }
+
+  function focusSharedProduct() {
+    const focusId = getSharedProductIdFromUrl();
     if (!focusId) return;
 
-    // Find card by ID, slug, or title (case-insensitive)
-    let targetCard = null;
+    if (sharedFocusTargetId !== focusId) {
+      sharedFocusDone = false;
+      sharedFocusTargetId = focusId;
+    }
+
+    const queryId = focusId.toLowerCase();
+
+    // 1. Try to locate target product card in current DOM grid
     const cards = document.querySelectorAll('.pcard');
+    let targetCard = null;
+
     for (const card of cards) {
       const fbId = String(card.dataset.fbId || '').toLowerCase();
-      const cardTitle = String(card.querySelector('.pcard-title')?.textContent || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      const queryId = focusId.toLowerCase();
-      if (fbId === queryId || cardTitle === queryId || fbId.includes(queryId)) {
+      const cardTitleText = String(card.querySelector('.pcard-title')?.textContent || '').trim();
+      const slugifiedTitle = cardTitleText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const rawTitleLower = cardTitleText.toLowerCase();
+
+      if (fbId === queryId || slugifiedTitle === queryId || rawTitleLower.includes(queryId) || (fbId && queryId.includes(fbId))) {
         targetCard = card;
         break;
       }
     }
 
+    // 2. If card is NOT in current DOM grid, check if it exists in live catalog data
+    if (!targetCard && liveCollections && liveCollections.products) {
+      let foundProd = null;
+      for (const [pId, pData] of Object.entries(liveCollections.products)) {
+        if (!pData) continue;
+        const pIdLower = String(pId).toLowerCase();
+        const pTitleLower = String(pData.title || pData.name || '').toLowerCase();
+        const pSlugLower = String(pData.slug || '').toLowerCase();
+        if (pIdLower === queryId || pSlugLower === queryId || pTitleLower.includes(queryId) || queryId.includes(pIdLower)) {
+          foundProd = pData;
+          break;
+        }
+      }
+
+      // If product exists in database but is hidden by current active category filter, reveal all products
+      if (foundProd && activeCategoryFilter !== 'all') {
+        activeCategoryFilter = 'all';
+        renderCategoryFilters();
+        renderLiveGrid();
+        return;
+      }
+    }
+
+    // 3. Highlight and scroll to target product card
     if (targetCard) {
-      hasFocusedProduct = true;
-      setTimeout(() => {
+      if (sharedFocusDone && targetCard.classList.contains('pcard-highlight')) return;
+
+      sharedFocusDone = true;
+
+      document.querySelectorAll('.pcard').forEach(c => {
+        c.classList.remove('pcard-highlight');
+        c.classList.remove('pcard-focused-steady');
+      });
+
+      targetCard.classList.add('pcard-highlight');
+
+      const performScroll = () => {
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        targetCard.classList.add('pcard-highlight');
-        setTimeout(() => {
+      };
+
+      performScroll();
+      setTimeout(performScroll, 250);
+      setTimeout(performScroll, 600);
+      setTimeout(performScroll, 1200);
+
+      setTimeout(() => {
+        if (targetCard.classList.contains('pcard-highlight')) {
           targetCard.classList.remove('pcard-highlight');
           targetCard.classList.add('pcard-focused-steady');
-        }, 4000);
-      }, 600);
+        }
+      }, 6000);
     }
   }
+
+  window.addEventListener('hashchange', () => {
+    sharedFocusDone = false;
+    focusSharedProduct();
+  });
+  window.addEventListener('popstate', () => {
+    sharedFocusDone = false;
+    focusSharedProduct();
+  });
+  window.addEventListener('load', () => {
+    focusSharedProduct();
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    focusSharedProduct();
+  });
 
   document.addEventListener('click', (event) => {
     const wrap = event.target.closest('.fb-slideshow');

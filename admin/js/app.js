@@ -1522,24 +1522,29 @@ function openRecordEditor(node, schema, record = {}) {
 
 window.copyShareLink = function(btn, text) {
   navigator.clipboard.writeText(text).then(() => {
-    const origHtml = btn.innerHTML;
     btn.innerHTML = '<i data-lucide="check" style="width: 14px; height: 14px;"></i> Copied!';
     
     btn.style.setProperty('background', '#10b981', 'important');
     btn.style.setProperty('border', 'none', 'important');
     btn.style.setProperty('color', '#ffffff', 'important');
-    btn.style.setProperty('box-shadow', '0 4px 12px rgba(16, 185, 129, 0.3)', 'important');
+    btn.style.setProperty('box-shadow', '0 4px 14px rgba(16, 185, 129, 0.4)', 'important');
     
     if (window.lucide) lucide.createIcons();
     showToast('Link copied to clipboard!');
+
+    // Smooth Telegram-style modal dismiss animation after brief feedback (350ms)
     setTimeout(() => {
-      btn.innerHTML = origHtml;
-      btn.style.setProperty('background', 'linear-gradient(135deg, #6366f1, #ec4899)', 'important');
-      btn.style.setProperty('border', 'none', 'important');
-      btn.style.setProperty('color', '#ffffff', 'important');
-      btn.style.setProperty('box-shadow', '0 4px 12px rgba(99, 102, 241, 0.3)', 'important');
-      if (window.lucide) lucide.createIcons();
-    }, 2000);
+      const backdrop = document.getElementById('modalBackdrop');
+      if (backdrop) {
+        backdrop.classList.add('closing');
+        setTimeout(() => {
+          closeModal();
+          backdrop.classList.remove('closing');
+        }, 300);
+      } else {
+        closeModal();
+      }
+    }, 350);
   }).catch((err) => {
     console.error('Copy failed:', err);
     showToast('Copy failed, please select and copy manually.', 'danger');
@@ -1550,7 +1555,13 @@ function openShareModal(node, id) {
   const item = getItem(node, id);
   if (!item) return;
 
-  const homeUrl = `${window.location.origin}/?product=${encodeURIComponent(id)}`;
+  const origin = window.location.origin;
+  const pathname = window.location.pathname;
+  const adminIdx = pathname.toLowerCase().indexOf('/admin');
+  const baseFolder = adminIdx !== -1 ? pathname.substring(0, adminIdx) : '';
+  const cleanBase = `${origin}${baseFolder}`.replace(/\/+$/, '');
+  const targetParam = item.id || id;
+  const homeUrl = `${cleanBase}/?product=${encodeURIComponent(targetParam)}`;
 
   const html = `
     <div class="panel shadow-lg share-product-modal modal-sm" style="width: 100%; padding: 28px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--border); overflow: hidden; position: relative;">
@@ -2583,31 +2594,31 @@ function openCategoryProducts(item) {
 
 function renderCatalogProductCard(item, node) {
   const active = isSelected(item.id);
-  const compactMobile = isMobileViewport();
   const features = normalizeFeatureList(item.features);
+  const toggleAction = String(item.status || 'active') === 'hidden' ? 'Show' : 'Hide';
+  const toggleIcon = String(item.status || 'active') === 'hidden' ? 'eye' : 'eye-off';
   const badges = [
     item.category ? `<span class="chip">${escapeHtml(item.category)}</span>` : '',
     catalogCardBadge(item.status),
     item.image || (Array.isArray(item.galleryImages) && item.galleryImages.length) ? `<span class="chip">${escapeHtml(itemMediaCountLabel(item))}</span>` : '',
   ].filter(Boolean).join('');
-  const metrics = (compactMobile
-    ? [
-      { label: 'INR', value: item.priceINR || '-' },
-      { label: 'Gallery', value: itemMediaCountLabel(item) },
-      { label: 'Updated', value: catalogMetaValue(item, 'updatedAt') },
-    ]
-    : [
-      { label: 'INR', value: item.priceINR || '-' },
-      { label: 'USD', value: item.priceUSD || '-' },
-      { label: 'Orders', value: itemOrderCountLabel(item) },
-      { label: 'Created', value: catalogMetaValue(item, 'createdAt') },
-      { label: 'Updated', value: catalogMetaValue(item, 'updatedAt') },
-    ]).map((entry) => `
+
+  const metricsList = [
+    { label: 'INR', value: item.priceINR ? `₹${item.priceINR}` : '—' },
+    { label: 'USD', value: item.priceUSD ? `$${item.priceUSD}` : '—' },
+    { label: 'Media', value: itemMediaCountLabel(item) },
+  ];
+  if (item.orderCount || item.orders) {
+    metricsList.push({ label: 'Orders', value: itemOrderCountLabel(item) });
+  }
+
+  const metrics = metricsList.map((entry) => `
     <div class="catalog-meta-item">
       <span>${escapeHtml(entry.label)}</span>
       <strong>${escapeHtml(String(entry.value))}</strong>
     </div>
   `).join('');
+
   return `
     <article class="catalog-card catalog-card-product ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}">
       <label class="catalog-select">
@@ -2621,21 +2632,24 @@ function renderCatalogProductCard(item, node) {
         <div class="catalog-card-head">
           <div>
             <h3>${escapeHtml(item.title || item.slug || 'Untitled')}</h3>
-            ${compactMobile ? '' : `<p>${escapeHtml(item.description || item.review || item.answer || '-')}</p>`}
+            <p>${escapeHtml(item.description || item.review || item.answer || 'No description provided')}</p>
           </div>
           <div class="catalog-card-badges">${badges}</div>
         </div>
+        ${features.length ? `
         <div class="catalog-card-chips">
           ${features.slice(0, 3).map((feature) => `<span class="chip subtle">${escapeHtml(feature)}</span>`).join('')}
         </div>
+        ` : ''}
         <div class="catalog-card-metrics">${metrics}</div>
       </div>
       <div class="catalog-card-actions">
-        <div class="catalog-card-primary-actions">
-          <button class="icon-btn" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
-          <button class="icon-btn" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
-        </div>
-        ${renderCatalogActionMenu(item, node)}
+        <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
+        <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
+        <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
+        <button type="button" class="catalog-action-btn action-duplicate" data-action="duplicate" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="copy"></i> Duplicate</button>
+        <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
+        <button type="button" class="catalog-action-btn action-delete danger" data-action="delete" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="trash-2"></i> Delete</button>
       </div>
     </article>
   `;
@@ -2643,25 +2657,22 @@ function renderCatalogProductCard(item, node) {
 
 function renderCatalogCategoryCard(item, node) {
   const active = isSelected(item.id);
-  const compactMobile = isMobileViewport();
   const productCount = countProductsForCategory(item);
-  const metrics = (compactMobile
-    ? [
-      { label: 'Products', value: String(productCount) },
-      { label: 'Order', value: item.displayOrder || '-' },
-      { label: 'Updated', value: catalogMetaValue(item, 'updatedAt') },
-    ]
-    : [
-      { label: 'Products', value: String(productCount) },
-      { label: 'Status', value: catalogMetaValue(item, 'status') },
-      { label: 'Order', value: item.displayOrder || '-' },
-      { label: 'Updated', value: catalogMetaValue(item, 'updatedAt') },
-    ]).map((entry) => `
+  const toggleAction = String(item.status || 'active') === 'hidden' ? 'Show' : 'Hide';
+  const toggleIcon = String(item.status || 'active') === 'hidden' ? 'eye' : 'eye-off';
+
+  const metricsList = [
+    { label: 'Products', value: `${productCount} items` },
+    { label: 'Display Order', value: item.displayOrder ?? '1' },
+  ];
+
+  const metrics = metricsList.map((entry) => `
     <div class="catalog-meta-item">
       <span>${escapeHtml(entry.label)}</span>
       <strong>${escapeHtml(String(entry.value))}</strong>
     </div>
   `).join('');
+
   return `
     <article class="catalog-card catalog-card-category ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}">
       <label class="catalog-select">
@@ -2676,7 +2687,7 @@ function renderCatalogCategoryCard(item, node) {
           <div>
             <div class="catalog-card-kicker">Category</div>
             <h3>${escapeHtml(item.title || item.slug || 'Untitled')}</h3>
-            ${compactMobile ? '' : `<p>${escapeHtml(item.description || '-')}</p>`}
+            <p>${escapeHtml(item.description || 'No description provided')}</p>
           </div>
           <div class="catalog-card-badges">
             ${catalogCardBadge(item.status)}
@@ -2686,12 +2697,14 @@ function renderCatalogCategoryCard(item, node) {
         <div class="catalog-card-metrics">${metrics}</div>
       </div>
       <div class="catalog-card-actions">
-        <div class="catalog-card-primary-actions">
-          <button class="icon-btn" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
-          <button class="icon-btn" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
-          <button class="icon-btn" data-action="view-products" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="layout-list"></i> View Products</button>
-        </div>
-        ${renderCatalogActionMenu(item, node)}
+        <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
+        <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
+        <button type="button" class="catalog-action-btn action-prods" data-action="view-products" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="layout-list"></i> Products</button>
+        <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-up"></i> Up</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-down"></i> Down</button>
+        <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
+        <button type="button" class="catalog-action-btn action-delete danger" data-action="delete" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="trash-2"></i> Delete</button>
       </div>
     </article>
   `;
@@ -3159,7 +3172,7 @@ function renderDashboard(data) {
               icon: 'banknote',
               series: summary.revenueSeries,
               tone: 'accent',
-              valuePrefix: 'Rs ',
+              valuePrefix: '₹',
             })}
           </div>
           <div class="dashboard-secondary-grid">

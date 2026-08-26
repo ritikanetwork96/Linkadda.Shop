@@ -2745,29 +2745,31 @@ body {
 /* Premium Card Highlight pulse animation */
 @keyframes premiumGlow {
   0%, 100% {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-    border-color: rgba(232, 67, 147, 0.2);
+    box-shadow: 0 0 25px rgba(240, 36, 122, 0.65), 0 0 10px rgba(99, 102, 241, 0.45), 0 6px 24px rgba(0, 0, 0, 0.5);
+    border-color: #f0247a !important;
     transform: scale(1) translateY(0);
   }
   50% {
-    box-shadow: 0 0 30px rgba(240, 36, 122, 0.85), 0 0 10px rgba(240, 36, 122, 0.5);
-    border-color: #f0247a;
-    transform: scale(1.03) translateY(-6px);
+    box-shadow: 0 0 50px rgba(240, 36, 122, 0.98), 0 0 28px rgba(168, 85, 247, 0.85), 0 0 85px rgba(240, 36, 122, 0.45);
+    border-color: #ec4899 !important;
+    transform: scale(1.035) translateY(-8px);
   }
 }
 
 .pcard-highlight {
-  animation: premiumGlow 2s ease-in-out infinite;
-  z-index: 100;
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: premiumGlow 1.8s ease-in-out infinite !important;
+  z-index: 100 !important;
+  position: relative !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  scroll-margin-top: 110px;
 }
 
 .pcard-focused-steady {
-  box-shadow: 0 0 20px rgba(240, 36, 122, 0.4);
+  box-shadow: 0 0 30px rgba(240, 36, 122, 0.7), 0 0 12px rgba(168, 85, 247, 0.5) !important;
   border-color: #f0247a !important;
-  transform: translateY(-2px);
-  transition: all 0.5s ease;
+  transform: translateY(-4px) !important;
+  transition: all 0.5s ease !important;
+  scroll-margin-top: 110px;
 }
 
 /* Category Filters Styling */
