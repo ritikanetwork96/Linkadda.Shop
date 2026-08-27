@@ -796,6 +796,7 @@ button {
   display: block;
 }
 
+.sparkline-line {
   stroke: var(--primary);
   stroke-width: 2.2;
   stroke-linecap: round;
@@ -2383,10 +2384,10 @@ button {
 }
 
 .catalog-card-actions {
-  padding: 12px;
+  padding: 8px 10px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
   align-content: center;
   align-items: center;
   justify-items: stretch;
@@ -2398,11 +2399,11 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  font-size: 0.81rem;
-  font-weight: 700;
+  gap: 5px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
@@ -2510,6 +2511,22 @@ button {
   border-color: #f87171;
   color: #ffffff;
   box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+}
+
+.catalog-card-actions .catalog-action-btn.danger {
+  grid-column: span 2;
+}
+
+.catalog-action-btn.action-move-pos {
+  background: rgba(232, 67, 147, 0.15);
+  border-color: rgba(232, 67, 147, 0.4);
+  color: #f472b6;
+}
+.catalog-action-btn.action-move-pos:hover {
+  background: #e84393;
+  border-color: #f472b6;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(232, 67, 147, 0.45);
 }
 
 .catalog-card-menu-item:hover {

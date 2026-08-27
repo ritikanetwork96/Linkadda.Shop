@@ -2734,12 +2734,22 @@ async function ensureCheckoutOrderLoaded() {
     if (matched) {
       const inrNum = Number.isFinite(matched.amountINRValue) ? matched.amountINRValue : (extractMoneyNumber(pInr) || extractMoneyNumber(matched.rawINR || matched.inr));
       const usdNum = Number.isFinite(matched.amountUSDValue) ? matched.amountUSDValue : (extractMoneyNumber(pUsd) || extractMoneyNumber(matched.rawUSD || matched.usd));
+      let orderId = requestedCheckout.orderId || '';
+
+      if (!orderId && window._fbPush && window.__linkaddaDb) {
+        orderId = window._fbPush(window._fbRef(window.__linkaddaDb, 'orders')).key;
+      }
+
       const nextOrder = {
-        orderId: requestedCheckout.orderId || '',
+        orderId: orderId,
+        id: orderId || matched.id || 'order',
         checkoutToken: requestedCheckout.token || '',
-        id: matched.id || matched.key || requestedCheckout.productId || '',
-        slug: matched.slug || '',
-        name: matched.title || matched.name || 'Product',
+        productId: matched.id || matched.key || requestedCheckout.productId || '',
+        productSlug: matched.slug || '',
+        productName: matched.title || matched.name || 'Product',
+        amount: Number.isFinite(inrNum) ? inrNum : (Number.isFinite(usdNum) ? usdNum : ''),
+        amountINR: Number.isFinite(inrNum) ? inrNum : null,
+        amountUSD: Number.isFinite(usdNum) ? usdNum : null,
         inr: matched.inr || (Number.isFinite(inrNum) ? formatCurrencyValue(inrNum, 'INR') : '—'),
         usd: matched.usd || (Number.isFinite(usdNum) ? formatCurrencyValue(usdNum, 'USD') : '—'),
         rawINR: inrNum,
@@ -2748,11 +2758,25 @@ async function ensureCheckoutOrderLoaded() {
         amountUSDValue: usdNum,
         paymentStatus: 'pending',
         orderStatus: 'pending',
+        status: 'pending',
         paymentMethod: '',
         screenshotUrl: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        source: 'payment-fallback',
         available: true,
         reason: '',
       };
+
+      // Guarantee immediate persistence to Firebase RTDB orders node
+      if (window.__linkaddaDb && orderId) {
+        try {
+          window._fbSet(window._fbRef(window.__linkaddaDb, `orders/${orderId}`), {
+            ...nextOrder,
+            updatedAt: Date.now()
+          });
+        } catch (_) {}
+      }
 
       applyOrderToUI(nextOrder);
       refreshOrderSummaryFromLiveCatalog();

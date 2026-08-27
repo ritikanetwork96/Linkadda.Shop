@@ -112,6 +112,12 @@ export async function updateRecord(node, id, data) {
   return { id, ...data };
 }
 
+export async function updateRecordsBatch(node, batchMap) {
+  const nodeName = RTDB_NODES[node];
+  if (!nodeName) throw new Error(`Unknown node: ${node}`);
+  await update(ref(db, nodeName), batchMap);
+}
+
 export async function deleteRecord(node, id) {
   if (isSingleton(node)) {
     await set(nodeRef(node), null);

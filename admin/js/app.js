@@ -13,6 +13,7 @@ import {
   createRecord,
   saveRecord,
   updateRecord,
+  updateRecordsBatch,
   deleteRecord,
   duplicateRecord,
 } from './state.js';
@@ -2620,7 +2621,9 @@ function renderCatalogProductCard(item, node) {
   const features = normalizeFeatureList(item.features);
   const toggleAction = String(item.status || 'active') === 'hidden' ? 'Show' : 'Hide';
   const toggleIcon = String(item.status || 'active') === 'hidden' ? 'eye' : 'eye-off';
+  const posBadge = `<button type="button" class="catalog-pos-badge-btn" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Click to move position">Pos #${item.displayOrder || '1'} ↕</button>`;
   const badges = [
+    posBadge,
     item.category ? `<span class="chip">${escapeHtml(item.category)}</span>` : '',
     catalogCardBadge(item.status),
     item.image || (Array.isArray(item.galleryImages) && item.galleryImages.length) ? `<span class="chip">${escapeHtml(itemMediaCountLabel(item))}</span>` : '',
@@ -2654,7 +2657,7 @@ function renderCatalogProductCard(item, node) {
   `).join('');
 
   return `
-    <article class="catalog-card catalog-card-product ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}">
+    <article class="catalog-card catalog-card-product ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}" draggable="true">
       <label class="catalog-select">
         <input type="checkbox" data-action="toggle-select-item" data-id="${escapeHtml(item.id)}" ${active ? 'checked' : ''} />
       </label>
@@ -2680,6 +2683,7 @@ function renderCatalogProductCard(item, node) {
       <div class="catalog-card-actions">
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
+        <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-up-down"></i> Move</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
         <button type="button" class="catalog-action-btn action-duplicate" data-action="duplicate" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="copy"></i> Duplicate</button>
         <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
@@ -2708,7 +2712,7 @@ function renderCatalogCategoryCard(item, node) {
   `).join('');
 
   return `
-    <article class="catalog-card catalog-card-category ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}">
+    <article class="catalog-card catalog-card-category ${active ? 'selected' : ''}" data-id="${escapeHtml(item.id)}" draggable="true">
       <label class="catalog-select">
         <input type="checkbox" data-action="toggle-select-item" data-id="${escapeHtml(item.id)}" ${active ? 'checked' : ''} />
       </label>
@@ -3459,6 +3463,190 @@ async function reorderCategory(id, direction) {
   await updateRecord('categories', target.id, { displayOrder: current.displayOrder || index + 1 });
   showToast('Category reordered');
   renderView(ui.data || {});
+}
+
+async function reorderProductPosition(productId, targetPosInput) {
+  const node = ui.catalogTab === 'categories' ? 'categories' : 'products';
+  const allItems = listCollection(node)
+    .filter((item) => item.status !== 'deleted')
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+
+  if (!allItems.length) return;
+
+  const totalCount = allItems.length;
+  const targetPos = Math.max(1, Math.min(totalCount, Math.floor(Number(targetPosInput))));
+
+  if (isNaN(targetPos)) {
+    showToast('Invalid target position', 'danger');
+    return;
+  }
+
+  const currentIndex = allItems.findIndex((item) => item.id === productId);
+  if (currentIndex === -1) {
+    showToast('Item not found', 'danger');
+    return;
+  }
+
+  const currentPos = currentIndex + 1;
+  if (currentPos === targetPos) {
+    showToast(`Product already at position #${targetPos}`, 'info');
+    return;
+  }
+
+  const targetItem = allItems[currentIndex];
+  const listWithoutTarget = allItems.filter((item) => item.id !== productId);
+  listWithoutTarget.splice(targetPos - 1, 0, targetItem);
+
+  const updates = {};
+  let modifiedCount = 0;
+
+  listWithoutTarget.forEach((item, index) => {
+    const newPos = index + 1;
+    if (item.displayOrder !== newPos) {
+      updates[`${item.id}/displayOrder`] = newPos;
+      updates[`${item.id}/updatedAt`] = Date.now();
+      modifiedCount += 1;
+    }
+  });
+
+  if (modifiedCount > 0) {
+    try {
+      await updateRecordsBatch(node, updates);
+      showToast(`Moved to position #${targetPos}`);
+      renderView(ui.data || {});
+    } catch (err) {
+      console.error('Reorder error:', err);
+      showToast('Unable to update product position. Please try again.', 'danger');
+      renderView(ui.data || {});
+    }
+  } else {
+    showToast(`Product at position #${targetPos}`);
+  }
+}
+
+function openMovePositionModal(productId) {
+  const node = ui.catalogTab === 'categories' ? 'categories' : 'products';
+  const allItems = listCollection(node)
+    .filter((item) => item.status !== 'deleted')
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+
+  const itemIndex = allItems.findIndex((item) => item.id === productId);
+  if (itemIndex === -1) return;
+
+  const item = allItems[itemIndex];
+  const currentPos = itemIndex + 1;
+  const totalCount = allItems.length;
+  const itemTitle = item.title || item.name || 'Product';
+
+  openModal(`
+    <div class="panel-head">
+      <div>
+        <h2 class="section-title"><i data-lucide="arrow-up-down"></i> Move Product Position</h2>
+        <p class="section-subtitle">Reorder position across the entire catalog.</p>
+      </div>
+      <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
+    </div>
+    <form id="movePositionForm" style="display:flex;flex-direction:column;gap:16px;padding:8px 0;">
+      <div class="move-pos-info-card glass" style="padding:14px 18px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
+        <div style="font-weight:700;font-size:1.05rem;color:#fff;margin-bottom:4px;">${escapeHtml(itemTitle)}</div>
+        <div style="font-size:0.85rem;color:var(--muted);display:flex;gap:16px;">
+          <span>Current position: <strong style="color:#f472b6;">#${currentPos}</strong></span>
+          <span>Total items: <strong>${totalCount}</strong></span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="targetPosInput">Move to Position (1 - ${totalCount})</label>
+        <input class="input" type="number" id="targetPosInput" name="targetPosition" min="1" max="${totalCount}" step="1" value="${currentPos}" required placeholder="Enter position number (1-${totalCount})" autofocus />
+        <small style="color:var(--muted);font-size:0.78rem;margin-top:4px;">Products between current and target positions will shift automatically.</small>
+      </div>
+      <div class="toolbar" style="margin-top:8px;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+        <button type="submit" class="btn btn-primary" id="btnSubmitMove"><i data-lucide="check"></i> Move</button>
+      </div>
+    </form>
+  `);
+
+  const form = document.getElementById('movePositionForm');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btnSubmit = document.getElementById('btnSubmitMove');
+    const inputVal = form.querySelector('[name="targetPosition"]')?.value;
+    const targetPos = parseInt(inputVal, 10);
+
+    if (isNaN(targetPos) || targetPos < 1 || targetPos > totalCount) {
+      showToast(`Please enter a valid position between 1 and ${totalCount}`, 'danger');
+      return;
+    }
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<i data-lucide="loader" class="spin"></i> Moving...';
+    }
+
+    try {
+      closeModal();
+      await reorderProductPosition(productId, targetPos);
+    } catch (err) {
+      showToast('Failed to move product position', 'danger');
+    }
+  });
+}
+
+function initCatalogDragAndDrop() {
+  const grid = document.getElementById('catalogResultsGrid');
+  if (!grid) return;
+
+  const cards = grid.querySelectorAll('.catalog-card-product[draggable="true"], .catalog-card-category[draggable="true"]');
+  if (!cards.length) return;
+
+  let draggedId = null;
+
+  cards.forEach((card) => {
+    card.addEventListener('dragstart', (e) => {
+      draggedId = card.dataset.id;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', draggedId);
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      cards.forEach((c) => c.classList.remove('drag-over'));
+      draggedId = null;
+    });
+
+    card.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (card.dataset.id !== draggedId) {
+        card.classList.add('drag-over');
+      }
+    });
+
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drag-over');
+    });
+
+    card.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      const sourceId = draggedId || e.dataTransfer.getData('text/plain');
+      const targetId = card.dataset.id;
+
+      if (!sourceId || !targetId || sourceId === targetId) return;
+
+      const node = ui.catalogTab === 'categories' ? 'categories' : 'products';
+      const allItems = listCollection(node)
+        .filter((item) => item.status !== 'deleted')
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+
+      const targetIndex = allItems.findIndex((item) => item.id === targetId);
+      if (targetIndex === -1) return;
+
+      const targetPos = targetIndex + 1;
+      await reorderProductPosition(sourceId, targetPos);
+    });
+  });
 }
 
 function openMoveCategoryModal(ids) {
@@ -5536,6 +5724,7 @@ function renderView(data) {
     else html = renderDashboard(data);
     viewRoot.innerHTML = html;
     if (window.lucide) lucide.createIcons();
+    initCatalogDragAndDrop();
     if (current === 'analytics') mountAnalyticsCharts();
     notifyCount.textContent = String(recentActivity(12).length);
   } catch (error) {
@@ -5608,6 +5797,7 @@ function softUpdateCatalog() {
     `;
   }
   if (window.lucide) lucide.createIcons();
+  initCatalogDragAndDrop();
 }
 
 function applyRoute(path) {
@@ -5807,6 +5997,10 @@ function attachGlobalHandlers() {
         await deleteRecord(node, id);
         showToast('Record deleted');
       }
+      return;
+    }
+    if (action === 'move-position') {
+      openMovePositionModal(id);
       return;
     }
     if (action === 'move-up' && node === 'categories') {

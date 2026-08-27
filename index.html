@@ -70,6 +70,10 @@
         <a href="#faq" class="nav-link">FAQ</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
+      <button class="header-search-btn" id="headerSearchBtn" aria-label="Search" title="Search Products & FAQs">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span class="header-search-text">Search</span>
+      </button>
       <button class="header-cart-btn" id="headerCartBtn" aria-label="Open Shopping Cart" title="View Cart">
         <i class="fa-solid fa-cart-shopping"></i>
         <span class="cart-badge" id="cartBadgeHeader" style="display: none;">0</span>
@@ -79,6 +83,9 @@
     </div>
     <!-- Mobile nav -->
     <div class="mobile-nav" id="mobileNav">
+      <button class="mob-search-btn" id="mobSearchBtn">
+        <i class="fa-solid fa-magnifying-glass"></i> Search Products & FAQs
+      </button>
       <button class="mob-cart-btn" id="mobCartBtn">
         <i class="fa-solid fa-cart-shopping"></i> View Cart (<span id="cartBadgeMob">0</span>)
       </button>
@@ -2099,7 +2106,7 @@
         window.history.replaceState(null, '', currentUrl.toString());
       } catch (_) {}
 
-      // Fast write with 200ms timeout for instant navigation
+      // Write to Firebase with safe 1200ms timeout to guarantee transmission before page redirect
       const writePromise = Promise.all([
         set(orderRef, payload),
         set(push(ref(db, 'events')), getOrderClickMeta(link)).catch(() => {})
@@ -2107,7 +2114,7 @@
 
       await Promise.race([
         writePromise,
-        new Promise(r => setTimeout(r, 200))
+        new Promise(r => setTimeout(r, 1200))
       ]);
 
       window.location.href = targetUrl;
@@ -2694,8 +2701,8 @@
     renderPinnedBanner();
   });
 
-  let sharedFocusDone = false;
-  let sharedFocusTargetId = '';
+  var sharedFocusDone = false;
+  var sharedFocusTargetId = '';
 
   function getSharedProductIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -3374,8 +3381,346 @@
     .media-viewer-title{color:#fff;font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.9;}
     .media-viewer-dots{display:flex;align-items:center;justify-content:center;gap:10px;pointer-events:auto;}
     .media-viewer-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(255,255,255,.28);cursor:pointer;}
-    .media-viewer-dot.active{background:#f0247a;transform:scale(1.2);}
   </style>
+
+  <!-- ===== UNIVERSAL SEARCH OVERLAY MODAL ===== -->
+  <div class="search-overlay-modal" id="searchOverlayModal" aria-hidden="true">
+    <div class="search-overlay-backdrop" id="searchOverlayBackdrop"></div>
+    <div class="search-modal-container">
+      <div class="search-modal-header">
+        <div class="search-modal-title">
+          <i class="fa-solid fa-fire-flame-curved search-modal-icon"></i>
+          <span>Linkadda <strong>Universal Search</strong></span>
+        </div>
+        <div class="search-modal-right">
+          <span class="search-esc-hint"><kbd>ESC</kbd> to close</span>
+          <button type="button" class="search-modal-close" id="searchModalClose" aria-label="Close search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="search-modal-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-modal-input-icon"></i>
+        <input type="text" id="navSearchInput" placeholder="Search categories, products, FAQs, reviews, creators, price..." autocomplete="off" />
+        <button type="button" class="search-modal-input-clear" id="navSearchClear" style="display: none;" title="Clear search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="search-quick-tags">
+        <span class="search-tags-label"><i class="fa-solid fa-bolt"></i> Popular:</span>
+        <button type="button" class="search-tag-btn" data-query="Mom Son">Mom Son</button>
+        <button type="button" class="search-tag-btn" data-query="Sis Bro">Sis Bro</button>
+        <button type="button" class="search-tag-btn" data-query="All Collection">All Collection</button>
+        <button type="button" class="search-tag-btn" data-query="4K">4K Quality</button>
+        <button type="button" class="search-tag-btn" data-query="Payment">FAQ: Payment</button>
+      </div>
+
+      <div class="search-modal-stats-bar" id="navSearchStats" style="display: none;"></div>
+
+      <div class="search-modal-results" id="navSearchResults">
+        <!-- Result items dynamically generated -->
+      </div>
+
+      <div class="search-modal-empty" id="navSearchNoResults" style="display: none;">
+        <div class="sme-icon"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
+        <h4>No results found for "<span id="navSearchNoTerm"></span>"</h4>
+        <p>Try searching another keyword like "Mom", "Sis", "4K", "Payment", or "Telegram".</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function initUniversalSearchEngine() {
+    function setup() {
+      const openBtnHeader = document.getElementById('headerSearchBtn');
+      const openBtnMob    = document.getElementById('mobSearchBtn');
+      const modal         = document.getElementById('searchOverlayModal');
+      const backdrop      = document.getElementById('searchOverlayBackdrop');
+      const closeBtn      = document.getElementById('searchModalClose');
+      const searchInput   = document.getElementById('navSearchInput');
+      const searchClear   = document.getElementById('navSearchClear');
+      const statsBar      = document.getElementById('navSearchStats');
+      const resultsContainer = document.getElementById('navSearchResults');
+      const noResults     = document.getElementById('navSearchNoResults');
+      const noResultsTerm = document.getElementById('navSearchNoTerm');
+
+      if (!modal || !searchInput) return;
+
+      function openModal() {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => searchInput.focus(), 150);
+        executeSearch();
+      }
+
+      function closeModal() {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      if (openBtnHeader) openBtnHeader.addEventListener('click', openModal);
+      if (openBtnMob) openBtnMob.addEventListener('click', () => {
+        const mobNav = document.getElementById('mobileNav');
+        if (mobNav) mobNav.classList.remove('open');
+        openModal();
+      });
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (backdrop) backdrop.addEventListener('click', closeModal);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+          closeModal();
+        }
+      });
+
+      function executeSearch() {
+        const term = searchInput.value.trim().toLowerCase();
+        if (searchClear) searchClear.style.display = term ? 'flex' : 'none';
+
+        resultsContainer.innerHTML = '';
+        let matchedCategoryPills = [];
+        let matchedProducts = [];
+        let matchedFaqs = [];
+
+        // 1. Search Category Filters (liveCollections.categories + DOM Pills)
+        const categoriesList = typeof liveCollections !== 'undefined' && liveCollections.categories
+          ? Object.entries(liveCollections.categories).map(([id, cat]) => ({ id, title: cat.title || id }))
+          : [];
+
+        document.querySelectorAll('#categoryFilterPills .category-pill, .category-select-element option').forEach(pill => {
+          const id = pill.dataset?.catId || pill.value;
+          const title = (pill.textContent || pill.innerText || '').trim();
+          if (id && id !== 'all' && title && !categoriesList.some(c => c.id === id)) {
+            categoriesList.push({ id, title });
+          }
+        });
+
+        categoriesList.forEach(cat => {
+          if (term && (cat.title.toLowerCase().includes(term) || cat.id.toLowerCase().includes(term))) {
+            if (!matchedCategoryPills.some(c => c.id === cat.id)) {
+              matchedCategoryPills.push(cat);
+            }
+          }
+        });
+
+        // 2. Search Categories & Products (.pcard, .collection-pack-banner)
+        const productCards = Array.from(document.querySelectorAll('.pcard, .collection-pack-banner'));
+        productCards.forEach((card) => {
+          const title = (card.querySelector('.pcard-title, .cpb-title')?.textContent || '').toLowerCase();
+          const creators = (card.querySelector('.pcard-creators, .cpb-desc')?.textContent || '').toLowerCase();
+          const features = (card.querySelector('.pcard-features')?.textContent || '').toLowerCase();
+          const platforms = (card.querySelector('.pcard-platforms')?.textContent || '').toLowerCase();
+          const price = (card.querySelector('.pcard-price, .cpb-offer')?.textContent || '').toLowerCase();
+          const pill = (card.querySelector('.pcard-pill, .cpb-pin')?.textContent || '').toLowerCase();
+
+          const isMatch = !term ||
+            title.includes(term) ||
+            creators.includes(term) ||
+            features.includes(term) ||
+            platforms.includes(term) ||
+            price.includes(term) ||
+            pill.includes(term);
+
+          if (isMatch) matchedProducts.push(card);
+        });
+
+        // 3. Search FAQs (.faq-item)
+        const faqItems = Array.from(document.querySelectorAll('.faq-item'));
+        faqItems.forEach((faq) => {
+          const qText = (faq.querySelector('.faq-q')?.textContent || '').toLowerCase();
+          const aText = (faq.querySelector('.faq-a')?.textContent || '').toLowerCase();
+          if (term && (qText.includes(term) || aText.includes(term))) {
+            matchedFaqs.push(faq);
+          }
+        });
+
+        const totalCount = matchedCategoryPills.length + matchedProducts.length + matchedFaqs.length;
+
+        if (term && statsBar) {
+          statsBar.style.display = 'block';
+          statsBar.textContent = `Found ${matchedCategoryPills.length} Category(ies), ${matchedProducts.length} Pack(s) & ${matchedFaqs.length} FAQ Answer(s)`;
+        } else if (statsBar) {
+          statsBar.style.display = 'none';
+        }
+
+        if (totalCount === 0 && term) {
+          if (noResults) {
+            noResults.style.display = 'flex';
+            if (noResultsTerm) noResultsTerm.textContent = searchInput.value.trim();
+          }
+          return;
+        } else {
+          if (noResults) noResults.style.display = 'none';
+        }
+
+        // Render Category Filter Chips
+        if (matchedCategoryPills.length > 0 && term) {
+          const catHeader = document.createElement('div');
+          catHeader.className = 'search-group-title';
+          catHeader.innerHTML = `<i class="fa-solid fa-tags"></i> Categories Found (${matchedCategoryPills.length})`;
+          resultsContainer.appendChild(catHeader);
+
+          const catWrap = document.createElement('div');
+          catWrap.className = 'search-categories-chip-wrap';
+
+          matchedCategoryPills.forEach(cat => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'search-cat-chip';
+            chip.innerHTML = `<i class="fa-solid fa-folder-open"></i> ${cat.title}`;
+
+            chip.addEventListener('click', () => {
+              closeModal();
+              if (typeof activeCategoryFilter !== 'undefined') {
+                activeCategoryFilter = cat.id;
+                if (typeof renderCategoryFilters === 'function') renderCategoryFilters();
+                if (typeof renderLiveGrid === 'function') renderLiveGrid();
+              }
+              const servicesSec = document.getElementById('services');
+              if (servicesSec) {
+                servicesSec.scrollIntoView({ behavior: 'smooth' });
+              }
+            });
+
+            catWrap.appendChild(chip);
+          });
+
+          resultsContainer.appendChild(catWrap);
+        }
+
+        // Render Category Product Cards
+        if (matchedProducts.length > 0) {
+          const groupHeader = document.createElement('div');
+          groupHeader.className = 'search-group-title';
+          groupHeader.innerHTML = `<i class="fa-solid fa-layer-group"></i> Categories & Products (${matchedProducts.length})`;
+          resultsContainer.appendChild(groupHeader);
+
+          matchedProducts.forEach((card) => {
+            const title = card.querySelector('.pcard-title, .cpb-title')?.textContent || 'Product';
+            const creators = card.querySelector('.pcard-creators, .cpb-desc')?.textContent || '';
+            const price = card.querySelector('.pcard-price, .cpb-offer')?.textContent || '';
+            // Multi-tier Image Extractor
+            let imgSrc = '';
+            const imgEl = card.querySelector('.fb-slide-active img, .fb-slide img, .pslide-active img, .pcard-img-wrap img, .pcard-img, img');
+            if (imgEl && imgEl.getAttribute('src') && !imgEl.getAttribute('src').includes('undefined')) {
+              imgSrc = imgEl.getAttribute('src');
+            }
+            if (!imgSrc) {
+              const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn');
+              if (cartBtn && cartBtn.dataset && cartBtn.dataset.img) {
+                imgSrc = cartBtn.dataset.img;
+              }
+            }
+
+            const thumbMarkup = imgSrc
+              ? `<img src="${imgSrc}" alt="${title}" class="src-thumb" onerror="this.onerror=null; this.outerHTML='<div class=\\'src-thumb-fallback\\'><i class=\\'fa-solid fa-fire-flame-curved\\'></i></div>';" />`
+              : `<div class="src-thumb-fallback"><i class="fa-solid fa-fire-flame-curved"></i></div>`;
+
+            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart');
+            const productId = cartBtn?.getAttribute('data-product-id') || title.toLowerCase().replace(/\s+/g, '-');
+            const productInr = cartBtn?.getAttribute('data-inr') || price.replace(/[^\d]/g, '') || '599';
+            const productUsd = cartBtn?.getAttribute('data-usd') || '39';
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'search-result-card';
+            itemEl.innerHTML = `
+              <div class="src-left">
+                ${thumbMarkup}
+                <div class="src-info">
+                  <div class="src-title">${title}</div>
+                  <div class="src-creators">${creators}</div>
+                </div>
+              </div>
+              <div class="src-right">
+                <div class="src-price-box">
+                  <div class="src-price">${price}</div>
+                </div>
+                <div class="src-actions">
+                  <a href="payment.html" class="src-btn-order">Order <i class="fa-solid fa-arrow-right"></i></a>
+                  <button type="button" class="src-btn-cart btn-add-cart" 
+                    data-product-id="${productId}" 
+                    data-name="${title}" 
+                    data-inr="${productInr}" 
+                    data-usd="${productUsd}">🛒 Add</button>
+                </div>
+              </div>
+            `;
+
+            itemEl.addEventListener('click', (e) => {
+              if (e.target.closest('.src-actions')) return;
+              closeModal();
+              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              card.classList.add('search-highlight');
+              setTimeout(() => card.classList.remove('search-highlight'), 1400);
+            });
+
+            resultsContainer.appendChild(itemEl);
+          });
+        }
+
+        // Render FAQ Results
+        if (matchedFaqs.length > 0) {
+          const faqHeader = document.createElement('div');
+          faqHeader.className = 'search-group-title';
+          faqHeader.style.marginTop = '16px';
+          faqHeader.innerHTML = `<i class="fa-solid fa-circle-question"></i> Help & FAQs (${matchedFaqs.length})`;
+          resultsContainer.appendChild(faqHeader);
+
+          matchedFaqs.forEach((faq) => {
+            const question = faq.querySelector('.faq-q span')?.textContent || 'FAQ Question';
+            const answer = faq.querySelector('.faq-a p')?.textContent || '';
+
+            const faqEl = document.createElement('div');
+            faqEl.className = 'faq-result-card';
+            faqEl.innerHTML = `
+              <div class="frc-q"><i class="fa-solid fa-question-circle"></i> ${question}</div>
+              <div class="frc-a">${answer}</div>
+            `;
+
+            faqEl.addEventListener('click', () => {
+              closeModal();
+              faq.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              faq.classList.add('active');
+              faq.classList.add('search-highlight');
+              setTimeout(() => faq.classList.remove('search-highlight'), 1400);
+            });
+
+            resultsContainer.appendChild(faqEl);
+          });
+        }
+      }
+
+      searchInput.addEventListener('input', executeSearch);
+
+      if (searchClear) {
+        searchClear.addEventListener('click', () => {
+          searchInput.value = '';
+          executeSearch();
+          searchInput.focus();
+        });
+      }
+
+      document.querySelectorAll('.search-tag-btn').forEach((tagBtn) => {
+        tagBtn.addEventListener('click', () => {
+          searchInput.value = tagBtn.getAttribute('data-query') || '';
+          executeSearch();
+          searchInput.focus();
+        });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setup);
+    } else {
+      setup();
+    }
+  })();
+  </script>
+
   <script type="module" src="/media-resolver.js"></script>
 </body>
 </html>
