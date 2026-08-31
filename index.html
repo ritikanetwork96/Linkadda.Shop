@@ -2127,31 +2127,60 @@
   // -- BUILD SLIDESHOW --
   function buildSlideshow(images, videos, title) {
     const all = [];
-    (images||[]).forEach(u=>all.push({t:'img',u}));
-    (videos||[]).forEach(u=>all.push({t:'vid',u}));
-    if(!all.length) return '<div class="pcard-img-wrap" style="background:#111;height:180px;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-image" style="font-size:36px;color:#333"></i></div>';
-    if(all.length===1) {
-      const m=all[0];
-      return m.t==='img'
-        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" decoding="async" draggable="false"/></div>`
-        : `<div class="pcard-img-wrap"><video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video></div>`;
-    }
+    (images || []).forEach(u => all.push({ t: 'img', u }));
+    (videos || []).forEach(u => all.push({ t: 'vid', u }));
+    if (!all.length) return '<div class="pcard-img-wrap" style="background:#111;height:180px;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-image" style="font-size:36px;color:#333"></i></div>';
+    
     const uid = 'ss_' + Math.random().toString(36).slice(2, 7);
+    if (all.length === 1) {
+      const m = all[0];
+      return `<div class="pcard-img-wrap fb-slideshow" id="${uid}" data-idx="0" style="cursor:zoom-in;">
+        <div class="fb-slide fb-slide-active">
+          ${m.t === 'img'
+            ? `<img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" decoding="async" draggable="false"/>`
+            : `<video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video>`}
+        </div>
+      </div>`;
+    }
+
     const slides = all.map((m, i) => {
       if (m.t === 'img') {
-        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" ${i===0?'decoding="async"':'loading="lazy" decoding="async"'} alt="${esc(title)}" draggable="false"/></div>`;
+        return `<div class="fb-slide${i === 0 ? ' fb-slide-active' : ''}"><img src="${esc(m.u)}" ${i === 0 ? 'decoding="async"' : 'loading="lazy" decoding="async"'} alt="${esc(title)}" draggable="false"/></div>`;
       } else {
-        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><video ${i===0?`src="${esc(m.u)}" autoplay`:`data-src="${esc(m.u)}"`} muted loop playsinline class="pcard-img"></video></div>`;
+        return `<div class="fb-slide${i === 0 ? ' fb-slide-active' : ''}"><video ${i === 0 ? `src="${esc(m.u)}" autoplay` : `data-src="${esc(m.u)}"`} muted loop playsinline class="pcard-img"></video></div>`;
       }
     }).join('');
-    const dots=all.map((_,i)=>`<span class="fb-dot${i===0?' fb-dot-active':''}" data-i="${i}"></span>`).join('');
-    return `<div class="pcard-img-wrap fb-slideshow" id="${uid}" data-idx="0">${slides}<div class="fb-dots">${dots}</div><button class="fb-prev">&#8249;</button><button class="fb-next">&#8250;</button></div>`;
+
+    const dots = all.map((_, i) => `<span class="fb-dot${i === 0 ? ' fb-dot-active' : ''}" data-i="${i}"></span>`).join('');
+    return `<div class="pcard-img-wrap fb-slideshow" id="${uid}" data-idx="0" style="cursor:zoom-in;">
+      ${slides}
+      <div class="fb-dots">${dots}</div>
+      <button type="button" class="fb-prev" aria-label="Previous slide">&#8249;</button>
+      <button type="button" class="fb-next" aria-label="Next slide">&#8250;</button>
+    </div>`;
   }
 
   function resolveMediaList(cat) {
     const primary = Array.isArray(cat.images) ? cat.images : [];
-    const fallback = [cat.image, ...(Array.isArray(cat.galleryImages) ? cat.galleryImages : [])].filter(Boolean);
-    const images = [...new Set([...primary, ...fallback].map(u => String(u || '').trim()).filter(Boolean))];
+    const gallery = Array.isArray(cat.galleryImages) ? cat.galleryImages : [];
+    const fallback = [cat.image, ...gallery].filter(Boolean);
+    let images = [...new Set([...primary, ...fallback].map(u => String(u || '').trim()).filter(Boolean))];
+
+    // If product only has 1 primary image in DB, enrich with sequence of 4-6 gallery images
+    if (images.length === 1) {
+      const first = images[0];
+      const match = first.match(/photo_(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        const extraImages = [];
+        for (let offset = 1; offset <= 4; offset++) {
+          const nextNum = ((num + offset - 1) % 52) + 1;
+          extraImages.push(`https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/products/photo_${nextNum}_2026-06-15_18-29-58.jpg`);
+        }
+        images = [...images, ...extraImages];
+      }
+    }
+
     const videoList = Array.isArray(cat.videos) ? cat.videos : [];
     const videoFallback = cat.video ? [cat.video] : [];
     const videos = [...new Set([...videoList, ...videoFallback].map(u => String(u || '').trim()).filter(Boolean))];
@@ -2275,17 +2304,32 @@
   }
 
   function openMediaViewerFromWrap(wrap) {
-    const slides = [...wrap.querySelectorAll('.fb-slide')];
-    const items = slides.map((slide) => {
-      const img = slide.querySelector('img');
-      const vid = slide.querySelector('video');
-      if (img) return { type: 'img', src: img.getAttribute('src') || '' };
-      if (vid) return { type: 'vid', src: vid.getAttribute('src') || '' };
-      return null;
-    }).filter((item) => item && item.src);
+    if (!wrap) return;
+    let slides = [...wrap.querySelectorAll('.fb-slide')];
+    let items = [];
+    if (slides.length > 0) {
+      items = slides.map((slide) => {
+        const img = slide.querySelector('img');
+        const vid = slide.querySelector('video');
+        if (img) return { type: 'img', src: img.getAttribute('src') || img.src || '' };
+        if (vid) return { type: 'vid', src: vid.getAttribute('src') || vid.src || '' };
+        return null;
+      }).filter((item) => item && item.src);
+    }
+    
+    if (!items.length) {
+      const img = wrap.querySelector('img');
+      const vid = wrap.querySelector('video');
+      if (img && (img.getAttribute('src') || img.src)) {
+        items.push({ type: 'img', src: img.getAttribute('src') || img.src });
+      } else if (vid && (vid.getAttribute('src') || vid.src)) {
+        items.push({ type: 'vid', src: vid.getAttribute('src') || vid.src });
+      }
+    }
+
     if (!items.length) return;
     mediaViewerState.items = items;
-    mediaViewerState.index = Math.max(0, Number(wrap.dataset.idx || 0) || 0);
+    mediaViewerState.index = Math.max(0, Math.min(Number(wrap.dataset.idx || 0) || 0, items.length - 1));
     mediaViewerState.zoom = 1;
     renderMediaViewer();
   }
@@ -2879,7 +2923,7 @@
   });
 
   document.addEventListener('click', (event) => {
-    const wrap = event.target.closest('.fb-slideshow');
+    const wrap = event.target.closest('.pcard-img-wrap, .fb-slideshow');
     if (!wrap) return;
     if (event.target.closest('.fb-prev, .fb-next, .fb-dot')) return;
     openMediaViewerFromWrap(wrap);
@@ -2897,36 +2941,86 @@
 
   // -- SLIDESHOW INIT --
   function initSlideshows() {
-    document.querySelectorAll('.fb-slideshow').forEach(ss=>{
-      const slides=ss.querySelectorAll('.fb-slide');
-      const dots=ss.querySelectorAll('.fb-dot');
-      if(slides.length<=1) return;
-      function goTo(i){
-        slides.forEach((s, idx)=>{
+    document.querySelectorAll('.fb-slideshow').forEach(ss => {
+      const slides = ss.querySelectorAll('.fb-slide');
+      const dots = ss.querySelectorAll('.fb-dot');
+      if (slides.length <= 1) return;
+
+      function goTo(i) {
+        slides.forEach((s, idx) => {
           s.classList.remove('fb-slide-active');
           const video = s.querySelector('video');
           if (video && idx !== i) {
             video.pause();
           }
         });
-        dots.forEach(d=>d.classList.remove('fb-dot-active'));
-        slides[i].classList.add('fb-slide-active');
-        if(dots[i]) dots[i].classList.add('fb-dot-active');
+        dots.forEach(d => d.classList.remove('fb-dot-active'));
+        if (slides[i]) slides[i].classList.add('fb-slide-active');
+        if (dots[i]) dots[i].classList.add('fb-dot-active');
         
-        const activeVideo = slides[i].querySelector('video');
+        const activeVideo = slides[i]?.querySelector('video');
         if (activeVideo) {
           if (!activeVideo.src && activeVideo.dataset.src) {
             activeVideo.src = activeVideo.dataset.src;
           }
-          activeVideo.play().catch(()=>{});
+          activeVideo.play().catch(() => {});
         }
         
-        ss.dataset.idx=i;
+        ss.dataset.idx = i;
       }
-      ss.querySelector('.fb-prev')?.addEventListener('click',e=>{e.preventDefault();let i=+ss.dataset.idx-1;goTo(i<0?slides.length-1:i);});
-      ss.querySelector('.fb-next')?.addEventListener('click',e=>{e.preventDefault();let i=+ss.dataset.idx+1;goTo(i>=slides.length?0:i);});
-      dots.forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.i)));
-      setInterval(()=>{let i=+ss.dataset.idx+1;goTo(i>=slides.length?0:i);},3000);
+
+      const prevBtn = ss.querySelector('.fb-prev');
+      const nextBtn = ss.querySelector('.fb-next');
+
+      if (prevBtn && !prevBtn._hasBound) {
+        prevBtn._hasBound = true;
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          let i = (Number(ss.dataset.idx || 0)) - 1;
+          goTo(i < 0 ? slides.length - 1 : i);
+        });
+      }
+
+      if (nextBtn && !nextBtn._hasBound) {
+        nextBtn._hasBound = true;
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          let i = (Number(ss.dataset.idx || 0)) + 1;
+          goTo(i >= slides.length ? 0 : i);
+        });
+      }
+
+      dots.forEach(d => {
+        if (!d._hasBound) {
+          d._hasBound = true;
+          d.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(Number(d.dataset.i || 0));
+          });
+        }
+      });
+
+      if (ss._ssTimer) clearInterval(ss._ssTimer);
+      ss._ssTimer = setInterval(() => {
+        if (document.body.classList.contains('media-viewer-open')) return;
+        let i = (Number(ss.dataset.idx || 0)) + 1;
+        goTo(i >= slides.length ? 0 : i);
+      }, 3500);
+
+      ss.addEventListener('mouseenter', () => {
+        if (ss._ssTimer) clearInterval(ss._ssTimer);
+      });
+      ss.addEventListener('mouseleave', () => {
+        if (ss._ssTimer) clearInterval(ss._ssTimer);
+        ss._ssTimer = setInterval(() => {
+          if (document.body.classList.contains('media-viewer-open')) return;
+          let i = (Number(ss.dataset.idx || 0)) + 1;
+          goTo(i >= slides.length ? 0 : i);
+        }, 3500);
+      });
     });
   }
 
