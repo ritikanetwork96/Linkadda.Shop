@@ -78,6 +78,7 @@ const ui = {
     sort: 'newest',
     view: 'grid',
     status: '',
+    selectedIds: new Set(),
   },
   management: {
     search: '',
@@ -2384,12 +2385,27 @@ function summarizeSources() {
 }
 
 function resolveMediaSource(value) {
-  const raw = String(value || '').trim();
+  let raw = String(value || '').trim();
   if (!raw) return '';
+  if (raw.includes('s3.linkadda.shop')) {
+    raw = raw.replace('https://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud')
+             .replace('http://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud');
+  }
+  if (raw.includes('supabase.co/storage/v1/object/public/media')) {
+    raw = raw.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media');
+  }
+
   if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
   const normalized = normalizeAssetValue(raw);
   const match = listCollection('media').find((item) => mediaMatchesReference(item, normalized) || mediaMatchesReference(item, raw));
-  if (match?.publicUrl) return match.publicUrl;
+  if (match?.publicUrl) {
+    let u = match.publicUrl;
+    if (u.includes('s3.linkadda.shop')) {
+      u = u.replace('https://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud')
+           .replace('http://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud');
+    }
+    return u;
+  }
   return raw.startsWith('/') ? raw : `/${raw}`;
 }
 
@@ -2412,7 +2428,9 @@ function mediaPreview(item) {
   if (String(item.type || '').toLowerCase() === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(src)) {
     return `<video class="thumb-media" src="${escapeHtml(src)}" autoplay muted loop playsinline></video>`;
   }
-  return `<img class="thumb-media" src="${escapeHtml(src)}" alt="${escapeHtml(item.title || item.name || 'Preview')}" loading="lazy" />`;
+  const fn = src.split('/').pop().split('?')[0];
+  const localFallback = `../images/${fn}`;
+  return `<img class="thumb-media" src="${escapeHtml(src)}" alt="${escapeHtml(item.title || item.name || 'Preview')}" loading="lazy" onerror="if(this.src!=='${localFallback}' && !this._triedLocal){this._triedLocal=true; this.src='${localFallback}';}" />`;
 }
 
 function renderDataPill(label, value) {
@@ -5429,8 +5447,14 @@ function renderMediaCard(item = {}) {
   const src = resolveMediaSource(item.publicUrl || item.path || '');
   const bucketKey = mediaBucketKey(item);
   const type = mediaKind(item);
+  const isSelected = ui.media.selectedIds?.has(item.id);
+  const status = item.status === 'inactive' ? 'inactive' : 'active';
   return `
-    <article class="media-card glass">
+    <article class="media-card glass ${isSelected ? 'selected' : ''}">
+      <label class="media-card-checkbox" title="Select asset">
+        <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} />
+        <span>Select</span>
+      </label>
       <button class="media-thumb media-thumb-button" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}">
         <span class="media-thumb-overlay">Open Preview</span>
         ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
@@ -5438,7 +5462,10 @@ function renderMediaCard(item = {}) {
       <div class="media-body">
         <div class="media-card-head">
           <strong title="${escapeHtml(item.name || item.path || 'Media')}">${escapeHtml(item.name || item.path || 'Media')}</strong>
-          <span class="badge">${escapeHtml(type)}</span>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);'}">${status.toUpperCase()}</span>
+            <span class="badge">${escapeHtml(type)}</span>
+          </div>
         </div>
         <div class="media-card-meta">
           <span>${escapeHtml(mediaBucketLabel(bucketKey))}</span>
@@ -5456,35 +5483,48 @@ function renderMediaCard(item = {}) {
 }
 
 function renderMediaList(items = []) {
+  const allSelected = items.length > 0 && items.every((i) => ui.media.selectedIds?.has(i.id));
   return `
     <div class="media-table">
-      <div class="media-table-head">
+      <div class="media-table-head" style="grid-template-columns: 40px 88px minmax(180px, 1.2fr) minmax(110px, 0.7fr) minmax(92px, 0.55fr) minmax(90px, 0.5fr) minmax(132px, 0.7fr) minmax(220px, 1fr);">
+        <div>
+          <input type="checkbox" data-action="select-all-media" ${allSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
+        </div>
         <span>Preview</span>
         <span>Filename</span>
         <span>Folder</span>
         <span>Type</span>
+        <span>Status</span>
         <span>Date</span>
         <span>Actions</span>
       </div>
-      ${items.length ? items.map((item) => `
-        <div class="media-table-row">
-          <button class="media-table-preview" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}">
-            ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
-          </button>
-          <div class="media-table-name">
-            <strong>${escapeHtml(item.name || item.path || 'Media')}</strong>
-            <span>${escapeHtml(item.path || '-')}</span>
+      ${items.length ? items.map((item) => {
+        const isSelected = ui.media.selectedIds?.has(item.id);
+        const status = item.status === 'inactive' ? 'inactive' : 'active';
+        return `
+          <div class="media-table-row" style="grid-template-columns: 40px 88px minmax(180px, 1.2fr) minmax(110px, 0.7fr) minmax(92px, 0.55fr) minmax(90px, 0.5fr) minmax(132px, 0.7fr) minmax(220px, 1fr); ${isSelected ? 'background: rgba(99, 102, 241, 0.1); border-radius: 8px;' : ''}">
+            <div>
+              <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
+            </div>
+            <button class="media-table-preview" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}">
+              ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
+            </button>
+            <div class="media-table-name">
+              <strong>${escapeHtml(item.name || item.path || 'Media')}</strong>
+              <span>${escapeHtml(item.path || '-')}</span>
+            </div>
+            <div>${escapeHtml(mediaBucketLabel(mediaBucketKey(item)))}</div>
+            <div><span class="badge">${escapeHtml(mediaKind(item))}</span></div>
+            <div><span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;'}">${status.toUpperCase()}</span></div>
+            <div>${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</div>
+            <div class="toolbar media-table-actions">
+              <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button">Preview</button>
+              <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || '')}" type="button">Copy URL</button>
+              <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button">Delete</button>
+            </div>
           </div>
-          <div>${escapeHtml(mediaBucketLabel(mediaBucketKey(item)))}</div>
-          <div><span class="badge">${escapeHtml(mediaKind(item))}</span></div>
-          <div>${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</div>
-          <div class="toolbar media-table-actions">
-            <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button">Preview</button>
-            <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || '')}" type="button">Copy URL</button>
-            <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button">Delete</button>
-          </div>
-        </div>
-      `).join('') : '<div class="empty-state media-empty">No media matched your filters.</div>'}
+        `;
+      }).join('') : '<div class="empty-state media-empty">No media matched your filters.</div>'}
     </div>
   `;
 }
@@ -5499,6 +5539,9 @@ function renderMediaView(data) {
       ...option,
       count: rawItems.filter((item) => mediaBucketKey(item) === option.value).length,
     }));
+  const selectedCount = ui.media.selectedIds ? ui.media.selectedIds.size : 0;
+  const allFilteredSelected = filteredItems.length > 0 && filteredItems.every((i) => ui.media.selectedIds?.has(i.id));
+
   return `
     <div class="page active">
       <section class="panel glass media-shell">
@@ -5506,7 +5549,7 @@ function renderMediaView(data) {
           <div>
             <div class="section-kicker">Media Library</div>
             <h2 class="section-title">Media</h2>
-            <p class="section-subtitle">Manage files stored in the Supabase <strong>media</strong> bucket.</p>
+            <p class="section-subtitle">Manage files stored in the <strong>Hostinger RustFS S3</strong> bucket.</p>
           </div>
           <div class="toolbar media-actions">
             <button class="btn btn-success" data-action="sync-site-media" type="button"><i data-lucide="image-plus"></i> Import Site Images</button>
@@ -5520,7 +5563,7 @@ function renderMediaView(data) {
           </div>
           <div class="media-summary-card">
             <span>Bucket</span>
-            <strong>media</strong>
+            <strong>linkadda-media</strong>
           </div>
           <div class="media-summary-card">
             <span>Folders</span>
@@ -5585,6 +5628,28 @@ function renderMediaView(data) {
             <span class="badge">${escapeHtml(String(stats.folders))} folders</span>
           </div>
         </div>
+
+        <!-- Media Bulk Action Toolbar -->
+        <div class="media-bulk-bar glass" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; margin-bottom: 18px; border-radius: 12px; background: rgba(30, 27, 75, 0.45); border: 1px solid rgba(99, 102, 241, 0.3);">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; font-size: 13px; color: var(--text);">
+              <input type="checkbox" data-action="select-all-media" ${allFilteredSelected ? 'checked' : ''} style="cursor: pointer; width: 18px; height: 18px; accent-color: #6366f1;" />
+              <span>Select All (${selectedCount} / ${filteredItems.length} selected)</span>
+            </label>
+          </div>
+          <div class="toolbar" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-sm btn-success" data-action="bulk-set-active-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Set Active
+            </button>
+            <button class="btn btn-sm btn-ghost" data-action="bulk-set-inactive-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+              <i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Set Inactive
+            </button>
+            <button class="btn btn-sm btn-danger" data-action="bulk-delete-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete Selected (${selectedCount})
+            </button>
+          </div>
+        </div>
+
         ${filteredItems.length ? (
           ui.media.view === 'list'
             ? renderMediaList(filteredItems)
@@ -6071,8 +6136,67 @@ function attachGlobalHandlers() {
       await applyBulkAction(actionBtn.dataset.bulkAction, node || (ui.catalogTab === 'categories' ? 'categories' : 'products'), ui.selection);
       return;
     }
+    if (action === 'toggle-select-media') {
+      const mediaId = actionBtn.dataset.id;
+      if (!ui.media.selectedIds) ui.media.selectedIds = new Set();
+      if (ui.media.selectedIds.has(mediaId)) {
+        ui.media.selectedIds.delete(mediaId);
+      } else {
+        ui.media.selectedIds.add(mediaId);
+      }
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'select-all-media') {
+      const rawItems = listCollection('media');
+      const filteredItems = sortMediaItems(filterMediaItems(rawItems));
+      if (!ui.media.selectedIds) ui.media.selectedIds = new Set();
+      const allSelected = filteredItems.length > 0 && filteredItems.every(i => ui.media.selectedIds.has(i.id));
+      if (allSelected) {
+        filteredItems.forEach(i => ui.media.selectedIds.delete(i.id));
+      } else {
+        filteredItems.forEach(i => ui.media.selectedIds.add(i.id));
+      }
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'bulk-delete-media') {
+      const selected = Array.from(ui.media.selectedIds || []);
+      if (!selected.length) {
+        showToast('Please select media items first.', 'warning');
+        return;
+      }
+      if (confirm(`Are you sure you want to delete ${selected.length} selected media assets?`)) {
+        for (const mId of selected) {
+          const item = getItem('media', mId);
+          if (item?.path) await deletePublicAsset(item.path);
+          await deleteRecord('media', mId);
+        }
+        ui.media.selectedIds.clear();
+        showToast(`Deleted ${selected.length} media assets.`);
+        renderView(ui.data || {});
+      }
+      return;
+    }
+    if (action === 'bulk-set-active-media' || action === 'bulk-set-inactive-media') {
+      const selected = Array.from(ui.media.selectedIds || []);
+      if (!selected.length) {
+        showToast('Please select media items first.', 'warning');
+        return;
+      }
+      const newStatus = action === 'bulk-set-active-media' ? 'active' : 'inactive';
+      for (const mId of selected) {
+        const item = getItem('media', mId);
+        if (item) {
+          await updateRecord('media', mId, { ...item, status: newStatus });
+        }
+      }
+      showToast(`Updated ${selected.length} assets to ${newStatus}.`);
+      renderView(ui.data || {});
+      return;
+    }
     if (action === 'delete-media') {
-      if (confirm('Delete uploaded media from Supabase Storage?')) {
+      if (confirm('Delete uploaded media asset?')) {
         await deletePublicAsset(actionBtn.dataset.path || '');
         await deleteRecord('media', actionBtn.dataset.id);
         showToast('Media deleted');
