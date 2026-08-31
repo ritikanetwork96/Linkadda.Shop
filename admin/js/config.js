@@ -18,6 +18,14 @@ export const FIREBASE_CONFIG = {
   measurementId: 'G-PCH50PK2N7',
 };
 
+// RustFS S3-compatible public config (No secrets on frontend!)
+export const RUSTFS_CONFIG = {
+  endpoint: 'https://rustfs-mi5c.srv1942099.hstgr.cloud',
+  bucket: 'linkadda-media',
+  region: 'us-east-1',
+};
+
+// Supabase config retained for zero-downtime transition & backward compatibility
 export const SUPABASE_CONFIG = {
   url: 'https://noecylfqhtfwbjfkjxoo.supabase.co',
   anonKey: 'sb_publishable_HHXzUZGaMXTpCXQVqiNBwQ_ZEbe_E2z',

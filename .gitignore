@@ -80,9 +80,8 @@ build/
 .nuxt/
 out/
 
-# Local dev/migration scripts (not needed in production)
+# Local dev scratch files
 scratch/
-scripts/
 migration-report.json
 migration-report.md
-*.mjs
+

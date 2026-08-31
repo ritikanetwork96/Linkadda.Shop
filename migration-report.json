@@ -1,17 +1,728 @@
 {
-  "migrated": 118,
-  "cached": 0,
-  "uploaded": 118,
-  "foldersUsed": [
-    "categories",
-    "logos",
-    "products"
-  ],
-  "failures": [],
-  "filesModified": [
-    "index.html",
-    "payment.html",
-    "firebase rtdb media"
-  ],
-  "generatedAt": "2026-08-08T00:46:14.140Z"
+  "timestamp": "2026-08-31T18:35:22.384Z",
+  "isDryRun": false,
+  "totalFiles": 119,
+  "imageCount": 116,
+  "videoCount": 3,
+  "successfulFiles": 0,
+  "skippedFiles": 0,
+  "failedFiles": 119,
+  "endpoint": "https://s3.linkadda.shop",
+  "bucket": "linkadda-media",
+  "failures": [
+    {
+      "id": "media_00ahqv7",
+      "key": "products/1786559378617_asset_16zgyf0.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786559378617_asset_16zgyf0.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_03v1l9o",
+      "key": "products/gallery/1786565494317_asset_ojm04z3.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786565494317_asset_ojm04z3.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_0jxbyic",
+      "key": "products/1786568974199_asset_d438ecc.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786568974199_asset_d438ecc.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_0ma2lpc",
+      "key": "products/1786602935813_asset_qfwqsmo.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786602935813_asset_qfwqsmo.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_11ksq8x",
+      "key": "products/1786561411696_asset_s9bq04a.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786561411696_asset_s9bq04a.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_16nl0qt",
+      "key": "products/gallery/1786563893203_asset_x2sl3h2.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563893203_asset_x2sl3h2.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_1kpsmfc",
+      "key": "products/gallery/1786562593692_asset_0af3mdw.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562593692_asset_0af3mdw.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_1kupqsq",
+      "key": "products/gallery/1786563887570_asset_dgdyngk.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563887570_asset_dgdyngk.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_1se0nk8",
+      "key": "products/gallery/1786564805356_asset_gk1kivo.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564805356_asset_gk1kivo.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_1x881u2",
+      "key": "products/1786566562786_asset_swz5y2u.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566562786_asset_swz5y2u.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_215lzar",
+      "key": "products/gallery/1786553766963_asset_z7rdops.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553766963_asset_z7rdops.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_40f13dd2e0c871c0",
+      "key": "logos/binance.png",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png",
+      "error": "@aws-sdk XML parse error: unexpected content.\n  Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object."
+    },
+    {
+      "id": "media_40quduq",
+      "key": "products/1786559908671_asset_1ovcacz.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786559908671_asset_1ovcacz.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_44gh6o1",
+      "key": "products/gallery/1786603106521_asset_8y8np2i.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786603106521_asset_8y8np2i.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_4c19z3a",
+      "key": "products/gallery/1786564357659_asset_suugmxg.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564357659_asset_suugmxg.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_4po2xqi",
+      "key": "products/1786562156754_asset_qqxkrpv.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786562156754_asset_qqxkrpv.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_4vek80j",
+      "key": "products/1786566160024_asset_7tpmsqe.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566160024_asset_7tpmsqe.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_5sl1edi",
+      "key": "products/gallery/1786603327991_asset_37i8dyg.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786603327991_asset_37i8dyg.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_6092d77cae466d67",
+      "key": "logos/upi-icon.png",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/upi-icon.png",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_619gxw4",
+      "key": "products/gallery/1786561459218_asset_dhbkf9w.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561459218_asset_dhbkf9w.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_6e694zn",
+      "key": "products/gallery/1786562583348_asset_bzy2vww.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562583348_asset_bzy2vww.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_74tyalx",
+      "key": "products/1786563875828_asset_n1ywj0v.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786563875828_asset_n1ywj0v.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_75o5ea6",
+      "key": "products/1786564782116_asset_w0ebv5q.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786564782116_asset_w0ebv5q.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_7m21ckr",
+      "key": "products/1786566350683_asset_sitj574.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566350683_asset_sitj574.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_8a5l5ci",
+      "key": "products/gallery/1786564359573_asset_y2zpjsb.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564359573_asset_y2zpjsb.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_8ba9ubw",
+      "key": "products/gallery/1786563890316_asset_kjkii2d.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563890316_asset_kjkii2d.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_8g6t26u",
+      "key": "products/gallery/1786564612066_asset_lq94u6j.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564612066_asset_lq94u6j.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_8j4bmbh",
+      "key": "products/1786566251088_asset_pa989ea.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566251088_asset_pa989ea.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_9lrlruv",
+      "key": "products/gallery/1786559944318_asset_64ekey4.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786559944318_asset_64ekey4.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_9q9qqi4",
+      "key": "products/gallery/1786562591911_asset_s94ov5i.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562591911_asset_s94ov5i.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_a0afea9e4ec2fe00",
+      "key": "logos/paypal.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg",
+      "error": "@aws-sdk XML parse error: unexpected content.\n  Deserialization error: to see the raw response, inspect the hidden field {error}.$response on this object."
+    },
+    {
+      "id": "media_a7qski1",
+      "key": "products/gallery/1786565492774_asset_l8xbplt.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786565492774_asset_l8xbplt.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_a96wm1h",
+      "key": "products/gallery/1786562263718_asset_0woosc0.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562263718_asset_0woosc0.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_au2r1rg",
+      "key": "products/1787843551886_asset_ggrlssh.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1787843551886_asset_ggrlssh.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_b8wjzmn",
+      "key": "products/1786564125799_asset_4a4356o.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786564125799_asset_4a4356o.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_cttaatq",
+      "key": "products/gallery/1786565220861_asset_at2cupw.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786565220861_asset_at2cupw.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_daqymr0",
+      "key": "products/gallery/1786559948380_asset_22bvj80.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786559948380_asset_22bvj80.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ddafdsi",
+      "key": "products/1786561834798_asset_gkaproq.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786561834798_asset_gkaproq.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_dmdd20t",
+      "key": "products/gallery/1786563508451_asset_3ocnq65.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563508451_asset_3ocnq65.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_dy62zp1",
+      "key": "products/gallery/1786569554801_asset_8uisgz4.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786569554801_asset_8uisgz4.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_e3e8ici",
+      "key": "products/gallery/1786564803105_asset_8sjbvml.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564803105_asset_8sjbvml.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ekobd4k",
+      "key": "products/gallery/1786603623622_asset_dkl2o68.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786603623622_asset_dkl2o68.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_epkgrjt",
+      "key": "products/gallery/1787843570859_asset_ser9ztb.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1787843570859_asset_ser9ztb.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ezfogwf",
+      "key": "products/gallery/1786602696167_asset_gvqublh.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786602696167_asset_gvqublh.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_fq8zg04",
+      "key": "products/gallery/1786561860244_asset_i4efi9a.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561860244_asset_i4efi9a.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_g6sfo4a",
+      "key": "products/gallery/1786558732127_asset_blvd8jc.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786558732127_asset_blvd8jc.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_g6zzdcj",
+      "key": "products/gallery/1786561466968_asset_xll21gr.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561466968_asset_xll21gr.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ggufiih",
+      "key": "products/gallery/1786562589040_asset_ylqusva.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562589040_asset_ylqusva.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_gicmav7",
+      "key": "products/gallery/1786561430448_asset_hpgzwnw.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561430448_asset_hpgzwnw.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_gyzxok7",
+      "key": "products/gallery/1786553772931_asset_niwjeut.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553772931_asset_niwjeut.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_haxbelg",
+      "key": "products/1786563493537_asset_utojrah.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786563493537_asset_utojrah.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_hr0upcp",
+      "key": "products/1786564605544_asset_hswtiki.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786564605544_asset_hswtiki.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_iev4g2v",
+      "key": "products/1786558763591_asset_4ilddx6.mp4",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786558763591_asset_4ilddx6.mp4",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_j5nk4jh",
+      "key": "products/gallery/1786562273716_asset_8myhepk.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562273716_asset_8myhepk.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_jl5arat",
+      "key": "products/gallery/1786568792542_asset_0g6cdzw.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786568792542_asset_0g6cdzw.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_jmfx46l",
+      "key": "products/gallery/1787843572298_asset_lw6o5h8.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1787843572298_asset_lw6o5h8.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_jv3bke9",
+      "key": "hero/1787109566056_asset_ogz30q0.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/hero/1787109566056_asset_ogz30q0.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_jymripl",
+      "key": "products/gallery/1786553769439_asset_emjecvr.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553769439_asset_emjecvr.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_khwf5qd",
+      "key": "products/1786565214035_asset_r2vs4wk.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786565214035_asset_r2vs4wk.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_kvd8nmh",
+      "key": "products/gallery/1786569243428_asset_1peiy2z.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786569243428_asset_1peiy2z.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_kwz47sf",
+      "key": "products/gallery/1786564354688_asset_pbxpdz2.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564354688_asset_pbxpdz2.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_kxr58dl",
+      "key": "products/gallery/1786558734788_asset_zn7jrmn.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786558734788_asset_zn7jrmn.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_l8yyvvd",
+      "key": "products/1786602691180_asset_v42rqjo.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786602691180_asset_v42rqjo.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_levawqy",
+      "key": "products/1786603100188_asset_mjysqbk.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786603100188_asset_mjysqbk.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_lnkvrkm",
+      "key": "products/1786558705877_asset_3nuf32c.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786558705877_asset_3nuf32c.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_lunbyjg",
+      "key": "products/gallery/1786962376948_asset_f1wjn90.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786962376948_asset_f1wjn90.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_m2fqyv4",
+      "key": "products/1786559920584_asset_rbxrrhm.mp4",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786559920584_asset_rbxrrhm.mp4",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_m9n4cro",
+      "key": "categories/1786480353710_asset_thz20r2.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/1786480353710_asset_thz20r2.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_mvduas9",
+      "key": "products/gallery/1786565219304_asset_ygsx8q7.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786565219304_asset_ygsx8q7.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_n096f0p",
+      "key": "products/gallery/1786558740536_asset_4rdjltt.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786558740536_asset_4rdjltt.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_n1yuimm",
+      "key": "products/gallery/1786561854019_asset_kmhj6vw.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561854019_asset_kmhj6vw.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nf436hs",
+      "key": "products/gallery/1786602940467_asset_h3r5ujy.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786602940467_asset_h3r5ujy.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nj13ivu",
+      "key": "products/gallery/1786553779517_asset_icflcbi.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553779517_asset_icflcbi.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nj2bqn0",
+      "key": "products/gallery/1786565222671_asset_sqwmymr.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786565222671_asset_sqwmymr.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nneufxk",
+      "key": "products/gallery/1786561464100_asset_1nfahwx.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561464100_asset_1nfahwx.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nxnu2ec",
+      "key": "products/gallery/1786561461999_asset_wdoza82.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561461999_asset_wdoza82.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_nzsodet",
+      "key": "products/1786569543822_asset_dzm6j4a.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786569543822_asset_dzm6j4a.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ofiqhvk",
+      "key": "products/gallery/1786562269679_asset_jk87rdg.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562269679_asset_jk87rdg.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_olkwgpx",
+      "key": "products/gallery/1786558742296_asset_03mkdyh.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786558742296_asset_03mkdyh.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ow2pa77",
+      "key": "products/gallery/1786553781716_asset_d42w5g5.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553781716_asset_d42w5g5.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ozzkoou",
+      "key": "products/1786566612946_asset_vymuyy4.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566612946_asset_vymuyy4.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_pbl6gfu",
+      "key": "products/1786603322743_asset_x75qww0.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786603322743_asset_x75qww0.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_pua5g5t",
+      "key": "products/gallery/1786564799928_asset_6rleu7e.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564799928_asset_6rleu7e.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_q3kbk89",
+      "key": "products/gallery/1786603468206_asset_ncga1j3.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786603468206_asset_ncga1j3.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_qcn2eqf",
+      "key": "products/gallery/1786563517859_asset_om18za0.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563517859_asset_om18za0.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_qimvhnl",
+      "key": "products/gallery/1786564351539_asset_9rpgjqa.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564351539_asset_9rpgjqa.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_qtrfayf",
+      "key": "products/gallery/1786562266455_asset_b2ubkre.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562266455_asset_b2ubkre.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_s3urdvw",
+      "key": "products/gallery/1787843568831_asset_n52eor7.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1787843568831_asset_n52eor7.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_si2nbk6",
+      "key": "products/1786562569127_asset_aoqjq16.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786562569127_asset_aoqjq16.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_soh87i1",
+      "key": "products/gallery/1786569597350_asset_04vilxd.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786569597350_asset_04vilxd.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_st8pmac",
+      "key": "products/gallery/1786561857206_asset_eg371bv.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561857206_asset_eg371bv.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_szkz7te",
+      "key": "products/1786603618993_asset_v02tahm.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786603618993_asset_v02tahm.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_tsdja73",
+      "key": "products/1786553853301_asset_nf1nxxs.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786553853301_asset_nf1nxxs.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_tszhr0b",
+      "key": "products/gallery/1786568980286_asset_ztk2kk6.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786568980286_asset_ztk2kk6.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ttpuqot",
+      "key": "products/1786566470409_asset_z4cprg1.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786566470409_asset_z4cprg1.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_tv8903l",
+      "key": "products/1786564344059_asset_sikzj6o.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786564344059_asset_sikzj6o.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_twlnx3j",
+      "key": "products/gallery/1786559946295_asset_dkhrd6l.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786559946295_asset_dkhrd6l.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_u4diuus",
+      "key": "products/gallery/1786563896402_asset_s6cmyoo.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563896402_asset_s6cmyoo.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_u9zttbn",
+      "key": "products/gallery/1786564806972_asset_6ysm5ah.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564806972_asset_6ysm5ah.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ufno0hm",
+      "key": "products/gallery/1786562586161_asset_c00yxvu.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562586161_asset_c00yxvu.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ujmd41a",
+      "key": "products/1786565970352_asset_8pb9r42.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786565970352_asset_8pb9r42.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_uq5tj1h",
+      "key": "products/gallery/1786563515580_asset_5g5dpxc.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563515580_asset_5g5dpxc.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_uwytzfr",
+      "key": "products/1786568777275_asset_hja4aee.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786568777275_asset_hja4aee.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_v6p1dta",
+      "key": "products/1786569238631_asset_4kp1zej.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786569238631_asset_4kp1zej.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_vsojuhh",
+      "key": "products/gallery/1786553784307_asset_ueky32l.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553784307_asset_ueky32l.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_w2rou6o",
+      "key": "products/gallery/1786558737677_asset_s5p9pqb.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786558737677_asset_s5p9pqb.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_w2s51ec",
+      "key": "products/1786569592355_asset_lmlasog.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786569592355_asset_lmlasog.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_w45cxwd",
+      "key": "products/gallery/1786564133194_asset_l16wwkh.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564133194_asset_l16wwkh.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_wb54prw",
+      "key": "products/1786565480438_asset_tixrfny.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786565480438_asset_tixrfny.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_wmi7kw5",
+      "key": "products/gallery/1786563510809_asset_fztnsu4.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563510809_asset_fztnsu4.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_wslgpzm",
+      "key": "products/gallery/1786553775975_asset_nwo30tx.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786553775975_asset_nwo30tx.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_x10a7hb",
+      "key": "products/1786603464073_asset_save7v3.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786603464073_asset_save7v3.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_xj578sf",
+      "key": "products/gallery/1786563513682_asset_y4abxye.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786563513682_asset_y4abxye.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_ycmhuxe",
+      "key": "products/gallery/1786562271761_asset_zfmuzdh.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786562271761_asset_zfmuzdh.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_yednpae",
+      "key": "products/gallery/1786564135892_asset_n4pcakk.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786564135892_asset_n4pcakk.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_z2y8and",
+      "key": "categories/1786480347819_asset_fbuvep5.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/categories/1786480347819_asset_fbuvep5.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_z40f14r",
+      "key": "products/gallery/1786561850969_asset_6y5vvll.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/gallery/1786561850969_asset_6y5vvll.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_z81dkkn",
+      "key": "products/1787018861433_asset_jz5v918.mp4",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1787018861433_asset_jz5v918.mp4",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    },
+    {
+      "id": "media_zzi8war",
+      "key": "products/1786565797249_asset_6b2hvuo.jpg",
+      "sourceUrl": "https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/products/1786565797249_asset_6b2hvuo.jpg",
+      "error": "Asset inaccessible: Supabase egress quota exceeded (402) and file not present in local images folder."
+    }
+  ]
 }

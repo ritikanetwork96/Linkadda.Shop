@@ -2133,13 +2133,13 @@
     if(all.length===1) {
       const m=all[0];
       return m.t==='img'
-        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" loading="lazy" decoding="async" draggable="false"/></div>`
+        ? `<div class="pcard-img-wrap"><img src="${esc(m.u)}" alt="${esc(title)}" class="pcard-img" decoding="async" draggable="false"/></div>`
         : `<div class="pcard-img-wrap"><video src="${esc(m.u)}" class="pcard-img" autoplay muted loop playsinline></video></div>`;
     }
     const uid = 'ss_' + Math.random().toString(36).slice(2, 7);
     const slides = all.map((m, i) => {
       if (m.t === 'img') {
-        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" loading="lazy" decoding="async" alt="${esc(title)}" draggable="false"/></div>`;
+        return `<div class="fb-slide${i===0?' fb-slide-active':''}"><img src="${esc(m.u)}" ${i===0?'decoding="async"':'loading="lazy" decoding="async"'} alt="${esc(title)}" draggable="false"/></div>`;
       } else {
         return `<div class="fb-slide${i===0?' fb-slide-active':''}"><video ${i===0?`src="${esc(m.u)}" autoplay`:`data-src="${esc(m.u)}"`} muted loop playsinline class="pcard-img"></video></div>`;
       }
@@ -3412,7 +3412,7 @@
         <span class="search-tags-label"><i class="fa-solid fa-bolt"></i> Popular:</span>
         <button type="button" class="search-tag-btn" data-query="Mom Son">Mom Son</button>
         <button type="button" class="search-tag-btn" data-query="Sis Bro">Sis Bro</button>
-        <button type="button" class="search-tag-btn" data-query="All Collection">All Collection</button>
+        <button type="button" class="search-tag-btn" data-query="Teen">Teen Videos</button>
         <button type="button" class="search-tag-btn" data-query="4K">4K Quality</button>
         <button type="button" class="search-tag-btn" data-query="Payment">FAQ: Payment</button>
       </div>
@@ -3507,15 +3507,15 @@
           }
         });
 
-        // 2. Search Categories & Products (.pcard, .collection-pack-banner)
-        const productCards = Array.from(document.querySelectorAll('.pcard, .collection-pack-banner'));
+        // 2. Search Categories & Products (.pcard only - excluding pinned banner)
+        const productCards = Array.from(document.querySelectorAll('.pcard'));
         productCards.forEach((card) => {
-          const title = (card.querySelector('.pcard-title, .cpb-title')?.textContent || '').toLowerCase();
-          const creators = (card.querySelector('.pcard-creators, .cpb-desc')?.textContent || '').toLowerCase();
+          const title = (card.querySelector('.pcard-title')?.textContent || '').toLowerCase();
+          const creators = (card.querySelector('.pcard-creators')?.textContent || '').toLowerCase();
           const features = (card.querySelector('.pcard-features')?.textContent || '').toLowerCase();
           const platforms = (card.querySelector('.pcard-platforms')?.textContent || '').toLowerCase();
-          const price = (card.querySelector('.pcard-price, .cpb-offer')?.textContent || '').toLowerCase();
-          const pill = (card.querySelector('.pcard-pill, .cpb-pin')?.textContent || '').toLowerCase();
+          const price = (card.querySelector('.pcard-price')?.textContent || '').toLowerCase();
+          const pill = (card.querySelector('.pcard-pill')?.textContent || '').toLowerCase();
 
           const isMatch = !term ||
             title.includes(term) ||
@@ -3600,9 +3600,11 @@
           resultsContainer.appendChild(groupHeader);
 
           matchedProducts.forEach((card) => {
-            const title = card.querySelector('.pcard-title, .cpb-title')?.textContent || 'Product';
-            const creators = card.querySelector('.pcard-creators, .cpb-desc')?.textContent || '';
-            const price = card.querySelector('.pcard-price, .cpb-offer')?.textContent || '';
+            const title = card.querySelector('.pcard-title')?.textContent || 'Product';
+            const creators = card.querySelector('.pcard-creators')?.textContent || '';
+            const price = card.querySelector('.pcard-price')?.textContent || '';
+            const orderHref = card.querySelector('.btn-order-now')?.getAttribute('href') || 'payment.html';
+
             // Multi-tier Image Extractor
             let imgSrc = '';
             const imgEl = card.querySelector('.fb-slide-active img, .fb-slide img, .pslide-active img, .pcard-img-wrap img, .pcard-img, img');
@@ -3620,7 +3622,7 @@
               ? `<img src="${imgSrc}" alt="${title}" class="src-thumb" onerror="this.onerror=null; this.outerHTML='<div class=\\'src-thumb-fallback\\'><i class=\\'fa-solid fa-fire-flame-curved\\'></i></div>';" />`
               : `<div class="src-thumb-fallback"><i class="fa-solid fa-fire-flame-curved"></i></div>`;
 
-            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart');
+            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn');
             const productId = cartBtn?.getAttribute('data-product-id') || title.toLowerCase().replace(/\s+/g, '-');
             const productInr = cartBtn?.getAttribute('data-inr') || price.replace(/[^\d]/g, '') || '599';
             const productUsd = cartBtn?.getAttribute('data-usd') || '39';
@@ -3640,7 +3642,7 @@
                   <div class="src-price">${price}</div>
                 </div>
                 <div class="src-actions">
-                  <a href="payment.html" class="src-btn-order">Order <i class="fa-solid fa-arrow-right"></i></a>
+                  <a href="${orderHref}" class="src-btn-order">Order <i class="fa-solid fa-arrow-right"></i></a>
                   <button type="button" class="src-btn-cart btn-add-cart" 
                     data-product-id="${productId}" 
                     data-name="${title}" 
@@ -3721,6 +3723,6 @@
   })();
   </script>
 
-  <script type="module" src="/media-resolver.js"></script>
+  <script type="module" src="media-resolver.js"></script>
 </body>
 </html>
