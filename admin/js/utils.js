@@ -38,6 +38,15 @@ export function formatDateTime(value) {
   return date.toLocaleString();
 }
 
+export function formatRelativeTime(value) {
+  if (!value) return 'Never';
+  const diff = Date.now() - Number(value);
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+  return `${Math.floor(diff / 86400000)}d ago`;
+}
+
 export function formatDate(value) {
   if (!value) return '-';
   const date = new Date(value);

@@ -2,6 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/fireba
 import {
   getAuth,
   setPersistence,
+  browserLocalPersistence,
   browserSessionPersistence,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -28,8 +29,9 @@ const app = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-void setPersistence(auth, browserSessionPersistence).catch(() => {
-  // Keep the admin app booting even if persistence is unavailable in this browser session.
+// Use persistent local storage so login never drops on reload/navigation
+void setPersistence(auth, browserLocalPersistence).catch(() => {
+  void setPersistence(auth, browserSessionPersistence).catch(() => {});
 });
 
 export {

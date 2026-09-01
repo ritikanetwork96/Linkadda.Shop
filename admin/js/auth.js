@@ -1,5 +1,11 @@
 import {
   auth,
+  db,
+  ref,
+  set,
+  get,
+  update,
+  onValue,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -7,6 +13,152 @@ import {
 } from './firebase.js';
 import { APP_CONFIG } from './config.js';
 import { escapeHtml } from './utils.js';
+
+export function getDeviceDetails() {
+  const ua = navigator.userAgent || '';
+  let browser = 'Browser';
+  if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+  else if (ua.includes('Chrome/')) browser = 'Google Chrome';
+  else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Apple Safari';
+  else if (ua.includes('Firefox/')) browser = 'Mozilla Firefox';
+  else if (ua.includes('OPR/') || ua.includes('Opera/')) browser = 'Opera';
+
+  let os = 'Unknown OS';
+  if (ua.includes('Windows NT 10.0') || ua.includes('Windows NT 11.0')) os = 'Windows 10/11';
+  else if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('iPhone')) os = 'iOS (iPhone)';
+  else if (ua.includes('iPad')) os = 'iPadOS (iPad)';
+  else if (ua.includes('Mac OS X')) os = 'macOS (Apple)';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('Linux')) os = 'Linux';
+
+  let type = 'Desktop';
+  if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+    type = 'Mobile';
+  } else if (/iPad|Tablet/i.test(ua)) {
+    type = 'Tablet';
+  }
+
+  return { browser, os, type };
+}
+
+export function getCurrentSessionId() {
+  let sessId = localStorage.getItem('linkadda_admin_session_id');
+  if (!sessId) {
+    sessId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    localStorage.setItem('linkadda_admin_session_id', sessId);
+  }
+  return sessId;
+}
+
+export async function registerAdminSession(user) {
+  if (!user) return null;
+  const sessId = getCurrentSessionId();
+  const device = getDeviceDetails();
+  const sessionRef = ref(db, `admin_sessions/${sessId}`);
+  
+  const sessionData = {
+    id: sessId,
+    uid: user.uid,
+    email: user.email || 'Admin',
+    browser: device.browser,
+    os: device.os,
+    deviceType: device.type,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+    loginAt: Date.now(),
+    lastActiveAt: Date.now(),
+    status: 'active',
+  };
+
+  try {
+    await set(sessionRef, sessionData);
+  } catch (err) {
+    console.warn('Could not register admin session in RTDB:', err);
+  }
+  return sessId;
+}
+
+export function startSessionWatch(user, onTerminated) {
+  if (!user) return;
+  const sessId = getCurrentSessionId();
+  const sessionRef = ref(db, `admin_sessions/${sessId}`);
+
+  // Heartbeat every 60 seconds
+  const heartbeatTimer = setInterval(() => {
+    try {
+      update(sessionRef, { lastActiveAt: Date.now() });
+    } catch (_) {}
+  }, 60000);
+
+  // Listen for remote termination from other devices
+  onValue(sessionRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.status === 'terminated') {
+      clearInterval(heartbeatTimer);
+      if (typeof onTerminated === 'function') {
+        onTerminated();
+      } else {
+        alert('Your admin session was signed out from another device.');
+        logout();
+      }
+    }
+  });
+}
+
+export async function getActiveAdminSessions() {
+  try {
+    const sessionsRef = ref(db, 'admin_sessions');
+    const snapshot = await get(sessionsRef);
+    const val = snapshot.val() || {};
+    const currentSessId = getCurrentSessionId();
+    
+    const list = Object.values(val)
+      .filter((s) => s && s.status === 'active')
+      .map((s) => ({
+        ...s,
+        isCurrent: s.id === currentSessId,
+      }))
+      .sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
+
+    return list;
+  } catch (err) {
+    console.error('Failed to get active sessions:', err);
+    return [];
+  }
+}
+
+export async function terminateAdminSession(sessionId) {
+  if (!sessionId) return;
+  try {
+    const sessionRef = ref(db, `admin_sessions/${sessionId}`);
+    await update(sessionRef, { status: 'terminated', terminatedAt: Date.now() });
+  } catch (err) {
+    console.error('Failed to terminate session:', err);
+    throw err;
+  }
+}
+
+export async function terminateAllOtherAdminSessions() {
+  const currentSessId = getCurrentSessionId();
+  try {
+    const sessionsRef = ref(db, 'admin_sessions');
+    const snapshot = await get(sessionsRef);
+    const val = snapshot.val() || {};
+    const updates = {};
+    for (const [id, sess] of Object.entries(val)) {
+      if (id !== currentSessId && sess && sess.status === 'active') {
+        updates[`admin_sessions/${id}/status`] = 'terminated';
+        updates[`admin_sessions/${id}/terminatedAt`] = Date.now();
+      }
+    }
+    if (Object.keys(updates).length) {
+      await update(ref(db), updates);
+    }
+  } catch (err) {
+    console.error('Failed to terminate other sessions:', err);
+    throw err;
+  }
+}
 
 export function mountLoginPage(root) {
   if (!root) return;
@@ -45,12 +197,23 @@ export function mountLoginPage(root) {
     event.preventDefault();
     const email = root.querySelector('#adminEmail').value.trim();
     const password = root.querySelector('#adminPassword').value;
-    note.textContent = 'Signing in...';
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+    }
+    note.textContent = 'Authenticating admin credentials...';
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await registerAdminSession(userCredential.user);
+      note.textContent = 'Success! Opening admin center...';
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
       window.location.href = isLocal ? '/admin/index.html' : '/admin';
     } catch (error) {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+      }
       note.textContent = error?.message || 'Login failed';
     }
   });
@@ -71,7 +234,8 @@ export function mountLoginPage(root) {
 }
 
 export function protectRoute(onReady) {
-  onAuthStateChanged(auth, (user) => {
+  let hasHandledAuth = false;
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       if (!/\/login(?:\.html)?\/?$/i.test(window.location.pathname)) {
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
@@ -79,11 +243,24 @@ export function protectRoute(onReady) {
       }
       return;
     }
-    if (typeof onReady === 'function') onReady(user);
+
+    if (!hasHandledAuth) {
+      hasHandledAuth = true;
+      await registerAdminSession(user);
+      startSessionWatch(user);
+      if (typeof onReady === 'function') onReady(user);
+    }
   });
 }
 
 export async function logout() {
+  const currentSessId = localStorage.getItem('linkadda_admin_session_id');
+  if (currentSessId) {
+    try {
+      await terminateAdminSession(currentSessId);
+    } catch (_) {}
+    localStorage.removeItem('linkadda_admin_session_id');
+  }
   await signOut(auth);
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
   window.location.href = isLocal ? '/admin/login.html' : '/admin/login';
