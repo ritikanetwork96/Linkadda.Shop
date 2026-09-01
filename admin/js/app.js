@@ -37,6 +37,7 @@ import {
   safeJson,
   safeUrl,
   uid,
+  copyText,
 } from './utils.js';
 
 const viewRoot = document.getElementById('viewRoot');
@@ -48,6 +49,10 @@ const toastHost = document.getElementById('toastHost');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalRoot = document.getElementById('modalRoot');
 const paletteBackdrop = document.getElementById('paletteBackdrop');
+
+window.copyText = copyText;
+window.closeModal = closeModal;
+window.showToast = showToast;
 const paletteList = document.getElementById('paletteList');
 const commandInput = document.getElementById('commandInput');
 const notifyBtn = document.getElementById('notifyBtn');
@@ -5359,7 +5364,7 @@ function renderOrderDetailsModal(item = {}) {
         <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Order & Payment Inspector</div>
         <h2 class="section-title" style="font-size: 20px; font-weight: 800; color: #fff;">${escapeHtml(prodName)}</h2>
         <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-          <span class="order-id-badge" onclick="copyText('${escapeHtml(orderId)}'); showToast('Order ID copied!');" title="Click to copy Order ID">
+          <span class="order-id-badge" data-action="copy-order-id" data-id="${escapeHtml(orderId)}" title="Click to copy Order ID" style="cursor: pointer;">
             <i data-lucide="copy" style="width: 12px; height: 12px;"></i> #${escapeHtml(orderId)}
           </span>
           <span class="order-status-pill ${isPaid ? 'paid' : isFailed ? 'rejected' : 'pending'}">
@@ -5367,7 +5372,7 @@ function renderOrderDetailsModal(item = {}) {
           </span>
         </div>
       </div>
-      <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
+      <button class="btn btn-ghost" data-close-modal type="button" onclick="closeModal()" title="Close Inspector" style="padding: 8px; border-radius: 50%;"><i data-lucide="x"></i></button>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
@@ -5448,6 +5453,9 @@ function renderOrderDetailsModal(item = {}) {
       </div>
 
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-ghost" type="button" data-close-modal onclick="closeModal()" style="font-size: 13px; padding: 8px 16px;">
+          Close
+        </button>
         <button class="btn btn-ghost" type="button" data-action="reject-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 16px; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
           <i data-lucide="x-circle" style="width: 15px; height: 15px;"></i> Reject Payment
         </button>
@@ -7271,6 +7279,14 @@ function attachGlobalHandlers() {
       showToast('Orders exported to CSV!');
       return;
     }
+    if (action === 'copy-order-id') {
+      const text = actionBtn.dataset.id || '';
+      if (text) {
+        await copyText(text);
+        showToast(`Order ID #${text} copied!`);
+      }
+      return;
+    }
     if (action === 'approve-order') {
       await updateRecord('orders', id, {
         status: 'approved',
@@ -7279,6 +7295,7 @@ function attachGlobalHandlers() {
         reviewedAt: Date.now(),
         reviewedBy: userEmail?.textContent || userName?.textContent || APP_CONFIG.appName,
       });
+      closeModal();
       showToast('Order approved');
       return;
     }
@@ -7290,12 +7307,14 @@ function attachGlobalHandlers() {
         reviewedAt: Date.now(),
         reviewedBy: userEmail?.textContent || userName?.textContent || APP_CONFIG.appName,
       });
+      closeModal();
       showToast('Order rejected');
       return;
     }
     if (action === 'delete-order') {
       if (confirm('Delete this order?')) {
         await deleteRecord('orders', id);
+        closeModal();
         showToast('Order deleted');
       }
       return;
