@@ -6223,6 +6223,137 @@ button {
     padding: 1px 5px !important;
   }
 
+  /* ===== CATALOG TABS ===== */
+  .catalog-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 20px 0;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(24, 24, 27, 0.7);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: fit-content;
+  }
+
+  .catalog-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .catalog-tab:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .catalog-tab.active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(232, 67, 147, 0.25));
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+  }
+
+  .catalog-tab span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+  }
+
+  .catalog-tab.active span {
+    background: rgba(99, 102, 241, 0.4);
+    color: #ffffff;
+  }
+
+  /* ===== POSITION BADGE & MOVE CONTROLS ===== */
+  .catalog-pos-badge-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border-radius: 8px;
+    color: #f472b6;
+    background: rgba(232, 67, 147, 0.15);
+    border: 1px solid rgba(232, 67, 147, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .catalog-pos-badge-btn:hover {
+    transform: translateY(-1px) scale(1.05);
+    background: rgba(232, 67, 147, 0.3);
+    border-color: #f472b6;
+    box-shadow: 0 0 12px rgba(244, 114, 182, 0.4);
+    color: #fff;
+  }
+
+  .catalog-action-btn.action-move-pos {
+    background: rgba(232, 67, 147, 0.14) !important;
+    border: 1px solid rgba(232, 67, 147, 0.35) !important;
+    color: #f472b6 !important;
+  }
+
+  .catalog-action-btn.action-move-pos:hover {
+    background: #e84393 !important;
+    border-color: #e84393 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px rgba(232, 67, 147, 0.45) !important;
+  }
+
+  .catalog-action-btn.action-move {
+    background: rgba(99, 102, 241, 0.1) !important;
+    border: 1px solid rgba(99, 102, 241, 0.25) !important;
+    color: #a5b4fc !important;
+  }
+
+  .catalog-action-btn.action-move:hover {
+    background: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4) !important;
+  }
+
+  /* Dragging visual cues */
+  .catalog-card[draggable="true"] {
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .catalog-card[draggable="true"]:active {
+    cursor: grabbing;
+  }
+
+  .catalog-card.dragging {
+    opacity: 0.35;
+    transform: scale(0.97);
+    border: 1px dashed #e84393 !important;
+  }
+
+  .catalog-card.drag-over {
+    border-color: #f472b6 !important;
+    box-shadow: 0 0 25px rgba(232, 67, 147, 0.5) !important;
+    transform: translateY(-3px) scale(1.02);
+  }
+
   /* Mobile Catalog Page Enhancements */
   .catalog-hero {
     padding: 14px 12px !important;
@@ -6271,6 +6402,71 @@ button {
   .catalog-card-media .catalog-media-frame {
     aspect-ratio: 16 / 9 !important;
     max-height: 190px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-tabs {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 4px !important;
+    margin-bottom: 16px !important;
+  }
+  .catalog-tab {
+    justify-content: center !important;
+    padding: 10px 8px !important;
+    font-size: 0.82rem !important;
+  }
+  .catalog-toolbar-shell {
+    padding: 10px !important;
+    border-radius: 14px !important;
+  }
+  .catalog-toolbar-top {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .catalog-toolbar-actions {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  .catalog-results.grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .catalog-card {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+  .catalog-card-head h3 {
+    font-size: 1.05rem !important;
+  }
+  .catalog-card-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding: 10px 8px !important;
+  }
+  .catalog-action-btn {
+    padding: 8px 4px !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    min-height: 36px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-card-actions {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+    padding: 8px 6px !important;
+  }
+  .catalog-action-btn {
+    font-size: 0.7rem !important;
+    padding: 7px 3px !important;
   }
 }
 

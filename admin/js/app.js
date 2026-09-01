@@ -2701,7 +2701,9 @@ function renderCatalogProductCard(item, node) {
       <div class="catalog-card-actions">
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
-        <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-up-down"></i> Move</button>
+        <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move position"><i data-lucide="arrow-up-down"></i> Move</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step up"><i data-lucide="arrow-up"></i> Up</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step down"><i data-lucide="arrow-down"></i> Down</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
         <button type="button" class="catalog-action-btn action-duplicate" data-action="duplicate" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="copy"></i> Duplicate</button>
         <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
@@ -2716,10 +2718,16 @@ function renderCatalogCategoryCard(item, node) {
   const productCount = countProductsForCategory(item);
   const toggleAction = String(item.status || 'active') === 'hidden' ? 'Show' : 'Hide';
   const toggleIcon = String(item.status || 'active') === 'hidden' ? 'eye' : 'eye-off';
+  const posBadge = `<button type="button" class="catalog-pos-badge-btn" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Click to move position">Pos #${item.displayOrder || '1'} ↕</button>`;
+  const badges = [
+    posBadge,
+    catalogCardBadge(item.status),
+    `<span class="chip">${escapeHtml(String(productCount))} products</span>`
+  ].filter(Boolean).join('');
 
   const metricsList = [
     { label: 'Products', value: `${productCount} items` },
-    { label: 'Display Order', value: item.displayOrder ?? '1' },
+    { label: 'Display Order', value: `#${item.displayOrder ?? '1'}` },
   ];
 
   const metrics = metricsList.map((entry) => `
@@ -2742,23 +2750,21 @@ function renderCatalogCategoryCard(item, node) {
         <div class="catalog-card-head">
           <div>
             <div class="catalog-card-kicker">Category</div>
-            <h3>${escapeHtml(item.title || item.slug || 'Untitled')}</h3>
+            <h3>${escapeHtml(item.title || item.name || item.slug || 'Untitled')}</h3>
             <p>${escapeHtml(item.description || 'No description provided')}</p>
           </div>
-          <div class="catalog-card-badges">
-            ${catalogCardBadge(item.status)}
-            <span class="chip">${escapeHtml(String(productCount))} products</span>
-          </div>
+          <div class="catalog-card-badges">${badges}</div>
         </div>
         <div class="catalog-card-metrics">${metrics}</div>
       </div>
       <div class="catalog-card-actions">
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
+        <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move position"><i data-lucide="arrow-up-down"></i> Move</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step up"><i data-lucide="arrow-up"></i> Up</button>
+        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step down"><i data-lucide="arrow-down"></i> Down</button>
         <button type="button" class="catalog-action-btn action-prods" data-action="view-products" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="layout-list"></i> Products</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-up"></i> Up</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="arrow-down"></i> Down</button>
         <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
         <button type="button" class="catalog-action-btn action-delete danger" data-action="delete" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="trash-2"></i> Delete</button>
       </div>
@@ -3488,8 +3494,9 @@ async function reorderCategory(id, direction) {
   renderView(ui.data || {});
 }
 
-async function reorderProductPosition(productId, targetPosInput) {
+async function reorderProductPosition(itemId, targetPosInput) {
   const node = ui.catalogTab === 'categories' ? 'categories' : 'products';
+  const nodeLabel = node === 'categories' ? 'Category' : 'Product';
   const allItems = listCollection(node)
     .filter((item) => item.status !== 'deleted')
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -3504,20 +3511,20 @@ async function reorderProductPosition(productId, targetPosInput) {
     return;
   }
 
-  const currentIndex = allItems.findIndex((item) => item.id === productId);
+  const currentIndex = allItems.findIndex((item) => item.id === itemId);
   if (currentIndex === -1) {
-    showToast('Item not found', 'danger');
+    showToast(`${nodeLabel} not found`, 'danger');
     return;
   }
 
   const currentPos = currentIndex + 1;
   if (currentPos === targetPos) {
-    showToast(`Product already at position #${targetPos}`, 'info');
+    showToast(`${nodeLabel} is already at position #${targetPos}`, 'info');
     return;
   }
 
   const targetItem = allItems[currentIndex];
-  const listWithoutTarget = allItems.filter((item) => item.id !== productId);
+  const listWithoutTarget = allItems.filter((item) => item.id !== itemId);
   listWithoutTarget.splice(targetPos - 1, 0, targetItem);
 
   const updates = {};
@@ -3535,37 +3542,38 @@ async function reorderProductPosition(productId, targetPosInput) {
   if (modifiedCount > 0) {
     try {
       await updateRecordsBatch(node, updates);
-      showToast(`Moved to position #${targetPos}`);
+      showToast(`Moved ${nodeLabel.toLowerCase()} to position #${targetPos}`, 'success');
       renderView(ui.data || {});
     } catch (err) {
       console.error('Reorder error:', err);
-      showToast('Unable to update product position. Please try again.', 'danger');
+      showToast(`Unable to update ${nodeLabel.toLowerCase()} position. Please try again.`, 'danger');
       renderView(ui.data || {});
     }
   } else {
-    showToast(`Product at position #${targetPos}`);
+    showToast(`${nodeLabel} at position #${targetPos}`);
   }
 }
 
-function openMovePositionModal(productId) {
+function openMovePositionModal(itemId) {
   const node = ui.catalogTab === 'categories' ? 'categories' : 'products';
+  const nodeLabel = node === 'categories' ? 'Category' : 'Product';
   const allItems = listCollection(node)
     .filter((item) => item.status !== 'deleted')
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
 
-  const itemIndex = allItems.findIndex((item) => item.id === productId);
+  const itemIndex = allItems.findIndex((item) => item.id === itemId);
   if (itemIndex === -1) return;
 
   const item = allItems[itemIndex];
   const currentPos = itemIndex + 1;
   const totalCount = allItems.length;
-  const itemTitle = item.title || item.name || 'Product';
+  const itemTitle = item.title || item.name || item.slug || nodeLabel;
 
   openModal(`
     <div class="panel-head">
       <div>
-        <h2 class="section-title"><i data-lucide="arrow-up-down"></i> Move Product Position</h2>
-        <p class="section-subtitle">Reorder position across the entire catalog.</p>
+        <h2 class="section-title"><i data-lucide="arrow-up-down"></i> Move ${nodeLabel} Position</h2>
+        <p class="section-subtitle">Reorder position across the entire ${nodeLabel.toLowerCase()} catalog.</p>
       </div>
       <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
     </div>
@@ -3574,20 +3582,31 @@ function openMovePositionModal(productId) {
         <div style="font-weight:700;font-size:1.05rem;color:#fff;margin-bottom:4px;">${escapeHtml(itemTitle)}</div>
         <div style="font-size:0.85rem;color:var(--muted);display:flex;gap:16px;">
           <span>Current position: <strong style="color:#f472b6;">#${currentPos}</strong></span>
-          <span>Total items: <strong>${totalCount}</strong></span>
+          <span>Total ${nodeLabel.toLowerCase()}s: <strong>${totalCount}</strong></span>
         </div>
       </div>
       <div class="field">
         <label for="targetPosInput">Move to Position (1 - ${totalCount})</label>
-        <input class="input" type="number" id="targetPosInput" name="targetPosition" min="1" max="${totalCount}" step="1" value="${currentPos}" required placeholder="Enter position number (1-${totalCount})" autofocus />
-        <small style="color:var(--muted);font-size:0.78rem;margin-top:4px;">Products between current and target positions will shift automatically.</small>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input class="input" type="number" id="targetPosInput" name="targetPosition" min="1" max="${totalCount}" step="1" value="${currentPos}" required placeholder="Enter position (1-${totalCount})" autofocus style="font-size: 1.1rem; font-weight: 700;" />
+        </div>
+        <!-- Quick Touch Helper Chips on Mobile & Desktop -->
+        <div class="quick-pos-chips" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('targetPosInput').value = 1;" style="font-size: 0.75rem; padding: 4px 8px;"><i data-lucide="chevrons-up"></i> Top #1</button>
+          ${currentPos > 1 ? `<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('targetPosInput').value = Math.max(1, ${currentPos - 1});" style="font-size: 0.75rem; padding: 4px 8px;"><i data-lucide="chevron-up"></i> Up 1 (${currentPos - 1})</button>` : ''}
+          ${currentPos < totalCount ? `<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('targetPosInput').value = Math.min(${totalCount}, ${currentPos + 1});" style="font-size: 0.75rem; padding: 4px 8px;"><i data-lucide="chevron-down"></i> Down 1 (${currentPos + 1})</button>` : ''}
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('targetPosInput').value = ${totalCount};" style="font-size: 0.75rem; padding: 4px 8px;"><i data-lucide="chevrons-down"></i> Bottom #${totalCount}</button>
+        </div>
+        <small style="color:var(--muted);font-size:0.78rem;margin-top:6px;display:block;">All ${nodeLabel.toLowerCase()}s will automatically shift into their new sequence.</small>
       </div>
       <div class="toolbar" style="margin-top:8px;justify-content:flex-end;gap:10px;">
         <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
-        <button type="submit" class="btn btn-primary" id="btnSubmitMove"><i data-lucide="check"></i> Move</button>
+        <button type="submit" class="btn btn-primary" id="btnSubmitMove"><i data-lucide="check"></i> Apply Position</button>
       </div>
     </form>
   `);
+
+  if (window.lucide) lucide.createIcons();
 
   const form = document.getElementById('movePositionForm');
   form?.addEventListener('submit', async (e) => {
@@ -3603,14 +3622,15 @@ function openMovePositionModal(productId) {
 
     if (btnSubmit) {
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = '<i data-lucide="loader" class="spin"></i> Moving...';
+      btnSubmit.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Moving...';
+      if (window.lucide) lucide.createIcons();
     }
 
     try {
       closeModal();
-      await reorderProductPosition(productId, targetPos);
+      await reorderProductPosition(itemId, targetPos);
     } catch (err) {
-      showToast('Failed to move product position', 'danger');
+      showToast(`Failed to move ${nodeLabel.toLowerCase()} position`, 'danger');
     }
   });
 }
@@ -6671,12 +6691,30 @@ function attachGlobalHandlers() {
       openMovePositionModal(id);
       return;
     }
-    if (action === 'move-up' && node === 'categories') {
-      await reorderCategory(id, -1);
+    if (action === 'move-up') {
+      const activeNode = node || (ui.catalogTab === 'categories' ? 'categories' : 'products');
+      const allItems = listCollection(activeNode)
+        .filter((item) => item.status !== 'deleted')
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+      const curIdx = allItems.findIndex((item) => item.id === id);
+      if (curIdx > 0) {
+        await reorderProductPosition(id, curIdx);
+      } else {
+        showToast('Already at the top position #1', 'info');
+      }
       return;
     }
-    if (action === 'move-down' && node === 'categories') {
-      await reorderCategory(id, 1);
+    if (action === 'move-down') {
+      const activeNode = node || (ui.catalogTab === 'categories' ? 'categories' : 'products');
+      const allItems = listCollection(activeNode)
+        .filter((item) => item.status !== 'deleted')
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.createdAt || 0) - (b.createdAt || 0));
+      const curIdx = allItems.findIndex((item) => item.id === id);
+      if (curIdx >= 0 && curIdx < allItems.length - 1) {
+        await reorderProductPosition(id, curIdx + 2);
+      } else {
+        showToast(`Already at the bottom position #${allItems.length}`, 'info');
+      }
       return;
     }
     if (action === 'edit-single') {
