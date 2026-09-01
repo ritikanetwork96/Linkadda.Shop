@@ -24,8 +24,12 @@ export function getSupabaseUrl(path) {
 export function getPublicUrl(path) {
   const clean = String(path || '').trim();
   if (!clean) return '';
-  if (/^https?:\/\//i.test(clean)) return clean;
-  // Default to new RustFS S3 storage
+  if (/^https?:\/\//i.test(clean) || clean.startsWith('data:') || clean.startsWith('blob:')) {
+    if (clean.includes('supabase.co/storage/v1/object/public/media/')) {
+      return clean.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', `${RUSTFS_CONFIG.endpoint}/${encodeURIComponent(RUSTFS_CONFIG.bucket)}/`);
+    }
+    return clean;
+  }
   return getRustfsUrl(clean);
 }
 
@@ -153,9 +157,9 @@ export function uploadAsset(file, folder = 'products', onProgress) {
       reader.onload = () => {
         resolve({
           path,
-          publicUrl: reader.result,
+          publicUrl: getRustfsUrl(path),
           rustfsUrl: getRustfsUrl(path),
-          legacySupabaseUrl: reader.result,
+          dataUrl: reader.result,
           isDataUrl: true,
         });
       };
@@ -167,17 +171,14 @@ export function uploadAsset(file, folder = 'products', onProgress) {
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve({
           path,
-          publicUrl: getPublicUrl(path),
+          publicUrl: getRustfsUrl(path),
           rustfsUrl: getRustfsUrl(path),
-          legacySupabaseUrl: getSupabaseUrl(path),
         });
       } else {
-        console.warn('Remote upload failed, using high-res local data URL fallback:', xhr.status);
         fallbackAsDataUrl();
       }
     };
     xhr.onerror = () => {
-      console.warn('Network upload failed, falling back to local data URL.');
       fallbackAsDataUrl();
     };
     xhr.send(file);

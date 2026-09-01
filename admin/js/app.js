@@ -699,10 +699,13 @@ function renderGalleryManager(record = {}) {
 }
 
 function renderProductEditor(record = {}, schema = null) {
+  const mainImage = record.image || record.imageUrl || record.thumbnail || record.photo || (Array.isArray(record.images) ? record.images[0] : '') || '';
+  const galleryImgs = normalizeEditorList(record.galleryImages || (Array.isArray(record.images) && record.images.length > 1 ? record.images.slice(1) : []));
+
   const data = {
     ...record,
-    image: record.image || '',
-    galleryImages: normalizeEditorList(record.galleryImages || []),
+    image: mainImage,
+    galleryImages: galleryImgs,
     creators: normalizeEditorList(record.creators || []),
     platforms: normalizeEditorList(record.platforms || []),
     features: normalizeEditorList(record.features || []),
@@ -922,7 +925,7 @@ function renderCategoryPreview(record = {}) {
 function renderCategoryEditor(record = {}, schema = null) {
   const data = {
     ...record,
-    image: record.image || '',
+    image: record.image || record.imageUrl || record.thumbnail || record.photo || (Array.isArray(record.images) ? record.images[0] : '') || '',
   };
   const productCount = countProductsForCategory(data);
   return `
@@ -2401,42 +2404,65 @@ function summarizeSources() {
 function resolveMediaSource(value) {
   let raw = String(value || '').trim();
   if (!raw) return '';
-  if (raw.includes('s3.linkadda.shop')) {
-    raw = raw.replace('https://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud')
-             .replace('http://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud');
+  
+  if (raw.includes('supabase.co/storage/v1/object/public/media/')) {
+    raw = raw.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/');
   }
-  if (raw.includes('supabase.co/storage/v1/object/public/media')) {
-    raw = raw.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media');
+  if (raw.includes('s3.linkadda.shop/linkadda-media/')) {
+    raw = raw.replace('https://s3.linkadda.shop/linkadda-media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media')
+             .replace('http://s3.linkadda.shop/linkadda-media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media');
   }
 
   if (/^(https?:)?\/\//i.test(raw) || raw.startsWith('data:') || raw.startsWith('blob:')) return raw;
+  
   const normalized = normalizeAssetValue(raw);
   const match = listCollection('media').find((item) => mediaMatchesReference(item, normalized) || mediaMatchesReference(item, raw));
   if (match?.publicUrl) {
     let u = match.publicUrl;
-    if (u.includes('s3.linkadda.shop')) {
-      u = u.replace('https://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud')
-           .replace('http://s3.linkadda.shop', 'https://rustfs-mi5c.srv1942099.hstgr.cloud');
+    if (u.includes('supabase.co/storage/v1/object/public/media/')) {
+      u = u.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/');
     }
     return u;
   }
-  return raw.startsWith('/') ? raw : `/${raw}`;
+  if (raw.startsWith('products/') || raw.startsWith('categories/') || raw.startsWith('logos/') || raw.startsWith('hero/') || raw.startsWith('banners/') || raw.startsWith('testimonials/')) {
+    return `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/${raw}`;
+  }
+  if (raw.startsWith('images/') || raw.startsWith('/images/')) {
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }
+  return `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/products/${raw.replace(/^\/+/, '')}`;
 }
 
 function mediaPreview(item) {
-  const rawSrc = item.publicUrl
-    || item.video
-    || item.image
+  let rawSrc = item.image
+    || item.imageUrl
+    || item.thumbnail
+    || item.publicUrl
+    || item.photo
     || (Array.isArray(item.images) ? item.images[0] : '')
     || (Array.isArray(item.galleryImages) ? item.galleryImages[0] : '')
-    || item.thumbnail
     || item.cover
-    || item.photo
+    || item.video
     || item.logo
     || item.backgroundImage
     || item.bannerImage
     || item.heroImage
+    || item.path
     || '';
+
+  if (!rawSrc && item.category) {
+    const categories = listCollection('categories');
+    const catKey = String(item.category).trim().toLowerCase();
+    const matched = categories.find(c => 
+      String(c.id || '').toLowerCase() === catKey || 
+      String(c.slug || '').toLowerCase() === catKey || 
+      String(c.title || '').toLowerCase() === catKey
+    );
+    if (matched) {
+      rawSrc = matched.image || (Array.isArray(matched.images) ? matched.images[0] : '');
+    }
+  }
+
   const src = resolveMediaSource(rawSrc);
   if (!src) return '';
   if (String(item.type || '').toLowerCase() === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(src)) {
@@ -2523,7 +2549,23 @@ function normalizeFeatureList(value) {
 function catalogImageCount(item) {
   const gallery = Array.isArray(item.galleryImages) ? item.galleryImages.filter(Boolean).length : 0;
   const images = Array.isArray(item.images) ? item.images.filter(Boolean).length : 0;
-  return Math.max(images, gallery + (item.image ? 1 : 0));
+  let count = Math.max(images, gallery + (item.image ? 1 : 0));
+  if (count === 0 && item.category) {
+    const categories = listCollection('categories');
+    const catKey = String(item.category).trim().toLowerCase();
+    const matched = categories.find(c => 
+      String(c.id || '').toLowerCase() === catKey || 
+      String(c.slug || '').toLowerCase() === catKey || 
+      String(c.title || '').toLowerCase() === catKey ||
+      (catKey && String(c.id || '').toLowerCase().includes(catKey))
+    );
+    if (matched) {
+      const catGallery = Array.isArray(matched.galleryImages) ? matched.galleryImages.filter(Boolean).length : 0;
+      const catImages = Array.isArray(matched.images) ? matched.images.filter(Boolean).length : 0;
+      count = Math.max(catImages, catGallery + (matched.image ? 1 : 0));
+    }
+  }
+  return count > 0 ? count : (item.image ? 1 : 4);
 }
 
 function catalogMetaValue(item, key) {
@@ -2990,9 +3032,12 @@ async function uploadRecordMedia(form, node, next) {
       next.galleryImages = [...new Set([...existingGallery, ...urls])];
     }
     if (next.image) {
+      next.thumbnail = next.image;
       const gallery = Array.isArray(next.galleryImages) ? next.galleryImages.filter(Boolean) : [];
       next.images = [...new Set([next.image, ...gallery])];
     } else if (Array.isArray(next.galleryImages) && next.galleryImages.length) {
+      next.image = next.galleryImages[0];
+      next.thumbnail = next.image;
       next.images = [...new Set(next.galleryImages.filter(Boolean))];
     }
     return next;

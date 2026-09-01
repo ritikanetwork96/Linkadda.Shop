@@ -83,7 +83,7 @@ function getLocalFallback(value, el = null) {
   if (match) {
     const prefix = match[1].toLowerCase();
     for (const asset of LOCAL_ASSETS) {
-      if (asset.toLowerCase().startsWith(prefix)) {
+      if (asset.toLowerCase().startsWith(prefix + '_') || asset.toLowerCase().startsWith(prefix)) {
         return `images/${asset}`;
       }
     }
@@ -93,7 +93,6 @@ function getLocalFallback(value, el = null) {
   const lower = String(value || '').toLowerCase();
   if (lower.includes('binance')) return 'images/binance.png';
   if (lower.includes('paypal')) return 'images/paypal.jpg';
-  if (lower.includes('upi')) return 'images/photo_1_2026-06-15_18-29-57.jpg';
 
   // Smart deterministic fallback for generated upload filenames:
   if (el) {
@@ -129,7 +128,12 @@ function initPreseededTable() {
       fallbackMap.set(k, localPath);
     });
 
-    // Also map legacy Supabase pattern
+    normalizeKeys(rustfsUrl).forEach((k) => {
+      mediaMap.set(k, rustfsUrl);
+      fallbackMap.set(k, localPath);
+    });
+
+    // Also support any old legacy Supabase URLs mapping directly to RustFS
     const legacySupa = `https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/${folder}/${file}`;
     normalizeKeys(legacySupa).forEach((k) => {
       mediaMap.set(k, rustfsUrl);
@@ -140,16 +144,14 @@ function initPreseededTable() {
 
 function indexRecord(record) {
   if (!record || typeof record !== 'object') return;
-  const primaryUrl = stripQuery(safeUrl(record.publicUrl || record.rustfsUrl || record.legacySupabaseUrl || ''));
+  const primaryUrl = stripQuery(safeUrl(record.publicUrl || record.rustfsUrl || ''));
   if (!primaryUrl) return;
 
-  const fallbackUrl = stripQuery(safeUrl(record.legacySupabaseUrl || record.sourcePath || record.path || ''));
   const localUrl = getLocalFallback(primaryUrl) || getLocalFallback(record.sourcePath) || getLocalFallback(record.name);
 
   const candidates = new Set([
     record.publicUrl,
     record.rustfsUrl,
-    record.legacySupabaseUrl,
     record.path,
     record.sourcePath,
     record.name,
@@ -166,9 +168,6 @@ function indexRecord(record) {
     normalizeKeys(candidate).forEach((key) => {
       mediaMap.set(key, primaryUrl);
       if (localUrl) fallbackMap.set(key, localUrl);
-      else if (fallbackUrl && fallbackUrl !== primaryUrl && /^https?:\/\//i.test(fallbackUrl)) {
-        fallbackMap.set(key, fallbackUrl);
-      }
     });
   });
 
@@ -207,6 +206,9 @@ function resolveFallback(value, el = null) {
 
 function updateImage(el) {
   if (!el) return;
+
+  const current = el.getAttribute('src') || '';
+  if (!current) return;
 
   // Attach error resilience listener if not present
   if (!el.dataset.hasErrHandler) {
@@ -258,7 +260,24 @@ function updateImage(el) {
     });
   }
 
-  const current = el.getAttribute('src') || '';
+  // If the src is a bare filename like "photo_41_..." or relative without "images/", fix it
+  if (!/^(https?:)?\/\//i.test(current) && !current.startsWith('data:') && !current.startsWith('blob:')) {
+    if (!current.startsWith('images/') && !current.startsWith('/images/')) {
+      const fn = current.split('/').pop().split('?')[0];
+      const local = getLocalFallback(fn, el) || `images/${fn}`;
+      el.setAttribute('src', local);
+      return;
+    }
+  }
+
+  // If it's a Supabase URL, seamlessly rewrite to RustFS S3
+  if (current.includes('supabase.co/storage/v1/object/public/media/')) {
+    const next = current.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/');
+    el.dataset.resolvedSrc = next;
+    el.setAttribute('src', next);
+    return;
+  }
+
   const next = resolveValue(current);
   if (next && next !== current && el.dataset.resolvedSrc !== next) {
     el.dataset.resolvedSrc = next;

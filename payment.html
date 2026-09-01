@@ -1401,7 +1401,7 @@
       <div id="binancepaySection" style="display:none">
         <div class="qr-wrapper">
           <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
-            <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+            <img src="https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
           </div>
           <button class="download-qr-btn" onclick="downloadCurrentQRCode('binancepay')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
@@ -1411,7 +1411,7 @@
       <div id="paypalSection" style="display:none">
         <div class="qr-wrapper">
           <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
-            <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+            <img src="https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
           </div>
           <button class="download-qr-btn" onclick="downloadCurrentQRCode('paypal')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
@@ -3205,7 +3205,7 @@ async function uploadScreenshotToSupabase(orderId, base64Data) {
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          const publicUrl = `https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/${fileName}`;
+          const publicUrl = `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/${fileName}`;
           resolve(publicUrl);
         } else {
           resolve(compressed);
