@@ -1224,7 +1224,7 @@
         <div class="recommended-pill"><i class="fa-solid fa-star"></i> Recommended</div>
         <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
         <div class="method-icon" style="background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0">
-          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="Binance Pay" />
+          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="Binance Pay" />
         </div>
         <div class="method-name">Binance Pay</div>
         <div class="method-sub">Direct ID Transfer</div>
@@ -1234,7 +1234,7 @@
       <div class="method-card" onclick="selectMethod('upi')" id="m-upi">
         <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
         <div class="method-icon icon-upi" style="background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0">
-          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/upi-icon.png" style="width:100%;height:100%;object-fit:contain;padding:6px" alt="UPI" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png" style="width:100%;height:100%;object-fit:contain;padding:6px" alt="UPI" />
         </div>
         <div class="method-name">UPI</div>
         <div class="method-sub">GPay · PhonePe · Paytm</div>
@@ -1243,8 +1243,8 @@
 
       <div class="method-card" onclick="selectMethod('bep20')" id="m-bep20">
         <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-bep20" style="overflow:hidden;padding:0">
-          <img src="https://pypi-camo.freetls.fastly.net/e5a6147a5b426934a5fd2df6696c4f1577f3452d/68747470733a2f2f616c70686177616c6c65742e636f6d2f77702d636f6e74656e742f75706c6f6164732f323032312f30322f424e422e706e67" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="BEP20" />
+        <div class="method-icon icon-bep20" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
+          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="BEP20" />
         </div>
         <div class="method-name">USDT BEP-20</div>
         <div class="method-sub">Binance Smart Chain</div>
@@ -1253,8 +1253,8 @@
 
       <div class="method-card" onclick="selectMethod('eth')" id="m-eth">
         <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-eth" style="overflow:hidden;padding:0">
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSndiDvD9neFlHtoY2t-gkLPPYgfyaKf7kANA&s" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="ERC20" />
+        <div class="method-icon icon-eth" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
+          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="ERC20" />
         </div>
         <div class="method-name">USDT ERC-20</div>
         <div class="method-sub">Ethereum Network</div>
@@ -1263,8 +1263,8 @@
 
       <div class="method-card" onclick="selectMethod('paypal')" id="m-paypal">
         <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-paypal" style="overflow:hidden;padding:0">
-          <img src="https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="PayPal" />
+        <div class="method-icon icon-paypal" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/320px-PayPal.svg.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="PayPal" />
         </div>
         <div class="method-name">PayPal</div>
         <div class="method-sub">Secure Transfer</div>
@@ -1832,7 +1832,7 @@ function renderDynamicPaymentMethods() {
       tag: 'USDT',
       tagClass: 'tag-usdt',
       iconStyle: 'background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0',
-      logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/binance.png',
+      logo: payment.binanceLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
       alt: 'Binance Pay',
     },
     {
@@ -1842,7 +1842,7 @@ function renderDynamicPaymentMethods() {
       tag: '₹ INR',
       tagClass: 'tag-inr',
       iconStyle: 'background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0',
-      logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/upi-icon.png',
+      logo: payment.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
       alt: 'UPI',
     },
     {
@@ -1851,8 +1851,8 @@ function renderDynamicPaymentMethods() {
       sub: 'Binance Smart Chain',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconStyle: 'overflow:hidden;padding:0',
-      logo: 'https://pypi-camo.freetls.fastly.net/e5a6147a5b426934a5fd2df6696c4f1577f3452d/68747470733a2f2f616c70686177616c6c65742e636f6d2f77702d636f6e74656e742f75706c6f6164732f323032312f30322f424e422e706e67',
+      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
+      logo: payment.bep20Logo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png',
       alt: 'BEP20',
     },
     {
@@ -1861,8 +1861,8 @@ function renderDynamicPaymentMethods() {
       sub: 'Ethereum Network',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconStyle: 'overflow:hidden;padding:0',
-      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSndiDvD9neFlHtoY2t-gkLPPYgfyaKf7kANA&s',
+      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
+      logo: payment.ethLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png',
       alt: 'ERC20',
     },
     {
@@ -1871,8 +1871,8 @@ function renderDynamicPaymentMethods() {
       sub: 'Secure Transfer',
       tag: 'INTL',
       tagClass: 'tag-intl',
-      iconStyle: 'overflow:hidden;padding:0',
-      logo: 'https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/logos/paypal.jpg',
+      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
+      logo: payment.paypalLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/320px-PayPal.svg.png',
       alt: 'PayPal',
     },
   ];
@@ -1884,7 +1884,7 @@ function renderDynamicPaymentMethods() {
     tag: item.tag || (item.type === 'upi' ? '₹ INR' : item.type === 'crypto' ? 'USDT' : 'INTL'),
     tagClass: item.type === 'upi' ? 'tag-inr' : item.type === 'crypto' ? 'tag-usdt' : 'tag-intl',
     iconStyle: 'background:linear-gradient(135deg,#059669,#10b981);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-    logo: item.qrImage || '',
+    logo: item.logo || '',
     iconFallback: '<i class="fa-solid fa-credit-card" style="color:#fff;font-size:22px"></i>',
     alt: item.name || 'Payment',
     status: item.status || 'active',

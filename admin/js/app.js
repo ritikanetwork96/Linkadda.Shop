@@ -5065,6 +5065,8 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'binance',
       iconClass: 'icon-binance',
       icon: 'sparkles',
+      logo: payment.binanceLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
+      qrImage: payment.binanceQr || '',
       identifierLabel: 'Binance ID / Pay ID',
       identifier: payment.binanceId || '969887942',
       tag: '0% FEE',
@@ -5080,9 +5082,10 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'upi',
       iconClass: 'icon-upi',
       icon: 'smartphone',
+      logo: payment.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
+      qrImage: payment.qrImage || '',
       identifierLabel: 'UPI VPA Address',
       identifier: payment.upiId || 'Ritikane@ptyes',
-      qrImage: payment.qrImage || '',
       tag: 'INR FAST',
       instructions: 'Scan QR with GPay / PhonePe / Paytm or send to UPI ID → Upload screenshot proof.',
       status: disabled.includes('upi') ? 'disabled' : 'active',
@@ -5096,6 +5099,8 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'crypto',
       iconClass: 'icon-bep20',
       icon: 'coins',
+      logo: payment.bep20Logo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png',
+      qrImage: payment.bep20Qr || '',
       identifierLabel: 'BEP-20 Wallet Address',
       identifier: payment.bep20Address || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
       tag: 'USDT (BSC)',
@@ -5111,6 +5116,8 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'crypto',
       iconClass: 'icon-eth',
       icon: 'wallet',
+      logo: payment.ethLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png',
+      qrImage: payment.ethQr || '',
       identifierLabel: 'ERC-20 Wallet Address',
       identifier: payment.ethAddress || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
       tag: 'USDT (ETH)',
@@ -5126,6 +5133,8 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'paypal',
       iconClass: 'icon-paypal',
       icon: 'credit-card',
+      logo: payment.paypalLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/320px-PayPal.svg.png',
+      qrImage: payment.paypalQr || '',
       identifierLabel: 'PayPal Link',
       identifier: payment.paypalLink || 'https://paypal.me/Johnguzman456',
       tag: 'GLOBAL',
@@ -5141,6 +5150,8 @@ function getStandardPaymentMethods(payment = {}) {
       type: 'giftcard',
       iconClass: 'icon-gift',
       icon: 'gift',
+      logo: payment.giftcardLogo || '',
+      qrImage: payment.giftcardQr || '',
       identifierLabel: 'Gift Card URL',
       identifier: payment.binanceGiftCardUrl || 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
       tag: 'VOUCHER',
@@ -5159,9 +5170,10 @@ function getStandardPaymentMethods(payment = {}) {
     type: item.type || 'custom',
     iconClass: 'icon-custom',
     icon: 'credit-card',
+    logo: item.logo || '',
+    qrImage: item.qrImage || '',
     identifierLabel: item.identifierLabel || 'Account / Address / Link',
     identifier: item.identifier || item.address || item.link || '',
-    qrImage: item.qrImage || '',
     tag: item.tag || 'CUSTOM',
     instructions: item.instructions || '',
     status: item.status || 'active',
@@ -5224,7 +5236,7 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
           <div>
             <div class="section-kicker">Checkout & Gateways</div>
             <h2 class="section-title">Payment Methods & Gateway Hub</h2>
-            <p class="section-subtitle">Add custom payment options, enable/disable methods, set the recommended choice, and update credentials live on Linkadda Shop.</p>
+            <p class="section-subtitle">Add custom payment options, upload brand logos and QR codes, toggle active, set recommended choice, and update credentials.</p>
           </div>
           <div class="toolbar management-actions">
             <button class="btn btn-primary" type="button" data-action="add-payment-method"><i data-lucide="plus-circle"></i> Add Payment Method</button>
@@ -5241,14 +5253,14 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
         </div>
       </section>
 
-      ${renderFieldGroup('Active Payment Methods (Linkadda Shop Connected)', 'Configure payment methods shown to customers on checkout. Toggle active, edit credentials, or set recommended.', `
+      ${renderFieldGroup('Active Payment Methods (Linkadda Shop Connected)', 'Configure payment methods shown to customers on checkout. Upload brand logos, scanner QR codes, or set recommended.', `
         <div class="payment-methods-grid">
           ${methodsList.map((m) => `
             <div class="payment-card ${m.isRecommended ? 'is-recommended' : ''} ${m.status !== 'active' ? 'is-disabled' : ''}">
               <div class="payment-card-header">
                 <div class="payment-card-brand">
-                  <div class="payment-card-icon ${escapeHtml(m.iconClass)}">
-                    <i data-lucide="${escapeHtml(m.icon)}"></i>
+                  <div class="payment-card-icon ${escapeHtml(m.iconClass)}" style="background: rgba(255,255,255,0.06); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; width: 44px; height: 44px;">
+                    ${m.logo ? `<img src="${escapeHtml(m.logo)}" alt="${escapeHtml(m.name)}" style="width: 100%; height: 100%; object-fit: contain;" />` : `<i data-lucide="${escapeHtml(m.icon)}"></i>`}
                   </div>
                   <div class="payment-card-titles">
                     <strong>${escapeHtml(m.name)}</strong>
@@ -5263,6 +5275,7 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
               <div class="payment-card-badges">
                 <span class="badge ${m.isRecommended ? 'warning' : 'primary'}">${escapeHtml(m.tag)}</span>
                 ${m.isRecommended ? '<span class="badge warning"><i data-lucide="star"></i> Recommended on Top</span>' : ''}
+                ${m.qrImage ? '<span class="badge success" style="font-size: 10px;"><i data-lucide="qr-code"></i> QR Set</span>' : ''}
               </div>
 
               <div class="payment-card-body">
@@ -5363,19 +5376,20 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
   `;
 }
 
-
-
 function renderPaymentMethodModal(method = {}, isEdit = false) {
   const isRecommended = Boolean(method.isRecommended);
   const status = method.status || 'active';
   const type = method.type || 'crypto';
+  const logo = method.logo || '';
+  const qrImage = method.qrImage || '';
+
   return `
     <div class="panel-head management-modal-head">
       <div>
         <h2 class="section-title">${isEdit ? 'Edit Payment Method' : 'Add New Payment Method'}</h2>
-        <p class="section-subtitle">${isEdit ? `Update credentials for ${escapeHtml(method.name || 'method')}` : 'Add a custom gateway or crypto wallet connected to checkout.'}</p>
+        <p class="section-subtitle">${isEdit ? `Update credentials, logo icon, and QR code for ${escapeHtml(method.name || 'method')}` : 'Add a custom gateway or crypto wallet connected to checkout.'}</p>
       </div>
-      <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
+      <button class="btn btn-ghost" data-close-modal type="button" onclick="closeModal()"><i data-lucide="x"></i></button>
     </div>
     <form class="form" id="paymentMethodForm" data-method-id="${escapeHtml(method.id || '')}" data-is-edit="${isEdit ? 'true' : 'false'}" data-is-custom="${method.isCustom ? 'true' : 'false'}">
       <div class="form-grid">
@@ -5398,15 +5412,46 @@ function renderPaymentMethodModal(method = {}, isEdit = false) {
           <label for="pmIdentifier">Account ID / Wallet Address / Payment Link *</label>
           <input class="input" id="pmIdentifier" name="identifier" type="text" placeholder="e.g. 0x... / UPI VPA / Binance ID / https://..." value="${escapeHtml(method.identifier || '')}" required />
         </div>
+
+        <!-- 1. METHOD LOGO / BRAND ICON DIRECT UPLOAD -->
+        <div class="field full glass" style="padding: 16px 18px; border-radius: 12px; border: 1px solid var(--border); background: rgba(99, 102, 241, 0.04);">
+          <label style="font-size: 13px; font-weight: 700; color: #818cf8; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+            <i data-lucide="image" style="width: 16px; height: 16px;"></i> Method Brand Logo / Icon (Direct Upload)
+          </label>
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div id="pmLogoPreview" style="width: 52px; height: 52px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              ${logo ? `<img src="${escapeHtml(logo)}" alt="Logo" style="width:100%;height:100%;object-fit:contain;padding:4px;" />` : '<i data-lucide="credit-card" style="width: 24px; height: 24px; color: var(--muted);"></i>'}
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+              <input type="file" accept="image/*" class="input" id="pmLogoFileInput" style="padding: 8px 12px; font-size: 12px; margin-bottom: 6px;" />
+              <input type="text" class="input" id="pmLogoInput" name="logo" placeholder="Or paste Image URL (https://...)" value="${escapeHtml(logo)}" style="font-size: 12px; padding: 8px 12px;" />
+            </div>
+          </div>
+          <small class="section-subtitle" style="margin-top: 6px; display: block;">This logo is shown on the checkout selection card (e.g. Binance / UPI / PayPal logo).</small>
+        </div>
+
+        <!-- 2. PAYMENT QR CODE SCANNER DIRECT UPLOAD -->
+        <div class="field full glass" style="padding: 16px 18px; border-radius: 12px; border: 1px solid var(--border); background: rgba(16, 185, 129, 0.04);">
+          <label style="font-size: 13px; font-weight: 700; color: #34d399; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+            <i data-lucide="qr-code" style="width: 16px; height: 16px;"></i> Payment QR Code Image (Direct Upload)
+          </label>
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div id="pmQrPreview" style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              ${qrImage ? `<img src="${escapeHtml(qrImage)}" alt="QR" style="width:100%;height:100%;object-fit:contain;padding:4px;" />` : '<i data-lucide="qr-code" style="width: 32px; height: 32px; color: var(--muted);"></i>'}
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+              <input type="file" accept="image/*" class="input" id="pmQrFileInput" style="padding: 8px 12px; font-size: 12px; margin-bottom: 6px;" />
+              <input type="text" class="input" id="pmQrImageInput" name="qrImage" placeholder="Or paste QR Image URL (https://...)" value="${escapeHtml(qrImage)}" style="font-size: 12px; padding: 8px 12px;" />
+            </div>
+          </div>
+          <small class="section-subtitle" style="margin-top: 6px; display: block;">This QR code is shown when the customer selects this method to scan and pay.</small>
+        </div>
+
         <div class="field">
           <label for="pmTag">Tag Badge Text</label>
           <input class="input" id="pmTag" name="tag" type="text" placeholder="e.g. USDT, 0% FEE, FAST, INTL" value="${escapeHtml(method.tag || '')}" />
         </div>
         <div class="field">
-          <label for="pmQrImage">QR Code Image URL (Optional)</label>
-          <input class="input" id="pmQrImage" name="qrImage" type="text" placeholder="https://..." value="${escapeHtml(method.qrImage || '')}" />
-        </div>
-        <div class="field full">
           <label for="pmSub">Subtitle / Short Note</label>
           <input class="input" id="pmSub" name="sub" type="text" placeholder="e.g. Tron network low-fee transfers" value="${escapeHtml(method.sub || '')}" />
         </div>
@@ -5426,9 +5471,9 @@ function renderPaymentMethodModal(method = {}, isEdit = false) {
           <label for="pmIsRecommended" style="cursor:pointer;margin:0;font-weight:600;">⭐ Make this the Recommended Choice</label>
         </div>
       </div>
-      <div class="toolbar management-actions-inline" style="margin-top:16px;">
+      <div class="toolbar management-actions-inline" style="margin-top:20px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-ghost" data-close-modal type="button" onclick="closeModal()">Cancel</button>
         <button class="btn btn-primary" type="submit"><i data-lucide="check"></i> Save Payment Method</button>
-        <button class="btn btn-ghost" data-close-modal type="button">Cancel</button>
       </div>
     </form>
   `;
@@ -7444,6 +7489,7 @@ function attachGlobalHandlers() {
       const type = (formData.get('type') || 'crypto').trim();
       const identifier = (formData.get('identifier') || '').trim();
       const tag = (formData.get('tag') || 'ACTIVE').trim().toUpperCase();
+      const logo = (formData.get('logo') || '').trim();
       const qrImage = (formData.get('qrImage') || '').trim();
       const sub = (formData.get('sub') || '').trim();
       const instructions = (formData.get('instructions') || '').trim();
@@ -7473,6 +7519,7 @@ function attachGlobalHandlers() {
           type,
           identifier,
           tag,
+          logo,
           qrImage,
           sub,
           instructions,
@@ -7481,14 +7528,31 @@ function attachGlobalHandlers() {
         };
         updatedPayment.customMethods = customMethods;
       } else {
-        if (methodId === 'binancepay') updatedPayment.binanceId = identifier;
-        else if (methodId === 'upi') {
+        if (methodId === 'binancepay') {
+          updatedPayment.binanceId = identifier;
+          if (logo) updatedPayment.binanceLogo = logo;
+          if (qrImage) updatedPayment.binanceQr = qrImage;
+        } else if (methodId === 'upi') {
           updatedPayment.upiId = identifier;
+          if (logo) updatedPayment.upiLogo = logo;
           if (qrImage) updatedPayment.qrImage = qrImage;
-        } else if (methodId === 'bep20') updatedPayment.bep20Address = identifier;
-        else if (methodId === 'eth') updatedPayment.ethAddress = identifier;
-        else if (methodId === 'paypal') updatedPayment.paypalLink = identifier;
-        else if (methodId === 'giftcard') updatedPayment.binanceGiftCardUrl = identifier;
+        } else if (methodId === 'bep20') {
+          updatedPayment.bep20Address = identifier;
+          if (logo) updatedPayment.bep20Logo = logo;
+          if (qrImage) updatedPayment.bep20Qr = qrImage;
+        } else if (methodId === 'eth') {
+          updatedPayment.ethAddress = identifier;
+          if (logo) updatedPayment.ethLogo = logo;
+          if (qrImage) updatedPayment.ethQr = qrImage;
+        } else if (methodId === 'paypal') {
+          updatedPayment.paypalLink = identifier;
+          if (logo) updatedPayment.paypalLogo = logo;
+          if (qrImage) updatedPayment.paypalQr = qrImage;
+        } else if (methodId === 'giftcard') {
+          updatedPayment.binanceGiftCardUrl = identifier;
+          if (logo) updatedPayment.giftcardLogo = logo;
+          if (qrImage) updatedPayment.giftcardQr = qrImage;
+        }
       }
 
       try {
@@ -7751,6 +7815,42 @@ function attachGlobalHandlers() {
     if (event.target.id === 'paymentDateFilter' || event.target.id === 'orderDateFilter') {
       ui.management.date = event.target.value || 'all';
       renderView(ui.data || {});
+      return;
+    }
+    if (event.target.id === 'pmLogoFileInput') {
+      const file = event.target.files?.[0];
+      if (file) {
+        showToast('Uploading payment method logo...', 'info');
+        const preview = document.getElementById('pmLogoPreview');
+        if (preview) preview.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;">Uploading...</div>';
+        uploadAsset(file, 'logos').then((res) => {
+          const input = document.getElementById('pmLogoInput');
+          if (input) input.value = res.publicUrl;
+          if (preview) preview.innerHTML = `<img src="${res.publicUrl}" alt="Logo" style="width:100%;height:100%;object-fit:contain;padding:4px;" />`;
+          showToast('Payment method logo uploaded!', 'success');
+        }).catch((err) => {
+          if (preview) preview.innerHTML = '<i data-lucide="credit-card" style="width:24px;height:24px;color:var(--muted);"></i>';
+          showToast(err?.message || 'Logo upload failed', 'danger');
+        });
+      }
+      return;
+    }
+    if (event.target.id === 'pmQrFileInput') {
+      const file = event.target.files?.[0];
+      if (file) {
+        showToast('Uploading payment QR code...', 'info');
+        const preview = document.getElementById('pmQrPreview');
+        if (preview) preview.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;">Uploading...</div>';
+        uploadAsset(file, 'qrcodes').then((res) => {
+          const input = document.getElementById('pmQrImageInput');
+          if (input) input.value = res.publicUrl;
+          if (preview) preview.innerHTML = `<img src="${res.publicUrl}" alt="QR" style="width:100%;height:100%;object-fit:contain;padding:4px;" />`;
+          showToast('Payment QR code uploaded!', 'success');
+        }).catch((err) => {
+          if (preview) preview.innerHTML = '<i data-lucide="qr-code" style="width:32px;height:32px;color:var(--muted);"></i>';
+          showToast(err?.message || 'QR upload failed', 'danger');
+        });
+      }
       return;
     }
     if (event.target.id === 'settingsFaviconFile') {
