@@ -236,7 +236,7 @@ export function stats() {
 
 export function recentOrders(limit = 6) {
   return listCollection('orders')
-    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+    .sort((a, b) => (Number(b.timestamp || b.createdAt || b.updatedAt || 0)) - (Number(a.timestamp || a.createdAt || a.updatedAt || 0)))
     .slice(0, limit);
 }
 

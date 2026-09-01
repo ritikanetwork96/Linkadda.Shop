@@ -3318,37 +3318,97 @@ function renderDashboard(data) {
         </section>
       </section>
 
-      <section class="panel glass">
+      <section class="panel glass" style="margin-top: 24px;">
         <div class="panel-head">
           <div>
-            <h3>Recent Orders</h3>
-            <p class="section-subtitle">The latest payment events from the public flow.</p>
+            <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Live Stream</div>
+            <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--text);">Recent Orders</h3>
+            <p class="section-subtitle">The latest customer checkout events and payment submissions.</p>
           </div>
           <button class="btn btn-ghost" type="button" data-action="goto" data-route="orders"><i data-lucide="list"></i> View All Orders</button>
         </div>
-        <div class="table-wrap">
-          <table class="table">
+        <div class="orders-table-shell" style="border: none; box-shadow: none;">
+          <table class="orders-table">
             <thead>
               <tr>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Payment Method</th>
-                <th>Status</th>
-                <th>Time</th>
-                <th>Action</th>
+                <th style="min-width: 260px;">Product & Order</th>
+                <th style="min-width: 120px;">Amount</th>
+                <th style="min-width: 130px;">Method</th>
+                <th style="min-width: 140px;">Status</th>
+                <th style="min-width: 140px;">Time</th>
+                <th style="min-width: 100px; text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody>
-              ${orders.length ? orders.map((item) => `
+              ${orders.length ? orders.map((item) => {
+                const proof = orderPaymentProof(item);
+                const isPaid = isPaidOrder(item);
+                const isFailed = isFailedOrder(item);
+                const orderId = item.id || item.orderId || '-';
+                const shortId = orderId.length > 10 ? `${orderId.substring(0, 8)}...` : orderId;
+                const prodTitle = orderProductName(item);
+                const method = orderMethodLabel(item);
+                const methodLower = method.toLowerCase();
+                const methodClass = methodLower.includes('upi') ? 'upi' : methodLower.includes('binance') ? 'binance' : methodLower.includes('paypal') ? 'paypal' : 'crypto';
+                const formattedAmt = item.amountDisplay || formatCurrencyCompact(item.amount || item.inr || 0);
+
+                return `
+                  <tr>
+                    <td>
+                      <div class="order-product-cell">
+                        <div class="order-proof-thumb-wrap" data-action="open-order" data-id="${escapeHtml(item.id)}" title="${proof ? 'View Screenshot' : 'View Order'}">
+                          ${proof ? `
+                            <img src="${escapeHtml(proof)}" alt="Proof" loading="lazy" />
+                            <span class="order-proof-badge"><i data-lucide="image" style="width: 8px; height: 8px; vertical-align: middle;"></i> PROOF</span>
+                          ` : `
+                            <div style="width: 100%; height: 100%; display: grid; place-items: center; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; font-weight: 800; font-size: 15px;">
+                              ${escapeHtml((prodTitle[0] || 'O').toUpperCase())}
+                            </div>
+                          `}
+                        </div>
+                        <div style="min-width: 0;">
+                          <strong style="display: block; font-size: 13.5px; color: var(--text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" title="${escapeHtml(prodTitle)}">
+                            ${escapeHtml(prodTitle)}
+                          </strong>
+                          <span class="order-id-badge" data-action="copy-order-id" data-id="${escapeHtml(orderId)}" title="Click to Copy #${escapeHtml(orderId)}">
+                            <i data-lucide="copy" style="width: 10px; height: 10px;"></i> #${escapeHtml(shortId)}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="order-amount-cell">${escapeHtml(formattedAmt)}</span>
+                    </td>
+                    <td>
+                      <span class="order-method-badge ${methodClass}">
+                        <i data-lucide="${methodClass === 'upi' ? 'smartphone' : methodClass === 'binance' ? 'coins' : methodClass === 'paypal' ? 'wallet' : 'shield-check'}" style="width: 13px; height: 13px;"></i>
+                        ${escapeHtml(method)}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="order-status-pill ${isPaid ? 'approved' : isFailed ? 'rejected' : 'pending'}">
+                        ${isPaid ? '🟢 Approved' : isFailed ? '🔴 Rejected' : '🟡 Pending'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style="font-size: 12.5px; color: var(--text); white-space: nowrap;">${escapeHtml(formatDateTime(orderDateValue(item)))}</div>
+                      <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${escapeHtml(formatRelativeTime(orderDateValue(item)))}</div>
+                    </td>
+                    <td style="text-align: right;">
+                      <button class="order-quick-btn view" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}" title="View Proof & Order">
+                        <i data-lucide="eye" style="width: 13px; height: 13px;"></i> View
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('') : `
                 <tr>
-                  <td>${escapeHtml(item.package || '-')}</td>
-                  <td>${escapeHtml(item.amount || '-')}</td>
-                  <td>${escapeHtml(item.method || '-')}</td>
-                  <td>${collectionRowBadge(item)}</td>
-                  <td>${escapeHtml(formatDateTime(item.timestamp))}</td>
-                  <td><button class="icon-btn" data-action="open-order" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> View</button></td>
+                  <td colspan="6" style="text-align: center; padding: 36px 20px; color: var(--muted);">
+                    <i data-lucide="inbox" style="width: 36px; height: 36px; opacity: 0.3; margin-bottom: 8px;"></i>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text);">No recent orders yet</div>
+                  </td>
                 </tr>
-              `).join('') : '<tr><td colspan="6"><div class="empty-state">No orders yet.</div></td></tr>'}
+              `}
             </tbody>
           </table>
         </div>
