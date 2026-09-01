@@ -4741,16 +4741,79 @@ async function applyAdminSnapshotImport(form) {
   }
 }
 
+function renderActiveSessionCard(sess, currentSessId) {
+  const isCurrent = sess.id === currentSessId || Boolean(sess.isCurrent);
+  const isMobile = sess.deviceType === 'Mobile';
+  const isTablet = sess.deviceType === 'Tablet';
+  const iconName = isMobile ? 'smartphone' : (isTablet ? 'tablet' : 'laptop');
+  const timeSince = formatRelativeTime(sess.lastActiveAt || Date.now());
+
+  return `
+    <div class="glass" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 16px 20px; border-radius: 12px; border: 1px solid ${isCurrent ? 'rgba(16, 185, 129, 0.4)' : 'var(--border)'}; background: ${isCurrent ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255,255,255,0.02)'}; box-shadow: ${isCurrent ? '0 4px 20px rgba(16, 185, 129, 0.08)' : 'none'};">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: ${isCurrent ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)'}; color: ${isCurrent ? '#10b981' : '#818cf8'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid ${isCurrent ? 'rgba(16, 185, 129, 0.3)' : 'rgba(99, 102, 241, 0.25)'};">
+          <i data-lucide="${iconName}" style="width: 22px; height: 22px;"></i>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <strong style="font-size: 14.5px; color: var(--text); font-weight: 700;">${escapeHtml(sess.browser || 'Browser')} on ${escapeHtml(sess.os || 'Windows PC')}</strong>
+            ${isCurrent ? `
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.5); font-size: 10.5px; font-weight: 800; padding: 2px 8px; letter-spacing: 0.04em;">🟢 THIS DEVICE (CURRENT ACTIVE)</span>
+            ` : `
+              <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 10.5px; font-weight: 700; padding: 2px 8px;">REMOTE SESSION</span>
+            `}
+          </div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; gap: 16px; flex-wrap: wrap;">
+            <span><i data-lucide="clock" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> Logged in: <span style="color: var(--text);">${escapeHtml(formatDateTime(sess.loginAt || Date.now()))}</span></span>
+            <span><i data-lucide="activity" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> Last active: <strong style="color: ${isCurrent ? '#34d399' : 'var(--text)'};">${isCurrent ? 'Active Now' : escapeHtml(timeSince)}</strong></span>
+            <span><i data-lucide="map-pin" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> ${escapeHtml(sess.timezone || 'Asia/Kolkata')}</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        ${isCurrent ? `
+          <button class="btn btn-ghost btn-sm" type="button" data-action="logout" style="font-size: 12px; padding: 7px 14px; color: #f87171; border-color: rgba(239, 68, 68, 0.3); display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="log-out" style="width: 13px; height: 13px;"></i> Log Out Here
+          </button>
+        ` : `
+          <button class="btn btn-danger btn-sm" type="button" data-action="terminate-session" data-session-id="${escapeHtml(sess.id)}" style="font-size: 12px; padding: 7px 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="power" style="width: 13px; height: 13px;"></i> Log Out Device
+          </button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function renderActiveSessionsCardsList(sessions = [], currentSessId = null) {
+  const currentId = currentSessId || getCurrentSessionId();
+  if (!sessions.length) {
+    const device = getDeviceDetails();
+    return renderActiveSessionCard({
+      id: currentId,
+      browser: device.browser,
+      os: device.os,
+      deviceType: device.type,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+      loginAt: Date.now(),
+      lastActiveAt: Date.now(),
+      status: 'active',
+      isCurrent: true,
+    }, currentId);
+  }
+  return sessions.map((sess) => renderActiveSessionCard(sess, currentId)).join('');
+}
+
 function renderActiveSessionsSection(sessions = []) {
   const currentSessId = getCurrentSessionId();
   const otherCount = sessions.filter((s) => s.id !== currentSessId).length;
 
   return `
-    <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border); margin-top: 24px;">
+    <section class="panel glass" id="activeSessionsContainer" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border); margin-top: 24px;">
       <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-            <i data-lucide="shield-alert" style="width: 20px; height: 20px;"></i>
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+            <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
           </div>
           <div>
             <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text);">Active Logged-in Devices & Security</h3>
@@ -4761,61 +4824,14 @@ function renderActiveSessionsSection(sessions = []) {
           <button class="btn btn-ghost btn-sm" type="button" data-action="refresh-sessions" style="font-size: 12px; padding: 6px 12px;">
             <i data-lucide="refresh-cw" style="width: 13px; height: 13px;"></i> Refresh Devices
           </button>
-          <button class="btn btn-danger btn-sm" type="button" data-action="terminate-all-other-sessions" ${otherCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} style="font-size: 12px; padding: 6px 12px; font-weight: 700;">
-            <i data-lucide="power" style="width: 13px; height: 13px;"></i> Log Out All Other Devices (${otherCount})
+          <button class="btn btn-danger btn-sm" type="button" data-action="terminate-all-other-sessions" id="terminateOtherSessionsBtn" ${otherCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} style="font-size: 12px; padding: 6px 12px; font-weight: 700;">
+            <i data-lucide="power" style="width: 13px; height: 13px;"></i> Log Out All Other Devices (<span id="otherSessionsCount">${otherCount}</span>)
           </button>
         </div>
       </div>
 
       <div id="activeSessionsList" style="display: flex; flex-direction: column; gap: 12px;">
-        ${sessions.length ? sessions.map((sess) => {
-          const isCurrent = sess.id === currentSessId;
-          const isMobile = sess.deviceType === 'Mobile';
-          const isTablet = sess.deviceType === 'Tablet';
-          const iconName = isMobile ? 'smartphone' : (isTablet ? 'tablet' : 'laptop');
-          const timeSince = formatRelativeTime(sess.lastActiveAt);
-
-          return `
-            <div class="glass" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid ${isCurrent ? 'rgba(16, 185, 129, 0.35)' : 'var(--border)'}; background: ${isCurrent ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.02)'};">
-              <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 42px; height: 42px; border-radius: 10px; background: ${isCurrent ? 'rgba(16, 185, 129, 0.15)' : 'rgba(99, 102, 241, 0.15)'}; color: ${isCurrent ? '#10b981' : '#818cf8'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <i data-lucide="${iconName}" style="width: 22px; height: 22px;"></i>
-                </div>
-                <div>
-                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <strong style="font-size: 14px; color: var(--text); font-weight: 700;">${escapeHtml(sess.browser || 'Browser')} on ${escapeHtml(sess.os || 'Device')}</strong>
-                    ${isCurrent ? `
-                      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10.5px; font-weight: 700;">🟢 THIS DEVICE (CURRENT)</span>
-                    ` : `
-                      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 10.5px; font-weight: 700;">REMOTE SESSION</span>
-                    `}
-                  </div>
-                  <div style="font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; gap: 14px; flex-wrap: wrap;">
-                    <span><i data-lucide="clock" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> Logged in: ${escapeHtml(formatDateTime(sess.loginAt))}</span>
-                    <span><i data-lucide="activity" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> Last active: <strong style="color: ${isCurrent ? '#34d399' : 'var(--text)'};">${escapeHtml(timeSince)}</strong></span>
-                    <span><i data-lucide="map-pin" style="width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px;"></i> ${escapeHtml(sess.timezone || 'Asia/Kolkata')}</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                ${isCurrent ? `
-                  <button class="btn btn-ghost btn-sm" type="button" data-action="logout" style="font-size: 12px; padding: 6px 14px; color: var(--muted); border-color: rgba(255,255,255,0.1); display: inline-flex; align-items: center; gap: 6px;">
-                    <i data-lucide="log-out" style="width: 13px; height: 13px;"></i> Log Out Here
-                  </button>
-                ` : `
-                  <button class="btn btn-danger btn-sm" type="button" data-action="terminate-session" data-session-id="${escapeHtml(sess.id)}" style="font-size: 12px; padding: 6px 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-                    <i data-lucide="power" style="width: 13px; height: 13px;"></i> Log Out Device
-                  </button>
-                `}
-              </div>
-            </div>
-          `;
-        }).join('') : `
-          <div style="padding: 24px; text-align: center; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border);">
-            <i data-lucide="shield-check" style="width: 32px; height: 32px; color: #10b981; margin-bottom: 8px;"></i>
-            <div>Only your current session is active. No other logged-in devices found.</div>
-          </div>
-        `}
+        ${renderActiveSessionsCardsList(sessions, currentSessId)}
       </div>
     </section>
   `;
@@ -4830,9 +4846,19 @@ function renderSettingsManagementView(data = {}, fullData = {}) {
     ui.sessionsLoaded = true;
     getActiveAdminSessions().then((sess) => {
       ui.sessions = sess;
-      const container = document.getElementById('activeSessionsList');
-      if (container) {
-        container.innerHTML = renderActiveSessionsSection(sess);
+      const listEl = document.getElementById('activeSessionsList');
+      if (listEl) {
+        const currentSessId = getCurrentSessionId();
+        listEl.innerHTML = renderActiveSessionsCardsList(sess, currentSessId);
+        const otherCount = sess.filter((s) => s.id !== currentSessId).length;
+        const countSpan = document.getElementById('otherSessionsCount');
+        if (countSpan) countSpan.textContent = String(otherCount);
+        const termBtn = document.getElementById('terminateOtherSessionsBtn');
+        if (termBtn) {
+          termBtn.disabled = otherCount === 0;
+          termBtn.style.opacity = otherCount === 0 ? '0.5' : '1';
+          termBtn.style.cursor = otherCount === 0 ? 'not-allowed' : 'pointer';
+        }
         if (window.lucide) lucide.createIcons();
       }
     }).catch(() => {});

@@ -106,13 +106,27 @@ export function startSessionWatch(user, onTerminated) {
 }
 
 export async function getActiveAdminSessions() {
+  const currentSessId = getCurrentSessionId();
+  const device = getDeviceDetails();
+  
+  const currentSessionFallback = {
+    id: currentSessId,
+    browser: device.browser,
+    os: device.os,
+    deviceType: device.type,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+    loginAt: Date.now(),
+    lastActiveAt: Date.now(),
+    status: 'active',
+    isCurrent: true,
+  };
+
   try {
     const sessionsRef = ref(db, 'admin_sessions');
     const snapshot = await get(sessionsRef);
     const val = snapshot.val() || {};
-    const currentSessId = getCurrentSessionId();
     
-    const list = Object.values(val)
+    let list = Object.values(val)
       .filter((s) => s && s.status === 'active')
       .map((s) => ({
         ...s,
@@ -120,10 +134,22 @@ export async function getActiveAdminSessions() {
       }))
       .sort((a, b) => (b.lastActiveAt || 0) - (a.lastActiveAt || 0));
 
+    const hasCurrent = list.some((s) => s.id === currentSessId);
+    if (!hasCurrent) {
+      list.unshift(currentSessionFallback);
+      try {
+        set(ref(db, `admin_sessions/${currentSessId}`), {
+          ...currentSessionFallback,
+          uid: auth.currentUser?.uid || 'admin',
+          email: auth.currentUser?.email || 'admin',
+        }).catch(() => {});
+      } catch (_) {}
+    }
+
     return list;
   } catch (err) {
-    console.error('Failed to get active sessions:', err);
-    return [];
+    console.warn('Failed to get active sessions from RTDB, returning local device:', err);
+    return [currentSessionFallback];
   }
 }
 
