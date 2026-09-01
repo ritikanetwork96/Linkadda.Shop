@@ -1,29 +1,61 @@
-import { db, ref, onValue, set, update, remove, push } from './firebase.js';
+import { db, ref, onValue, get, set, update, remove, push } from './firebase.js';
 import { RTDB_NODES } from './config.js';
 import { safeJson, slugify, uid } from './utils.js';
 
-const STORE = {
-  hero: {},
-  categories: {},
-  products: {},
-  events: {},
-  banner: {},
-  faq: {},
-  testimonials: {},
-  settings: {},
-  payment: {},
-  orders: {},
-  analytics: {},
-  media: {},
-  visitors: {},
-};
+const CACHE_KEY = 'linkadda_admin_store_cache_v2';
 
+function loadCachedStore() {
+  const initial = {
+    hero: {},
+    categories: {},
+    products: {},
+    events: {},
+    banner: {},
+    faq: {},
+    testimonials: {},
+    settings: {},
+    payment: {},
+    orders: {},
+    analytics: {},
+    media: {},
+    visitors: {},
+  };
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return { ...initial, ...parsed };
+      }
+    }
+  } catch (_) {}
+  return initial;
+}
+
+const STORE = loadCachedStore();
 const subscribers = new Set();
 let listening = false;
+let emitTimer = null;
+
+function saveStoreCache() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(STORE));
+  } catch (_) {}
+}
 
 function emit() {
-  const snapshot = getSnapshot();
-  subscribers.forEach((fn) => fn(snapshot));
+  if (emitTimer) cancelAnimationFrame(emitTimer);
+  emitTimer = requestAnimationFrame(() => {
+    saveStoreCache();
+    const snapshot = getSnapshot();
+    subscribers.forEach((fn) => {
+      try {
+        fn(snapshot);
+      } catch (err) {
+        console.error('Subscriber error:', err);
+      }
+    });
+  });
 }
 
 export function getSnapshot() {
@@ -45,7 +77,35 @@ function attachNode(key, mode = 'collection') {
   });
 }
 
+export async function fetchAllInitialData() {
+  const nodeKeys = Object.keys(RTDB_NODES);
+  try {
+    const promises = nodeKeys.map(async (key) => {
+      const nodeName = RTDB_NODES[key];
+      try {
+        const snap = await get(ref(db, nodeName));
+        return { key, val: snap.val() };
+      } catch (e) {
+        return { key, val: null };
+      }
+    });
+
+    const results = await Promise.allSettled(promises);
+    results.forEach((res) => {
+      if (res.status === 'fulfilled' && res.value && res.value.val !== null) {
+        STORE[res.value.key] = res.value.val;
+      }
+    });
+    emit();
+  } catch (err) {
+    console.warn('Initial parallel fetch warning:', err);
+  }
+}
+
 export function startRealtime() {
+  // Fast parallel bulk load
+  fetchAllInitialData();
+
   if (listening) return;
   listening = true;
   attachNode('hero', 'singleton');
