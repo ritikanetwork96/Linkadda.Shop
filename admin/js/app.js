@@ -2923,7 +2923,7 @@ async function deleteMediaIfUnused(reference, keepContext = null) {
   }
 }
 
-async function saveUploadedMediaRecord(file, result, folder, type, source = 'admin', sourcePath = '') {
+async function saveUploadedMediaRecord(file, result, folder, type, source = 'admin', sourcePath = '', linkedName = '', linkedId = '') {
   await saveRecord('media', uid('media'), {
     name: file.name,
     folder: normalizeStorageFolder(folder),
@@ -2934,11 +2934,16 @@ async function saveUploadedMediaRecord(file, result, folder, type, source = 'adm
     size: file.size,
     mime: file.type,
     source,
+    linkedName: linkedName || '',
+    linkedId: linkedId || '',
     status: 'active',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
   });
 }
 
 async function uploadRecordMedia(form, node, next) {
+  const recordLabel = next.name || next.title || next.label || (node === 'categories' ? 'Category' : 'Product');
   const imageFile = form.querySelector('input[name="imageFile"]')?.files?.[0] || null;
   const photoFile = form.querySelector('input[name="photoFile"]')?.files?.[0] || null;
   const galleryFiles = [...(form.querySelector('input[name="galleryFiles"]')?.files || [])];
@@ -2946,7 +2951,7 @@ async function uploadRecordMedia(form, node, next) {
   const uploadOne = async (file, folder, type, source) => {
     const result = await uploadAsset(file, folder);
     uploaded.push(result.path);
-    await saveUploadedMediaRecord(file, result, folder, type, source, `${source}:${file.name}`);
+    await saveUploadedMediaRecord(file, result, folder, type, source, `${source}:${file.name}`, recordLabel, next.id);
     return result.publicUrl;
   };
   try {
@@ -3745,32 +3750,306 @@ async function applyBulkAction(action, node, ids) {
   }
 }
 
-function renderSingleEditorPage(node, schema, data) {
-  const hasData = Boolean(Object.entries(data || {}).length);
+function renderSingleEditorPage(node, schema, data = {}) {
+  const record = data || {};
+  const isHero = node === 'hero';
+  const isBanner = node === 'banner';
+  const isLive = (record.status || 'active') === 'active';
+  const lastUpdated = singleEditorLastUpdated(record);
+
   return `
-    <div class="page active management-page-shell">
-      <section class="panel glass management-page single-editor-page">
-        <div class="panel-head management-page-head">
+    <div class="page active management-page-shell single-editor-page-shell" style="max-width: 1200px; margin: 0 auto; padding-bottom: 60px;">
+      
+      <!-- Top Control Bar -->
+      <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div class="section-kicker">${escapeHtml(node === 'hero' ? 'Homepage Hero' : 'Homepage Banner')}</div>
-            <h2 class="section-title">${escapeHtml(schema.title)}</h2>
-            <p class="section-subtitle">${escapeHtml(schema.description)}</p>
-          </div>
-          <div class="toolbar management-actions">
-            <button class="btn btn-primary" data-action="edit-single" data-node="${node}" type="button"><i data-lucide="pencil"></i> Edit</button>
-          </div>
-        </div>
-        <div class="single-editor-shell">
-          ${renderSingleEditorPreviewCard(node, data)}
-          <div class="single-editor-main">
-            ${renderSingleEditorSummaryGrid(node, data)}
-            <div class="single-editor-section-list">
-              ${renderSingleEditorFieldSections(node, schema, data)}
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em;">
+                ${escapeHtml(isHero ? 'Homepage Hero' : 'Homepage Deal')}
+              </span>
+              <span class="badge ${isLive ? 'success' : 'warning'}" style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                <i data-lucide="${isLive ? 'eye' : 'eye-off'}" style="width: 12px; height: 12px;"></i>
+                ${isLive ? 'Live on Store' : 'Hidden from Store'}
+              </span>
             </div>
-            ${!hasData ? '<div class="empty-state">No content saved yet.</div>' : ''}
+            <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">${escapeHtml(schema.title)}</h2>
+            <p style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">${escapeHtml(schema.description)}</p>
+          </div>
+          <div class="toolbar" style="display: flex; gap: 10px; align-items: center;">
+            <a class="btn btn-ghost" href="/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px;">
+              <i data-lucide="external-link"></i> View on Website
+            </a>
           </div>
         </div>
       </section>
+
+      <!-- Main Layout: Preview on Left, Direct Form on Right -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; align-items: start;">
+        
+        <!-- LIVE PREVIEW CARD -->
+        <div>
+          <div style="position: sticky; top: 88px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="monitor" style="width: 14px; height: 14px; color: var(--primary);"></i> Live Storefront Preview
+              </span>
+              <small style="font-size: 11px; color: var(--muted);">Last updated: ${escapeHtml(lastUpdated)}</small>
+            </div>
+
+            ${isBanner ? `
+              <!-- Realistic Banner Card Preview -->
+              <div class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid rgba(99, 102, 241, 0.3); background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(236, 72, 153, 0.05)); position: relative; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.3);">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #6366f1, #ec4899);"></div>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                  <span style="background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                    🔥 PINNED DEAL
+                  </span>
+                  <span style="font-size: 11px; color: var(--muted);">${escapeHtml(record.status === 'hidden' ? '⚠️ Hidden' : '🟢 Active')}</span>
+                </div>
+
+                <h3 style="font-size: 20px; font-weight: 800; color: var(--text); margin: 0 0 8px 0; line-height: 1.3;">
+                  ${escapeHtml(record.title || 'All Collection Pack')}
+                </h3>
+                
+                <p style="font-size: 13px; color: var(--muted); margin: 0 0 18px 0; line-height: 1.5;">
+                  ${escapeHtml(record.description || 'Mega Pack — 1,14,000+ Videos | Every category bundled together — the ultimate deal.')}
+                </p>
+
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; padding: 12px 16px; background: rgba(0,0,0,0.25); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                  <span style="font-size: 22px; font-weight: 900; color: #10b981;">
+                    ${escapeHtml(record.priceOfferINR ? `₹${record.priceOfferINR.replace(/[^0-9,]/g, '')}` : '₹15,700')}
+                  </span>
+                  ${record.priceOfferUSD ? `
+                    <span style="font-size: 14px; font-weight: 700; color: #818cf8;">
+                      / ${escapeHtml(record.priceOfferUSD.startsWith('$') ? record.priceOfferUSD : `$${record.priceOfferUSD}`)}
+                    </span>
+                  ` : ''}
+                  ${record.priceOriginal ? `
+                    <span style="font-size: 13px; text-decoration: line-through; color: var(--muted); margin-left: auto;">
+                      ${escapeHtml(record.priceOriginal.startsWith('₹') ? record.priceOriginal : `₹${record.priceOriginal}`)}
+                    </span>
+                  ` : ''}
+                </div>
+
+                <a href="${escapeHtml(record.buttonLink || '#')}" target="_blank" style="display: block; width: 100%; text-align: center; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #ec4899); color: white; text-decoration: none; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+                  ${escapeHtml(record.buttonText || 'Claim Deal')} →
+                </a>
+              </div>
+            ` : `
+              <!-- Realistic Hero Preview -->
+              <div class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border); background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(0,0,0,0.4)); position: relative;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase;">HERO SECTION</span>
+                  <span style="font-size: 11px; color: var(--muted);">${escapeHtml(record.status === 'hidden' ? '⚠️ Hidden' : '🟢 Active')}</span>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 800; color: var(--text); margin: 0 0 8px 0; line-height: 1.3;">
+                  ${escapeHtml(record.title || 'Welcome to Linkadda Shop')}
+                </h3>
+                <p style="font-size: 12.5px; color: var(--muted); margin: 0 0 16px 0; line-height: 1.4;">
+                  ${escapeHtml(record.subtitle || 'High quality products & instant digital access.')}
+                </p>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                  <span style="padding: 8px 14px; font-size: 12px; font-weight: 700; background: var(--primary); color: white; border-radius: 8px;">
+                    ${escapeHtml(record.primaryButtonText || 'Explore Catalog')}
+                  </span>
+                  ${record.secondaryButtonText ? `
+                    <span style="padding: 8px 14px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.06); color: var(--text); border-radius: 8px; border: 1px solid var(--border);">
+                      ${escapeHtml(record.secondaryButtonText)}
+                    </span>
+                  ` : ''}
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <div style="font-size: 11px; font-weight: 700; color: var(--text);">${escapeHtml(record.stat1 || '50K+ Buyers')}</div>
+                  <div style="font-size: 11px; font-weight: 700; color: var(--text);">${escapeHtml(record.stat2 || '100% Instant')}</div>
+                  <div style="font-size: 11px; font-weight: 700; color: var(--text);">${escapeHtml(record.stat3 || '24/7 Support')}</div>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- DIRECT LIVE EDIT FORM -->
+        <form id="directSingleForm" data-node="${node}" style="display: flex; flex-direction: column; gap: 20px;">
+          
+          <!-- Section 1: Content & Copy -->
+          <section class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="type" style="width: 16px; height: 16px;"></i>
+              </div>
+              <div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text);">Headline & Promotional Text</h4>
+                <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--muted);">Shown directly to visitors on the homepage.</p>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">
+                  ${isHero ? 'Hero Title Heading' : 'Banner Deal Title'}
+                </label>
+                <input type="text" name="title" value="${escapeHtml(record.title || (isHero ? 'Linkadda Premium Shop' : 'All Collection Pack'))}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" required />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">
+                  ${isHero ? 'Hero Subtitle / Description' : 'Offer Description / Perks'}
+                </label>
+                <textarea name="description" rows="3" class="textarea" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; resize: vertical;">${escapeHtml(record.description || record.subtitle || '')}</textarea>
+              </div>
+            </div>
+          </section>
+
+          ${isBanner ? `
+            <!-- Section 2: Pricing Details (For Banner) -->
+            <section class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i data-lucide="tag" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text);">Pricing & Discount Values</h4>
+                  <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--muted);">Original crossed-out price vs special discounted price.</p>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;">
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Original Price (Strikethrough)</label>
+                  <input type="text" name="priceOriginal" value="${escapeHtml(record.priceOriginal || '₹22,800')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="₹22,800" />
+                </div>
+
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: #10b981; margin-bottom: 6px;">Offer Price (INR) ⭐</label>
+                  <input type="text" name="priceOfferINR" value="${escapeHtml(record.priceOfferINR || '₹15,700')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; color: var(--text); font-size: 13px; font-weight: 700;" placeholder="₹15,700" />
+                </div>
+
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: #818cf8; margin-bottom: 6px;">Offer Price (USD)</label>
+                  <input type="text" name="priceOfferUSD" value="${escapeHtml(record.priceOfferUSD || '$109')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="$109" />
+                </div>
+              </div>
+            </section>
+          ` : `
+            <!-- Section 2: Statistics & Secondary (For Hero) -->
+            <section class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white;">
+                  <i data-lucide="bar-chart-2" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div>
+                  <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text);">Trust Badges / Counter Stats</h4>
+                  <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--muted);">3 highlight metrics displayed on the hero section.</p>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;">
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Stat 1</label>
+                  <input type="text" name="stat1" value="${escapeHtml(record.stat1 || '50K+ Happy Buyers')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" />
+                </div>
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Stat 2</label>
+                  <input type="text" name="stat2" value="${escapeHtml(record.stat2 || '100% Instant')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" />
+                </div>
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Stat 3</label>
+                  <input type="text" name="stat3" value="${escapeHtml(record.stat3 || '24/7 Delivery')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" />
+                </div>
+              </div>
+            </section>
+          `}
+
+          <!-- Section 3: Call To Action & Links -->
+          <section class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #ec4899, #f43f5e); display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+              </div>
+              <div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text);">Action Buttons & Links</h4>
+                <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--muted);">Button labels and destinations.</p>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">
+                  ${isHero ? 'Primary Button Text' : 'Button Label Text'}
+                </label>
+                <input type="text" name="${isHero ? 'primaryButtonText' : 'buttonText'}" value="${escapeHtml(isHero ? (record.primaryButtonText || 'Explore Catalog') : (record.buttonText || 'Claim Deal'))}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" required />
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">
+                  ${isHero ? 'Primary Button Link' : 'Button Destination Link'}
+                </label>
+                <input type="text" name="${isHero ? 'primaryButtonLink' : 'buttonLink'}" value="${escapeHtml(isHero ? (record.primaryButtonLink || '#catalog') : (record.buttonLink || 'payment.html'))}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" required />
+              </div>
+
+              ${isHero ? `
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Secondary Button Text</label>
+                  <input type="text" name="secondaryButtonText" value="${escapeHtml(record.secondaryButtonText || 'Telegram Support')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" />
+                </div>
+
+                <div>
+                  <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Secondary Button Link</label>
+                  <input type="text" name="secondaryButtonLink" value="${escapeHtml(record.secondaryButtonLink || 'https://t.me/TRUSTED_BROTHER1234')}" class="input" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" />
+                </div>
+              ` : ''}
+            </div>
+          </section>
+
+          <!-- Section 4: Publishing & Media -->
+          <section class="panel glass" style="padding: 24px; border-radius: 16px; border: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: white;">
+                <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
+              </div>
+              <div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text);">Visibility & Media</h4>
+                <p style="margin: 2px 0 0 0; font-size: 11.5px; color: var(--muted);">Publishing status on the live store.</p>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Publishing Status</label>
+                <select name="status" class="select" style="width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;">
+                  <option value="active" ${record.status === 'active' || !record.status ? 'selected' : ''}>🟢 Visible (Active on Home)</option>
+                  <option value="hidden" ${record.status === 'hidden' ? 'selected' : ''}>🟡 Hidden (Do Not Show)</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">Image / Background URL (Optional)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="singleUrlInput_${node}" name="${isHero ? 'backgroundImage' : 'image'}" value="${escapeHtml(isHero ? (record.backgroundImage || '') : (record.image || ''))}" class="input" style="flex: 1; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="https://..." />
+                  <label class="btn btn-ghost" style="cursor: pointer; padding: 0 12px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px; font-size: 12px;">
+                    <i data-lucide="upload" style="width: 14px; height: 14px;"></i> Upload
+                    <input type="file" id="singleUploadFileInput" data-node="${node}" accept="image/*" style="display: none;" />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sticky Save Bar -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--panel-solid); border: 1px solid var(--border); border-radius: 12px; flex-wrap: wrap; gap: 12px; position: sticky; bottom: 16px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12.5px;">
+              <i data-lucide="sparkles" style="color: #6366f1; width: 15px; height: 15px;"></i>
+              <span>Updates apply instantly to the homepage without redeploying.</span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="saveSingleSubmitBtn" style="padding: 10px 24px; font-weight: 700; font-size: 13.5px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; border: none !important; color: white !important; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+              <i data-lucide="check" style="width: 16px; height: 16px;"></i> Save ${escapeHtml(schema.title)}
+            </button>
+          </div>
+
+        </form>
+      </div>
     </div>
   `;
 }
@@ -3853,7 +4132,7 @@ function orderStatusValue(item = {}) {
 }
 
 function orderPaymentProof(item = {}) {
-  return pickFirstValue(item, ['paymentProof', 'proofUrl', 'proof', 'screenshot', 'screenshotUrl', 'receiptUrl', 'receipt', 'image'], '');
+  return pickFirstValue(item, ['paymentProof', 'screenshotUrl', 'proofUrl', 'proof', 'screenshot', 'receiptUrl', 'receipt', 'image', 'screenshotBase64', 'payment_proof'], '');
 }
 
 function orderDeliveryInfo(item = {}) {
@@ -4370,90 +4649,177 @@ async function applyAdminSnapshotImport(form) {
 
 function renderSettingsManagementView(data = {}, fullData = {}) {
   const settings = fullData.settings || {};
-  const theme = document.body.dataset.theme || getTheme();
-  const notifications = Array.isArray(settings.notificationPreferences)
-    ? settings.notificationPreferences
-    : fromLines(settings.notificationPreferences || settings.notifications || settings.notificationTypes || '');
-  const syncMode = candidateText(settings, ['publicSiteSync', 'syncMode', 'syncSettings', 'siteSync'], 'Not configured');
-  const maintenance = candidateText(settings, ['maintenanceMode', 'maintenance', 'siteMaintenance'], 'Not configured');
-  const firebaseStatus = fullData.settings ? 'Connected' : 'Not loaded';
-  const supabaseStatus = 'Bucket: media';
+  const currentEmail = userEmail?.textContent && userEmail.textContent !== 'connected' ? userEmail.textContent : 'ritikanetwork96@gmail.com';
+  
   return `
-    <div class="page active management-page-shell">
-      <section class="panel glass management-page">
-        <div class="panel-head management-page-head">
+    <div class="page active management-page-shell settings-page-shell" style="max-width: 1200px; margin: 0 auto; padding-bottom: 60px;">
+      
+      <!-- Top Control Bar -->
+      <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div class="section-kicker">System Settings</div>
-            <h2 class="section-title">Settings</h2>
-            <p class="section-subtitle">Website controls, identity, sync, notifications, and security preferences.</p>
+            <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">System Controls</div>
+            <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">Website & Store Settings</h2>
+            <p style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">Manage store branding, Telegram support links, footer copyright, currency, and data backups.</p>
           </div>
-          <div class="toolbar management-actions">
-            <button class="btn btn-primary" type="button" data-action="edit-single" data-node="settings"><i data-lucide="pencil"></i> Edit Settings</button>
-            <button class="btn btn-ghost" type="button" data-action="export-admin-snapshot"><i data-lucide="download"></i> Export</button>
-            <button class="btn btn-ghost" type="button" data-action="import-admin-snapshot"><i data-lucide="upload"></i> Import</button>
+          <div class="toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-ghost" type="button" data-action="export-admin-snapshot" title="Download entire store backup"><i data-lucide="download"></i> Export Backup</button>
+            <button class="btn btn-ghost" type="button" data-action="import-admin-snapshot" title="Restore configuration"><i data-lucide="upload"></i> Restore Backup</button>
+            <a class="btn btn-ghost" href="/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px;"><i data-lucide="external-link"></i> View Website</a>
           </div>
         </div>
-        <div class="management-summary-grid">
-          ${renderManagementSummaryCard('Theme', theme, 'Current admin theme preference', 'accent')}
-          ${renderManagementSummaryCard('Maintenance', maintenance, 'Public site availability setting', 'warning')}
-          ${renderManagementSummaryCard('Sync', syncMode, 'Public-site sync preference', 'primary')}
-          ${renderManagementSummaryCard('Firebase', firebaseStatus, 'RTDB data loaded in the admin session', 'success')}
-          ${renderManagementSummaryCard('Supabase', supabaseStatus, 'Storage uploads use the media bucket', 'success')}
+
+        <!-- Realtime Connection Status -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+          <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: #10b981; flex-shrink: 0;"><i data-lucide="database"></i></div>
+            <div>
+              <div style="font-size: 10px; font-weight: 700; color: #10b981; text-transform: uppercase;">Firebase RTDB</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text);">Live & Synchronized</div>
+            </div>
+          </div>
+          <div style="background: rgba(99, 102, 241, 0.06); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: #818cf8; flex-shrink: 0;"><i data-lucide="cloud"></i></div>
+            <div>
+              <div style="font-size: 10px; font-weight: 700; color: #818cf8; text-transform: uppercase;">Media Storage</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text);">RustFS S3 CDN + Supabase</div>
+            </div>
+          </div>
+          <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: #f59e0b; flex-shrink: 0;"><i data-lucide="shield-check"></i></div>
+            <div style="min-width: 0;">
+              <div style="font-size: 10px; font-weight: 700; color: #f59e0b; text-transform: uppercase;">Logged-in Admin</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(currentEmail)}</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      ${renderFieldGroup('Brand & Identity', 'Website name, logo and favicon values currently saved in Firebase.', `
-        <div class="management-grid">
-          ${renderInfoTile('Website Name', settings.siteName || settings.appName || APP_CONFIG.appName, 'Public-facing brand name')}
-          ${renderInfoTile('Logo', settings.logo || 'Not set', 'Logo URL')}
-          ${renderInfoTile('Favicon', settings.favicon || 'Not set', 'Browser tab icon')}
-          ${renderInfoTile('Footer', settings.footer || 'Not set', 'Footer copy shown on public site')}
-        </div>
-      `)}
+      <!-- Live Editable Form -->
+      <form id="directSettingsForm" style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- 1. Store Identity -->
+        <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white;"><i data-lucide="store" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text);">Store Identity & Header</h3>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--muted);">Directly updates website header, browser tab title, and branding.</p>
+            </div>
+          </div>
 
-      ${renderFieldGroup('Contact & Social', 'Contact information and social links already stored in settings.', `
-        <div class="management-grid">
-          ${renderInfoTile('Email', settings.email || 'Not set')}
-          ${renderInfoTile('WhatsApp', settings.whatsapp || 'Not set')}
-          ${renderInfoTile('Telegram', settings.telegram || 'Not set')}
-          ${renderInfoTile('Social Links', Array.isArray(settings.socialLinks) ? String(settings.socialLinks.length) : (settings.socialLinks ? 'Configured' : 'Not set'), 'Links stored as lines or arrays')}
-        </div>
-      `)}
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Store / Website Name</label>
+              <input type="text" name="siteName" value="${escapeHtml(settings.siteName || 'Linkadda Shop')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="e.g. Linkadda Shop" required />
+              <small style="display: block; color: var(--muted); font-size: 11px; margin-top: 4px;">Shown in navbar and browser tab.</small>
+            </div>
 
-      ${renderFieldGroup('Currency & Display', 'Display preferences pulled from the existing settings object.', `
-        <div class="management-grid">
-          ${renderInfoTile('Currency', candidateText(settings, ['currency', 'displayCurrency', 'currencyCode'], 'INR'))}
-          ${renderInfoTile('Currency Symbol', candidateText(settings, ['currencySymbol', 'symbol'], '₹'))}
-          ${renderInfoTile('Price Format', candidateText(settings, ['priceFormat', 'displayFormat'], 'INR / USD'))}
-          ${renderInfoTile('Admin Theme', theme, 'Local theme preference')}
-        </div>
-      `)}
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Favicon URL</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="settingsFaviconInput" name="favicon" value="${escapeHtml(settings.favicon || '/favicon.svg')}" class="input" style="flex: 1; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="/favicon.svg or https://..." />
+                <label class="btn btn-ghost" style="cursor: pointer; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px;">
+                  <i data-lucide="upload" style="width: 15px; height: 15px;"></i> Upload
+                  <input type="file" id="settingsFaviconFile" accept="image/*" style="display: none;" />
+                </label>
+              </div>
+              <small style="display: block; color: var(--muted); font-size: 11px; margin-top: 4px;">Small icon for browser tab.</small>
+            </div>
 
-      ${renderFieldGroup('Security & Notifications', 'Profile and preference state without exposing secrets.', `
-        <div class="management-grid">
-          ${renderInfoTile('Admin Profile', candidateText(settings, ['adminName', 'ownerName', 'supportName'], 'Current authenticated admin'), 'Based on logged-in admin session')}
-          ${renderInfoTile('Security', candidateText(settings, ['securityMode', 'accessMode'], 'Firebase Auth protected'), 'No secrets displayed here')}
-          ${renderInfoTile('Notifications', notifications.length ? `${notifications.length} preferences` : 'Not configured', notifications.length ? notifications.join(', ') : 'No notification preferences saved')}
-          ${renderInfoTile('Profile Email', candidateText(settings, ['adminEmail', 'ownerEmail'], userEmail?.textContent || 'Connected admin'), 'Current admin identity')}
-        </div>
-      `)}
+            <div style="grid-column: 1 / -1;">
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Logo Image URL (Optional)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="settingsLogoInput" name="logo" value="${escapeHtml(settings.logo || '')}" class="input" style="flex: 1; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="https://... (Leave empty to use clean text logo)" />
+                <label class="btn btn-ghost" style="cursor: pointer; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px;">
+                  <i data-lucide="upload" style="width: 15px; height: 15px;"></i> Upload
+                  <input type="file" id="settingsLogoFile" accept="image/*" style="display: none;" />
+                </label>
+              </div>
+            </div>
 
-      ${renderFieldGroup('Backup & Sync', 'Export or import the current admin configuration snapshot.', `
-        <div class="management-grid">
-          ${renderInfoTile('Public Sync', syncMode, 'Used for site data sync settings')}
-          ${renderInfoTile('Maintenance Mode', maintenance, 'Helpful for planned downtime')}
-          ${renderInfoTile('Export', 'Download JSON snapshot', 'Settings and payment config only')}
-          ${renderInfoTile('Import', 'Restore JSON snapshot', 'Safe import for settings/payment')}
-        </div>
-      `)}
+            <div style="grid-column: 1 / -1;">
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Footer Copyright & Notice</label>
+              <textarea name="footer" rows="2" class="textarea" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; resize: vertical;" placeholder="e.g. © 2026 Linkadda Shop. All rights reserved.">${escapeHtml(settings.footer || '© 2026 Linkadda.Shop. All rights reserved.')}</textarea>
+              <small style="display: block; color: var(--muted); font-size: 11px; margin-top: 4px;">Displayed at the bottom of every page.</small>
+            </div>
+          </div>
+        </section>
 
-      ${renderFieldGroup('Quick Actions', 'Open the existing modal editor when you need to change values.', `
-        <div class="toolbar management-actions-inline">
-          <button class="btn btn-primary" type="button" data-action="edit-single" data-node="settings"><i data-lucide="pencil"></i> Edit Settings</button>
-          <button class="btn btn-ghost" type="button" data-action="edit-single" data-node="payment"><i data-lucide="credit-card"></i> Edit Payment</button>
-          <button class="btn btn-ghost" type="button" data-action="goto" data-route="payment"><i data-lucide="arrow-right"></i> Open Payment</button>
+        <!-- 2. Support & Contact -->
+        <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #0088cc, #229ED9); display: flex; align-items: center; justify-content: center; color: white;"><i data-lucide="message-circle" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text);">Customer Support & Contact Channels</h3>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--muted);">Controls where customers are directed for orders, support, and payments.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+            <div style="grid-column: 1 / -1;">
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #38bdf8; margin-bottom: 6px; letter-spacing: 0.04em;">Official Telegram Support Link / Username ⭐</label>
+              <input type="text" name="telegram" value="${escapeHtml(settings.telegram || 'https://t.me/TRUSTED_BROTHER1234')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: var(--text); font-size: 13px; font-weight: 600;" placeholder="https://t.me/TRUSTED_BROTHER1234" required />
+              <div style="margin-top: 6px; padding: 8px 12px; border-radius: 6px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.15); color: #bae6fd; font-size: 11.5px; line-height: 1.4;">
+                <i data-lucide="info" style="width: 13px; height: 13px; vertical-align: middle; margin-right: 4px;"></i>
+                Changing this link will <strong>instantly update all "Order via Telegram" and "Contact Support" buttons</strong> across the entire storefront and checkout pages in real time.
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Support Email</label>
+              <input type="email" name="email" value="${escapeHtml(settings.email || currentEmail)}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="support@linkadda.shop" />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Support WhatsApp (Optional)</label>
+              <input type="text" name="whatsapp" value="${escapeHtml(settings.whatsapp || '')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="+91 98765 43210" />
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Currency & Pricing -->
+        <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white;"><i data-lucide="coins" style="width: 18px; height: 18px;"></i></div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text);">Currency & Pricing Display</h3>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--muted);">Default currencies shown on products and checkout.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Primary Currency</label>
+              <input type="text" name="currency" value="${escapeHtml(settings.currency || 'INR')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="INR" />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Currency Symbol</label>
+              <input type="text" name="currencySymbol" value="${escapeHtml(settings.currencySymbol || '₹')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="₹" />
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.04em;">Dual Pricing Display</label>
+              <input type="text" name="priceFormat" value="${escapeHtml(settings.priceFormat || 'INR / USD')}" class="input" style="width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px;" placeholder="INR / USD" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Save Button Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; background: var(--panel-solid); border: 1px solid var(--border); border-radius: 14px; flex-wrap: wrap; gap: 14px; position: sticky; bottom: 16px; z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <div style="display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px;">
+            <i data-lucide="sparkles" style="color: #6366f1; width: 16px; height: 16px;"></i>
+            <span>Changes sync instantly across live website & checkout.</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary" id="saveSettingsSubmitBtn" style="padding: 12px 28px; font-weight: 700; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #8b5cf6) !important; border: none !important; color: white !important; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);">
+              <i data-lucide="check" style="width: 18px; height: 18px;"></i> Save Settings
+            </button>
+          </div>
         </div>
-      `)}
+
+      </form>
     </div>
   `;
 }
@@ -5035,13 +5401,13 @@ function renderScreenshotsGalleryView(data = {}, fullData = {}) {
   const allOrders = listCollection('orders');
   
   // Filter for orders that have screenshots
-  const itemsWithScreenshot = allOrders.filter(item => {
+  const itemsWithScreenshot = allOrders.filter((item) => {
     const proof = orderPaymentProof(item);
     return proof && String(proof).trim() !== '';
   });
   
   // Sort items (newest first)
-  const sortedItems = itemsWithScreenshot.sort((a, b) => orderDateValue(b) - orderDateValue(a));
+  const sortedItems = [...itemsWithScreenshot].sort((a, b) => orderDateValue(b) - orderDateValue(a));
   
   const methods = [...new Set(sortedItems.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
   
@@ -5054,7 +5420,7 @@ function renderScreenshotsGalleryView(data = {}, fullData = {}) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const thisMonthStr = new Date().toISOString().slice(0, 7);
   
-  const filteredItems = sortedItems.filter(item => {
+  const filteredItems = sortedItems.filter((item) => {
     const name = orderProductName(item).toLowerCase();
     const txn = orderTransactionId(item).toLowerCase();
     const customer = orderCustomerLabel(item).toLowerCase();
@@ -5100,140 +5466,67 @@ function renderScreenshotsGalleryView(data = {}, fullData = {}) {
 
   const totals = {
     total: itemsWithScreenshot.length,
-    pending: itemsWithScreenshot.filter(item => isPendingOrder(item)).length,
-    paid: itemsWithScreenshot.filter(item => isPaidOrder(item)).length,
-    failed: itemsWithScreenshot.filter(item => isFailedOrder(item)).length,
+    pending: itemsWithScreenshot.filter((item) => isPendingOrder(item)).length,
+    paid: itemsWithScreenshot.filter((item) => isPaidOrder(item)).length,
+    failed: itemsWithScreenshot.filter((item) => isFailedOrder(item)).length,
   };
 
   return `
-    <style>
-      .screenshots-gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 20px;
-        margin-top: 20px;
-        width: 100%;
-      }
-      .screenshot-card {
-        border-radius: 18px;
-        border: 1px solid var(--border);
-        background: var(--panel-glass);
-        backdrop-filter: blur(12px);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      .screenshot-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-      }
-      .screenshot-img-wrap {
-        width: 100%;
-        height: 240px;
-        position: relative;
-        overflow: hidden;
-        background: #09090e;
-        border-bottom: 1px solid var(--border);
-      }
-      .screenshot-img-wrap img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-        cursor: pointer;
-      }
-      .screenshot-img-wrap img:hover {
-        transform: scale(1.05);
-      }
-      .screenshot-card-content {
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        flex-grow: 1;
-      }
-      .screenshot-card-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--text);
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .screenshot-card-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 0.82rem;
-        color: var(--muted);
-      }
-      .screenshot-meta-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .screenshot-meta-value {
-        color: var(--text-bright);
-        font-weight: 500;
-      }
-      .screenshot-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: auto;
-        padding-top: 12px;
-        border-top: 1px solid var(--border-light);
-      }
-      .screenshot-actions .btn {
-        flex: 1;
-        padding: 8px 12px;
-        font-size: 0.8rem;
-        height: auto;
-      }
-    </style>
-
-    <div class="page active management-page-shell">
-      <section class="panel glass management-page">
-        <div class="panel-head management-page-head">
+    <div class="page active management-page-shell" style="max-width: 1300px; margin: 0 auto; padding-bottom: 60px;">
+      
+      <!-- Top Header -->
+      <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div class="section-kicker">Payment Verification</div>
-            <h2 class="section-title">Order Screenshots</h2>
-            <p class="section-subtitle">Review payment screenshots and manage order statuses directly.</p>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.08em;">
+                Payment Proof Gallery
+              </span>
+              <span class="badge ${totals.pending > 0 ? 'warning' : 'success'}" style="font-size: 11px;">
+                ${totals.pending > 0 ? `${totals.pending} Pending Review` : 'All Verified'}
+              </span>
+            </div>
+            <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">Order Screenshots</h2>
+            <p style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">Review payment screenshots submitted by customers and approve or reject orders directly.</p>
           </div>
-          <div class="toolbar management-actions">
-            <button class="btn btn-ghost" type="button" data-action="goto" data-route="orders"><i data-lucide="receipt-text"></i> Orders List</button>
+          <div class="toolbar" style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-ghost" type="button" data-action="goto" data-route="orders" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="receipt-text"></i> View Orders Table
+            </button>
           </div>
         </div>
-        <div class="management-summary-grid">
-          ${renderManagementSummaryCard('Total Screenshots', totals.total, 'All uploaded proofs', 'primary')}
-          ${renderManagementSummaryCard('Pending Review', totals.pending, 'Awaiting verification', 'warning')}
-          ${renderManagementSummaryCard('Approved', totals.paid, 'Verified payments', 'success')}
-          ${renderManagementSummaryCard('Rejected', totals.failed, 'Failed / rejected', 'danger')}
+
+        <!-- 4 Metric Cards -->
+        <div class="management-summary-grid" style="margin-top: 20px;">
+          ${renderManagementSummaryCard('Total Screenshots', totals.total, 'All customer receipts', 'primary')}
+          ${renderManagementSummaryCard('Pending Review', totals.pending, 'Awaiting approval', totals.pending > 0 ? 'warning' : 'default')}
+          ${renderManagementSummaryCard('Approved & Paid', totals.paid, 'Verified payments', 'success')}
+          ${renderManagementSummaryCard('Rejected / Failed', totals.failed, 'Declined orders', 'danger')}
         </div>
       </section>
 
-      ${renderFieldGroup('Search & Filters', 'Filter screenshots by status, payment method, and date.', `
+      <!-- Search & Filters -->
+      ${renderFieldGroup('Filter & Search Proofs', 'Narrow down screenshots by status, payment gateway, or keyword.', `
         <div class="management-filterbar">
           <div class="field">
-            <label for="orderSearch">Search</label>
-            <input class="input" id="orderSearch" type="search" placeholder="Search product, customer, order or txn ID..." value="${escapeHtml(ui.management.search || '')}" />
+            <label for="orderSearch">Search Customer / Order ID / Txn</label>
+            <input class="input" id="orderSearch" type="search" placeholder="Type name, email, order ID, or transaction hash..." value="${escapeHtml(ui.management.search || '')}" />
           </div>
           <div class="field">
             <label for="orderStatusFilter">Status</label>
             <select class="select" id="orderStatusFilter">
-              ${['all', 'pending', 'paid', 'failed', 'approved', 'rejected', 'expired'].map((status) => `<option value="${status}" ${ui.management.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`).join('')}
+              ${['all', 'pending', 'paid', 'failed', 'approved', 'rejected', 'expired'].map((status) => `<option value="${status}" ${ui.management.status === status ? 'selected' : ''}>${escapeHtml(status.toUpperCase())}</option>`).join('')}
             </select>
           </div>
           <div class="field">
-            <label for="orderMethodFilter">Payment Method</label>
+            <label for="orderMethodFilter">Payment Gateway</label>
             <select class="select" id="orderMethodFilter">
-              <option value="all">All Methods</option>
+              <option value="all">All Gateways</option>
               ${methods.map((method) => `<option value="${escapeHtml(method)}" ${ui.management.method === method ? 'selected' : ''}>${escapeHtml(method)}</option>`).join('')}
             </select>
           </div>
           <div class="field">
-            <label for="orderDateFilter">Date</label>
+            <label for="orderDateFilter">Date Period</label>
             <select class="select" id="orderDateFilter">
               <option value="all" ${ui.management.date === 'all' ? 'selected' : ''}>All Time</option>
               <option value="today" ${ui.management.date === 'today' ? 'selected' : ''}>Today</option>
@@ -5243,59 +5536,101 @@ function renderScreenshotsGalleryView(data = {}, fullData = {}) {
         </div>
       `)}
 
-      <div class="screenshots-gallery-grid">
-        ${filteredItems.length ? filteredItems.map(item => {
+      <!-- Grid of Screenshot Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-top: 24px;">
+        ${filteredItems.length ? filteredItems.map((item) => {
           const proof = orderPaymentProof(item);
           const status = orderStatusValue(item);
           const resolvedProof = resolveMediaSource(proof) || proof;
+          const isPending = isPendingOrder(item);
+          const isPaid = isPaidOrder(item);
+
           return `
-            <div class="screenshot-card">
-              <div class="screenshot-img-wrap">
-                <img src="${escapeHtml(resolvedProof)}" alt="Payment proof" onclick="window.open('${escapeHtml(resolvedProof)}', '_blank')" title="Click to view full image" />
+            <div class="panel glass" style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.25);">
+              
+              <!-- Image Preview Area -->
+              <div style="width: 100%; height: 260px; position: relative; background: #07070a; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border);">
+                <img 
+                  src="${escapeHtml(resolvedProof)}" 
+                  alt="Payment Receipt Screenshot" 
+                  style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: transform 0.25s ease;"
+                  onclick="window.open('${escapeHtml(resolvedProof)}', '_blank')" 
+                  title="Click to view full high-resolution image"
+                  loading="lazy"
+                />
+                <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 6px;">
+                  <a href="${escapeHtml(resolvedProof)}" target="_blank" download="screenshot_${escapeHtml(item.id)}.jpg" style="padding: 6px 10px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border-radius: 8px; color: white; font-size: 11px; text-decoration: none; border: 1px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; gap: 4px;">
+                    <i data-lucide="download" style="width: 13px; height: 13px;"></i> Download
+                  </a>
+                </div>
+                <div style="position: absolute; top: 12px; left: 12px;">
+                  ${renderStatusBadge(status)}
+                </div>
               </div>
-              <div class="screenshot-card-content">
-                <h3 class="screenshot-card-title">${escapeHtml(orderProductName(item))}</h3>
-                <div class="screenshot-card-meta">
-                  <div class="screenshot-meta-item">
-                    <span>Order ID:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(item.id || '-')}</span>
+
+              <!-- Card Content -->
+              <div style="padding: 20px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1;">
+                <div>
+                  <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 2px;">
+                    ${escapeHtml(orderMethodLabel(item))} · ${escapeHtml(formatDateTime(orderDateValue(item)))}
                   </div>
-                  <div class="screenshot-meta-item">
-                    <span>Customer:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(orderCustomerLabel(item))}</span>
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.3;">
+                    ${escapeHtml(orderProductName(item))}
+                  </h3>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.04); font-size: 12.5px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--muted);">Customer:</span>
+                    <strong style="color: var(--text);">${escapeHtml(orderCustomerLabel(item))}</strong>
                   </div>
-                  <div class="screenshot-meta-item">
-                    <span>Amount:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(formatCurrencyCompact(item.amount))}</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--muted);">Amount Paid:</span>
+                    <strong style="color: #10b981; font-size: 14px;">${escapeHtml(formatCurrencyCompact(item.amount))}</strong>
                   </div>
-                  <div class="screenshot-meta-item">
-                    <span>Method:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(orderMethodLabel(item))}</span>
-                  </div>
-                  <div class="screenshot-meta-item">
-                    <span>Txn / Ref:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(orderTransactionId(item))}</span>
-                  </div>
-                  <div class="screenshot-meta-item">
-                    <span>Status:</span>
-                    <span>${renderStatusBadge(status)}</span>
-                  </div>
-                  <div class="screenshot-meta-item">
-                    <span>Date:</span>
-                    <span class="screenshot-meta-value">${escapeHtml(formatDateTime(orderDateValue(item)))}</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--muted);">Order ID:</span>
+                    <code style="font-size: 11.5px; color: var(--muted); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">${escapeHtml(item.id || '-')}</code>
                   </div>
                 </div>
-                <div class="screenshot-actions">
-                  <button class="btn btn-ghost" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Details</button>
-                  ${isPendingOrder(item) ? `
-                    <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id)}"><i data-lucide="check"></i> Approve</button>
-                    <button class="btn btn-danger" type="button" data-action="reject-order" data-id="${escapeHtml(item.id)}"><i data-lucide="x"></i> Reject</button>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
+                  <button class="btn btn-ghost" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}" style="flex: 1; font-size: 12.5px; padding: 9px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Details
+                  </button>
+                  
+                  ${isPending ? `
+                    <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id)}" style="flex: 1; font-size: 12.5px; padding: 9px 12px; background: linear-gradient(135deg, #10b981, #059669) !important; border: none !important; color: white !important; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                      <i data-lucide="check" style="width: 14px; height: 14px;"></i> Approve
+                    </button>
+                    <button class="btn btn-danger" type="button" data-action="reject-order" data-id="${escapeHtml(item.id)}" style="flex: 1; font-size: 12.5px; padding: 9px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                      <i data-lucide="x" style="width: 14px; height: 14px;"></i> Reject
+                    </button>
+                  ` : ''}
+
+                  ${isPaid ? `
+                    <span style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 700; color: #10b981; padding: 8px 12px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                      <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Approved
+                    </span>
                   ` : ''}
                 </div>
               </div>
             </div>
           `;
-        }).join('') : `<div style="grid-column: 1/-1;"><div class="empty-state">${itemsWithScreenshot.length ? 'No screenshots match the current filters.' : 'No uploaded screenshots found.'}</div></div>`}
+        }).join('') : `
+          <div style="grid-column: 1/-1;">
+            <div class="panel glass" style="padding: 40px 20px; text-align: center; border-radius: 16px; border: 1px dashed var(--border);">
+              <i data-lucide="image-off" style="width: 42px; height: 42px; color: var(--muted); margin-bottom: 12px;"></i>
+              <h3 style="margin: 0 0 6px 0; font-size: 17px; font-weight: 700; color: var(--text);">
+                ${itemsWithScreenshot.length ? 'No screenshots match your current filter criteria' : 'No Customer Screenshots Found Yet'}
+              </h3>
+              <p style="margin: 0; font-size: 13px; color: var(--muted); max-width: 500px; margin: 0 auto;">
+                ${itemsWithScreenshot.length ? 'Try clearing or changing your search filters above.' : 'When customers complete payments on the checkout page and upload payment screenshots, they will appear here in real-time.'}
+              </p>
+            </div>
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -5364,6 +5699,230 @@ function filterMediaItems(items = []) {
   });
 }
 
+function getAllUnifiedMediaItems(data = {}) {
+  const mediaMap = new Map();
+
+  // 1. Existing explicit records from 'media' node in Firebase
+  const explicitMedia = listCollection('media');
+  for (const item of explicitMedia) {
+    const key = normalizeAssetValue(item.publicUrl || item.path || item.sourcePath || item.id);
+    if (key) {
+      mediaMap.set(key, {
+        ...item,
+        id: item.id || slugify(key),
+        publicUrl: item.publicUrl || item.path,
+        path: item.path || item.publicUrl,
+        name: item.name || mediaFileName(item.publicUrl || item.path),
+        folder: item.folder || 'images',
+        type: item.type || 'image',
+        status: item.status || 'active',
+        usedIn: item.linkedName ? [item.linkedName] : [],
+      });
+    }
+  }
+
+  // Helper to record asset usage and add missing assets to media gallery
+  function recordAssetUsage(rawUrl, label, folderFallback = 'products') {
+    const url = String(rawUrl || '').trim();
+    if (!url) return;
+    const key = normalizeAssetValue(url);
+    if (!key) return;
+
+    if (mediaMap.has(key)) {
+      const existing = mediaMap.get(key);
+      if (label && !existing.usedIn.includes(label)) {
+        existing.usedIn.push(label);
+      }
+      if (!existing.folder || existing.folder === 'all') {
+        existing.folder = folderFallback;
+      }
+    } else {
+      const id = slugify(key) || uid('media');
+      mediaMap.set(key, {
+        id,
+        name: mediaFileName(url),
+        folder: folderFallback,
+        type: mediaTypeFromPath(url) || 'image',
+        path: url,
+        publicUrl: resolveMediaSource(url) || url,
+        sourcePath: url,
+        source: 'catalog-sync',
+        status: 'active',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        usedIn: label ? [label] : [],
+      });
+    }
+  }
+
+  // 2. Scan All Products
+  const products = listCollection('products');
+  for (const p of products) {
+    const pName = p.name || p.title || `Product #${p.id}`;
+    if (p.image) recordAssetUsage(p.image, pName, 'products');
+    if (p.photo) recordAssetUsage(p.photo, pName, 'products');
+    if (p.thumbnail) recordAssetUsage(p.thumbnail, pName, 'products');
+    if (p.coverImage) recordAssetUsage(p.coverImage, pName, 'products');
+    if (Array.isArray(p.images)) {
+      p.images.forEach((img) => recordAssetUsage(img, pName, 'products'));
+    }
+    if (Array.isArray(p.galleryImages)) {
+      p.galleryImages.forEach((img) => recordAssetUsage(img, pName, 'products'));
+    }
+  }
+
+  // 3. Scan All Categories
+  const categories = listCollection('categories');
+  for (const c of categories) {
+    const cName = c.name || c.title || `Category #${c.id}`;
+    if (c.image) recordAssetUsage(c.image, cName, 'categories');
+    if (c.icon) recordAssetUsage(c.icon, cName, 'categories');
+  }
+
+  // 4. Scan Hero Section
+  const hero = data.hero || ui.data?.hero || {};
+  if (hero.backgroundImage) recordAssetUsage(hero.backgroundImage, 'Homepage Hero', 'hero');
+  if (hero.image) recordAssetUsage(hero.image, 'Homepage Hero', 'hero');
+
+  // 5. Scan Banner Section
+  const banner = data.banner || ui.data?.banner || {};
+  if (banner.image) recordAssetUsage(banner.image, banner.title ? `Banner: ${banner.title}` : 'Homepage Pinned Deal', 'banners');
+
+  // 6. Scan Settings (Logo & Favicon)
+  const settings = data.settings || ui.data?.settings || {};
+  if (settings.logo) recordAssetUsage(settings.logo, 'Store Logo', 'logos');
+  if (settings.favicon) recordAssetUsage(settings.favicon, 'Store Favicon', 'logos');
+
+  // 7. Scan Payment (QR Image)
+  const payment = data.payment || ui.data?.payment || {};
+  if (payment.qrImage) recordAssetUsage(payment.qrImage, 'Payment QR Code', 'payments');
+
+  return Array.from(mediaMap.values());
+}
+
+async function deleteMediaAndDetachFromCatalog(item = {}) {
+  if (!item) return { detachedProducts: [], detachedCategories: [] };
+  const targetUrls = [
+    item.publicUrl,
+    item.path,
+    item.sourcePath,
+    item.id,
+    resolveMediaSource(item.publicUrl || item.path || '')
+  ].filter(Boolean).map((u) => normalizeAssetValue(String(u)));
+
+  function matchesTarget(val) {
+    if (!val) return false;
+    const normalized = normalizeAssetValue(String(val).trim());
+    return targetUrls.includes(normalized);
+  }
+
+  const detachedProducts = [];
+  const detachedCategories = [];
+
+  // 1. Clean from all products in Firebase
+  const products = listCollection('products');
+  for (const p of products) {
+    let changed = false;
+    const nextProd = { ...p };
+    if (matchesTarget(nextProd.image)) {
+      nextProd.image = '';
+      changed = true;
+    }
+    if (matchesTarget(nextProd.photo)) {
+      nextProd.photo = '';
+      changed = true;
+    }
+    if (matchesTarget(nextProd.thumbnail)) {
+      nextProd.thumbnail = '';
+      changed = true;
+    }
+    if (Array.isArray(nextProd.images)) {
+      const filtered = nextProd.images.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextProd.images.length) {
+        nextProd.images = filtered;
+        changed = true;
+      }
+    }
+    if (Array.isArray(nextProd.galleryImages)) {
+      const filtered = nextProd.galleryImages.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextProd.galleryImages.length) {
+        nextProd.galleryImages = filtered;
+        changed = true;
+      }
+    }
+    if (changed) {
+      await updateRecord('products', p.id, nextProd);
+      detachedProducts.push(p.name || p.title || p.id);
+    }
+  }
+
+  // 2. Clean from all categories in Firebase
+  const categories = listCollection('categories');
+  for (const c of categories) {
+    let changed = false;
+    const nextCat = { ...c };
+    if (matchesTarget(nextCat.image)) {
+      nextCat.image = '';
+      changed = true;
+    }
+    if (matchesTarget(nextCat.icon)) {
+      nextCat.icon = '';
+      changed = true;
+    }
+    if (changed) {
+      await updateRecord('categories', c.id, nextCat);
+      detachedCategories.push(c.name || c.title || c.id);
+    }
+  }
+
+  // 3. Clean from Hero
+  const hero = ui.data?.hero || {};
+  if (matchesTarget(hero.backgroundImage) || matchesTarget(hero.image)) {
+    await updateRecord('hero', null, {
+      ...hero,
+      backgroundImage: matchesTarget(hero.backgroundImage) ? '' : hero.backgroundImage,
+      image: matchesTarget(hero.image) ? '' : hero.image,
+    });
+  }
+
+  // 4. Clean from Banner
+  const banner = ui.data?.banner || {};
+  if (matchesTarget(banner.image)) {
+    await updateRecord('banner', null, {
+      ...banner,
+      image: '',
+    });
+  }
+
+  // 5. Clean from Settings
+  const settings = ui.data?.settings || {};
+  if (matchesTarget(settings.logo) || matchesTarget(settings.favicon)) {
+    await updateRecord('settings', null, {
+      ...settings,
+      logo: matchesTarget(settings.logo) ? '' : settings.logo,
+      favicon: matchesTarget(settings.favicon) ? '' : settings.favicon,
+    });
+  }
+
+  // 6. Delete remote storage file if applicable
+  if (item.path && !item.path.startsWith('http') && !item.path.startsWith('data:')) {
+    try {
+      await deletePublicAsset(item.path);
+    } catch (_) {}
+  }
+
+  // 7. Delete explicit media record from Firebase if it exists
+  const explicitRecord = getItem('media', item.id);
+  if (explicitRecord) {
+    await deleteRecord('media', item.id);
+  }
+
+  return {
+    detachedProducts,
+    detachedCategories,
+  };
+}
+
 function sortMediaItems(items = []) {
   const sort = String(ui.media.sort || 'newest');
   const compareName = (a, b) => String(a.name || a.path || '').localeCompare(String(b.name || b.path || ''), undefined, { sensitivity: 'base' });
@@ -5411,6 +5970,8 @@ function setMediaStatus(message = '') {
 function renderMediaPreviewModal(item = {}) {
   const src = resolveMediaSource(item.publicUrl || item.path || '');
   const bucket = mediaBucketLabel(mediaBucketKey(item));
+  const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
+
   return `
     <div class="panel-head media-preview-head">
       <div>
@@ -5428,15 +5989,23 @@ function renderMediaPreviewModal(item = {}) {
           <span class="badge">${escapeHtml(bucket)}</span>
           <span class="badge">${escapeHtml(mediaKind(item))}</span>
         </div>
+        
+        <!-- Linked Usage Box -->
+        <div style="padding: 12px; border-radius: 10px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); margin-bottom: 12px;">
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; margin-bottom: 4px;">Assigned Store Usage</div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--text);">
+            ${usedList.length ? escapeHtml(usedList.join(', ')) : '<span style="color: var(--muted); font-weight: normal;">Not attached to any product or section</span>'}
+          </div>
+        </div>
+
         <div class="media-preview-details">
           <div><span>Filename</span><strong>${escapeHtml(item.name || mediaFileName(item.path || item.publicUrl || '') || '-')}</strong></div>
           <div><span>Folder</span><strong>${escapeHtml(item.folder || bucket)}</strong></div>
-          <div class="full"><span>Path</span><strong>${escapeHtml(item.path || '-')}</strong></div>
-          <div class="full"><span>Public URL</span><strong class="media-url">${escapeHtml(item.publicUrl || '-')}</strong></div>
+          <div class="full"><span>Path / URL</span><strong class="media-url">${escapeHtml(item.publicUrl || item.path || '-')}</strong></div>
         </div>
         <div class="toolbar media-preview-actions">
-          <button class="btn btn-ghost" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || '')}" type="button"><i data-lucide="copy"></i> Copy URL</button>
-          <button class="btn btn-danger" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="trash-2"></i> Delete</button>
+          <button class="btn btn-ghost" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button"><i data-lucide="copy"></i> Copy URL</button>
+          <button class="btn btn-danger" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="trash-2"></i> Delete Image</button>
         </div>
       </div>
     </div>
@@ -5449,8 +6018,10 @@ function renderMediaCard(item = {}) {
   const type = mediaKind(item);
   const isSelected = ui.media.selectedIds?.has(item.id);
   const status = item.status === 'inactive' ? 'inactive' : 'active';
+  const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
+
   return `
-    <article class="media-card glass ${isSelected ? 'selected' : ''}">
+    <article class="media-card glass ${isSelected ? 'selected' : ''}" style="border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;">
       <label class="media-card-checkbox" title="Select asset">
         <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} />
         <span>Select</span>
@@ -5459,23 +6030,39 @@ function renderMediaCard(item = {}) {
         <span class="media-thumb-overlay">Open Preview</span>
         ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
       </button>
-      <div class="media-body">
+      <div class="media-body" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
         <div class="media-card-head">
-          <strong title="${escapeHtml(item.name || item.path || 'Media')}">${escapeHtml(item.name || item.path || 'Media')}</strong>
+          <strong title="${escapeHtml(item.name || item.path || 'Media')}" style="font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
+            ${escapeHtml(item.name || item.path || 'Media')}
+          </strong>
           <div style="display: flex; gap: 4px; align-items: center;">
-            <span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);'}">${status.toUpperCase()}</span>
-            <span class="badge">${escapeHtml(type)}</span>
+            <span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;'}">${status.toUpperCase()}</span>
           </div>
         </div>
-        <div class="media-card-meta">
+
+        <!-- Product Name / Section Tag -->
+        <div style="margin: 2px 0;">
+          ${usedList.length ? `
+            <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #818cf8; background: rgba(99, 102, 241, 0.12); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.25); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Used in: ${escapeHtml(usedList.join(', '))}">
+              <i data-lucide="package" style="width: 12px; height: 12px; flex-shrink: 0;"></i>
+              <span style="overflow: hidden; text-overflow: ellipsis;">${escapeHtml(usedList.join(', '))}</span>
+            </div>
+          ` : `
+            <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); background: rgba(255, 255, 255, 0.04); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.08);">
+              <i data-lucide="circle-dashed" style="width: 12px; height: 12px;"></i> Unassigned
+            </div>
+          `}
+        </div>
+
+        <div class="media-card-meta" style="font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between;">
           <span>${escapeHtml(mediaBucketLabel(bucketKey))}</span>
           <span>${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</span>
         </div>
-        <div class="media-path">${escapeHtml(item.path || item.folder || '-')}</div>
-        <div class="toolbar media-card-actions">
-          <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button">Preview</button>
-          <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || '')}" type="button">Copy URL</button>
-          <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button">Delete</button>
+
+        <div class="toolbar media-card-actions" style="margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px;">
+          <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button" style="flex: 1; font-size: 12px; padding: 6px;">Preview</button>
+          <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button" style="font-size: 12px; padding: 6px;" title="Copy URL"><i data-lucide="copy" style="width: 13px; height: 13px;"></i></button>
+          <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" style="font-size: 12px; padding: 6px;" title="Delete & Detach from Store"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
         </div>
       </div>
     </article>
@@ -5486,14 +6073,14 @@ function renderMediaList(items = []) {
   const allSelected = items.length > 0 && items.every((i) => ui.media.selectedIds?.has(i.id));
   return `
     <div class="media-table">
-      <div class="media-table-head" style="grid-template-columns: 40px 88px minmax(180px, 1.2fr) minmax(110px, 0.7fr) minmax(92px, 0.55fr) minmax(90px, 0.5fr) minmax(132px, 0.7fr) minmax(220px, 1fr);">
+      <div class="media-table-head" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr) minmax(120px, 0.7fr) minmax(150px, 0.8fr);">
         <div>
           <input type="checkbox" data-action="select-all-media" ${allSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
         </div>
         <span>Preview</span>
         <span>Filename</span>
+        <span>Used In (Product/Section)</span>
         <span>Folder</span>
-        <span>Type</span>
         <span>Status</span>
         <span>Date</span>
         <span>Actions</span>
@@ -5501,8 +6088,10 @@ function renderMediaList(items = []) {
       ${items.length ? items.map((item) => {
         const isSelected = ui.media.selectedIds?.has(item.id);
         const status = item.status === 'inactive' ? 'inactive' : 'active';
+        const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
+
         return `
-          <div class="media-table-row" style="grid-template-columns: 40px 88px minmax(180px, 1.2fr) minmax(110px, 0.7fr) minmax(92px, 0.55fr) minmax(90px, 0.5fr) minmax(132px, 0.7fr) minmax(220px, 1fr); ${isSelected ? 'background: rgba(99, 102, 241, 0.1); border-radius: 8px;' : ''}">
+          <div class="media-table-row" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr) minmax(120px, 0.7fr) minmax(150px, 0.8fr); ${isSelected ? 'background: rgba(99, 102, 241, 0.1); border-radius: 8px;' : ''}">
             <div>
               <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
             </div>
@@ -5511,16 +6100,25 @@ function renderMediaList(items = []) {
             </button>
             <div class="media-table-name">
               <strong>${escapeHtml(item.name || item.path || 'Media')}</strong>
-              <span>${escapeHtml(item.path || '-')}</span>
+              <span style="font-size: 11px; color: var(--muted);">${escapeHtml(item.path || '-')}</span>
+            </div>
+            <div>
+              ${usedList.length ? `
+                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 11px; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(usedList.join(', '))}">
+                  <i data-lucide="package" style="width: 11px; height: 11px; flex-shrink: 0;"></i>
+                  ${escapeHtml(usedList.join(', '))}
+                </span>
+              ` : `
+                <span style="font-size: 11px; color: var(--muted);">Unassigned</span>
+              `}
             </div>
             <div>${escapeHtml(mediaBucketLabel(mediaBucketKey(item)))}</div>
-            <div><span class="badge">${escapeHtml(mediaKind(item))}</span></div>
             <div><span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;'}">${status.toUpperCase()}</span></div>
-            <div>${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</div>
-            <div class="toolbar media-table-actions">
+            <div style="font-size: 11.5px; color: var(--muted);">${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</div>
+            <div class="toolbar media-table-actions" style="display: flex; gap: 6px;">
               <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button">Preview</button>
-              <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || '')}" type="button">Copy URL</button>
-              <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button">Delete</button>
+              <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button" title="Copy URL"><i data-lucide="copy" style="width: 13px; height: 13px;"></i></button>
+              <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" title="Delete & Detach"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
             </div>
           </div>
         `;
@@ -5530,7 +6128,7 @@ function renderMediaList(items = []) {
 }
 
 function renderMediaView(data) {
-  const rawItems = Array.isArray(data) ? data : Object.entries(data || {}).map(([id, item]) => ({ id, ...(item || {}) }));
+  const rawItems = Array.isArray(data) ? data : getAllUnifiedMediaItems(data);
   const filteredItems = sortMediaItems(filterMediaItems(rawItems));
   const stats = mediaStats(rawItems);
   const folderCounts = MEDIA_FOLDER_FILTERS
@@ -5543,22 +6141,24 @@ function renderMediaView(data) {
   const allFilteredSelected = filteredItems.length > 0 && filteredItems.every((i) => ui.media.selectedIds?.has(i.id));
 
   return `
-    <div class="page active">
-      <section class="panel glass media-shell">
-        <div class="panel-head media-head">
+    <div class="page active" style="max-width: 1300px; margin: 0 auto; padding-bottom: 60px;">
+      <section class="panel glass media-shell" style="padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border);">
+        <div class="panel-head media-head" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
           <div>
-            <div class="section-kicker">Media Library</div>
-            <h2 class="section-title">Media</h2>
-            <p class="section-subtitle">Manage files stored in the <strong>Hostinger RustFS S3</strong> bucket.</p>
+            <div class="section-kicker" style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Live Store Media Manager</div>
+            <h2 class="section-title" style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">Media Library</h2>
+            <p class="section-subtitle" style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">All store assets (Products, Categories, Banner, Hero, Logos) aggregated in real-time.</p>
           </div>
-          <div class="toolbar media-actions">
-            <button class="btn btn-success" data-action="sync-site-media" type="button"><i data-lucide="image-plus"></i> Import Site Images</button>
-            <button class="btn btn-primary" data-action="upload-media" type="button"><i data-lucide="upload"></i> Upload</button>
+          <div class="toolbar media-actions" style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary" data-action="upload-media" type="button" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+              <i data-lucide="upload"></i> Upload Media
+            </button>
           </div>
         </div>
+
         <div class="media-summary-grid">
           <div class="media-summary-card">
-            <span>Total Assets</span>
+            <span>Total Store Assets</span>
             <strong>${escapeHtml(String(stats.count))}</strong>
           </div>
           <div class="media-summary-card">
@@ -5578,13 +6178,14 @@ function renderMediaView(data) {
             <strong>${stats.latest ? escapeHtml(formatDateTime(stats.latest)) : '—'}</strong>
           </div>
         </div>
-        <div class="media-filter-panel glass">
-          <div class="media-filter-row">
-            <div class="field media-search-field">
-              <label for="mediaSearch">Search</label>
-              <input class="input" id="mediaSearch" type="search" placeholder="Search filename or path" value="${escapeHtml(ui.media.search || '')}" />
+
+        <div class="media-filter-panel glass" style="margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+          <div class="media-filter-row" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+            <div class="field media-search-field" style="flex: 1; min-width: 200px;">
+              <label for="mediaSearch">Search Filename, Path or Product Name</label>
+              <input class="input" id="mediaSearch" type="search" placeholder="Search product name, filename..." value="${escapeHtml(ui.media.search || '')}" />
             </div>
-            <div class="field">
+            <div class="field" style="min-width: 140px;">
               <label for="mediaFolderFilter">Folder</label>
               <select class="select" id="mediaFolderFilter">
                 ${MEDIA_FOLDER_FILTERS.map((option) => `
@@ -5594,13 +6195,13 @@ function renderMediaView(data) {
                 `).join('')}
               </select>
             </div>
-            <div class="field">
+            <div class="field" style="min-width: 120px;">
               <label for="mediaTypeFilter">File Type</label>
               <select class="select" id="mediaTypeFilter">
                 ${MEDIA_TYPE_FILTERS.map((option) => `<option value="${escapeHtml(option.value)}" ${ui.media.type === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
               </select>
             </div>
-            <div class="field">
+            <div class="field" style="min-width: 120px;">
               <label for="mediaSortFilter">Sort</label>
               <select class="select" id="mediaSortFilter">
                 ${MEDIA_SORT_OPTIONS.map((option) => `<option value="${escapeHtml(option.value)}" ${ui.media.sort === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
@@ -5617,11 +6218,12 @@ function renderMediaView(data) {
         </div>
         ${renderMediaStatus(ui.media.status || '')}
       </section>
-      <section class="panel glass media-results-panel">
-        <div class="panel-head media-results-head">
+
+      <section class="panel glass media-results-panel" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border);">
+        <div class="panel-head media-results-head" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
           <div>
-            <h3>${escapeHtml(ui.media.view === 'list' ? 'List View' : 'Grid View')}</h3>
-            <p class="section-subtitle">${escapeHtml(String(filteredItems.length))} assets shown from ${escapeHtml(String(stats.count))} total.</p>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">${escapeHtml(ui.media.view === 'list' ? 'List View' : 'Grid View')}</h3>
+            <p class="section-subtitle" style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--muted);">${escapeHtml(String(filteredItems.length))} assets shown from ${escapeHtml(String(stats.count))} total.</p>
           </div>
           <div class="toolbar media-results-actions">
             <span class="badge">${escapeHtml(String(stats.count))} assets</span>
@@ -5653,11 +6255,12 @@ function renderMediaView(data) {
         ${filteredItems.length ? (
           ui.media.view === 'list'
             ? renderMediaList(filteredItems)
-            : `<div class="media-grid">${filteredItems.map((item) => renderMediaCard(item)).join('')}</div>`
+            : `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px;">${filteredItems.map((item) => renderMediaCard(item)).join('')}</div>`
         ) : `
-          <div class="empty-state media-empty">
-            <h3>No media matched your filters.</h3>
-            <p>Try clearing the search or switching folder/type filters.</p>
+          <div class="panel glass" style="padding: 40px 20px; text-align: center; border-radius: 16px; border: 1px dashed var(--border);">
+            <i data-lucide="image-off" style="width: 40px; height: 40px; color: var(--muted); margin-bottom: 12px;"></i>
+            <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 700; color: var(--text);">No media matched your filters</h3>
+            <p style="margin: 0; font-size: 13px; color: var(--muted);">Try clearing the search or switching folder/type filters.</p>
           </div>
         `}
       </section>
@@ -5778,7 +6381,7 @@ function renderView(data) {
     else if (current === 'catalog' || current === 'products' || current === 'categories') html = renderCatalogView(data);
     else if (current === 'faq') html = renderCollection('faq', collectionSchemas.faq, listCollection('faq'));
     else if (current === 'testimonials') html = renderCollection('testimonials', collectionSchemas.testimonials, listCollection('testimonials'));
-    else if (current === 'media') html = renderMediaView(listCollection('media'));
+    else if (current === 'media') html = renderMediaView(getAllUnifiedMediaItems(data || {}));
     else if (current === 'settings') html = renderSettingsManagementView(data.settings || {}, data || {});
     else if (current === 'payment') html = renderPaymentManagementView(data.payment || {}, data || {});
     else if (current === 'orders') html = renderOrdersManagementView(data.orders || {}, data || {});
@@ -6108,7 +6711,8 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'preview-media') {
-      const media = getItem('media', id) || listCollection('media').find((item) => item.id === id) || {};
+      const allMedia = getAllUnifiedMediaItems(ui.data || {});
+      const media = allMedia.find((item) => item.id === id) || getItem('media', id) || listCollection('media').find((item) => item.id === id) || {};
       openModal(renderMediaPreviewModal(media));
       return;
     }
@@ -6148,7 +6752,7 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'select-all-media') {
-      const rawItems = listCollection('media');
+      const rawItems = getAllUnifiedMediaItems(ui.data || {});
       const filteredItems = sortMediaItems(filterMediaItems(rawItems));
       if (!ui.media.selectedIds) ui.media.selectedIds = new Set();
       const allSelected = filteredItems.length > 0 && filteredItems.every(i => ui.media.selectedIds.has(i.id));
@@ -6166,14 +6770,22 @@ function attachGlobalHandlers() {
         showToast('Please select media items first.', 'warning');
         return;
       }
-      if (confirm(`Are you sure you want to delete ${selected.length} selected media assets?`)) {
+      if (confirm(`Are you sure you want to delete ${selected.length} selected media assets? They will also be removed from any linked products or categories.`)) {
+        const allMedia = getAllUnifiedMediaItems(ui.data || {});
+        let totalDetachedProds = 0;
+        let totalDetachedCats = 0;
         for (const mId of selected) {
-          const item = getItem('media', mId);
-          if (item?.path) await deletePublicAsset(item.path);
-          await deleteRecord('media', mId);
+          const item = allMedia.find((m) => m.id === mId) || getItem('media', mId) || { id: mId };
+          const res = await deleteMediaAndDetachFromCatalog(item);
+          totalDetachedProds += res.detachedProducts.length;
+          totalDetachedCats += res.detachedCategories.length;
         }
         ui.media.selectedIds.clear();
-        showToast(`Deleted ${selected.length} media assets.`);
+        let notice = `Deleted ${selected.length} media assets.`;
+        if (totalDetachedProds || totalDetachedCats) {
+          notice += ` (Removed from ${totalDetachedProds} products, ${totalDetachedCats} categories)`;
+        }
+        showToast(notice, 'success');
         renderView(ui.data || {});
       }
       return;
@@ -6196,11 +6808,21 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'delete-media') {
-      if (confirm('Delete uploaded media asset?')) {
-        await deletePublicAsset(actionBtn.dataset.path || '');
-        await deleteRecord('media', actionBtn.dataset.id);
-        showToast('Media deleted');
-        setMediaStatus('Media deleted.');
+      const mediaId = actionBtn.dataset.id;
+      const allMedia = getAllUnifiedMediaItems(ui.data || {});
+      const targetItem = allMedia.find((m) => m.id === mediaId) || getItem('media', mediaId) || { id: mediaId, path: actionBtn.dataset.path };
+
+      if (confirm('Delete this image? It will also be removed from any linked products and store sections.')) {
+        const res = await deleteMediaAndDetachFromCatalog(targetItem);
+        let msg = 'Media deleted.';
+        if (res.detachedProducts.length) {
+          msg += ` Removed from product: ${res.detachedProducts.join(', ')}`;
+        }
+        if (res.detachedCategories.length) {
+          msg += ` Removed from category: ${res.detachedCategories.join(', ')}`;
+        }
+        showToast(msg, 'success');
+        setMediaStatus(msg);
         closeModal();
         renderView(ui.data || {});
       }
@@ -6467,6 +7089,83 @@ function attachGlobalHandlers() {
       await handleMediaUpload(form);
       return;
     }
+    if (form.id === 'directSettingsForm') {
+      const formData = new FormData(form);
+      const nextSettings = {
+        ...(ui.data?.settings || {}),
+        siteName: (formData.get('siteName') || '').trim() || 'Linkadda Shop',
+        logo: (formData.get('logo') || '').trim(),
+        favicon: (formData.get('favicon') || '').trim(),
+        telegram: (formData.get('telegram') || '').trim(),
+        whatsapp: (formData.get('whatsapp') || '').trim(),
+        email: (formData.get('email') || '').trim(),
+        footer: (formData.get('footer') || '').trim(),
+        currency: (formData.get('currency') || 'INR').trim(),
+        currencySymbol: (formData.get('currencySymbol') || '₹').trim(),
+        priceFormat: (formData.get('priceFormat') || 'INR / USD').trim(),
+        updatedAt: Date.now(),
+        updatedBy: userEmail?.textContent || userName?.textContent || 'Admin',
+      };
+
+      const btn = form.querySelector('#saveSettingsSubmitBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Saving...';
+      }
+
+      try {
+        await updateRecord('settings', null, nextSettings);
+        showToast('Settings saved successfully and synced live to store!', 'success');
+      } catch (err) {
+        showToast(err?.message || 'Failed to save settings', 'danger');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="check"></i> Save Settings';
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+      return;
+    }
+    if (form.id === 'directSingleForm') {
+      const node = form.dataset.node;
+      const schema = singleEditors[node];
+      const formData = new FormData(form);
+      const nextData = {
+        ...(ui.data?.[node] || {}),
+        updatedAt: Date.now(),
+        updatedBy: userEmail?.textContent || userName?.textContent || 'Admin',
+      };
+
+      if (schema && Array.isArray(schema.fields)) {
+        schema.fields.forEach((field) => {
+          const val = formData.get(field.key);
+          if (val !== null) {
+            nextData[field.key] = typeof val === 'string' ? val.trim() : val;
+          }
+        });
+      }
+
+      const btn = form.querySelector('#saveSingleSubmitBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Saving...';
+      }
+
+      try {
+        await updateRecord(node, null, nextData);
+        showToast(`${schema ? schema.title : 'Content'} saved successfully and updated live on website!`, 'success');
+      } catch (err) {
+        showToast(err?.message || 'Failed to save changes', 'danger');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="check"></i> Save ${schema ? schema.title : 'Changes'}`;
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+      return;
+    }
     if (form.id === 'adminSnapshotImportForm') {
       await applyAdminSnapshotImport(form);
     }
@@ -6586,6 +7285,50 @@ function attachGlobalHandlers() {
     if (event.target.id === 'paymentDateFilter' || event.target.id === 'orderDateFilter') {
       ui.management.date = event.target.value || 'all';
       renderView(ui.data || {});
+      return;
+    }
+    if (event.target.id === 'settingsFaviconFile') {
+      const file = event.target.files?.[0];
+      if (file) {
+        showToast('Uploading favicon image...', 'info');
+        uploadAsset(file, 'logos').then((res) => {
+          const input = document.getElementById('settingsFaviconInput');
+          if (input) input.value = res.publicUrl;
+          showToast('Favicon uploaded! Click Save Settings to apply.', 'success');
+        }).catch((err) => {
+          showToast(err?.message || 'Favicon upload failed', 'danger');
+        });
+      }
+      return;
+    }
+    if (event.target.id === 'settingsLogoFile') {
+      const file = event.target.files?.[0];
+      if (file) {
+        showToast('Uploading logo image...', 'info');
+        uploadAsset(file, 'logos').then((res) => {
+          const input = document.getElementById('settingsLogoInput');
+          if (input) input.value = res.publicUrl;
+          showToast('Logo uploaded! Click Save Settings to apply.', 'success');
+        }).catch((err) => {
+          showToast(err?.message || 'Logo upload failed', 'danger');
+        });
+      }
+      return;
+    }
+    if (event.target.id === 'singleUploadFileInput') {
+      const file = event.target.files?.[0];
+      const node = event.target.dataset.node;
+      if (file && node) {
+        showToast(`Uploading ${node} image...`, 'info');
+        const folder = node === 'hero' ? 'hero' : 'banner';
+        uploadAsset(file, folder).then((res) => {
+          const input = document.getElementById(`singleUrlInput_${node}`);
+          if (input) input.value = res.publicUrl;
+          showToast(`${node} image uploaded! Click Save to apply changes.`, 'success');
+        }).catch((err) => {
+          showToast(err?.message || 'Upload failed', 'danger');
+        });
+      }
       return;
     }
     if (event.target.matches?.('[data-action="toggle-select-item"]')) {

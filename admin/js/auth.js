@@ -48,7 +48,8 @@ export function mountLoginPage(root) {
     note.textContent = 'Signing in...';
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = '/admin/';
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      window.location.href = isLocal ? '/admin/index.html' : '/admin';
     } catch (error) {
       note.textContent = error?.message || 'Login failed';
     }
