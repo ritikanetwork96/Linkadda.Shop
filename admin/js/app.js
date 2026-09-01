@@ -5346,55 +5346,114 @@ function renderPaymentMethodModal(method = {}, isEdit = false) {
 function renderOrderDetailsModal(item = {}) {
   const proof = orderPaymentProof(item);
   const delivery = orderDeliveryInfo(item);
-  const proofIsImage = /\.(png|jpg|jpeg|webp|gif|avif|bmp)$/i.test(String(proof || ''));
+  const isPaid = isPaidOrder(item);
+  const isFailed = isFailedOrder(item);
+  const amountFormatted = item.amountDisplay || formatCurrencyCompact(item.amount || item.inr || 0);
+  const methodName = orderMethodLabel(item);
+  const orderId = item.id || item.orderId || '-';
+  const prodName = orderProductName(item);
+
   return `
-    <div class="panel-head management-modal-head">
+    <div class="panel-head management-modal-head" style="padding-bottom: 16px; border-bottom: 1px solid var(--border);">
       <div>
-        <h2 class="section-title">${escapeHtml(orderProductName(item))}</h2>
-        <p class="section-subtitle">Order ID: ${escapeHtml(item.id || '-')}</p>
+        <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Order & Payment Inspector</div>
+        <h2 class="section-title" style="font-size: 20px; font-weight: 800; color: #fff;">${escapeHtml(prodName)}</h2>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+          <span class="order-id-badge" onclick="copyText('${escapeHtml(orderId)}'); showToast('Order ID copied!');" title="Click to copy Order ID">
+            <i data-lucide="copy" style="width: 12px; height: 12px;"></i> #${escapeHtml(orderId)}
+          </span>
+          <span class="order-status-pill ${isPaid ? 'paid' : isFailed ? 'rejected' : 'pending'}">
+            ${isPaid ? '🟢 Verified & Paid' : isFailed ? '🔴 Rejected' : '🟡 Pending Verification'}
+          </span>
+        </div>
       </div>
       <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
     </div>
-    <div class="management-drawer">
-      <div class="management-drawer-top">
-        <div class="management-drawer-thumb">
-          ${item.image ? `<img src="${escapeHtml(resolveMediaSource(item.image) || item.image)}" alt="${escapeHtml(orderProductName(item))}" loading="lazy" />` : '<div class="preview-fallback">No image</div>'}
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+      
+      <!-- Left: Proof Screenshot / Product Media -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+          <span>Payment Screenshot Proof</span>
+          ${proof ? `<a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" class="btn btn-ghost btn-sm" style="font-size: 11px; padding: 2px 8px;"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Open Full Size</a>` : ''}
         </div>
-        <div class="management-drawer-summary">
-          <div class="management-pill-row">
-            ${renderStatusBadge(orderStatusValue(item))}
-            ${renderStatusBadge(isPaidOrder(item) ? 'paid' : isFailedOrder(item) ? 'failed' : 'pending')}
-          </div>
-          <div class="management-grid">
-            ${renderInfoTile('Customer', orderCustomerLabel(item))}
-            ${renderInfoTile('Amount', formatCurrencyCompact(item.amount))}
-            ${renderInfoTile('Payment Method', orderMethodLabel(item))}
-            ${renderInfoTile('Txn / Ref', orderTransactionId(item))}
-          </div>
+        
+        <div class="glass" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--border); min-height: 240px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative;">
+          ${proof ? `
+            <a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+              <img src="${escapeHtml(proof)}" alt="Payment Proof" style="max-width: 100%; max-height: 360px; object-fit: contain; display: block; cursor: zoom-in;" />
+            </a>
+          ` : `
+            <div style="text-align: center; color: var(--muted); padding: 30px;">
+              <i data-lucide="image-off" style="width: 40px; height: 40px; opacity: 0.4; margin-bottom: 8px;"></i>
+              <div style="font-size: 13px;">No payment screenshot uploaded by customer.</div>
+            </div>
+          `}
         </div>
       </div>
-      <div class="management-grid">
-        ${renderInfoTile('Order Status', orderStatusLabel(item))}
-        ${renderInfoTile('Payment Status', candidateText(item, ['paymentStatus', 'status', 'state'], orderStatusLabel(item)))}
-        ${renderInfoTile('Date', formatDateTime(orderDateValue(item)))}
-        ${renderInfoTile('Product', orderProductName(item))}
+
+      <!-- Right: Order & Buyer Metadata -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
+          Transaction & Buyer Breakdown
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--muted);">Amount Paid</div>
+            <div style="font-size: 18px; font-weight: 800; color: #34d399; margin-top: 2px;">${escapeHtml(amountFormatted)}</div>
+          </div>
+          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; color: var(--muted);">Payment Method</div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">${escapeHtml(methodName)}</div>
+          </div>
+        </div>
+
+        <div class="glass" style="padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+            <span style="color: var(--muted);">Buyer Details:</span>
+            <strong style="color: #fff;">${escapeHtml(orderCustomerLabel(item))}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+            <span style="color: var(--muted);">Order Date:</span>
+            <span style="color: #fff;">${escapeHtml(formatDateTime(orderDateValue(item)))} (${escapeHtml(formatRelativeTime(orderDateValue(item)))})</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+            <span style="color: var(--muted);">Txn / Ref ID:</span>
+            <code style="color: #818cf8; font-size: 11.5px;">${escapeHtml(orderTransactionId(item))}</code>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12.5px;">
+            <span style="color: var(--muted);">Payment State:</span>
+            <strong style="color: ${isPaid ? '#34d399' : isFailed ? '#f87171' : '#fbbf24'};">${escapeHtml(orderStatusLabel(item))}</strong>
+          </div>
+        </div>
+
+        ${delivery ? `
+          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.04);">
+            <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase;">Delivery / Access Notes:</div>
+            <div style="font-size: 12.5px; color: #fff; margin-top: 4px;">${escapeHtml(delivery)}</div>
+          </div>
+        ` : ''}
       </div>
-      ${proof ? `
-        <section class="management-proof">
-          <h3>Payment Screenshot</h3>
-          ${proofIsImage ? `<a href="${escapeHtml(safeUrl(resolveMediaSource(proof) || proof))}" target="_blank" rel="noreferrer" class="proof-image-link"><img src="${escapeHtml(resolveMediaSource(proof) || proof)}" alt="Payment proof" loading="lazy" /></a>` : `<a href="${escapeHtml(safeUrl(proof))}" target="_blank" rel="noreferrer">${escapeHtml(proof)}</a>`}
-        </section>
-      ` : '<div class="empty-state">No payment proof saved for this record.</div>'}
-      ${delivery ? `
-        <section class="management-proof">
-          <h3>Delivery / Access</h3>
-          <p>${escapeHtml(delivery)}</p>
-        </section>
-      ` : '<div class="empty-state">No delivery or access information saved.</div>'}
-      <div class="toolbar management-actions-inline">
-        <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id || '')}"><i data-lucide="check"></i> Approve Payment</button>
-        <button class="btn btn-ghost" type="button" data-action="reject-order" data-id="${escapeHtml(item.id || '')}"><i data-lucide="x"></i> Reject Payment</button>
-        <button class="btn btn-danger" type="button" data-action="delete-order" data-id="${escapeHtml(item.id || '')}"><i data-lucide="trash-2"></i> Delete</button>
+
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="toolbar" style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-danger btn-sm" type="button" data-action="delete-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 12px; padding: 8px 14px;">
+          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete Order
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-ghost" type="button" data-action="reject-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 16px; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+          <i data-lucide="x-circle" style="width: 15px; height: 15px;"></i> Reject Payment
+        </button>
+        <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 20px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669) !important; border: none !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+          <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Approve & Verify Order
+        </button>
       </div>
     </div>
   `;
@@ -5403,63 +5462,90 @@ function renderOrderDetailsModal(item = {}) {
 function renderOrdersManagementView(data = {}, fullData = {}) {
   const allOrders = listCollection('orders');
   const items = sortManagementList(filterManagementList(allOrders, 'orders'));
-  const totals = managementTotals(items);
-  const methods = [...new Set(items.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
-  const revenueThisMonth = items
-    .filter((item) => isPaidOrder(item) && new Date(orderDateValue(item)).toISOString().slice(0, 7) === new Date().toISOString().slice(0, 7))
-    .reduce((total, item) => total + parseAmountValue(item.amount), 0);
+  const totals = managementTotals(allOrders);
+  const activeTab = ui.management.status || 'all';
+
+  const methods = [...new Set(allOrders.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
+
   return `
-    <div class="page active management-page-shell">
-      <section class="panel glass management-page">
-        <div class="panel-head management-page-head">
+    <div class="page active management-page-shell" style="max-width: 1240px; margin: 0 auto; padding-bottom: 60px;">
+      
+      <!-- Top Control Header -->
+      <section class="panel glass" style="padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
           <div>
-            <div class="section-kicker">Order Processing</div>
-            <h2 class="section-title">Orders</h2>
-            <p class="section-subtitle">Track customer orders, payment state, and delivery or access details.</p>
+            <div style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Realtime Checkout Stream</div>
+            <h2 style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">Orders & Payment Verifications</h2>
+            <p style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">Manage real customer transactions, verify payment screenshot proofs, and approve orders.</p>
           </div>
-          <div class="toolbar management-actions">
-            <button class="btn btn-ghost" type="button" data-action="goto" data-route="payment"><i data-lucide="credit-card"></i> Payment</button>
+          <div class="toolbar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-ghost" type="button" data-action="export-orders-csv" title="Export all orders to CSV"><i data-lucide="download"></i> Export CSV</button>
+            <button class="btn btn-ghost" type="button" data-action="goto" data-route="payment"><i data-lucide="credit-card"></i> Payment Hub</button>
           </div>
         </div>
-        <div class="management-summary-grid">
-          ${renderManagementSummaryCard('Total Orders', totals.total, 'All order records', 'primary')}
-          ${renderManagementSummaryCard('Pending', totals.pending, 'Waiting for verification', 'warning')}
-          ${renderManagementSummaryCard('Paid', totals.paid, 'Verified payments', 'success')}
-          ${renderManagementSummaryCard('Failed', totals.failed, 'Rejected / expired / failed', 'danger')}
-          ${renderManagementSummaryCard('Revenue', formatCurrencyCompact(totals.totalReceived), 'Only paid / approved orders', 'accent')}
+
+        <!-- Metric KPI Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+          
+          <div style="background: rgba(99, 102, 241, 0.06); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 14px; padding: 16px 18px;">
+            <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.05em;">Total Orders</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff; margin-top: 4px;">${totals.total}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">All customer records</div>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 14px; padding: 16px 18px;">
+            <div style="font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em;">Pending Review</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fbbf24; margin-top: 4px;">${totals.pending}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Awaiting verification</div>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; padding: 16px 18px;">
+            <div style="font-size: 11px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em;">Verified & Paid</div>
+            <div style="font-size: 26px; font-weight: 800; color: #34d399; margin-top: 4px;">${totals.paid}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Approved orders</div>
+          </div>
+
+          <div style="background: rgba(236, 72, 153, 0.06); border: 1px solid rgba(236, 72, 153, 0.25); border-radius: 14px; padding: 16px 18px;">
+            <div style="font-size: 11px; font-weight: 700; color: #f472b6; text-transform: uppercase; letter-spacing: 0.05em;">Total Volume</div>
+            <div style="font-size: 26px; font-weight: 800; color: #fff; margin-top: 4px;">${formatCurrencyCompact(totals.totalReceived)}</div>
+            <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">From verified payments</div>
+          </div>
+
         </div>
       </section>
 
-      ${renderFieldGroup('Revenue Summary', 'Live order totals from the existing Firebase records.', `
-        <div class="management-grid">
-          ${renderInfoTile('Today', `${totals.today} orders`, `${formatCurrencyCompact(items.filter((item) => isPaidOrder(item) && new Date(orderDateValue(item)).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)).reduce((sum, item) => sum + parseAmountValue(item.amount), 0))}`)}
-          ${renderInfoTile('This Month', `${totals.month} orders`, formatCurrencyCompact(revenueThisMonth))}
-          ${renderInfoTile('Pending', String(totals.pending))}
-          ${renderInfoTile('Failed', String(totals.failed))}
-        </div>
-      `)}
+      <!-- Status Tab Filter Pills -->
+      <div class="order-tabs-nav">
+        <button type="button" class="order-tab-btn ${activeTab === 'all' ? 'active' : ''}" data-action="set-orders-tab" data-status="all">
+          All Orders <span>${totals.total}</span>
+        </button>
+        <button type="button" class="order-tab-btn ${activeTab === 'pending' ? 'active' : ''}" data-action="set-orders-tab" data-status="pending">
+          ⏳ Pending Review <span>${totals.pending}</span>
+        </button>
+        <button type="button" class="order-tab-btn ${activeTab === 'paid' ? 'active' : ''}" data-action="set-orders-tab" data-status="paid">
+          ✅ Verified / Paid <span>${totals.paid}</span>
+        </button>
+        <button type="button" class="order-tab-btn ${activeTab === 'failed' ? 'active' : ''}" data-action="set-orders-tab" data-status="failed">
+          ❌ Rejected <span>${totals.failed}</span>
+        </button>
+      </div>
 
-      ${renderFieldGroup('Search & Filters', 'Filter orders by status, payment method, and date.', `
-        <div class="management-filterbar">
-          <div class="field">
-            <label for="orderSearch">Search</label>
-            <input class="input" id="orderSearch" type="search" placeholder="Search order, product, customer or txn ID..." value="${escapeHtml(ui.management.search || '')}" />
+      <!-- Search & Filters Toolbar -->
+      <div class="panel glass" style="padding: 16px 20px; border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--border);">
+        <div class="management-filterbar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+          <div class="field" style="grid-column: span 2;">
+            <label for="orderSearch" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);">Search Orders</label>
+            <input class="input" id="orderSearch" type="search" placeholder="Search by Product, Order ID, buyer, or amount..." value="${escapeHtml(ui.management.search || '')}" />
           </div>
           <div class="field">
-            <label for="orderStatusFilter">Status</label>
-            <select class="select" id="orderStatusFilter">
-              ${['all', 'paid', 'pending', 'failed', 'approved', 'rejected', 'expired'].map((status) => `<option value="${status}" ${ui.management.status === status ? 'selected' : ''}>${escapeHtml(status)}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label for="orderMethodFilter">Payment Method</label>
+            <label for="orderMethodFilter" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);">Payment Method</label>
             <select class="select" id="orderMethodFilter">
-              <option value="all">All Methods</option>
-              ${methods.map((method) => `<option value="${escapeHtml(method)}" ${ui.management.method === method ? 'selected' : ''}>${escapeHtml(method)}</option>`).join('')}
+              <option value="all">All Gateways</option>
+              ${methods.map((m) => `<option value="${escapeHtml(m)}" ${ui.management.method === m ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('')}
             </select>
           </div>
           <div class="field">
-            <label for="orderDateFilter">Date</label>
+            <label for="orderDateFilter" style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted);">Date Range</label>
             <select class="select" id="orderDateFilter">
               <option value="all" ${ui.management.date === 'all' ? 'selected' : ''}>All Time</option>
               <option value="today" ${ui.management.date === 'today' ? 'selected' : ''}>Today</option>
@@ -5467,58 +5553,127 @@ function renderOrdersManagementView(data = {}, fullData = {}) {
             </select>
           </div>
         </div>
-      `)}
+      </div>
 
-      <section class="panel glass management-section">
-        <div class="panel-head management-section-head">
-          <div>
-            <h3>Order Records</h3>
-            <p class="section-subtitle">Real records from Firebase with customer, payment and status details.</p>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="table management-table">
-            <thead>
-              <tr>
-                <th>Order</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Payment</th>
-                <th>Order Status</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${items.length ? items.map((item) => `
+      <!-- Orders Table -->
+      <div class="orders-table-shell">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th style="min-width: 280px;">Order & Proof</th>
+              <th style="min-width: 140px;">Customer</th>
+              <th style="min-width: 120px;">Amount</th>
+              <th style="min-width: 130px;">Method</th>
+              <th style="min-width: 140px;">Status</th>
+              <th style="min-width: 140px;">Date</th>
+              <th style="min-width: 160px; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.length ? items.map((item) => {
+              const proof = orderPaymentProof(item);
+              const isPaid = isPaidOrder(item);
+              const isFailed = isFailedOrder(item);
+              const orderId = item.id || item.orderId || '-';
+              const shortId = orderId.length > 10 ? `${orderId.substring(0, 8)}...` : orderId;
+              const prodTitle = orderProductName(item);
+              const method = orderMethodLabel(item);
+              const methodLower = method.toLowerCase();
+              const methodClass = methodLower.includes('upi') ? 'upi' : methodLower.includes('binance') ? 'binance' : methodLower.includes('paypal') ? 'paypal' : 'crypto';
+              const formattedAmt = item.amountDisplay || formatCurrencyCompact(item.amount || item.inr || 0);
+
+              return `
                 <tr>
-                  <td data-label="Order">
-                    <div class="management-product-cell">
-                      <div class="management-product-thumb">${item.image ? `<img src="${escapeHtml(resolveMediaSource(item.image) || item.image)}" alt="${escapeHtml(orderProductName(item))}" loading="lazy" />` : '<div class="preview-fallback">No image</div>'}</div>
-                      <div>
-                        <strong>${escapeHtml(orderProductName(item))}</strong>
-                        <div class="meta">${escapeHtml(orderTransactionId(item))}</div>
+                  <!-- Col 1: Order & Proof -->
+                  <td>
+                    <div class="order-product-cell">
+                      <div class="order-proof-thumb-wrap" data-action="open-order" data-id="${escapeHtml(item.id)}" title="${proof ? 'View Payment Screenshot' : 'View Order Details'}">
+                        ${proof ? `
+                          <img src="${escapeHtml(proof)}" alt="Proof" loading="lazy" />
+                          <span class="order-proof-badge"><i data-lucide="image" style="width: 8px; height: 8px; vertical-align: middle;"></i> PROOF</span>
+                        ` : `
+                          <div style="width: 100%; height: 100%; display: grid; place-items: center; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; font-weight: 800; font-size: 16px;">
+                            ${escapeHtml((prodTitle[0] || 'O').toUpperCase())}
+                          </div>
+                        `}
+                      </div>
+                      <div style="min-width: 0;">
+                        <strong style="display: block; font-size: 13.5px; color: var(--text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" title="${escapeHtml(prodTitle)}">
+                          ${escapeHtml(prodTitle)}
+                        </strong>
+                        <span class="order-id-badge" onclick="copyText('${escapeHtml(orderId)}'); showToast('Order ID copied!');" title="Click to Copy #${escapeHtml(orderId)}">
+                          <i data-lucide="copy" style="width: 10px; height: 10px;"></i> #${escapeHtml(shortId)}
+                        </span>
                       </div>
                     </div>
                   </td>
-                  <td data-label="Customer">${escapeHtml(orderCustomerLabel(item))}</td>
-                  <td data-label="Amount">${escapeHtml(formatCurrencyCompact(item.amount))}</td>
-                  <td data-label="Method">${escapeHtml(orderMethodLabel(item))}</td>
-                  <td data-label="Payment">${renderStatusBadge(orderStatusValue(item))}</td>
-                  <td data-label="Order Status">${renderStatusBadge(candidateText(item, ['orderStatus', 'status', 'state'], 'unknown'))}</td>
-                  <td data-label="Date">${escapeHtml(formatDateTime(orderDateValue(item)))}</td>
-                  <td data-label="Action">
-                    <div class="item-actions">
-                      <button class="icon-btn" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> View</button>
+
+                  <!-- Col 2: Customer -->
+                  <td>
+                    <div style="font-size: 13px; color: var(--text); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">
+                      ${escapeHtml(orderCustomerLabel(item))}
+                    </div>
+                  </td>
+
+                  <!-- Col 3: Amount -->
+                  <td>
+                    <span class="order-amount-cell">${escapeHtml(formattedAmt)}</span>
+                  </td>
+
+                  <!-- Col 4: Method -->
+                  <td>
+                    <span class="order-method-badge ${methodClass}">
+                      <i data-lucide="${methodClass === 'upi' ? 'smartphone' : methodClass === 'binance' ? 'coins' : methodClass === 'paypal' ? 'wallet' : 'shield-check'}" style="width: 13px; height: 13px;"></i>
+                      ${escapeHtml(method)}
+                    </span>
+                  </td>
+
+                  <!-- Col 5: Status -->
+                  <td>
+                    <span class="order-status-pill ${isPaid ? 'approved' : isFailed ? 'rejected' : 'pending'}">
+                      ${isPaid ? '🟢 Approved' : isFailed ? '🔴 Rejected' : '🟡 Pending'}
+                    </span>
+                  </td>
+
+                  <!-- Col 6: Date -->
+                  <td>
+                    <div style="font-size: 12.5px; color: var(--text); white-space: nowrap;">${escapeHtml(formatDateTime(orderDateValue(item)))}</div>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${escapeHtml(formatRelativeTime(orderDateValue(item)))}</div>
+                  </td>
+
+                  <!-- Col 7: Actions -->
+                  <td style="text-align: right;">
+                    <div class="order-actions-toolbar" style="justify-content: flex-end;">
+                      <button class="order-quick-btn view" type="button" data-action="open-order" data-id="${escapeHtml(item.id)}" title="View Proof & Order">
+                        <i data-lucide="eye" style="width: 13px; height: 13px;"></i> View
+                      </button>
+                      ${!isPaid ? `
+                        <button class="order-quick-btn approve" type="button" data-action="approve-order" data-id="${escapeHtml(item.id)}" title="Verify & Approve">
+                          <i data-lucide="check" style="width: 13px; height: 13px;"></i>
+                        </button>
+                      ` : ''}
+                      ${!isFailed ? `
+                        <button class="order-quick-btn reject" type="button" data-action="reject-order" data-id="${escapeHtml(item.id)}" title="Reject Order">
+                          <i data-lucide="x" style="width: 13px; height: 13px;"></i>
+                        </button>
+                      ` : ''}
                     </div>
                   </td>
                 </tr>
-              `).join('') : `<tr><td colspan="8"><div class="empty-state">${allOrders.length ? 'No orders match the current filters.' : 'No orders found.'}</div></td></tr>`}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              `;
+            }).join('') : `
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 48px 24px; color: var(--muted);">
+                  <i data-lucide="inbox" style="width: 44px; height: 44px; opacity: 0.3; margin-bottom: 12px;"></i>
+                  <div style="font-size: 15px; font-weight: 600; color: var(--text);">No orders found</div>
+                  <div style="font-size: 13px; margin-top: 4px;">${allOrders.length ? 'No orders match your current filter settings.' : 'Customer orders will appear here in real time as they complete checkout.'}</div>
+                </td>
+              </tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+
     </div>
   `;
 }
@@ -7088,8 +7243,32 @@ function attachGlobalHandlers() {
       showToast('Snapshot exported');
       return;
     }
-    if (action === 'import-admin-snapshot') {
-      openAdminSnapshotImportModal();
+    if (action === 'set-orders-tab') {
+      const targetStatus = actionBtn.dataset.status || 'all';
+      ui.management.status = targetStatus;
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'export-orders-csv') {
+      const allOrders = listCollection('orders');
+      if (!allOrders.length) {
+        showToast('No orders found to export', 'warning');
+        return;
+      }
+      const headers = ['Order ID', 'Product', 'Customer', 'Amount', 'Method', 'Status', 'Date', 'Proof URL'];
+      const rows = allOrders.map((o) => [
+        `"${String(o.id || o.orderId || '').replace(/"/g, '""')}"`,
+        `"${String(orderProductName(o) || '').replace(/"/g, '""')}"`,
+        `"${String(orderCustomerLabel(o) || '').replace(/"/g, '""')}"`,
+        `"${String(o.amountDisplay || o.amount || o.inr || 0).replace(/"/g, '""')}"`,
+        `"${String(orderMethodLabel(o) || '').replace(/"/g, '""')}"`,
+        `"${String(orderStatusValue(o) || '').replace(/"/g, '""')}"`,
+        `"${String(formatDateTime(orderDateValue(o))).replace(/"/g, '""')}"`,
+        `"${String(orderPaymentProof(o) || '').replace(/"/g, '""')}"`
+      ]);
+      const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+      downloadTextFile(`linkadda-orders-${new Date().toISOString().slice(0, 10)}.csv`, csv);
+      showToast('Orders exported to CSV!');
       return;
     }
     if (action === 'approve-order') {
