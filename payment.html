@@ -3301,55 +3301,40 @@ async function compressImageBase64(base64Str, maxWidth = 900, quality = 0.72) {
   });
 }
 
-// ———— UPLOAD SCREENSHOT TO SUPABASE STORAGE WITH FALLBACK ————
-async function uploadScreenshotToSupabase(orderId, base64Data) {
+// ———— UPLOAD SCREENSHOT TO RUSTFS S3 VIA API WITH FALLBACK ————
+async function uploadScreenshot(orderId, base64Data) {
   try {
-    const compressed = await compressImageBase64(base64Data, 900, 0.72);
-    
-    // Try remote upload to Supabase
-    const parts = compressed.split(',');
-    if (parts.length < 2) return compressed;
+    const compressed = await compressImageBase64(base64Data, 900, 0.75);
+    const fileName = `${orderId || 'order'}_${Date.now()}.jpg`;
 
-    const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
-    const bstr = atob(parts[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    const blob = new Blob([u8arr], { type: mime });
-    
-    const fileName = `orders/${orderId || 'order'}_${Date.now()}.jpg`;
-    const supabaseUrl = `https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/media/${fileName}`;
-    const anonKey = 'sb_publishable_HHXzUZGaMXTpCXQVqiNBwQ_ZEbe_E2z';
+    // 1. Try Serverless RustFS S3 Upload via /api/upload
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folder: 'orders',
+          filename: fileName,
+          base64: compressed,
+          contentType: 'image/jpeg',
+        }),
+      });
 
-    return await new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', supabaseUrl, true);
-      xhr.setRequestHeader('apikey', anonKey);
-      xhr.setRequestHeader('Authorization', `Bearer ${anonKey}`);
-      xhr.setRequestHeader('x-upsert', 'true');
-      xhr.setRequestHeader('Content-Type', mime);
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          const publicUrl = `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/${fileName}`;
-          resolve(publicUrl);
-        } else {
-          resolve(compressed);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.publicUrl) {
+          return data.publicUrl;
         }
-      };
-      xhr.onerror = () => {
-        resolve(compressed);
-      };
-      xhr.ontimeout = () => {
-        resolve(compressed);
-      };
-      xhr.timeout = 6000;
-      xhr.send(blob);
-    });
+      }
+    } catch (e) {
+      console.warn('RustFS API upload fallback to base64:', e);
+    }
+
+    return compressed;
   } catch (err) {
-    console.warn('Screenshot upload fallback to base64:', err);
+    console.warn('Screenshot compression error, using raw base64:', err);
     return base64Data;
   }
 }
@@ -3374,7 +3359,7 @@ async function saveOrderToFirebase(amountText, methodName) {
     // Process & upload screenshot with guaranteed persistence
     if (screenshotRaw && screenshotRaw.startsWith('data:')) {
       try {
-        finalProof = await uploadScreenshotToSupabase(orderId, screenshotRaw);
+        finalProof = await uploadScreenshot(orderId, screenshotRaw);
       } catch (err) {
         console.warn('Screenshot processing warning:', err);
         finalProof = screenshotRaw;

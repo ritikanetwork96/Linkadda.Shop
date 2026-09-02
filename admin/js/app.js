@@ -499,7 +499,7 @@ function fieldMarkup(field, value = '', options = {}) {
     <div class="field full">
       <label for="${escapeHtml(name)}">${escapeHtml(label)}</label>
       <input class="input" type="file" name="${escapeHtml(name)}" id="${escapeHtml(name)}" accept="${escapeHtml(accept)}"${multiple ? ' multiple' : ''} />
-      <small class="section-subtitle">Upload a local file. If selected, this file will be pushed to Supabase and the URL field will update automatically.</small>
+      <small class="section-subtitle">Upload a local file. If selected, this file will be uploaded to RustFS S3 and the URL field will update automatically.</small>
     </div>
   ` : '';
   const imageUploadKeys = ['image', 'photo', 'logo', 'favicon', 'qrImage', 'backgroundImage'];
@@ -1783,7 +1783,7 @@ function openRecordEditor(node, schema, record = {}) {
           ${renderRecordPreview(data)}
           <div class="editor-help glass">
             <strong>Upload tip</strong>
-            <p>Choose a file below and save. The file will upload to Supabase first, then the public URL will be stored in Firebase.</p>
+            <p>Choose a file below and save. The file will upload to RustFS S3 first, then the public URL will be stored in Firebase.</p>
           </div>
         </div>
         ` : ''}
@@ -3409,7 +3409,7 @@ async function syncFirebaseCollection(node, records) {
 // causing all admin changes to revert. Do not restore.
 
 async function syncCurrentSiteMedia() {
-  const confirmed = confirm('Import the current public site images into Supabase Storage and save media metadata in Firebase?');
+  const confirmed = confirm('Import the current public site images into RustFS S3 Storage and save media metadata in Firebase?');
   if (!confirmed) return;
   try {
     setMediaStatus('Scanning public site images...');
@@ -3648,7 +3648,7 @@ function renderDashboard(data) {
           <div class="dashboard-secondary-grid">
             ${renderCompactStatCard('Products', summary.totals.products, 'Live product records', 'package', 'primary')}
             ${renderCompactStatCard('Categories', summary.totals.categories, 'Live category records', 'layers-3', 'secondary')}
-            ${renderCompactStatCard('Media Assets', summary.mediaAssets, 'Stored in Supabase', 'image', 'accent')}
+            ${renderCompactStatCard('Media Assets', summary.mediaAssets, 'Stored in RustFS S3', 'image', 'accent')}
             ${renderCompactStatCard("Today's Visitors", summary.totals.todaysVisitors || 0, 'Visitors tracked today', 'calendar-days', 'success')}
           </div>
         </div>
@@ -3874,14 +3874,14 @@ function renderCatalogView(data) {
         </div>
         <div class="catalog-hero">
           <div class="catalog-copy">
-            <span class="eyebrow">Live RTDB + Supabase media</span>
+            <span class="eyebrow">Live RTDB + RustFS S3 Media</span>
             <h3>${escapeHtml(meta.title)} management</h3>
             <p>${escapeHtml(meta.subtitle)}</p>
           </div>
           <div class="catalog-side">
             ${renderCatalogMetric('Products', counts.products, 'Live product records')}
             ${renderCatalogMetric('Categories', counts.categories, 'Live category records')}
-            ${renderCatalogMetric('Total Images', counts.images, 'Supabase media assets')}
+            ${renderCatalogMetric('Total Images', counts.images, 'RustFS S3 media assets')}
             ${renderCatalogMetric('Last Sync', counts.lastSync ? formatDateTime(counts.lastSync) : '-', 'Latest catalog write')}
           </div>
         </div>
@@ -5284,7 +5284,7 @@ function renderSettingsManagementView(data = {}, fullData = {}) {
             <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: #818cf8; flex-shrink: 0;"><i data-lucide="cloud"></i></div>
             <div>
               <div style="font-size: 10px; font-weight: 700; color: #818cf8; text-transform: uppercase;">Media Storage</div>
-              <div style="font-size: 13px; font-weight: 600; color: var(--text);">RustFS S3 CDN + Supabase</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text);">RustFS S3 CDN (High Speed Storage)</div>
             </div>
           </div>
           <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
@@ -8254,6 +8254,19 @@ function attachGlobalHandlers() {
       const existingRecord = id ? getItem(node, id) || {} : {};
       const beforeRefs = recordAssetRefs(existingRecord);
       let next = sanitizeRecordFromForm(form, schema.fields, id ? getItem(node, id) || {} : {});
+      if (node === 'products') {
+        const prodData = getProductEditorRecord(form);
+        next = {
+          ...next,
+          ...prodData,
+          image: prodData.image,
+          thumbnail: prodData.image,
+          images: prodData.images,
+          galleryImages: prodData.galleryImages,
+          video: prodData.video,
+          videos: prodData.videos,
+        };
+      }
       const duplicate = existingItems.find((item) => item.slug && item.slug === next.slug && item.id !== id);
       if (duplicate) {
         showToast('Duplicate slug detected', 'warning');
