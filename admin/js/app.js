@@ -875,129 +875,172 @@ function renderProductEditor(record = {}, schema = null) {
   if (currentBadgeStyle && !badgeStyles.some((item) => item.value === currentBadgeStyle)) {
     badgeStyles.unshift({ value: currentBadgeStyle, label: currentBadgeStyle });
   }
+
+  const isEdit = Boolean(data.id);
+
   return `
     <form id="recordForm" class="product-editor-form" data-node="products" data-id="${escapeHtml(data.id || '')}">
       <div class="product-editor-shell">
+        
+        <!-- Left Column: Live Card Preview & Slideshow -->
         <aside class="product-editor-preview-column">
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.06em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Live Storefront Preview
+          </div>
           ${renderProductPreview(data, 0)}
-          <div class="editor-help glass">
-            <strong>Unlimited Media</strong>
-            <p>Upload as many images and videos as you need. They will show automatically in the storefront carousel.</p>
+          <div class="editor-help glass" style="margin-top: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.2); background: rgba(99, 102, 241, 0.05);">
+            <strong style="font-size: 12.5px; color: #a5b4fc; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Live Sync Tip
+            </strong>
+            <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;">Jese hi aap images/videos add karenge ya details change karenge, ye card live update hoga.</p>
           </div>
         </aside>
+
+        <!-- Right Column: Step-by-Step Sections -->
         <section class="product-editor-main">
+          
+          <!-- Section 1: Basic Identity -->
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
-                <h4>Basic Info</h4>
-                <p>Primary identity and public facing copy.</p>
+                <h4><i data-lucide="package" style="color: #818cf8; width: 18px; height: 18px;"></i> 1. Basic Identity & Category</h4>
+                <p>Product ka name, category aur storefront highlight tags.</p>
               </div>
             </div>
+            
+            <div class="field full" style="margin-bottom: 14px;">
+              <label for="title" style="font-weight: 700;">Product Title *</label>
+              <input class="input" type="text" name="title" id="title" value="${escapeHtml(data.title || '')}" placeholder="e.g. Spx Pack #2 (400+ Videos)" required style="font-size: 14px; font-weight: 600;" />
+              <small class="field-hint">Ye main title hai jo storefront card aur search me sabse pehle dikhayi dega.</small>
+            </div>
+
             <div class="product-grid-2">
-              <div class="field">
-                <label for="title">Title</label>
-                <input class="input" type="text" name="title" id="title" value="${escapeHtml(data.title || '')}" placeholder="Product title" />
-              </div>
-              <div class="field">
-                <label for="slug">Slug</label>
-                <input class="input" type="text" name="slug" id="slug" value="${escapeHtml(data.slug || '')}" placeholder="product-slug" />
-              </div>
               <div class="field">
                 <label for="category">Category</label>
                 <select class="select" name="category" id="category">
-                  <option value="">Uncategorized</option>
+                  <option value="">Uncategorized (All Products)</option>
                   ${categoryOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${String(option.value) === currentCategory ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
                 </select>
+                <small class="field-hint">Product kis collection/filter me show hoga.</small>
               </div>
+
               <div class="field">
-                <label for="badge">Badge</label>
-                <input class="input" type="text" name="badge" id="badge" value="${escapeHtml(data.badge || '')}" placeholder="Badge text" />
+                <label for="slug">URL Slug</label>
+                <input class="input" type="text" name="slug" id="slug" value="${escapeHtml(data.slug || '')}" placeholder="e.g. spx-pack-2" />
+                <small class="field-hint">Clean link address (khaali chhodne par auto-generate ho jayega).</small>
               </div>
+
+              <div class="field">
+                <label for="badge">Highlight Badge Text</label>
+                <input class="input" type="text" name="badge" id="badge" value="${escapeHtml(data.badge || '')}" placeholder="e.g. 4K QUALITY, HOT, TOP RATED" />
+                <small class="field-hint">Product card ke top corner par glowing badge.</small>
+              </div>
+
               <div class="field">
                 <label for="badgeStyle">Badge Style</label>
                 <select class="select" name="badgeStyle" id="badgeStyle">
                   ${badgeStyles.map((option) => `<option value="${escapeHtml(option.value)}" ${String(option.value) === currentBadgeStyle ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
                 </select>
-              </div>
-              <div class="field">
-                <label for="badgeIcon">Badge Icon</label>
-                <input class="input" type="text" name="badgeIcon" id="badgeIcon" value="${escapeHtml(data.badgeIcon || '')}" placeholder="lucide icon name" />
+                <small class="field-hint">Badge ka color aur visual tone.</small>
               </div>
             </div>
-            <div class="field full">
-              <label for="description">Description</label>
-              <textarea class="textarea" name="description" id="description" placeholder="Product description">${escapeHtml(data.description || '')}</textarea>
+
+            <div class="field full" style="margin-top: 14px;">
+              <label for="description">Full Description</label>
+              <textarea class="textarea" name="description" id="description" rows="3" placeholder="Describe content, quality, updates, and specifications...">${escapeHtml(data.description || '')}</textarea>
+              <small class="field-hint">Product ke features aur details (card preview aur customer detail view me dikhegi).</small>
             </div>
           </div>
 
+          <!-- Section 2: Pricing & Action Link -->
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
-                <h4>Pricing & Action</h4>
-                <p>Commercial details and public action link.</p>
+                <h4><i data-lucide="badge-dollar-sign" style="color: #34d399; width: 18px; height: 18px;"></i> 2. Pricing & Instant Order Link</h4>
+                <p>Commercial prices and direct checkout/Telegram links.</p>
               </div>
             </div>
+            
             <div class="product-grid-2">
               <div class="field">
-                <label for="priceINR">INR Price</label>
-                <input class="input" type="text" name="priceINR" id="priceINR" value="${escapeHtml(data.priceINR || '')}" placeholder="0" />
+                <label for="priceINR" style="font-weight: 700;">INR Price (₹)</label>
+                <input class="input" type="text" name="priceINR" id="priceINR" value="${escapeHtml(data.priceINR || '')}" placeholder="e.g. 299" />
+                <small class="field-hint">Indian customers ke liye price (₹ sign automatic lag jayega).</small>
               </div>
+
               <div class="field">
-                <label for="priceUSD">USD Price</label>
-                <input class="input" type="text" name="priceUSD" id="priceUSD" value="${escapeHtml(data.priceUSD || '')}" placeholder="0" />
+                <label for="priceUSD" style="font-weight: 700;">USD Price ($)</label>
+                <input class="input" type="text" name="priceUSD" id="priceUSD" value="${escapeHtml(data.priceUSD || '')}" placeholder="e.g. 14" />
+                <small class="field-hint">International buyers ke liye price in dollars ($).</small>
               </div>
+
               <div class="field">
-                <label for="orderLink">Order Link</label>
-                <input class="input" type="text" name="orderLink" id="orderLink" value="${escapeHtml(data.orderLink || '')}" placeholder="https:// or /payment.html" />
+                <label for="orderLink">Order / Telegram Link</label>
+                <input class="input" type="text" name="orderLink" id="orderLink" value="${escapeHtml(data.orderLink || '')}" placeholder="https://t.me/... or /payment.html" />
+                <small class="field-hint">Buy Now dabane par customer is link par navigate karega.</small>
               </div>
+
               <div class="field">
-                <label for="displayOrder">Display Order</label>
+                <label for="displayOrder">Display Ranking Order (#)</label>
                 <input class="input" type="number" name="displayOrder" id="displayOrder" value="${escapeHtml(String(data.displayOrder ?? 0))}" placeholder="0" />
+                <small class="field-hint">Catalog position number (1 = sabse pehle/upar show hoga).</small>
               </div>
             </div>
           </div>
 
+          <!-- Section 3: Unlimited Media Studio -->
           ${renderMediaStudio(data)}
 
+          <!-- Section 4: Features & Tags -->
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
-                <h4>Metadata</h4>
-                <p>Tag-style inputs for creator, platform and feature lists.</p>
+                <h4><i data-lucide="tags" style="color: #ec4899; width: 18px; height: 18px;"></i> 4. Features & Content Tags</h4>
+                <p>Bullet chips shown on cards (e.g. 400+ Videos, Mega, Direct Link).</p>
               </div>
             </div>
-            ${renderTagEditor('creators', 'Creators', data.creators, 'One creator per tag.', 'Add creator')}
-            ${renderTagEditor('platforms', 'Platforms', data.platforms, 'One platform per tag.', 'Add platform')}
-            ${renderTagEditor('features', 'Features', data.features, 'One feature per tag.', 'Add feature')}
+            ${renderTagEditor('features', 'Key Features / Highlights', data.features, 'Enter feature tag and press Enter (e.g. 400+ Videos, 24*7 Updates).', 'Add Feature Tag')}
+            ${renderTagEditor('platforms', 'Storage Platforms', data.platforms, 'Content platform (e.g. Mega, Telegram, Google Drive).', 'Add Platform')}
+            ${renderTagEditor('creators', 'Creators / Models', data.creators, 'Creator or model tags.', 'Add Creator')}
           </div>
 
+          <!-- Section 5: Publishing & Status -->
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
-                <h4>Publishing</h4>
-                <p>Control visibility and order.</p>
+                <h4><i data-lucide="shield-check" style="color: #fbbf24; width: 18px; height: 18px;"></i> 5. Publishing Status</h4>
+                <p>Live visibility control for website.</p>
               </div>
             </div>
             <div class="product-grid-2">
               <div class="field">
                 <label for="status">Status</label>
-                <select class="select" name="status" id="status">
-                  ${['active', 'hidden', 'draft', 'deleted'].map((status) => `<option value="${status}" ${String(data.status || 'active') === status ? 'selected' : ''}>${escapeHtml(status)}</option>`).join('')}
+                <select class="select" name="status" id="status" style="font-weight: 700;">
+                  <option value="active" ${String(data.status || 'active') === 'active' ? 'selected' : ''}>🟢 Active (Live on Store)</option>
+                  <option value="hidden" ${String(data.status || 'active') === 'hidden' ? 'selected' : ''}>🟡 Hidden (Temporarily Disabled)</option>
+                  <option value="draft" ${String(data.status || 'active') === 'draft' ? 'selected' : ''}>⚪ Draft (In-Progress)</option>
                 </select>
+                <small class="field-hint">Active karne par turant website par live ho jayega.</small>
               </div>
               <div class="field">
-                <label>Preview note</label>
-                <input class="input" type="text" value="Live slideshow updates as you edit" disabled />
+                <label>Realtime Sync Status</label>
+                <div style="padding: 10px 14px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="check-circle-2" style="width: 16px; height: 16px;"></i> Firebase Realtime Sync Enabled
+                </div>
               </div>
             </div>
           </div>
         </section>
       </div>
+
+      <!-- Sticky Footer Actions -->
       <div class="editor-footer glass">
-        <div class="editor-upload-state" data-role="upload-state">Ready.</div>
+        <div class="editor-upload-state" data-role="upload-state" style="font-size: 12.5px; color: var(--muted);">Ready to save.</div>
         <div class="toolbar editor-footer-actions">
           <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
-          <button type="submit" class="btn btn-primary" data-role="save-product">Save Product</button>
+          <button type="submit" class="btn btn-primary" data-role="save-product" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 22px;">
+            <i data-lucide="check"></i> ${isEdit ? 'Update Product' : 'Create Product'}
+          </button>
         </div>
       </div>
     </form>
@@ -3007,8 +3050,6 @@ function renderCatalogProductCard(item, node) {
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
         <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move position"><i data-lucide="arrow-up-down"></i> Move</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step up"><i data-lucide="arrow-up"></i> Up</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step down"><i data-lucide="arrow-down"></i> Down</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
         <button type="button" class="catalog-action-btn action-duplicate" data-action="duplicate" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="copy"></i> Duplicate</button>
         <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>
@@ -3066,8 +3107,6 @@ function renderCatalogCategoryCard(item, node) {
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
         <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move position"><i data-lucide="arrow-up-down"></i> Move</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-up" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step up"><i data-lucide="arrow-up"></i> Up</button>
-        <button type="button" class="catalog-action-btn action-move" data-action="move-down" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move 1 step down"><i data-lucide="arrow-down"></i> Down</button>
         <button type="button" class="catalog-action-btn action-prods" data-action="view-products" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="layout-list"></i> Products</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
         <button type="button" class="catalog-action-btn action-toggle" data-action="toggle" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="${toggleIcon}"></i> ${toggleAction}</button>

@@ -8002,5 +8002,118 @@ button {
   transition: width 0.2s ease;
 }
 
+/* ==========================================================================
+   PRODUCT & RECORD EDITOR ENHANCEMENTS (FIELD HINTS, SECTION HEADS, MOBILE)
+   ========================================================================== */
+
+.field-hint {
+  display: block;
+  font-size: 0.73rem;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.editor-section {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
+  transition: all 0.2s ease;
+}
+
+.editor-section:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.editor-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.editor-section-head h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-section-head p {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 4px 0 0 0;
+}
+
+/* Mobile Responsiveness for Editor Modal */
+@media (max-width: 900px) {
+  .product-editor-modal,
+  .modal {
+    width: 96% !important;
+    max-width: 96% !important;
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .product-editor-shell {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .product-editor-preview-column {
+    position: static !important;
+    width: 100% !important;
+  }
+
+  .product-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .editor-section {
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .editor-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    backdrop-filter: blur(14px);
+    background: rgba(10, 15, 30, 0.95) !important;
+    padding: 12px 14px !important;
+    margin-top: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+  }
+
+  .editor-footer-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .editor-footer-actions button {
+    flex: 1;
+    min-height: 46px;
+    font-size: 14px !important;
+  }
+
+  .media-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+
 
 
