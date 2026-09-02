@@ -72,8 +72,10 @@ export const DEFAULT_EMPTY = {
   priceUSD: '',
   badge: '',
   image: '',
+  images: [],
   galleryImages: [],
   video: '',
+  videos: [],
   status: 'active',
   displayOrder: 0,
 };

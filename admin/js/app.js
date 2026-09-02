@@ -90,8 +90,11 @@ const ui = {
     folder: 'all',
     type: 'all',
     sort: 'newest',
+    lifecycle: 'active',
     view: 'grid',
     status: '',
+    page: 1,
+    pageSize: 36,
     selectedIds: new Set(),
   },
   management: {
@@ -168,6 +171,7 @@ const collectionSchemas = {
       { key: 'image', label: 'Main Image', type: 'text', hint: 'Paste a URL or use the file picker below.' },
       { key: 'video', label: 'Main Video', type: 'text' },
       { key: 'galleryImages', label: 'Gallery Images', type: 'textarea', hint: 'One URL per line or upload multiple files.' },
+      { key: 'videos', label: 'Additional Videos', type: 'textarea', hint: 'One video URL per line or upload video files.' },
       { key: 'creators', label: 'Creators', type: 'textarea', hint: 'Comma or line separated' },
       { key: 'platforms', label: 'Platforms', type: 'textarea', hint: 'Comma or line separated' },
       { key: 'features', label: 'Features', type: 'textarea', hint: 'One feature per line' },
@@ -458,7 +462,7 @@ function buildTableRows(node, columns, items) {
 
 function sanitizeRecordFromForm(form, fields, existing = {}) {
   const data = { ...existing };
-  const linesToArray = ['galleryImages', 'creators', 'platforms', 'features', 'socialLinks'];
+  const linesToArray = ['galleryImages', 'videos', 'creators', 'platforms', 'features', 'socialLinks'];
   fields.forEach((field) => {
     const el = form.querySelector(`[name="${field.key}"]`);
     if (!el) return;
@@ -473,7 +477,12 @@ function sanitizeRecordFromForm(form, fields, existing = {}) {
   if (data.image && !data.images) data.images = [data.image];
   if (Array.isArray(data.galleryImages)) {
     const current = data.image ? [data.image] : [];
-    data.images = [...current, ...data.galleryImages.filter(Boolean)];
+    data.images = [...new Set([...current, ...data.galleryImages.filter(Boolean)])];
+  }
+  if (data.video && !data.videos) data.videos = [data.video];
+  if (Array.isArray(data.videos)) {
+    const current = data.video ? [data.video] : [];
+    data.videos = [...new Set([...current, ...data.videos.filter(Boolean)])];
   }
   if (data.status === '') data.status = 'active';
   if (!data.displayOrder && data.displayOrder !== 0) data.displayOrder = 0;
@@ -632,9 +641,191 @@ function renderMediaFallback(label = 'No image selected') {
   return `<div class="preview-fallback">${escapeHtml(label)}</div>`;
 }
 
-function renderProductPreview(record = {}, galleryCount = 0) {
-  const image = String(record.image || '').trim();
-  const mediaHtml = image ? mediaPreview({ image, title: record.title }) || `<img src="${escapeHtml(image)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />` : renderMediaFallback();
+function normalizeProductMedia(record = {}) {
+  const rawImage = String(record.image || record.imageUrl || record.thumbnail || record.photo || '').trim();
+  const rawImages = (Array.isArray(record.images) ? record.images : normalizeEditorList(record.images || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  const rawGallery = (Array.isArray(record.galleryImages) ? record.galleryImages : normalizeEditorList(record.galleryImages || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  
+  const allImages = [...new Set([rawImage, ...rawImages, ...rawGallery].filter(Boolean))];
+  const mainImage = rawImage || allImages[0] || '';
+  const galleryImages = allImages.filter((u) => u !== mainImage);
+
+  const rawVideo = String(record.video || '').trim();
+  const rawVideos = (Array.isArray(record.videos) ? record.videos : normalizeEditorList(record.videos || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  const allVideos = [...new Set([rawVideo, ...rawVideos].filter(Boolean))];
+  const mainVideo = rawVideo || allVideos[0] || '';
+
+  const mediaItems = [];
+  allImages.forEach((url) => {
+    mediaItems.push({
+      url,
+      type: 'image',
+      isMainImage: url === mainImage,
+      isMainVideo: false,
+    });
+  });
+  allVideos.forEach((url) => {
+    mediaItems.push({
+      url,
+      type: 'video',
+      isMainImage: false,
+      isMainVideo: url === mainVideo,
+    });
+  });
+
+  return {
+    mainImage,
+    allImages,
+    galleryImages,
+    mainVideo,
+    allVideos,
+    mediaItems,
+  };
+}
+
+function renderMediaStudioCard(item, index) {
+  const url = String(item.url || '').trim();
+  if (!url) return '';
+  const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(url);
+  const isMainImg = Boolean(item.isMainImage);
+  const isMainVid = Boolean(item.isMainVideo);
+  
+  return `
+    <div class="media-card-item ${isMainImg || isMainVid ? 'is-main' : ''}" draggable="true" data-media-item data-index="${index}" data-url="${escapeHtml(url)}" data-type="${isVideo ? 'video' : 'image'}">
+      <span class="media-card-badge ${isVideo ? 'type-vid' : 'type-img'}">${isVideo ? 'VID' : 'IMG'}</span>
+      ${isMainImg ? '<span class="media-card-main-tag"><i data-lucide="star" style="width:10px;height:10px;"></i> Main Img</span>' : ''}
+      ${isMainVid ? '<span class="media-card-main-tag" style="background:#ec4899;"><i data-lucide="play" style="width:10px;height:10px;"></i> Main Vid</span>' : ''}
+      <span class="media-card-index">#${index + 1}</span>
+      
+      <div class="media-card-preview-wrap">
+        ${isVideo
+          ? `<video src="${escapeHtml(url)}" autoplay muted loop playsinline preload="metadata"></video>`
+          : `<img src="${escapeHtml(url)}" alt="Media ${index + 1}" loading="lazy" />`
+        }
+      </div>
+
+      <div class="media-card-actions-overlay">
+        ${!isVideo && !isMainImg ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-image" data-index="${index}"><i data-lucide="star" style="width:11px;height:11px;"></i> Set Main</button>` : ''}
+        ${isVideo && !isMainVid ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-video" data-index="${index}"><i data-lucide="play" style="width:11px;height:11px;"></i> Set Main</button>` : ''}
+        
+        <div class="media-action-row">
+          <button type="button" class="media-card-btn" data-role="media-move-prev" data-index="${index}" title="Move Left / Up"><i data-lucide="arrow-left" style="width:12px;height:12px;"></i></button>
+          <button type="button" class="media-card-btn" data-role="media-move-next" data-index="${index}" title="Move Right / Down"><i data-lucide="arrow-right" style="width:12px;height:12px;"></i></button>
+          <button type="button" class="media-card-btn btn-remove" data-role="media-card-remove" data-index="${index}" title="Remove Media"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMediaStudio(record = {}) {
+  const { allImages, allVideos, mediaItems, mainImage, mainVideo, galleryImages } = normalizeProductMedia(record);
+  const imgCount = allImages.length;
+  const vidCount = allVideos.length;
+  const totalCount = mediaItems.length;
+
+  return `
+    <div class="editor-section">
+      <div class="editor-section-head">
+        <div>
+          <h4>Media Studio (Unlimited Images & Videos)</h4>
+          <p>Add as many images and videos as you want. Upload files directly or paste URLs.</p>
+        </div>
+      </div>
+
+      <div class="media-studio">
+        <div class="media-studio-header">
+          <div class="media-studio-stats">
+            <span class="media-stat-chip img-chip" data-role="stat-imgs"><i data-lucide="image" style="width:14px;height:14px;"></i> <strong>${imgCount}</strong> Images</span>
+            <span class="media-stat-chip vid-chip" data-role="stat-vids"><i data-lucide="video" style="width:14px;height:14px;"></i> <strong>${vidCount}</strong> Videos</span>
+            <span class="media-stat-chip"><i data-lucide="layers" style="width:14px;height:14px;"></i> <strong>${totalCount}</strong> Total Media</span>
+          </div>
+          <div class="media-studio-actions">
+            <button type="button" class="btn media-btn-upload" data-role="media-upload-trigger"><i data-lucide="upload-cloud"></i> Upload Media (Files)</button>
+            <button type="button" class="btn btn-ghost" data-role="media-url-toggle"><i data-lucide="link"></i> Add via URL</button>
+            <input type="file" class="sr-only" accept="image/*,video/*" multiple data-role="media-multi-file-input" />
+          </div>
+        </div>
+
+        <div class="media-url-adder" data-role="media-url-adder-box">
+          <input class="input" type="text" data-role="media-url-input" placeholder="Paste Image URL or Video URL (https://...)" />
+          <select class="select media-url-type-select" data-role="media-url-type">
+            <option value="auto">Auto-Detect</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+          <button type="button" class="btn btn-primary" data-role="media-url-add-btn" style="flex-shrink:0;"><i data-lucide="plus"></i> Add Media</button>
+        </div>
+
+        <div class="media-items-grid" data-role="media-studio-grid">
+          ${mediaItems.length ? mediaItems.map((item, index) => renderMediaStudioCard(item, index)).join('') : `
+            <div class="media-empty-state">
+              <i data-lucide="image-plus"></i>
+              <strong style="color:var(--text);font-size:0.95rem;">No media items added yet</strong>
+              <p>Upload images/videos or paste URLs above. They will show directly on the live storefront slideshow.</p>
+            </div>
+          `}
+        </div>
+
+        <!-- Hidden sync inputs -->
+        <input type="hidden" name="image" data-role="main-image-source" value="${escapeHtml(mainImage)}" />
+        <input type="hidden" name="video" data-role="main-video-source" value="${escapeHtml(mainVideo)}" />
+        <textarea class="textarea sr-only" name="galleryImages" data-role="gallery-images-source">${escapeHtml(galleryImages.join('\n'))}</textarea>
+        <textarea class="textarea sr-only" name="videos" data-role="videos-source">${escapeHtml(allVideos.join('\n'))}</textarea>
+        <textarea class="textarea sr-only" name="images" data-role="all-images-source">${escapeHtml(allImages.join('\n'))}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderProductPreview(record = {}, activeIndex = 0) {
+  const { allImages, allVideos, mediaItems } = normalizeProductMedia(record);
+  const totalSlides = mediaItems.length;
+  const safeIdx = totalSlides > 0 ? Math.max(0, Math.min(totalSlides - 1, activeIndex)) : 0;
+  
+  let mediaHtml = '';
+  if (totalSlides === 0) {
+    mediaHtml = renderMediaFallback('No media added yet');
+  } else if (totalSlides === 1) {
+    const single = mediaItems[0];
+    const isVid = single.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(single.url);
+    mediaHtml = `
+      <div class="editor-slideshow-wrap">
+        <div class="editor-slideshow-slide active">
+          ${isVid
+            ? `<video src="${escapeHtml(single.url)}" autoplay muted loop playsinline></video>`
+            : `<img src="${escapeHtml(single.url)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
+          }
+        </div>
+      </div>
+    `;
+  } else {
+    const slidesHtml = mediaItems.map((m, i) => {
+      const isVid = m.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(m.url);
+      return `
+        <div class="editor-slideshow-slide ${i === safeIdx ? 'active' : ''}" data-slide-index="${i}">
+          ${isVid
+            ? `<video src="${escapeHtml(m.url)}" autoplay muted loop playsinline></video>`
+            : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
+          }
+        </div>
+      `;
+    }).join('');
+
+    const dotsHtml = mediaItems.map((_, i) => `
+      <span class="editor-slideshow-dot ${i === safeIdx ? 'active' : ''}" data-slide-dot="${i}"></span>
+    `).join('');
+
+    mediaHtml = `
+      <div class="editor-slideshow-wrap" data-role="editor-slideshow" data-active-idx="${safeIdx}">
+        ${slidesHtml}
+        <div class="editor-slideshow-nav">${dotsHtml}</div>
+        <button type="button" class="editor-slideshow-arrow prev" data-slide-nav="prev" aria-label="Previous slide">&#8249;</button>
+        <button type="button" class="editor-slideshow-arrow next" data-slide-nav="next" aria-label="Next slide">&#8250;</button>
+      </div>
+    `;
+  }
+
   const tags = [record.badge, record.category, record.status].filter(Boolean);
   return `
     <div class="editor-preview glass product-preview-card" data-role="product-preview">
@@ -649,63 +840,26 @@ function renderProductPreview(record = {}, galleryCount = 0) {
           ${tags.map((tag) => `<span class="badge">${escapeHtml(tag)}</span>`).join('')}
         </div>
         <div class="editor-preview-list">
-          <div><span>INR</span><strong>${escapeHtml(record.priceINR || '-')}</strong></div>
-          <div><span>USD</span><strong>${escapeHtml(record.priceUSD || '-')}</strong></div>
-          <div><span>Gallery</span><strong>${escapeHtml(String(galleryCount))}</strong></div>
+          <div><span>INR</span><strong>${escapeHtml(record.priceINR ? `₹${record.priceINR.replace(/^[₹\s]+/, '')}` : '-')}</strong></div>
+          <div><span>USD</span><strong>${escapeHtml(record.priceUSD ? `$${record.priceUSD.replace(/^[\$\s]+/, '')}` : '-')}</strong></div>
+          <div><span>Images</span><strong>${escapeHtml(String(allImages.length))}</strong></div>
+          <div><span>Videos</span><strong>${escapeHtml(String(allVideos.length))}</strong></div>
         </div>
       </div>
-    </div>
-  `;
-}
-
-function renderGalleryThumb(url, index) {
-  const image = String(url || '').trim();
-  if (!image) return '';
-  return `
-    <div class="gallery-thumb" draggable="true" data-gallery-item data-index="${index}" data-url="${escapeHtml(image)}">
-      <button type="button" class="gallery-thumb-remove" data-role="gallery-remove" data-index="${index}" aria-label="Remove image"><i data-lucide="x"></i></button>
-      <img src="${escapeHtml(image)}" alt="Gallery ${index + 1}" loading="lazy" />
-      <span class="gallery-thumb-index">${index + 1}</span>
-    </div>
-  `;
-}
-
-function renderGalleryManager(record = {}) {
-  const items = normalizeEditorList(record.galleryImages || []);
-  return `
-    <div class="field full editor-gallery-field" data-gallery-field>
-      <div class="editor-section-head">
-        <div>
-          <h4>Gallery Images</h4>
-          <p>Drag thumbnails to reorder. Remove only clears this product gallery.</p>
-        </div>
-        <div class="toolbar editor-media-actions">
-          <button type="button" class="btn btn-ghost" data-role="gallery-pick">Add Images</button>
-          <button type="button" class="btn btn-ghost" data-role="gallery-url-toggle">Add URL</button>
-          <input type="file" class="sr-only" accept="image/*" multiple data-role="gallery-file-input" />
-        </div>
-      </div>
-      <div class="gallery-url-row">
-        <input class="input" type="text" data-role="gallery-url-input" placeholder="Paste image URL" />
-        <button type="button" class="btn btn-ghost" data-role="gallery-url-add">Add</button>
-      </div>
-      <div class="gallery-grid" data-role="gallery-grid">
-        ${items.length ? items.map((url, index) => renderGalleryThumb(url, index)).join('') : '<div class="gallery-empty">No gallery images yet.</div>'}
-      </div>
-      <textarea class="textarea sr-only" name="galleryImages" data-role="gallery-source">${escapeHtml(items.join('\n'))}</textarea>
-      <small class="section-subtitle">Supported: existing Supabase URLs, pasted URLs, and local image uploads.</small>
     </div>
   `;
 }
 
 function renderProductEditor(record = {}, schema = null) {
-  const mainImage = record.image || record.imageUrl || record.thumbnail || record.photo || (Array.isArray(record.images) ? record.images[0] : '') || '';
-  const galleryImgs = normalizeEditorList(record.galleryImages || (Array.isArray(record.images) && record.images.length > 1 ? record.images.slice(1) : []));
+  const { allImages, allVideos, mainImage, mainVideo, galleryImages } = normalizeProductMedia(record);
 
   const data = {
     ...record,
     image: mainImage,
-    galleryImages: galleryImgs,
+    images: allImages,
+    galleryImages,
+    video: mainVideo,
+    videos: allVideos,
     creators: normalizeEditorList(record.creators || []),
     platforms: normalizeEditorList(record.platforms || []),
     features: normalizeEditorList(record.features || []),
@@ -725,10 +879,10 @@ function renderProductEditor(record = {}, schema = null) {
     <form id="recordForm" class="product-editor-form" data-node="products" data-id="${escapeHtml(data.id || '')}">
       <div class="product-editor-shell">
         <aside class="product-editor-preview-column">
-          ${renderProductPreview(data, data.galleryImages.length)}
+          ${renderProductPreview(data, 0)}
           <div class="editor-help glass">
-            <strong>Image workflow</strong>
-            <p>Use Replace Image or Add Images to upload directly to Supabase media. URLs stay supported, but are secondary.</p>
+            <strong>Unlimited Media</strong>
+            <p>Upload as many images and videos as you need. They will show automatically in the storefront carousel.</p>
           </div>
         </aside>
         <section class="product-editor-main">
@@ -779,7 +933,7 @@ function renderProductEditor(record = {}, schema = null) {
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
-                <h4>Pricing</h4>
+                <h4>Pricing & Action</h4>
                 <p>Commercial details and public action link.</p>
               </div>
             </div>
@@ -803,52 +957,7 @@ function renderProductEditor(record = {}, schema = null) {
             </div>
           </div>
 
-          <div class="editor-section">
-            <div class="editor-section-head">
-              <div>
-                <h4>Media</h4>
-                <p>Upload to the existing Supabase media bucket or paste a URL if needed.</p>
-              </div>
-            </div>
-            <div class="media-manager">
-              <div class="media-manager-panel" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; padding: 20px;">
-                <!-- Main Image Column -->
-                <div class="main-media-column" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                  <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 16px; height: 16px; color: #6366f1;"></i> Main Image</div>
-                  <div class="media-manager-preview" data-role="main-image-preview" style="width: 100% !important; max-width: 100% !important; height: 220px !important; min-height: 220px !important; max-height: 220px !important; border-radius: 12px; margin-bottom: 4px;">${data.image ? `<img src="${escapeHtml(data.image)}" alt="${escapeHtml(data.title || 'Main image')}" loading="lazy" />` : renderMediaFallback('No main image selected')}</div>
-                  <div class="media-manager-actions">
-                    <div class="toolbar media-manager-toolbar" style="margin-bottom: 4px;">
-                      <button type="button" class="btn btn-ghost" data-role="main-image-replace">Replace Image</button>
-                      <button type="button" class="btn btn-ghost" data-role="main-image-remove">Remove Image</button>
-                      <input type="file" class="sr-only" accept="image/*" data-role="main-image-file" />
-                    </div>
-                    <div class="field">
-                      <label for="image">Main Image URL</label>
-                      <input class="input" type="text" name="image" id="image" value="${escapeHtml(data.image || '')}" placeholder="https://..." data-role="main-image-url" />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Main Video Column -->
-                <div class="main-media-column" style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
-                  <div style="font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); display: flex; align-items: center; gap: 6px;"><i data-lucide="video" style="width: 16px; height: 16px; color: #ec4899;"></i> Main Video</div>
-                  <div class="media-manager-preview" data-role="main-video-preview" style="width: 100% !important; max-width: 100% !important; height: 220px !important; min-height: 220px !important; max-height: 220px !important; border-radius: 12px; margin-bottom: 4px;">${data.video ? `<video src="${escapeHtml(data.video)}" autoplay muted loop playsinline class="thumb-media" style="width:100%;height:100%;object-fit:cover;"></video>` : renderMediaFallback('No main video selected')}</div>
-                  <div class="media-manager-actions">
-                    <div class="toolbar media-manager-toolbar" style="margin-bottom: 4px;">
-                      <button type="button" class="btn btn-ghost" data-role="main-video-replace">Replace Video</button>
-                      <button type="button" class="btn btn-ghost" data-role="main-video-remove">Remove Video</button>
-                      <input type="file" class="sr-only" accept="video/*" data-role="main-video-file" />
-                    </div>
-                    <div class="field">
-                      <label for="video">Main Video URL</label>
-                      <input class="input" type="text" name="video" id="video" value="${escapeHtml(data.video || '')}" placeholder="https://..." data-role="main-video-url" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              ${renderGalleryManager(data)}
-            </div>
-          </div>
+          ${renderMediaStudio(data)}
 
           <div class="editor-section">
             <div class="editor-section-head">
@@ -877,8 +986,8 @@ function renderProductEditor(record = {}, schema = null) {
                 </select>
               </div>
               <div class="field">
-                <label for="badgeIcon">Preview note</label>
-                <input class="input" type="text" value="Live preview updates as you edit" disabled />
+                <label>Preview note</label>
+                <input class="input" type="text" value="Live slideshow updates as you edit" disabled />
               </div>
             </div>
           </div>
@@ -1100,21 +1209,19 @@ function syncTagEditor(form, name) {
   return items;
 }
 
-function syncProductEditorGallery(form) {
-  const source = form.querySelector('[data-role="gallery-source"]');
-  const list = normalizeEditorList(source?.value || '');
-  const grid = form.querySelector('[data-role="gallery-grid"]');
-  if (grid) {
-    grid.innerHTML = list.length ? list.map((url, index) => renderGalleryThumb(url, index)).join('') : '<div class="gallery-empty">No gallery images yet.</div>';
-  }
-  return list;
-}
-
 function getProductEditorRecord(form) {
-  const gallery = syncProductEditorGallery(form);
+  const items = form.__mediaStudioItems || [];
+  const mainImage = items.find((i) => i.isMainImage)?.url || items.find((i) => i.type === 'image')?.url || form.querySelector('[name="image"]')?.value || '';
+  const allImages = items.filter((i) => i.type === 'image').map((i) => i.url);
+  const galleryImages = allImages.filter((u) => u !== mainImage);
+  
+  const mainVideo = items.find((i) => i.isMainVideo)?.url || items.find((i) => i.type === 'video')?.url || form.querySelector('[name="video"]')?.value || '';
+  const allVideos = items.filter((i) => i.type === 'video').map((i) => i.url);
+
   const creators = syncTagEditor(form, 'creators');
   const platforms = syncTagEditor(form, 'platforms');
   const features = syncTagEditor(form, 'features');
+
   return {
     title: form.querySelector('[name="title"]')?.value || '',
     slug: form.querySelector('[name="slug"]')?.value || '',
@@ -1125,9 +1232,11 @@ function getProductEditorRecord(form) {
     badge: form.querySelector('[name="badge"]')?.value || '',
     badgeStyle: form.querySelector('[name="badgeStyle"]')?.value || '',
     badgeIcon: form.querySelector('[name="badgeIcon"]')?.value || '',
-    image: form.querySelector('[name="image"]')?.value || '',
-    video: form.querySelector('[name="video"]')?.value || '',
-    galleryImages: gallery,
+    image: mainImage,
+    images: allImages.length ? allImages : (mainImage ? [mainImage] : []),
+    galleryImages,
+    video: mainVideo,
+    videos: allVideos.length ? allVideos : (mainVideo ? [mainVideo] : []),
     creators,
     platforms,
     features,
@@ -1137,118 +1246,184 @@ function getProductEditorRecord(form) {
   };
 }
 
-function updateProductEditorPreview(form) {
+function updateProductEditorPreview(form, activeIdx = null) {
   const previewRoot = form.querySelector('[data-role="product-preview"]');
-  const state = getProductEditorRecord(form);
-  const galleryCount = state.galleryImages.length;
-  const tags = [state.badge, state.category, state.status].filter(Boolean);
   if (!previewRoot) return;
-  previewRoot.innerHTML = `
-    <div class="editor-preview glass product-preview-card">
-      <div class="editor-preview-media product-preview-media">
-        ${state.image ? `<img src="${escapeHtml(state.image)}" alt="${escapeHtml(state.title || 'Preview')}" loading="lazy" />` : renderMediaFallback()}
-      </div>
-      <div class="editor-preview-body">
-        <div class="editor-preview-badge">${escapeHtml(state.badge || state.category || 'Product')}</div>
-        <h3>${escapeHtml(state.title || 'Untitled product')}</h3>
-        <p>${escapeHtml(state.description || 'Add details, pricing and media to preview the live product card.')}</p>
-        <div class="preview-tags">
-          ${tags.map((tag) => `<span class="badge">${escapeHtml(tag)}</span>`).join('')}
-        </div>
-        <div class="editor-preview-list">
-          <div><span>INR</span><strong>${escapeHtml(state.priceINR || '-')}</strong></div>
-          <div><span>USD</span><strong>${escapeHtml(state.priceUSD || '-')}</strong></div>
-          <div><span>Gallery</span><strong>${escapeHtml(String(galleryCount))}</strong></div>
-        </div>
-      </div>
-    </div>
-  `;
+  const state = getProductEditorRecord(form);
+  if (activeIdx !== null) form.__previewSlideIndex = activeIdx;
+  previewRoot.innerHTML = renderProductPreview(state, form.__previewSlideIndex || 0);
   if (window.lucide) lucide.createIcons();
 }
 
 async function uploadEditorFile(file, folder, stateEl, source = 'product-editor') {
   const progress = stateEl;
-  progress.textContent = `Uploading ${file.name}...`;
+  if (progress) progress.textContent = `Uploading ${file.name}...`;
   const result = await uploadAsset(file, folder, (value) => {
-    progress.textContent = `Uploading ${file.name}... ${value}%`;
+    if (progress) progress.textContent = `Uploading ${file.name}... ${value}%`;
   });
   const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
   await saveUploadedMediaRecord(file, result, folder, mediaType, source, `${folder}:${file.name}`);
-  progress.textContent = `Uploaded ${file.name}`;
+  if (progress) progress.textContent = `Uploaded ${file.name}`;
   return result.publicUrl;
 }
 
 function attachProductEditorBehaviors(form) {
   const stateEl = form.querySelector('[data-role="upload-state"]');
   const saveBtn = form.querySelector('[data-role="save-product"]');
-  const mainPreview = form.querySelector('[data-role="main-image-preview"]');
-  const mainImageInput = form.querySelector('[data-role="main-image-url"]');
-  const mainFileInput = form.querySelector('[data-role="main-image-file"]');
+  const mediaGrid = form.querySelector('[data-role="media-studio-grid"]');
+  const multiFileInput = form.querySelector('[data-role="media-multi-file-input"]');
+  const uploadTriggerBtn = form.querySelector('[data-role="media-upload-trigger"]');
+  const urlToggleBtn = form.querySelector('[data-role="media-url-toggle"]');
+  const urlAdderBox = form.querySelector('[data-role="media-url-adder-box"]');
+  const urlInput = form.querySelector('[data-role="media-url-input"]');
+  const urlTypeSelect = form.querySelector('[data-role="media-url-type"]');
+  const urlAddBtn = form.querySelector('[data-role="media-url-add-btn"]');
   
-  const videoPreview = form.querySelector('[data-role="main-video-preview"]');
-  const videoUrlInput = form.querySelector('[data-role="main-video-url"]');
-  const videoFileInput = form.querySelector('[data-role="main-video-file"]');
+  const mainImageHidden = form.querySelector('[data-role="main-image-source"]');
+  const mainVideoHidden = form.querySelector('[data-role="main-video-source"]');
+  const galleryImagesHidden = form.querySelector('[data-role="gallery-images-source"]');
+  const videosHidden = form.querySelector('[data-role="videos-source"]');
+  const allImagesHidden = form.querySelector('[data-role="all-images-source"]');
   
-  const gallerySource = form.querySelector('[data-role="gallery-source"]');
-  const galleryInput = form.querySelector('[data-role="gallery-url-input"]');
-  const galleryFileInput = form.querySelector('[data-role="gallery-file-input"]');
-  const galleryGrid = form.querySelector('[data-role="gallery-grid"]');
   const tagFields = [...form.querySelectorAll('[data-tag-field]')];
   form.__galleryDragIndex = null;
+  form.__previewSlideIndex = 0;
 
-  const rerenderGallery = () => {
-    syncProductEditorGallery(form);
-    updateProductEditorPreview(form);
-    if (window.lucide) lucide.createIcons();
-  };
+  // Initialize form.__mediaStudioItems from existing hidden fields
+  const rawImage = String(mainImageHidden?.value || '').trim();
+  const rawImages = normalizeEditorList(allImagesHidden?.value || '');
+  const rawGallery = normalizeEditorList(galleryImagesHidden?.value || '');
+  const allImgList = [...new Set([rawImage, ...rawImages, ...rawGallery].filter(Boolean))];
+  const initialMainImage = rawImage || allImgList[0] || '';
+
+  const rawVideo = String(mainVideoHidden?.value || '').trim();
+  const rawVideos = normalizeEditorList(videosHidden?.value || '');
+  const allVidList = [...new Set([rawVideo, ...rawVideos].filter(Boolean))];
+  const initialMainVideo = rawVideo || allVidList[0] || '';
+
+  const initialItems = [];
+  allImgList.forEach((url) => {
+    initialItems.push({
+      url,
+      type: 'image',
+      isMainImage: url === initialMainImage,
+      isMainVideo: false,
+    });
+  });
+  allVidList.forEach((url) => {
+    initialItems.push({
+      url,
+      type: 'video',
+      isMainImage: false,
+      isMainVideo: url === initialMainVideo,
+    });
+  });
+
+  form.__mediaStudioItems = initialItems;
 
   const setBusy = (busy, message = '') => {
     if (saveBtn) saveBtn.disabled = busy;
     if (message && stateEl) stateEl.textContent = message;
   };
 
-  const updateMainPreview = () => {
-    if (!mainPreview) return;
-    const value = String(mainImageInput?.value || '').trim();
-    mainPreview.innerHTML = value ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(form.querySelector('[name="title"]')?.value || 'Main image')}" loading="lazy" />` : renderMediaFallback('No main image selected');
+  const syncMediaStudio = () => {
+    const items = form.__mediaStudioItems || [];
+    
+    // Ensure main image flag
+    const hasMainImg = items.some((i) => i.type === 'image' && i.isMainImage);
+    if (!hasMainImg) {
+      const firstImg = items.find((i) => i.type === 'image');
+      if (firstImg) firstImg.isMainImage = true;
+    }
+    
+    // Ensure main video flag
+    const hasMainVid = items.some((i) => i.type === 'video' && i.isMainVideo);
+    if (!hasMainVid) {
+      const firstVid = items.find((i) => i.type === 'video');
+      if (firstVid) firstVid.isMainVideo = true;
+    }
+
+    const mainImgUrl = items.find((i) => i.type === 'image' && i.isMainImage)?.url || items.find((i) => i.type === 'image')?.url || '';
+    const imgList = items.filter((i) => i.type === 'image').map((i) => i.url);
+    const galleryList = imgList.filter((u) => u !== mainImgUrl);
+
+    const mainVidUrl = items.find((i) => i.type === 'video' && i.isMainVideo)?.url || items.find((i) => i.type === 'video')?.url || '';
+    const vidList = items.filter((i) => i.type === 'video').map((i) => i.url);
+
+    if (mainImageHidden) mainImageHidden.value = mainImgUrl;
+    if (mainVideoHidden) mainVideoHidden.value = mainVidUrl;
+    if (galleryImagesHidden) galleryImagesHidden.value = galleryList.join('\n');
+    if (videosHidden) videosHidden.value = vidList.join('\n');
+    if (allImagesHidden) allImagesHidden.value = imgList.join('\n');
+
+    // Update Stats chips
+    const statImgs = form.querySelector('[data-role="stat-imgs"] strong');
+    const statVids = form.querySelector('[data-role="stat-vids"] strong');
+    if (statImgs) statImgs.textContent = String(imgList.length);
+    if (statVids) statVids.textContent = String(vidList.length);
+
+    // Re-render Media Studio Grid
+    if (mediaGrid) {
+      mediaGrid.innerHTML = items.length
+        ? items.map((item, index) => renderMediaStudioCard(item, index)).join('')
+        : `
+          <div class="media-empty-state">
+            <i data-lucide="image-plus"></i>
+            <strong style="color:var(--text);font-size:0.95rem;">No media items added yet</strong>
+            <p>Upload images/videos or paste URLs above. They will show directly on the live storefront slideshow.</p>
+          </div>
+        `;
+    }
+
     updateProductEditorPreview(form);
     if (window.lucide) lucide.createIcons();
   };
 
-  const updateVideoPreview = () => {
-    if (!videoPreview) return;
-    const value = String(videoUrlInput?.value || '').trim();
-    videoPreview.innerHTML = value ? `<video src="${escapeHtml(value)}" autoplay muted loop playsinline class="thumb-media" style="width:100%;height:100%;object-fit:cover;"></video>` : renderMediaFallback('No main video selected');
-    updateProductEditorPreview(form);
-    if (window.lucide) lucide.createIcons();
+  const addMediaItems = (newItems = []) => {
+    const current = form.__mediaStudioItems || [];
+    const valid = newItems.filter((it) => it && it.url && String(it.url).trim());
+    form.__mediaStudioItems = [...current, ...valid];
+    syncMediaStudio();
   };
 
-  const syncAllTags = () => {
-    tagFields.forEach((field) => syncTagEditor(form, field.dataset.tagField));
-    updateProductEditorPreview(form);
+  const removeMediaIndex = (index) => {
+    const current = form.__mediaStudioItems || [];
+    if (index >= 0 && index < current.length) {
+      current.splice(index, 1);
+      form.__mediaStudioItems = current;
+      syncMediaStudio();
+    }
   };
 
-  const addGalleryUrls = (urls) => {
-    const existing = normalizeEditorList(gallerySource?.value || '');
-    const next = mergeUniqueList(existing, urls.map((item) => String(item || '').trim()).filter(Boolean));
-    if (gallerySource) gallerySource.value = next.join('\n');
-    rerenderGallery();
+  const moveMediaIndex = (fromIndex, toIndex) => {
+    const current = form.__mediaStudioItems || [];
+    if (fromIndex < 0 || toIndex < 0 || fromIndex >= current.length || toIndex >= current.length || fromIndex === toIndex) return;
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+    form.__mediaStudioItems = current;
+    syncMediaStudio();
   };
 
-  const removeGalleryIndex = (index) => {
-    const existing = normalizeEditorList(gallerySource?.value || '');
-    existing.splice(index, 1);
-    if (gallerySource) gallerySource.value = existing.join('\n');
-    rerenderGallery();
+  const setAsMainImage = (index) => {
+    const current = form.__mediaStudioItems || [];
+    current.forEach((item, i) => {
+      if (item.type === 'image') {
+        item.isMainImage = (i === index);
+      }
+    });
+    form.__mediaStudioItems = current;
+    syncMediaStudio();
   };
 
-  const moveGalleryIndex = (fromIndex, toIndex) => {
-    const existing = normalizeEditorList(gallerySource?.value || '');
-    if (fromIndex < 0 || toIndex < 0 || fromIndex >= existing.length || toIndex >= existing.length) return;
-    const [item] = existing.splice(fromIndex, 1);
-    existing.splice(toIndex, 0, item);
-    if (gallerySource) gallerySource.value = existing.join('\n');
-    rerenderGallery();
+  const setAsMainVideo = (index) => {
+    const current = form.__mediaStudioItems || [];
+    current.forEach((item, i) => {
+      if (item.type === 'video') {
+        item.isMainVideo = (i === index);
+      }
+    });
+    form.__mediaStudioItems = current;
+    syncMediaStudio();
   };
 
   const handleTagAdd = (fieldName, input) => {
@@ -1266,6 +1441,82 @@ function attachProductEditorBehaviors(form) {
     updateProductEditorPreview(form);
   };
 
+  // Upload button trigger
+  uploadTriggerBtn?.addEventListener('click', () => {
+    multiFileInput?.click();
+  });
+
+  // Toggle URL adder box
+  urlToggleBtn?.addEventListener('click', () => {
+    if (urlAdderBox) {
+      urlAdderBox.style.display = urlAdderBox.style.display === 'none' ? 'flex' : 'none';
+      if (urlAdderBox.style.display === 'flex') {
+        urlInput?.focus();
+      }
+    }
+  });
+
+  // URL Add handler
+  urlAddBtn?.addEventListener('click', () => {
+    const rawUrl = String(urlInput?.value || '').trim();
+    if (!rawUrl) {
+      showToast('Please enter a valid URL', 'warning');
+      return;
+    }
+    const chosenType = urlTypeSelect?.value || 'auto';
+    let mediaType = chosenType;
+    if (chosenType === 'auto') {
+      mediaType = (/\.(mp4|webm|mov|m4v|ogg)$/i.test(rawUrl) || rawUrl.includes('video')) ? 'video' : 'image';
+    }
+    addMediaItems([{
+      url: rawUrl,
+      type: mediaType,
+      isMainImage: false,
+      isMainVideo: false,
+    }]);
+    if (urlInput) urlInput.value = '';
+    showToast(`Added ${mediaType} from URL`, 'success');
+  });
+
+  // Enter in URL input
+  urlInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      urlAddBtn?.click();
+    }
+  });
+
+  // File Upload change
+  multiFileInput?.addEventListener('change', async (event) => {
+    const files = [...(event.target.files || [])];
+    if (!files.length) return;
+    event.target.value = '';
+
+    try {
+      setBusy(true, `Uploading ${files.length} media file${files.length > 1 ? 's' : ''}...`);
+      const newItems = [];
+      for (const file of files) {
+        const isVid = file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+        const folder = isVid ? mediaFolderForNode('products', 'video') : mediaFolderForNode('products', 'gallery');
+        const url = await uploadEditorFile(file, folder, stateEl, 'product-editor');
+        newItems.push({
+          url,
+          type: isVid ? 'video' : 'image',
+          isMainImage: false,
+          isMainVideo: false,
+        });
+      }
+      addMediaItems(newItems);
+      showToast(`Uploaded ${files.length} media item${files.length > 1 ? 's' : ''}!`, 'success');
+    } catch (error) {
+      if (stateEl) stateEl.textContent = error?.message || 'Media upload failed';
+      showToast(error?.message || 'Media upload failed', 'danger');
+    } finally {
+      setBusy(false, 'Ready.');
+    }
+  });
+
+  // Form input listeners (title, price, slug, etc.)
   form.addEventListener('input', (event) => {
     if (event.target.name === 'title') {
       const slugInput = form.querySelector('[name="slug"]');
@@ -1273,82 +1524,80 @@ function attachProductEditorBehaviors(form) {
         slugInput.value = slugify(event.target.value);
       }
     }
-    if (event.target === mainImageInput || event.target === videoUrlInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"],[name="video"]')) {
-      updateMainPreview();
-      updateVideoPreview();
+    if (event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"]')) {
+      updateProductEditorPreview(form);
       return;
     }
     if (event.target.matches('[data-role="tag-input"]')) {
       updateProductEditorPreview(form);
       return;
     }
-    if (event.target === gallerySource) {
-      rerenderGallery();
-    }
   });
 
-  form.addEventListener('change', async (event) => {
-    if (event.target === mainFileInput && event.target.files?.[0]) {
-      const file = event.target.files[0];
-      try {
-        setBusy(true, `Uploading ${file.name}...`);
-        const url = await uploadEditorFile(file, mediaFolderForNode('products', 'image'), stateEl);
-        if (mainImageInput) mainImageInput.value = url;
-        event.target.value = '';
-        updateMainPreview();
-      } catch (error) {
-        stateEl.textContent = error?.message || 'Image upload failed';
-        showToast(error?.message || 'Image upload failed', 'danger');
-      } finally {
-        setBusy(false, 'Ready.');
-      }
-      return;
-    }
-    if (event.target === videoFileInput && event.target.files?.[0]) {
-      const file = event.target.files[0];
-      try {
-        setBusy(true, `Uploading ${file.name}...`);
-        const url = await uploadEditorFile(file, mediaFolderForNode('products', 'video'), stateEl);
-        if (videoUrlInput) videoUrlInput.value = url;
-        event.target.value = '';
-        updateVideoPreview();
-      } catch (error) {
-        stateEl.textContent = error?.message || 'Video upload failed';
-        showToast(error?.message || 'Video upload failed', 'danger');
-      } finally {
-        setBusy(false, 'Ready.');
-      }
-      return;
-    }
-    if (event.target === galleryFileInput && event.target.files?.length) {
-      const files = [...event.target.files];
-      try {
-        setBusy(true, `Uploading ${files.length} gallery image${files.length > 1 ? 's' : ''}...`);
-        const next = normalizeEditorList(gallerySource?.value || '');
-        for (const file of files) {
-          const url = await uploadEditorFile(file, mediaFolderForNode('products', 'gallery'), stateEl);
-          next.push(url);
-        }
-        if (gallerySource) gallerySource.value = mergeUniqueList([], next).join('\n');
-        event.target.value = '';
-        rerenderGallery();
-      } catch (error) {
-        stateEl.textContent = error?.message || 'Gallery upload failed';
-        showToast(error?.message || 'Gallery upload failed', 'danger');
-      } finally {
-        setBusy(false, 'Ready.');
-      }
-      return;
-    }
-    if (event.target.matches('[data-role="tag-input"]')) {
-      return;
-    }
-    if (event.target === mainImageInput || event.target === videoUrlInput || event.target.matches('[name="title"],[name="slug"],[name="category"],[name="description"],[name="priceINR"],[name="priceUSD"],[name="badge"],[name="badgeStyle"],[name="badgeIcon"],[name="orderLink"],[name="status"],[name="displayOrder"],[name="video"]')) {
-      updateProductEditorPreview(form);
-    }
-  });
-
+  // Click delegation
   form.addEventListener('click', (event) => {
+    // Slideshow dot click in preview
+    const slideDot = event.target.closest('[data-slide-dot]');
+    if (slideDot) {
+      const idx = Number(slideDot.dataset.slideDot);
+      updateProductEditorPreview(form, idx);
+      return;
+    }
+
+    // Slideshow arrow nav in preview
+    const slideNav = event.target.closest('[data-slide-nav]');
+    if (slideNav) {
+      const total = (form.__mediaStudioItems || []).length;
+      if (total <= 1) return;
+      let currentIdx = form.__previewSlideIndex || 0;
+      if (slideNav.dataset.slideNav === 'prev') {
+        currentIdx = (currentIdx - 1 + total) % total;
+      } else {
+        currentIdx = (currentIdx + 1) % total;
+      }
+      updateProductEditorPreview(form, currentIdx);
+      return;
+    }
+
+    // Media studio actions
+    const removeBtn = event.target.closest('[data-role="media-card-remove"]');
+    if (removeBtn) {
+      const idx = Number(removeBtn.dataset.index);
+      removeMediaIndex(idx);
+      return;
+    }
+
+    const setMainImgBtn = event.target.closest('[data-role="set-main-image"]');
+    if (setMainImgBtn) {
+      const idx = Number(setMainImgBtn.dataset.index);
+      setAsMainImage(idx);
+      showToast('Set as Main Image', 'success');
+      return;
+    }
+
+    const setMainVidBtn = event.target.closest('[data-role="set-main-video"]');
+    if (setMainVidBtn) {
+      const idx = Number(setMainVidBtn.dataset.index);
+      setAsMainVideo(idx);
+      showToast('Set as Main Video', 'success');
+      return;
+    }
+
+    const movePrevBtn = event.target.closest('[data-role="media-move-prev"]');
+    if (movePrevBtn) {
+      const idx = Number(movePrevBtn.dataset.index);
+      moveMediaIndex(idx, idx - 1);
+      return;
+    }
+
+    const moveNextBtn = event.target.closest('[data-role="media-move-next"]');
+    if (moveNextBtn) {
+      const idx = Number(moveNextBtn.dataset.index);
+      moveMediaIndex(idx, idx + 1);
+      return;
+    }
+
+    // Tags
     const tagAdd = event.target.closest('[data-role="tag-add"]');
     if (tagAdd) {
       const field = tagAdd.closest('[data-tag-field]');
@@ -1369,76 +1618,45 @@ function attachProductEditorBehaviors(form) {
       updateProductEditorPreview(form);
       return;
     }
-    const galleryRemove = event.target.closest('[data-role="gallery-remove"]');
-    if (galleryRemove) {
-      removeGalleryIndex(Number(galleryRemove.dataset.index));
-      return;
-    }
-    const galleryPick = event.target.closest('[data-role="gallery-pick"]');
-    if (galleryPick) {
-      galleryFileInput?.click();
-      return;
-    }
-    const galleryToggle = event.target.closest('[data-role="gallery-url-toggle"]');
-    if (galleryToggle) {
-      galleryInput?.focus();
-      galleryInput?.select?.();
-      return;
-    }
-    const galleryAdd = event.target.closest('[data-role="gallery-url-add"]');
-    if (galleryAdd) {
-      const url = String(galleryInput?.value || '').trim();
-      if (!url) return;
-      addGalleryUrls([url]);
-      if (galleryInput) galleryInput.value = '';
-      return;
-    }
-    const mainReplace = event.target.closest('[data-role="main-image-replace"]');
-    if (mainReplace) {
-      mainFileInput?.click();
-      return;
-    }
-    const mainRemove = event.target.closest('[data-role="main-image-remove"]');
-    if (mainRemove) {
-      if (mainImageInput) mainImageInput.value = '';
-      updateMainPreview();
-      return;
-    }
-    const videoReplace = event.target.closest('[data-role="main-video-replace"]');
-    if (videoReplace) {
-      videoFileInput?.click();
-      return;
-    }
-    const videoRemove = event.target.closest('[data-role="main-video-remove"]');
-    if (videoRemove) {
-      if (videoUrlInput) videoUrlInput.value = '';
-      updateVideoPreview();
-      return;
-    }
   });
 
+  // Drag and drop reordering
   form.addEventListener('dragstart', (event) => {
-    const thumb = event.target.closest('[data-gallery-item]');
-    if (!thumb) return;
-    form.__galleryDragIndex = Number(thumb.dataset.index);
+    const card = event.target.closest('[data-media-item]');
+    if (!card) return;
+    form.__galleryDragIndex = Number(card.dataset.index);
+    card.classList.add('dragging');
     event.dataTransfer.effectAllowed = 'move';
   });
 
+  form.addEventListener('dragend', (event) => {
+    const card = event.target.closest('[data-media-item]');
+    if (card) card.classList.remove('dragging');
+    form.querySelectorAll('[data-media-item]').forEach((c) => c.classList.remove('drag-over'));
+  });
+
   form.addEventListener('dragover', (event) => {
-    const thumb = event.target.closest('[data-gallery-item]');
-    if (!thumb) return;
+    const card = event.target.closest('[data-media-item]');
+    if (!card) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
+    card.classList.add('drag-over');
+  });
+
+  form.addEventListener('dragleave', (event) => {
+    const card = event.target.closest('[data-media-item]');
+    if (card) card.classList.remove('drag-over');
   });
 
   form.addEventListener('drop', (event) => {
-    const thumb = event.target.closest('[data-gallery-item]');
-    if (!thumb) return;
+    const card = event.target.closest('[data-media-item]');
+    if (!card) return;
     event.preventDefault();
+    card.classList.remove('drag-over');
     const fromIndex = Number(form.__galleryDragIndex);
-    const toIndex = Number(thumb.dataset.index);
+    const toIndex = Number(card.dataset.index);
     if (Number.isFinite(fromIndex) && Number.isFinite(toIndex) && fromIndex !== toIndex) {
-      moveGalleryIndex(fromIndex, toIndex);
+      moveMediaIndex(fromIndex, toIndex);
     }
     form.__galleryDragIndex = null;
   });
@@ -1455,8 +1673,7 @@ function attachProductEditorBehaviors(form) {
   });
 
   syncAllTags();
-  updateMainPreview();
-  rerenderGallery();
+  syncMediaStudio();
 }
 
 function openProductEditor(record, schema) {
@@ -2394,9 +2611,10 @@ function getCatalogMeta(tab = ui.catalogTab) {
 }
 
 function summarizeSources() {
+  const mStats = mediaStats(getAllUnifiedMediaItems(ui.data || {}));
   return [
     { label: 'Firebase RTDB', value: `${stats().products + stats().categories + stats().orders} live records` },
-    { label: 'Supabase Storage', value: `${listCollection('media').length} uploaded assets` },
+    { label: 'Media Assets', value: `${mStats.active} active (${mStats.total} total)` },
     { label: 'Public Site', value: 'Live catalog sync enabled' },
   ];
 }
@@ -2421,6 +2639,10 @@ function resolveMediaSource(value) {
     let u = match.publicUrl;
     if (u.includes('supabase.co/storage/v1/object/public/media/')) {
       u = u.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/');
+    }
+    if (u.includes('s3.linkadda.shop/linkadda-media/')) {
+      u = u.replace('https://s3.linkadda.shop/linkadda-media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media')
+           .replace('http://s3.linkadda.shop/linkadda-media', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media');
     }
     return u;
   }
@@ -2489,15 +2711,16 @@ function getCatalogItems(node) {
 function getCatalogCounts() {
   const products = listCollection('products').filter((item) => item.status !== 'deleted');
   const categories = listCollection('categories').filter((item) => item.status !== 'deleted');
-  const media = listCollection('media');
-  const latestStamp = [...products, ...categories, ...media]
+  const allMedia = getAllUnifiedMediaItems(ui.data || {});
+  const mStats = mediaStats(allMedia);
+  const latestStamp = [...products, ...categories, ...allMedia]
     .map((item) => Number(item.updatedAt || item.createdAt || 0))
     .filter(Boolean)
     .sort((a, b) => b - a)[0] || 0;
   return {
     products: products.length,
     categories: categories.length,
-    images: media.length,
+    images: mStats.active,
     lastSync: latestStamp,
   };
 }
@@ -2607,9 +2830,35 @@ function itemPreviewThumb(item) {
   return mediaPreview(item) || '<div class="preview-fallback">No image</div>';
 }
 
+function itemMediaCounts(item) {
+  const rawImages = (Array.isArray(item.images) ? item.images : normalizeEditorList(item.images || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  const rawGallery = (Array.isArray(item.galleryImages) ? item.galleryImages : normalizeEditorList(item.galleryImages || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  const allImages = [...new Set([item.image, item.imageUrl, item.thumbnail, item.photo, ...rawImages, ...rawGallery].map((u) => String(u || '').trim()).filter(Boolean))];
+
+  const rawVideos = (Array.isArray(item.videos) ? item.videos : normalizeEditorList(item.videos || '')).map((u) => String(u || '').trim()).filter(Boolean);
+  const allVideos = [...new Set([item.video, ...rawVideos].map((u) => String(u || '').trim()).filter(Boolean))];
+
+  return {
+    images: allImages.length,
+    videos: allVideos.length,
+    total: allImages.length + allVideos.length,
+  };
+}
+
 function itemMediaCountLabel(item) {
-  const count = catalogImageCount(item);
-  return `${count} image${count === 1 ? '' : 's'}`;
+  const counts = itemMediaCounts(item);
+  if (counts.videos > 0) {
+    return `${counts.images} Img${counts.images === 1 ? '' : 's'} • ${counts.videos} Vid${counts.videos === 1 ? '' : 's'}`;
+  }
+  return `${counts.images} image${counts.images === 1 ? '' : 's'}`;
+}
+
+function itemMediaCountBadgeHtml(item) {
+  const counts = itemMediaCounts(item);
+  if (counts.videos > 0) {
+    return `<span class="catalog-media-badge-enhanced"><span class="img-num"><i data-lucide="image" style="width:12px;height:12px;"></i> ${counts.images}</span> • <span class="vid-num"><i data-lucide="video" style="width:12px;height:12px;"></i> ${counts.videos}</span></span>`;
+  }
+  return `<span class="catalog-media-badge-enhanced"><span class="img-num"><i data-lucide="image" style="width:12px;height:12px;"></i> ${counts.images} ${counts.images === 1 ? 'img' : 'imgs'}</span></span>`;
 }
 
 function itemOrderCountLabel(item) {
@@ -2700,7 +2949,7 @@ function renderCatalogProductCard(item, node) {
     posBadge,
     item.category ? `<span class="chip">${escapeHtml(item.category)}</span>` : '',
     catalogCardBadge(item.status),
-    item.image || (Array.isArray(item.galleryImages) && item.galleryImages.length) ? `<span class="chip">${escapeHtml(itemMediaCountLabel(item))}</span>` : '',
+    itemMediaCountBadgeHtml(item),
   ].filter(Boolean).join('');
 
   const cleanPriceINR = (val) => {
@@ -2737,7 +2986,7 @@ function renderCatalogProductCard(item, node) {
       </label>
       <div class="catalog-card-media">
         <button class="catalog-media-frame catalog-media-button" type="button" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}">${itemPreviewThumb(item)}</button>
-        <span class="catalog-image-badge">${escapeHtml(itemMediaCountLabel(item))}</span>
+        <span class="catalog-image-badge">${itemMediaCountBadgeHtml(item)}</span>
       </div>
       <div class="catalog-card-content catalog-card-tapzone" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}">
         <div class="catalog-card-head">
@@ -2933,8 +3182,8 @@ function recordAssetRefs(record) {
     else add(value);
   };
 
-  ['image', 'thumbnail', 'cover', 'photo', 'logo', 'backgroundImage', 'bannerImage', 'heroImage', 'publicUrl', 'path', 'sourcePath'].forEach((key) => add(record[key]));
-  ['images', 'galleryImages', 'thumbnails', 'slides', 'media', 'mediaUrls'].forEach((key) => addList(record[key]));
+  ['image', 'video', 'thumbnail', 'cover', 'photo', 'logo', 'backgroundImage', 'bannerImage', 'heroImage', 'publicUrl', 'path', 'sourcePath'].forEach((key) => add(record[key]));
+  ['images', 'videos', 'galleryImages', 'thumbnails', 'slides', 'media', 'mediaUrls'].forEach((key) => addList(record[key]));
 
   return [...refs];
 }
@@ -6102,7 +6351,7 @@ function renderScreenshotsGalleryView(data = {}, fullData = {}) {
 }
 
 const MEDIA_FOLDER_FILTERS = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'All Folders' },
   { value: 'products', label: 'Products' },
   { value: 'categories', label: 'Categories' },
   { value: 'hero', label: 'Hero' },
@@ -6119,10 +6368,17 @@ const MEDIA_TYPE_FILTERS = [
 ];
 
 const MEDIA_SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'oldest', label: 'Oldest' },
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
   { value: 'name-asc', label: 'Name A-Z' },
   { value: 'name-desc', label: 'Name Z-A' },
+];
+
+const MEDIA_LIFECYCLE_TABS = [
+  { value: 'active', label: 'All Active', icon: 'layers' },
+  { value: 'in-use', label: 'In-Use / Assigned', icon: 'package-check' },
+  { value: 'unused', label: 'Unassigned', icon: 'help-circle' },
+  { value: 'deleted', label: 'Trash / Deleted', icon: 'trash-2', isTrash: true },
 ];
 
 function mediaBucketKey(item = {}) {
@@ -6140,34 +6396,18 @@ function mediaBucketLabel(key) {
 }
 
 function mediaKind(item = {}) {
-  return mediaTypeFromPath(item.path || item.publicUrl || item.name || '');
+  if (item.type === 'video' || /\.(mp4|webm|mov|m4v|ogg)$/i.test(item.path || item.publicUrl || item.name || '')) return 'video';
+  return mediaTypeFromPath(item.path || item.publicUrl || item.name || '') || 'image';
 }
 
 function mediaSortValue(item = {}) {
-  return Number(item.updatedAt || item.createdAt || 0);
-}
-
-function filterMediaItems(items = []) {
-  const search = String(ui.media.search || '').trim().toLowerCase();
-  const folder = String(ui.media.folder || 'all');
-  const type = String(ui.media.type || 'all');
-  return items.filter((item) => {
-    const name = String(item.name || mediaFileName(item.path || item.publicUrl || '') || '').toLowerCase();
-    const path = String(item.path || '').toLowerCase();
-    const publicUrl = String(item.publicUrl || '').toLowerCase();
-    const bucket = mediaBucketKey(item);
-    const kind = mediaKind(item);
-    if (folder !== 'all' && bucket !== folder) return false;
-    if (type !== 'all' && kind !== type) return false;
-    if (!search) return true;
-    return name.includes(search) || path.includes(search) || publicUrl.includes(search) || String(item.folder || '').toLowerCase().includes(search);
-  });
+  return Number(item.deletedAt || item.updatedAt || item.createdAt || 0);
 }
 
 function getAllUnifiedMediaItems(data = {}) {
   const mediaMap = new Map();
 
-  // 1. Existing explicit records from 'media' node in Firebase
+  // 1. Scan explicit records from 'media' node in Firebase
   const explicitMedia = listCollection('media');
   for (const item of explicitMedia) {
     const key = normalizeAssetValue(item.publicUrl || item.path || item.sourcePath || item.id);
@@ -6179,19 +6419,24 @@ function getAllUnifiedMediaItems(data = {}) {
         path: item.path || item.publicUrl,
         name: item.name || mediaFileName(item.publicUrl || item.path),
         folder: item.folder || 'images',
-        type: item.type || 'image',
-        status: item.status || 'active',
+        type: item.type || mediaKind(item),
+        status: item.status === 'deleted' ? 'deleted' : 'active',
+        deletedAt: item.deletedAt || null,
         usedIn: item.linkedName ? [item.linkedName] : [],
+        createdAt: item.createdAt || Date.now(),
+        updatedAt: item.updatedAt || Date.now(),
       });
     }
   }
 
-  // Helper to record asset usage and add missing assets to media gallery
+  // Helper to record asset usage and add missing assets from store catalog
   function recordAssetUsage(rawUrl, label, folderFallback = 'products') {
     const url = String(rawUrl || '').trim();
     if (!url) return;
     const key = normalizeAssetValue(url);
     if (!key) return;
+
+    const isVid = /\.(mp4|webm|mov|m4v|ogg)$/i.test(url);
 
     if (mediaMap.has(key)) {
       const existing = mediaMap.get(key);
@@ -6201,18 +6446,24 @@ function getAllUnifiedMediaItems(data = {}) {
       if (!existing.folder || existing.folder === 'all') {
         existing.folder = folderFallback;
       }
+      // If found in active catalog, mark as active
+      if (existing.status === 'deleted') {
+        existing.status = 'active';
+        existing.deletedAt = null;
+      }
     } else {
       const id = slugify(key) || uid('media');
       mediaMap.set(key, {
         id,
         name: mediaFileName(url),
         folder: folderFallback,
-        type: mediaTypeFromPath(url) || 'image',
+        type: isVid ? 'video' : 'image',
         path: url,
         publicUrl: resolveMediaSource(url) || url,
         sourcePath: url,
         source: 'catalog-sync',
         status: 'active',
+        deletedAt: null,
         createdAt: Date.now(),
         updatedAt: Date.now(),
         usedIn: label ? [label] : [],
@@ -6221,171 +6472,103 @@ function getAllUnifiedMediaItems(data = {}) {
   }
 
   // 2. Scan All Products
-  const products = listCollection('products');
+  const products = listCollection('products').filter((p) => p.status !== 'deleted');
   for (const p of products) {
     const pName = p.name || p.title || `Product #${p.id}`;
     if (p.image) recordAssetUsage(p.image, pName, 'products');
     if (p.photo) recordAssetUsage(p.photo, pName, 'products');
     if (p.thumbnail) recordAssetUsage(p.thumbnail, pName, 'products');
     if (p.coverImage) recordAssetUsage(p.coverImage, pName, 'products');
+    if (p.video) recordAssetUsage(p.video, pName, 'products');
     if (Array.isArray(p.images)) {
       p.images.forEach((img) => recordAssetUsage(img, pName, 'products'));
     }
     if (Array.isArray(p.galleryImages)) {
       p.galleryImages.forEach((img) => recordAssetUsage(img, pName, 'products'));
     }
+    if (Array.isArray(p.videos)) {
+      p.videos.forEach((vid) => recordAssetUsage(vid, pName, 'products'));
+    }
   }
 
   // 3. Scan All Categories
-  const categories = listCollection('categories');
+  const categories = listCollection('categories').filter((c) => c.status !== 'deleted');
   for (const c of categories) {
     const cName = c.name || c.title || `Category #${c.id}`;
     if (c.image) recordAssetUsage(c.image, cName, 'categories');
     if (c.icon) recordAssetUsage(c.icon, cName, 'categories');
+    if (c.video) recordAssetUsage(c.video, cName, 'categories');
+    if (Array.isArray(c.images)) {
+      c.images.forEach((img) => recordAssetUsage(img, cName, 'categories'));
+    }
+    if (Array.isArray(c.galleryImages)) {
+      c.galleryImages.forEach((img) => recordAssetUsage(img, cName, 'categories'));
+    }
+    if (Array.isArray(c.videos)) {
+      c.videos.forEach((vid) => recordAssetUsage(vid, cName, 'categories'));
+    }
   }
 
   // 4. Scan Hero Section
   const hero = data.hero || ui.data?.hero || {};
   if (hero.backgroundImage) recordAssetUsage(hero.backgroundImage, 'Homepage Hero', 'hero');
   if (hero.image) recordAssetUsage(hero.image, 'Homepage Hero', 'hero');
+  if (hero.video) recordAssetUsage(hero.video, 'Homepage Hero', 'hero');
 
   // 5. Scan Banner Section
   const banner = data.banner || ui.data?.banner || {};
   if (banner.image) recordAssetUsage(banner.image, banner.title ? `Banner: ${banner.title}` : 'Homepage Pinned Deal', 'banners');
+  if (banner.mobileImage) recordAssetUsage(banner.mobileImage, banner.title ? `Banner (Mobile): ${banner.title}` : 'Homepage Deal Mobile', 'banners');
+  if (banner.video) recordAssetUsage(banner.video, banner.title ? `Banner Video: ${banner.title}` : 'Homepage Deal Video', 'banners');
 
   // 6. Scan Settings (Logo & Favicon)
   const settings = data.settings || ui.data?.settings || {};
   if (settings.logo) recordAssetUsage(settings.logo, 'Store Logo', 'logos');
+  if (settings.darkLogo) recordAssetUsage(settings.darkLogo, 'Store Dark Logo', 'logos');
   if (settings.favicon) recordAssetUsage(settings.favicon, 'Store Favicon', 'logos');
 
-  // 7. Scan Payment (QR Image)
+  // 7. Scan Payment
   const payment = data.payment || ui.data?.payment || {};
   if (payment.qrImage) recordAssetUsage(payment.qrImage, 'Payment QR Code', 'payments');
+
+  // 8. Scan Testimonials & FAQ
+  const testimonials = listCollection('testimonials');
+  for (const t of testimonials) {
+    if (t.avatar) recordAssetUsage(t.avatar, `Testimonial: ${t.name || 'User'}`, 'testimonials');
+    if (t.image) recordAssetUsage(t.image, `Testimonial: ${t.name || 'User'}`, 'testimonials');
+  }
 
   return Array.from(mediaMap.values());
 }
 
-async function deleteMediaAndDetachFromCatalog(item = {}) {
-  if (!item) return { detachedProducts: [], detachedCategories: [] };
-  const targetUrls = [
-    item.publicUrl,
-    item.path,
-    item.sourcePath,
-    item.id,
-    resolveMediaSource(item.publicUrl || item.path || '')
-  ].filter(Boolean).map((u) => normalizeAssetValue(String(u)));
+function filterMediaItems(items = []) {
+  const search = String(ui.media.search || '').trim().toLowerCase();
+  const folder = String(ui.media.folder || 'all');
+  const type = String(ui.media.type || 'all');
+  const lifecycle = String(ui.media.lifecycle || 'active');
 
-  function matchesTarget(val) {
-    if (!val) return false;
-    const normalized = normalizeAssetValue(String(val).trim());
-    return targetUrls.includes(normalized);
-  }
+  return items.filter((item) => {
+    const isDel = item.status === 'deleted';
+    
+    // Lifecycle filtering
+    if (lifecycle === 'active' && isDel) return false;
+    if (lifecycle === 'in-use' && (isDel || !item.usedIn?.length)) return false;
+    if (lifecycle === 'unused' && (isDel || item.usedIn?.length > 0)) return false;
+    if (lifecycle === 'deleted' && !isDel) return false;
 
-  const detachedProducts = [];
-  const detachedCategories = [];
+    const name = String(item.name || mediaFileName(item.path || item.publicUrl || '') || '').toLowerCase();
+    const path = String(item.path || '').toLowerCase();
+    const publicUrl = String(item.publicUrl || '').toLowerCase();
+    const usedInStr = (item.usedIn || []).join(' ').toLowerCase();
+    const bucket = mediaBucketKey(item);
+    const kind = mediaKind(item);
 
-  // 1. Clean from all products in Firebase
-  const products = listCollection('products');
-  for (const p of products) {
-    let changed = false;
-    const nextProd = { ...p };
-    if (matchesTarget(nextProd.image)) {
-      nextProd.image = '';
-      changed = true;
-    }
-    if (matchesTarget(nextProd.photo)) {
-      nextProd.photo = '';
-      changed = true;
-    }
-    if (matchesTarget(nextProd.thumbnail)) {
-      nextProd.thumbnail = '';
-      changed = true;
-    }
-    if (Array.isArray(nextProd.images)) {
-      const filtered = nextProd.images.filter((img) => !matchesTarget(img));
-      if (filtered.length !== nextProd.images.length) {
-        nextProd.images = filtered;
-        changed = true;
-      }
-    }
-    if (Array.isArray(nextProd.galleryImages)) {
-      const filtered = nextProd.galleryImages.filter((img) => !matchesTarget(img));
-      if (filtered.length !== nextProd.galleryImages.length) {
-        nextProd.galleryImages = filtered;
-        changed = true;
-      }
-    }
-    if (changed) {
-      await updateRecord('products', p.id, nextProd);
-      detachedProducts.push(p.name || p.title || p.id);
-    }
-  }
+    if (folder !== 'all' && bucket !== folder) return false;
+    if (type !== 'all' && kind !== type) return false;
+    if (!search) return true;
 
-  // 2. Clean from all categories in Firebase
-  const categories = listCollection('categories');
-  for (const c of categories) {
-    let changed = false;
-    const nextCat = { ...c };
-    if (matchesTarget(nextCat.image)) {
-      nextCat.image = '';
-      changed = true;
-    }
-    if (matchesTarget(nextCat.icon)) {
-      nextCat.icon = '';
-      changed = true;
-    }
-    if (changed) {
-      await updateRecord('categories', c.id, nextCat);
-      detachedCategories.push(c.name || c.title || c.id);
-    }
-  }
-
-  // 3. Clean from Hero
-  const hero = ui.data?.hero || {};
-  if (matchesTarget(hero.backgroundImage) || matchesTarget(hero.image)) {
-    await updateRecord('hero', null, {
-      ...hero,
-      backgroundImage: matchesTarget(hero.backgroundImage) ? '' : hero.backgroundImage,
-      image: matchesTarget(hero.image) ? '' : hero.image,
-    });
-  }
-
-  // 4. Clean from Banner
-  const banner = ui.data?.banner || {};
-  if (matchesTarget(banner.image)) {
-    await updateRecord('banner', null, {
-      ...banner,
-      image: '',
-    });
-  }
-
-  // 5. Clean from Settings
-  const settings = ui.data?.settings || {};
-  if (matchesTarget(settings.logo) || matchesTarget(settings.favicon)) {
-    await updateRecord('settings', null, {
-      ...settings,
-      logo: matchesTarget(settings.logo) ? '' : settings.logo,
-      favicon: matchesTarget(settings.favicon) ? '' : settings.favicon,
-    });
-  }
-
-  // 6. Delete remote storage file if applicable
-  if (item.path && !item.path.startsWith('http') && !item.path.startsWith('data:')) {
-    try {
-      await deletePublicAsset(item.path);
-    } catch (_) {}
-  }
-
-  // 7. Delete explicit media record from Firebase if it exists
-  const explicitRecord = getItem('media', item.id);
-  if (explicitRecord) {
-    await deleteRecord('media', item.id);
-  }
-
-  return {
-    detachedProducts,
-    detachedCategories,
-  };
+    return name.includes(search) || path.includes(search) || publicUrl.includes(search) || usedInStr.includes(search) || String(item.folder || '').toLowerCase().includes(search);
+  });
 }
 
 function sortMediaItems(items = []) {
@@ -6402,14 +6585,37 @@ function sortMediaItems(items = []) {
 function mediaStats(items = []) {
   const folders = new Set();
   const kinds = { image: 0, video: 0, other: 0 };
+  let active = 0;
+  let inUse = 0;
+  let unused = 0;
+  let deleted = 0;
   let latest = 0;
+
   items.forEach((item) => {
-    folders.add(mediaBucketKey(item));
-    kinds[mediaKind(item)] = (kinds[mediaKind(item)] || 0) + 1;
+    const isDel = item.status === 'deleted';
+    if (isDel) {
+      deleted++;
+    } else {
+      active++;
+      if (Array.isArray(item.usedIn) && item.usedIn.length > 0) {
+        inUse++;
+      } else {
+        unused++;
+      }
+      folders.add(mediaBucketKey(item));
+      const k = mediaKind(item);
+      kinds[k] = (kinds[k] || 0) + 1;
+    }
     latest = Math.max(latest, mediaSortValue(item));
   });
+
   return {
-    count: items.length,
+    total: items.length,
+    active,
+    inUse,
+    unused,
+    deleted,
+    count: active,
     folders: folders.size,
     images: kinds.image || 0,
     videos: kinds.video || 0,
@@ -6432,27 +6638,139 @@ function setMediaStatus(message = '') {
   if (el) el.textContent = ui.media.status;
 }
 
+async function deleteMediaAndDetachFromCatalog(item = {}) {
+  if (!item || !item.id) return { detachedProducts: [], detachedCategories: [] };
+  const targetUrls = [
+    item.publicUrl,
+    item.path,
+    item.sourcePath,
+    item.id,
+    resolveMediaSource(item.publicUrl || item.path || '')
+  ].filter(Boolean).map((u) => normalizeAssetValue(String(u)));
+
+  function matchesTarget(val) {
+    if (!val) return false;
+    const normalized = normalizeAssetValue(String(val).trim());
+    return targetUrls.includes(normalized);
+  }
+
+  const detachedProducts = [];
+  const detachedCategories = [];
+
+  // 1. Clean from all products in Firebase
+  const products = listCollection('products');
+  for (const p of products) {
+    let changed = false;
+    const nextProd = { ...p };
+    if (matchesTarget(nextProd.image)) { nextProd.image = ''; changed = true; }
+    if (matchesTarget(nextProd.photo)) { nextProd.photo = ''; changed = true; }
+    if (matchesTarget(nextProd.thumbnail)) { nextProd.thumbnail = ''; changed = true; }
+    if (matchesTarget(nextProd.video)) { nextProd.video = ''; changed = true; }
+    if (Array.isArray(nextProd.images)) {
+      const filtered = nextProd.images.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextProd.images.length) { nextProd.images = filtered; changed = true; }
+    }
+    if (Array.isArray(nextProd.galleryImages)) {
+      const filtered = nextProd.galleryImages.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextProd.galleryImages.length) { nextProd.galleryImages = filtered; changed = true; }
+    }
+    if (Array.isArray(nextProd.videos)) {
+      const filtered = nextProd.videos.filter((v) => !matchesTarget(v));
+      if (filtered.length !== nextProd.videos.length) { nextProd.videos = filtered; changed = true; }
+    }
+    if (changed) {
+      await updateRecord('products', p.id, nextProd);
+      detachedProducts.push(p.name || p.title || p.id);
+    }
+  }
+
+  // 2. Clean from all categories in Firebase
+  const categories = listCollection('categories');
+  for (const c of categories) {
+    let changed = false;
+    const nextCat = { ...c };
+    if (matchesTarget(nextCat.image)) { nextCat.image = ''; changed = true; }
+    if (matchesTarget(nextCat.icon)) { nextCat.icon = ''; changed = true; }
+    if (matchesTarget(nextCat.video)) { nextCat.video = ''; changed = true; }
+    if (Array.isArray(nextCat.images)) {
+      const filtered = nextCat.images.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextCat.images.length) { nextCat.images = filtered; changed = true; }
+    }
+    if (Array.isArray(nextCat.galleryImages)) {
+      const filtered = nextCat.galleryImages.filter((img) => !matchesTarget(img));
+      if (filtered.length !== nextCat.galleryImages.length) { nextCat.galleryImages = filtered; changed = true; }
+    }
+    if (Array.isArray(nextCat.videos)) {
+      const filtered = nextCat.videos.filter((v) => !matchesTarget(v));
+      if (filtered.length !== nextCat.videos.length) { nextCat.videos = filtered; changed = true; }
+    }
+    if (changed) {
+      await updateRecord('categories', c.id, nextCat);
+      detachedCategories.push(c.name || c.title || c.id);
+    }
+  }
+
+  // 3. Mark as deleted in Firebase (soft delete into Trash)
+  await saveRecord('media', item.id, {
+    ...item,
+    status: 'deleted',
+    deletedAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+
+  return { detachedProducts, detachedCategories };
+}
+
+async function restoreMediaItem(item = {}) {
+  if (!item || !item.id) return;
+  await saveRecord('media', item.id, {
+    ...item,
+    status: 'active',
+    deletedAt: null,
+    updatedAt: Date.now(),
+  });
+}
+
+async function purgeMediaItem(item = {}) {
+  if (!item || !item.id) return;
+  // 1. Delete from remote storage bucket if applicable
+  if (item.path && !item.path.startsWith('http') && !item.path.startsWith('data:')) {
+    try {
+      await deletePublicAsset(item.path);
+    } catch (_) {}
+  }
+  // 2. Permanently delete from Firebase media node
+  await deleteRecord('media', item.id);
+}
+
 function renderMediaPreviewModal(item = {}) {
   const src = resolveMediaSource(item.publicUrl || item.path || '');
   const bucket = mediaBucketLabel(mediaBucketKey(item));
+  const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v|ogg)$/i.test(src);
   const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
+  const isDeleted = item.status === 'deleted';
 
   return `
     <div class="panel-head media-preview-head">
       <div>
         <h2 class="section-title">${escapeHtml(item.name || mediaFileName(item.path || item.publicUrl || '') || 'Media Preview')}</h2>
-        <p class="section-subtitle">${escapeHtml(bucket)} · ${escapeHtml(mediaKind(item))} · ${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</p>
+        <p class="section-subtitle">${escapeHtml(bucket)} · ${escapeHtml(isVideo ? 'Video' : 'Image')} · ${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</p>
       </div>
       <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
     </div>
     <div class="media-preview-modal">
       <div class="media-preview-figure">
-        ${src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.name || 'Media preview')}" loading="eager" />` : '<div class="preview-fallback">No preview available</div>'}
+        ${src ? (
+          isVideo
+            ? `<video src="${escapeHtml(src)}" controls autoplay playsinline class="media-modal-video" style="max-width:100%;max-height:480px;border-radius:12px;"></video>`
+            : `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.name || 'Media preview')}" loading="eager" />`
+        ) : '<div class="preview-fallback">No preview available</div>'}
       </div>
       <div class="media-preview-meta">
         <div class="media-preview-pill-row">
           <span class="badge">${escapeHtml(bucket)}</span>
-          <span class="badge">${escapeHtml(mediaKind(item))}</span>
+          <span class="badge ${isVideo ? 'type-vid' : 'type-img'}">${escapeHtml(isVideo ? 'Video' : 'Image')}</span>
+          ${isDeleted ? '<span class="media-trash-badge"><i data-lucide="trash-2" style="width:11px;height:11px;"></i> TRASH / DELETED</span>' : ''}
         </div>
         
         <!-- Linked Usage Box -->
@@ -6466,11 +6784,17 @@ function renderMediaPreviewModal(item = {}) {
         <div class="media-preview-details">
           <div><span>Filename</span><strong>${escapeHtml(item.name || mediaFileName(item.path || item.publicUrl || '') || '-')}</strong></div>
           <div><span>Folder</span><strong>${escapeHtml(item.folder || bucket)}</strong></div>
-          <div class="full"><span>Path / URL</span><strong class="media-url">${escapeHtml(item.publicUrl || item.path || '-')}</strong></div>
+          <div class="full"><span>Direct URL</span><strong class="media-url">${escapeHtml(item.publicUrl || item.path || '-')}</strong></div>
+          ${isDeleted ? `<div class="full"><span>Deleted At</span><strong style="color:#fca5a5;">${escapeHtml(formatDateTime(item.deletedAt))}</strong></div>` : ''}
         </div>
-        <div class="toolbar media-preview-actions">
+        <div class="toolbar media-preview-actions" style="margin-top: 14px; display: flex; gap: 8px;">
           <button class="btn btn-ghost" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button"><i data-lucide="copy"></i> Copy URL</button>
-          <button class="btn btn-danger" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="trash-2"></i> Delete Image</button>
+          ${isDeleted ? `
+            <button class="btn btn-restore" data-action="restore-media" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="rotate-ccw"></i> Restore Media</button>
+            <button class="btn btn-purge" data-action="purge-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="trash-2"></i> Permanently Purge</button>
+          ` : `
+            <button class="btn btn-danger" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button"><i data-lucide="trash-2"></i> Move to Trash</button>
+          `}
         </div>
       </div>
     </div>
@@ -6480,34 +6804,50 @@ function renderMediaPreviewModal(item = {}) {
 function renderMediaCard(item = {}) {
   const src = resolveMediaSource(item.publicUrl || item.path || '');
   const bucketKey = mediaBucketKey(item);
-  const type = mediaKind(item);
+  const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v|ogg)$/i.test(src);
   const isSelected = ui.media.selectedIds?.has(item.id);
-  const status = item.status === 'inactive' ? 'inactive' : 'active';
+  const isDeleted = item.status === 'deleted';
   const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
 
   return `
-    <article class="media-card glass ${isSelected ? 'selected' : ''}" style="border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;">
+    <article class="media-card glass ${isSelected ? 'selected' : ''} ${isDeleted ? 'is-deleted' : ''}" style="border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; position: relative;">
       <label class="media-card-checkbox" title="Select asset">
         <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} />
         <span>Select</span>
       </label>
-      <button class="media-thumb media-thumb-button" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}">
-        <span class="media-thumb-overlay">Open Preview</span>
-        ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
+      
+      <button class="media-thumb media-thumb-button" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" style="position: relative; height: 160px; overflow: hidden; background: #0b0f19;">
+        ${isVideo ? `
+          <div class="media-video-indicator"><i data-lucide="video" style="width:11px;height:11px;"></i> VID</div>
+          <div class="media-play-pill"><i data-lucide="play"></i></div>
+          <video class="thumb-media" src="${escapeHtml(src)}" preload="metadata" muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+        ` : `
+          <img class="thumb-media" src="${escapeHtml(src)}" alt="${escapeHtml(item.name || 'Media')}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='../images/placeholder.svg';" />
+        `}
       </button>
+
       <div class="media-body" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
         <div class="media-card-head">
-          <strong title="${escapeHtml(item.name || item.path || 'Media')}" style="font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
+          <strong title="${escapeHtml(item.name || item.path || 'Media')}" style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
             ${escapeHtml(item.name || item.path || 'Media')}
           </strong>
           <div style="display: flex; gap: 4px; align-items: center;">
-            <span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;'}">${status.toUpperCase()}</span>
+            ${isDeleted
+              ? '<span class="media-trash-badge"><i data-lucide="trash-2" style="width:10px;height:10px;"></i> TRASH</span>'
+              : (usedList.length
+                ? '<span class="badge badge-success" style="font-size:10px;">IN-USE</span>'
+                : '<span class="badge badge-warning" style="font-size:10px;">UNASSIGNED</span>')
+            }
           </div>
         </div>
 
         <!-- Product Name / Section Tag -->
         <div style="margin: 2px 0;">
-          ${usedList.length ? `
+          ${isDeleted ? `
+            <div style="font-size: 11px; color: #fca5a5; display: inline-flex; align-items: center; gap: 4px;">
+              <i data-lucide="clock" style="width: 11px; height: 11px;"></i> Deleted ${escapeHtml(formatDateTime(item.deletedAt))}
+            </div>
+          ` : (usedList.length ? `
             <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #818cf8; background: rgba(99, 102, 241, 0.12); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.25); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Used in: ${escapeHtml(usedList.join(', '))}">
               <i data-lucide="package" style="width: 12px; height: 12px; flex-shrink: 0;"></i>
               <span style="overflow: hidden; text-overflow: ellipsis;">${escapeHtml(usedList.join(', '))}</span>
@@ -6516,18 +6856,24 @@ function renderMediaCard(item = {}) {
             <div style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); background: rgba(255, 255, 255, 0.04); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.08);">
               <i data-lucide="circle-dashed" style="width: 12px; height: 12px;"></i> Unassigned
             </div>
-          `}
+          `)}
         </div>
 
-        <div class="media-card-meta" style="font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between;">
+        <div class="media-card-meta" style="font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; margin-top: auto;">
           <span>${escapeHtml(mediaBucketLabel(bucketKey))}</span>
           <span>${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</span>
         </div>
 
-        <div class="toolbar media-card-actions" style="margin-top: auto; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px;">
-          <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button" style="flex: 1; font-size: 12px; padding: 6px;">Preview</button>
-          <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button" style="font-size: 12px; padding: 6px;" title="Copy URL"><i data-lucide="copy" style="width: 13px; height: 13px;"></i></button>
-          <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" style="font-size: 12px; padding: 6px;" title="Delete & Detach from Store"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+        <div class="toolbar media-card-actions" style="margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 6px;">
+          <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button" style="flex: 1; font-size: 11.5px; padding: 5px 8px;">Preview</button>
+          <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button" style="font-size: 11.5px; padding: 5px 8px;" title="Copy URL"><i data-lucide="copy" style="width: 13px; height: 13px;"></i></button>
+          
+          ${isDeleted ? `
+            <button class="btn btn-restore btn-sm" data-action="restore-media" data-id="${escapeHtml(item.id || '')}" type="button" style="font-size: 11.5px; padding: 5px 8px;" title="Restore Asset"><i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i></button>
+            <button class="btn btn-purge btn-sm" data-action="purge-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" style="font-size: 11.5px; padding: 5px 8px;" title="Permanently Purge"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+          ` : `
+            <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" style="font-size: 11.5px; padding: 5px 8px;" title="Move to Trash"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+          `}
         </div>
       </div>
     </article>
@@ -6538,13 +6884,13 @@ function renderMediaList(items = []) {
   const allSelected = items.length > 0 && items.every((i) => ui.media.selectedIds?.has(i.id));
   return `
     <div class="media-table">
-      <div class="media-table-head" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr) minmax(120px, 0.7fr) minmax(150px, 0.8fr);">
+      <div class="media-table-head" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(100px, 0.6fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr);">
         <div>
           <input type="checkbox" data-action="select-all-media" ${allSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
         </div>
         <span>Preview</span>
         <span>Filename</span>
-        <span>Used In (Product/Section)</span>
+        <span>Used In (Store)</span>
         <span>Folder</span>
         <span>Status</span>
         <span>Date</span>
@@ -6552,38 +6898,57 @@ function renderMediaList(items = []) {
       </div>
       ${items.length ? items.map((item) => {
         const isSelected = ui.media.selectedIds?.has(item.id);
-        const status = item.status === 'inactive' ? 'inactive' : 'active';
+        const isDeleted = item.status === 'deleted';
+        const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v|ogg)$/i.test(item.path || item.publicUrl || '');
         const usedList = Array.isArray(item.usedIn) ? item.usedIn : [];
+        const src = resolveMediaSource(item.publicUrl || item.path || '');
 
         return `
-          <div class="media-table-row" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(80px, 0.5fr) minmax(120px, 0.7fr) minmax(150px, 0.8fr); ${isSelected ? 'background: rgba(99, 102, 241, 0.1); border-radius: 8px;' : ''}">
+          <div class="media-table-row ${isDeleted ? 'is-deleted' : ''}" style="grid-template-columns: 40px 70px minmax(160px, 1.2fr) minmax(140px, 1fr) minmax(90px, 0.6fr) minmax(100px, 0.6fr) minmax(120px, 0.7fr) minmax(160px, 0.9fr); ${isSelected ? 'background: rgba(99, 102, 241, 0.1); border-radius: 8px;' : ''}">
             <div>
               <input type="checkbox" data-action="toggle-select-media" data-id="${escapeHtml(item.id || '')}" ${isSelected ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #6366f1;" />
             </div>
             <button class="media-table-preview" type="button" data-action="preview-media" data-id="${escapeHtml(item.id || '')}">
-              ${mediaPreview(item) || '<div class="preview-fallback">No preview</div>'}
+              ${isVideo
+                ? `<div style="width:100%;height:100%;background:#1e1b4b;display:flex;align-items:center;justify-content:center;color:#ec4899;"><i data-lucide="play" style="width:18px;height:18px;"></i></div>`
+                : `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.name || 'Media')}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='../images/placeholder.svg';" />`
+              }
             </button>
             <div class="media-table-name">
-              <strong>${escapeHtml(item.name || item.path || 'Media')}</strong>
+              <strong title="${escapeHtml(item.name || item.path || 'Media')}">${escapeHtml(item.name || item.path || 'Media')}</strong>
               <span style="font-size: 11px; color: var(--muted);">${escapeHtml(item.path || '-')}</span>
             </div>
             <div>
-              ${usedList.length ? `
+              ${isDeleted ? `
+                <span style="font-size: 11px; color: #fca5a5;">Deleted</span>
+              ` : (usedList.length ? `
                 <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 11px; display: inline-flex; align-items: center; gap: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(usedList.join(', '))}">
                   <i data-lucide="package" style="width: 11px; height: 11px; flex-shrink: 0;"></i>
                   ${escapeHtml(usedList.join(', '))}
                 </span>
               ` : `
                 <span style="font-size: 11px; color: var(--muted);">Unassigned</span>
-              `}
+              `)}
             </div>
             <div>${escapeHtml(mediaBucketLabel(mediaBucketKey(item)))}</div>
-            <div><span class="badge ${status === 'active' ? 'badge-success' : 'badge-warning'}" style="${status === 'active' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;'}">${status.toUpperCase()}</span></div>
-            <div style="font-size: 11.5px; color: var(--muted);">${escapeHtml(formatDateTime(item.updatedAt || item.createdAt))}</div>
+            <div>
+              ${isDeleted
+                ? '<span class="media-trash-badge" style="font-size:10px;">TRASH</span>'
+                : (usedList.length
+                  ? '<span class="badge badge-success" style="font-size:10px;">IN-USE</span>'
+                  : '<span class="badge badge-warning" style="font-size:10px;">UNASSIGNED</span>')
+              }
+            </div>
+            <div style="font-size: 11.5px; color: var(--muted);">${escapeHtml(formatDateTime(isDeleted ? item.deletedAt : (item.updatedAt || item.createdAt)))}</div>
             <div class="toolbar media-table-actions" style="display: flex; gap: 6px;">
               <button class="btn btn-ghost btn-sm" data-action="preview-media" data-id="${escapeHtml(item.id || '')}" type="button">Preview</button>
               <button class="btn btn-ghost btn-sm" data-action="copy-url" data-url="${escapeHtml(item.publicUrl || item.path || '')}" type="button" title="Copy URL"><i data-lucide="copy" style="width: 13px; height: 13px;"></i></button>
-              <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" title="Delete & Detach"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+              ${isDeleted ? `
+                <button class="btn btn-restore btn-sm" data-action="restore-media" data-id="${escapeHtml(item.id || '')}" type="button" title="Restore"><i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i></button>
+                <button class="btn btn-purge btn-sm" data-action="purge-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" title="Purge Permanently"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+              ` : `
+                <button class="btn btn-danger btn-sm" data-action="delete-media" data-path="${escapeHtml(item.path || '')}" data-id="${escapeHtml(item.id || '')}" type="button" title="Move to Trash"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button>
+              `}
             </div>
           </div>
         `;
@@ -6592,18 +6957,67 @@ function renderMediaList(items = []) {
   `;
 }
 
+function renderMediaPagination(totalItems, currentPage, pageSize) {
+  if (pageSize >= totalItems && totalItems <= 48) return '';
+  const totalPages = pageSize >= totalItems ? 1 : Math.ceil(totalItems / pageSize);
+  if (totalPages <= 1) return '';
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+      pages.push(i);
+    } else if (pages[pages.length - 1] !== '...') {
+      pages.push('...');
+    }
+  }
+
+  const startIdx = (currentPage - 1) * pageSize + 1;
+  const endIdx = Math.min(currentPage * pageSize, totalItems);
+
+  return `
+    <div class="media-pagination-bar">
+      <div class="media-page-info">
+        Showing <strong>${startIdx}–${endIdx}</strong> of <strong>${totalItems}</strong> assets
+      </div>
+      <div class="media-page-controls">
+        <button type="button" class="media-page-btn" data-action="media-page" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''} aria-label="Previous page">&#8249; Prev</button>
+        ${pages.map((p) => {
+          if (p === '...') return '<span style="padding: 0 4px; color: var(--muted);">...</span>';
+          return `<button type="button" class="media-page-btn ${p === currentPage ? 'active' : ''}" data-action="media-page" data-page="${p}">${p}</button>`;
+        }).join('')}
+        <button type="button" class="media-page-btn" data-action="media-page" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''} aria-label="Next page">Next &#8250;</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderMediaView(data) {
   const rawItems = Array.isArray(data) ? data : getAllUnifiedMediaItems(data);
   const filteredItems = sortMediaItems(filterMediaItems(rawItems));
   const stats = mediaStats(rawItems);
+  
+  const currentLifecycle = ui.media.lifecycle || 'active';
+  const isTrashTab = currentLifecycle === 'deleted';
+
   const folderCounts = MEDIA_FOLDER_FILTERS
     .filter((option) => option.value !== 'all')
     .map((option) => ({
       ...option,
-      count: rawItems.filter((item) => mediaBucketKey(item) === option.value).length,
+      count: rawItems.filter((item) => (isTrashTab ? item.status === 'deleted' : item.status !== 'deleted') && mediaBucketKey(item) === option.value).length,
     }));
+
   const selectedCount = ui.media.selectedIds ? ui.media.selectedIds.size : 0;
   const allFilteredSelected = filteredItems.length > 0 && filteredItems.every((i) => ui.media.selectedIds?.has(i.id));
+
+  // Pagination calculation
+  const rawPageSize = ui.media.pageSize || 36;
+  const pageSize = rawPageSize === 'all' ? filteredItems.length || 1 : Number(rawPageSize) || 36;
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.media.page) || 1), totalPages);
+  ui.media.page = currentPage;
+
+  const startIdx = (currentPage - 1) * pageSize;
+  const pageItems = filteredItems.slice(startIdx, startIdx + pageSize);
 
   return `
     <div class="page active" style="max-width: 1300px; margin: 0 auto; padding-bottom: 60px;">
@@ -6612,39 +7026,57 @@ function renderMediaView(data) {
           <div>
             <div class="section-kicker" style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Live Store Media Manager</div>
             <h2 class="section-title" style="margin: 0; font-size: 24px; font-weight: 800; color: var(--text);">Media Library</h2>
-            <p class="section-subtitle" style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">All store assets (Products, Categories, Banner, Hero, Logos) aggregated in real-time.</p>
+            <p class="section-subtitle" style="margin: 4px 0 0 0; color: var(--muted); font-size: 13px;">All store assets (Products, Categories, Banner, Hero, Logos) aggregated and synced in real-time.</p>
           </div>
           <div class="toolbar media-actions" style="display: flex; gap: 10px; align-items: center;">
             <button class="btn btn-primary" data-action="upload-media" type="button" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
-              <i data-lucide="upload"></i> Upload Media
+              <i data-lucide="upload-cloud"></i> Upload Media (Batch)
             </button>
           </div>
         </div>
 
         <div class="media-summary-grid">
           <div class="media-summary-card">
-            <span>Total Store Assets</span>
-            <strong>${escapeHtml(String(stats.count))}</strong>
+            <span>Active Store Media</span>
+            <strong>${escapeHtml(String(stats.active))}</strong>
           </div>
           <div class="media-summary-card">
-            <span>Bucket</span>
-            <strong>linkadda-media</strong>
+            <span>In-Use (Attached)</span>
+            <strong>${escapeHtml(String(stats.inUse))}</strong>
           </div>
           <div class="media-summary-card">
-            <span>Folders</span>
-            <strong>${escapeHtml(String(stats.folders))}</strong>
+            <span>Unassigned (Unused)</span>
+            <strong>${escapeHtml(String(stats.unused))}</strong>
+          </div>
+          <div class="media-summary-card" style="${stats.deleted > 0 ? 'border-color: rgba(239, 68, 68, 0.4);' : ''}">
+            <span>Trash / Deleted</span>
+            <strong style="${stats.deleted > 0 ? 'color: #fca5a5;' : ''}">${escapeHtml(String(stats.deleted))}</strong>
           </div>
           <div class="media-summary-card">
-            <span>Images</span>
-            <strong>${escapeHtml(String(stats.images))}</strong>
-          </div>
-          <div class="media-summary-card">
-            <span>Last Updated</span>
-            <strong>${stats.latest ? escapeHtml(formatDateTime(stats.latest)) : '—'}</strong>
+            <span>Images / Videos</span>
+            <strong>${escapeHtml(String(stats.images))} / ${escapeHtml(String(stats.videos))}</strong>
           </div>
         </div>
 
-        <div class="media-filter-panel glass" style="margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+        <!-- Lifecycle Tabs Bar -->
+        <div class="media-tab-bar" style="margin-top: 22px;">
+          ${MEDIA_LIFECYCLE_TABS.map((tab) => {
+            const isActive = currentLifecycle === tab.value;
+            let count = stats.active;
+            if (tab.value === 'in-use') count = stats.inUse;
+            if (tab.value === 'unused') count = stats.unused;
+            if (tab.value === 'deleted') count = stats.deleted;
+            return `
+              <button type="button" class="media-tab-btn ${tab.isTrash ? 'tab-trash' : ''} ${isActive ? 'active' : ''}" data-action="set-media-lifecycle" data-lifecycle="${tab.value}">
+                <i data-lucide="${tab.icon}" style="width: 15px; height: 15px;"></i>
+                <span>${escapeHtml(tab.label)}</span>
+                <span class="media-tab-badge">${count}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="media-filter-panel glass" style="padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
           <div class="media-filter-row" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
             <div class="field media-search-field" style="flex: 1; min-width: 200px;">
               <label for="mediaSearch">Search Filename, Path or Product Name</label>
@@ -6666,10 +7098,16 @@ function renderMediaView(data) {
                 ${MEDIA_TYPE_FILTERS.map((option) => `<option value="${escapeHtml(option.value)}" ${ui.media.type === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
               </select>
             </div>
-            <div class="field" style="min-width: 120px;">
+            <div class="field" style="min-width: 130px;">
               <label for="mediaSortFilter">Sort</label>
               <select class="select" id="mediaSortFilter">
                 ${MEDIA_SORT_OPTIONS.map((option) => `<option value="${escapeHtml(option.value)}" ${ui.media.sort === option.value ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field" style="min-width: 100px;">
+              <label for="mediaPageSizeFilter">Per Page</label>
+              <select class="select" id="mediaPageSizeFilter">
+                ${[24, 36, 48, 96, 'all'].map((size) => `<option value="${size}" ${String(ui.media.pageSize || 36) === String(size) ? 'selected' : ''}>${size === 'all' ? 'All' : size}</option>`).join('')}
               </select>
             </div>
             <div class="field">
@@ -6687,11 +7125,15 @@ function renderMediaView(data) {
       <section class="panel glass media-results-panel" style="padding: 24px 28px; border-radius: 16px; border: 1px solid var(--border);">
         <div class="panel-head media-results-head" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
           <div>
-            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">${escapeHtml(ui.media.view === 'list' ? 'List View' : 'Grid View')}</h3>
-            <p class="section-subtitle" style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--muted);">${escapeHtml(String(filteredItems.length))} assets shown from ${escapeHtml(String(stats.count))} total.</p>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text);">
+              ${escapeHtml(isTrashTab ? 'Trash Bin' : (ui.media.view === 'list' ? 'List View' : 'Grid View'))}
+            </h3>
+            <p class="section-subtitle" style="margin: 2px 0 0 0; font-size: 12.5px; color: var(--muted);">
+              ${escapeHtml(String(filteredItems.length))} assets found in ${escapeHtml(isTrashTab ? 'Trash' : 'Library')}.
+            </p>
           </div>
           <div class="toolbar media-results-actions">
-            <span class="badge">${escapeHtml(String(stats.count))} assets</span>
+            <span class="badge ${isTrashTab ? 'badge-danger' : 'badge-primary'}">${escapeHtml(String(filteredItems.length))} ${isTrashTab ? 'in trash' : 'active assets'}</span>
             <span class="badge">${escapeHtml(String(stats.folders))} folders</span>
           </div>
         </div>
@@ -6705,29 +7147,43 @@ function renderMediaView(data) {
             </label>
           </div>
           <div class="toolbar" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-sm btn-success" data-action="bulk-set-active-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
-              <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Set Active
-            </button>
-            <button class="btn btn-sm btn-ghost" data-action="bulk-set-inactive-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
-              <i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Set Inactive
-            </button>
-            <button class="btn btn-sm btn-danger" data-action="bulk-delete-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
-              <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete Selected (${selectedCount})
-            </button>
+            ${isTrashTab ? `
+              <button class="btn btn-sm btn-success" data-action="bulk-restore-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i> Restore Selected (${selectedCount})
+              </button>
+              <button class="btn btn-sm btn-danger" data-action="bulk-purge-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Permanently Purge Selected (${selectedCount})
+              </button>
+              <button class="btn btn-sm btn-ghost" data-action="empty-trash-media" ${stats.deleted === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px; color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.1);">
+                <i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i> Empty Trash (${stats.deleted})
+              </button>
+            ` : `
+              <button class="btn btn-sm btn-success" data-action="bulk-set-active-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Set Active
+              </button>
+              <button class="btn btn-sm btn-ghost" data-action="bulk-set-inactive-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+                <i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Set Inactive
+              </button>
+              <button class="btn btn-sm btn-danger" data-action="bulk-delete-media" ${selectedCount === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''} type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Move to Trash (${selectedCount})
+              </button>
+            `}
           </div>
         </div>
 
-        ${filteredItems.length ? (
+        ${pageItems.length ? (
           ui.media.view === 'list'
-            ? renderMediaList(filteredItems)
-            : `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px;">${filteredItems.map((item) => renderMediaCard(item)).join('')}</div>`
+            ? renderMediaList(pageItems)
+            : `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px;">${pageItems.map((item) => renderMediaCard(item)).join('')}</div>`
         ) : `
           <div class="panel glass" style="padding: 40px 20px; text-align: center; border-radius: 16px; border: 1px dashed var(--border);">
-            <i data-lucide="image-off" style="width: 40px; height: 40px; color: var(--muted); margin-bottom: 12px;"></i>
-            <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 700; color: var(--text);">No media matched your filters</h3>
-            <p style="margin: 0; font-size: 13px; color: var(--muted);">Try clearing the search or switching folder/type filters.</p>
+            <i data-lucide="${isTrashTab ? 'trash-2' : 'image-off'}" style="width: 40px; height: 40px; color: var(--muted); margin-bottom: 12px;"></i>
+            <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 700; color: var(--text);">${isTrashTab ? 'Trash bin is empty' : 'No media matched your filters'}</h3>
+            <p style="margin: 0; font-size: 13px; color: var(--muted);">${isTrashTab ? 'Deleted assets will appear here before being permanently purged.' : 'Try clearing the search or switching folder/type filters.'}</p>
           </div>
         `}
+
+        ${renderMediaPagination(filteredItems.length, currentPage, pageSize)}
       </section>
     </div>
   `;
@@ -7222,6 +7678,18 @@ function attachGlobalHandlers() {
       openSingleEditor(node, singleEditors[node], currentVal);
       return;
     }
+    if (action === 'set-media-lifecycle') {
+      ui.media.lifecycle = actionBtn.dataset.lifecycle || 'active';
+      ui.media.page = 1;
+      if (ui.media.selectedIds) ui.media.selectedIds.clear();
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'media-page') {
+      ui.media.page = Number(actionBtn.dataset.page) || 1;
+      renderView(ui.data || {});
+      return;
+    }
     if (action === 'set-media-view') {
       ui.media.view = actionBtn.dataset.view === 'list' ? 'list' : 'grid';
       renderView(ui.data || {});
@@ -7239,7 +7707,7 @@ function attachGlobalHandlers() {
     }
     if (action === 'copy-url') {
       await navigator.clipboard.writeText(actionBtn.dataset.url || '');
-      showToast('Public URL copied');
+      showToast('Direct URL copied to clipboard!', 'success');
       return;
     }
     if (action === 'select-visible') {
@@ -7285,13 +7753,86 @@ function attachGlobalHandlers() {
       renderView(ui.data || {});
       return;
     }
+    if (action === 'restore-media') {
+      const mediaId = actionBtn.dataset.id;
+      const allMedia = getAllUnifiedMediaItems(ui.data || {});
+      const targetItem = allMedia.find((m) => m.id === mediaId) || getItem('media', mediaId) || { id: mediaId };
+      await restoreMediaItem(targetItem);
+      showToast('Media restored to library.', 'success');
+      closeModal();
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'purge-media') {
+      const mediaId = actionBtn.dataset.id;
+      if (confirm('Permanently delete this file from storage and database? This action cannot be undone.')) {
+        const allMedia = getAllUnifiedMediaItems(ui.data || {});
+        const targetItem = allMedia.find((m) => m.id === mediaId) || getItem('media', mediaId) || { id: mediaId, path: actionBtn.dataset.path };
+        await purgeMediaItem(targetItem);
+        showToast('Media permanently purged from bucket.', 'success');
+        closeModal();
+        renderView(ui.data || {});
+      }
+      return;
+    }
+    if (action === 'bulk-restore-media') {
+      const selected = Array.from(ui.media.selectedIds || []);
+      if (!selected.length) {
+        showToast('Please select items to restore.', 'warning');
+        return;
+      }
+      const allMedia = getAllUnifiedMediaItems(ui.data || {});
+      for (const mId of selected) {
+        const item = allMedia.find((m) => m.id === mId) || getItem('media', mId) || { id: mId };
+        await restoreMediaItem(item);
+      }
+      ui.media.selectedIds.clear();
+      showToast(`Restored ${selected.length} media assets.`, 'success');
+      renderView(ui.data || {});
+      return;
+    }
+    if (action === 'bulk-purge-media') {
+      const selected = Array.from(ui.media.selectedIds || []);
+      if (!selected.length) {
+        showToast('Please select items to delete.', 'warning');
+        return;
+      }
+      if (confirm(`Permanently delete ${selected.length} selected assets from storage and database? This CANNOT be undone.`)) {
+        const allMedia = getAllUnifiedMediaItems(ui.data || {});
+        for (const mId of selected) {
+          const item = allMedia.find((m) => m.id === mId) || getItem('media', mId) || { id: mId };
+          await purgeMediaItem(item);
+        }
+        ui.media.selectedIds.clear();
+        showToast(`Permanently deleted ${selected.length} media assets.`, 'success');
+        renderView(ui.data || {});
+      }
+      return;
+    }
+    if (action === 'empty-trash-media') {
+      const allMedia = getAllUnifiedMediaItems(ui.data || {});
+      const deletedItems = allMedia.filter((m) => m.status === 'deleted');
+      if (!deletedItems.length) {
+        showToast('Trash bin is already empty.', 'info');
+        return;
+      }
+      if (confirm(`Permanently delete ALL ${deletedItems.length} items from the trash bin? This cannot be undone.`)) {
+        for (const item of deletedItems) {
+          await purgeMediaItem(item);
+        }
+        ui.media.selectedIds?.clear();
+        showToast(`Trash emptied (${deletedItems.length} assets permanently deleted).`, 'success');
+        renderView(ui.data || {});
+      }
+      return;
+    }
     if (action === 'bulk-delete-media') {
       const selected = Array.from(ui.media.selectedIds || []);
       if (!selected.length) {
         showToast('Please select media items first.', 'warning');
         return;
       }
-      if (confirm(`Are you sure you want to delete ${selected.length} selected media assets? They will also be removed from any linked products or categories.`)) {
+      if (confirm(`Move ${selected.length} selected media assets to Trash? They will also be detached from any linked products or categories.`)) {
         const allMedia = getAllUnifiedMediaItems(ui.data || {});
         let totalDetachedProds = 0;
         let totalDetachedCats = 0;
@@ -7302,7 +7843,7 @@ function attachGlobalHandlers() {
           totalDetachedCats += res.detachedCategories.length;
         }
         ui.media.selectedIds.clear();
-        let notice = `Deleted ${selected.length} media assets.`;
+        let notice = `Moved ${selected.length} assets to Trash.`;
         if (totalDetachedProds || totalDetachedCats) {
           notice += ` (Removed from ${totalDetachedProds} products, ${totalDetachedCats} categories)`;
         }
@@ -7333,9 +7874,9 @@ function attachGlobalHandlers() {
       const allMedia = getAllUnifiedMediaItems(ui.data || {});
       const targetItem = allMedia.find((m) => m.id === mediaId) || getItem('media', mediaId) || { id: mediaId, path: actionBtn.dataset.path };
 
-      if (confirm('Delete this image? It will also be removed from any linked products and store sections.')) {
+      if (confirm('Move this media to Trash? It will also be detached from any linked products and store sections.')) {
         const res = await deleteMediaAndDetachFromCatalog(targetItem);
-        let msg = 'Media deleted.';
+        let msg = 'Media moved to Trash.';
         if (res.detachedProducts.length) {
           msg += ` Removed from product: ${res.detachedProducts.join(', ')}`;
         }
@@ -7861,16 +8402,25 @@ function attachGlobalHandlers() {
     }
     if (event.target.id === 'mediaFolderFilter') {
       ui.media.folder = event.target.value || 'all';
+      ui.media.page = 1;
       renderView(ui.data || {});
       return;
     }
     if (event.target.id === 'mediaTypeFilter') {
       ui.media.type = event.target.value || 'all';
+      ui.media.page = 1;
       renderView(ui.data || {});
       return;
     }
     if (event.target.id === 'mediaSortFilter') {
       ui.media.sort = event.target.value || 'newest';
+      ui.media.page = 1;
+      renderView(ui.data || {});
+      return;
+    }
+    if (event.target.id === 'mediaPageSizeFilter') {
+      ui.media.pageSize = event.target.value === 'all' ? 'all' : (Number(event.target.value) || 36);
+      ui.media.page = 1;
       renderView(ui.data || {});
       return;
     }
@@ -7990,73 +8540,157 @@ function openMediaUpload() {
   openModal(`
     <div class="panel-head">
       <div>
-        <h2 class="section-title">Upload Media</h2>
-        <p class="section-subtitle">Files are stored in Supabase Storage, metadata in Firebase RTDB.</p>
+        <h2 class="section-title">Batch Upload Media</h2>
+        <p class="section-subtitle">Select or drag & drop multiple images and videos. Uploads directly to storage and updates library.</p>
       </div>
       <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
     </div>
     <form id="mediaUploadForm">
       <div class="form-grid">
         <div class="field">
-          <label>Folder</label>
-          <select class="select" name="folder">
-            <option value="images">images/</option>
-            <option value="products">products/</option>
-            <option value="categories">categories/</option>
-            <option value="hero">hero/</option>
-            <option value="banner">banner/</option>
-            <option value="logos">logos/</option>
+          <label>Target Folder</label>
+          <select class="select" name="folder" id="mediaUploadFolder">
+            <option value="images">images/ (General Store Assets)</option>
+            <option value="products" selected>products/ (Product Media)</option>
+            <option value="categories">categories/ (Category Media)</option>
+            <option value="hero">hero/ (Hero Media)</option>
+            <option value="banner">banner/ (Banner Media)</option>
+            <option value="logos">logos/ (Logos & QR)</option>
           </select>
         </div>
         <div class="field full">
-          <label>File</label>
-          <input class="input" type="file" name="file" accept="image/*,video/*" required />
+          <div class="media-dropzone" id="mediaDropzone">
+            <i data-lucide="upload-cloud" style="width: 44px; height: 44px; color: #818cf8; margin-bottom: 6px;"></i>
+            <strong style="font-size: 14.5px; color: var(--text);">Click or Drag & Drop multiple files here</strong>
+            <p style="font-size: 12px; color: var(--muted); margin: 2px 0 0 0;">Images (JPG, PNG, WEBP, GIF) and Videos (MP4, WEBM, MOV)</p>
+            <input type="file" id="mediaMultiFileInput" name="files" accept="image/*,video/*" multiple style="display:none;" />
+          </div>
         </div>
       </div>
-      <div class="toolbar" style="margin-top:16px;justify-content:flex-end;">
+      <div id="mediaUploadQueue" class="upload-queue-list"></div>
+      <div class="toolbar" style="margin-top:20px; justify-content:flex-end;">
         <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
-        <button type="submit" class="btn btn-primary">Upload</button>
+        <button type="submit" class="btn btn-primary" id="mediaSubmitUploadBtn" disabled style="display:inline-flex; align-items:center; gap:6px; font-weight:700;">
+          <i data-lucide="upload"></i> Select Files to Upload
+        </button>
       </div>
-      <div class="section-subtitle" id="mediaProgress" style="margin-top:10px;"></div>
+      <div class="section-subtitle" id="mediaProgress" style="margin-top:12px; font-weight:600;"></div>
     </form>
   `);
+
+  let queueFiles = [];
+  const dropzone = document.getElementById('mediaDropzone');
+  const fileInput = document.getElementById('mediaMultiFileInput');
+  const queueEl = document.getElementById('mediaUploadQueue');
+  const submitBtn = document.getElementById('mediaSubmitUploadBtn');
+
+  const updateQueueDisplay = () => {
+    if (!queueFiles.length) {
+      if (queueEl) queueEl.innerHTML = '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i data-lucide="upload"></i> Select Files to Upload';
+      }
+      return;
+    }
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i data-lucide="upload-cloud"></i> Upload ${queueFiles.length} File${queueFiles.length > 1 ? 's' : ''}`;
+    }
+    if (queueEl) {
+      queueEl.innerHTML = queueFiles.map((f, i) => `
+        <div class="upload-queue-item">
+          <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+            <span style="font-weight:700; color:var(--primary);">#${i + 1}</span>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+            <span style="color:var(--muted); font-size:11px;">(${(f.size / 1024 / 1024).toFixed(2)} MB)</span>
+          </div>
+          <span class="badge ${f.type.startsWith('video/') ? 'type-vid' : 'type-img'}" style="font-size:10px;">${f.type.startsWith('video/') ? 'VIDEO' : 'IMAGE'}</span>
+        </div>
+      `).join('');
+    }
+    if (window.lucide) lucide.createIcons();
+  };
+
+  dropzone?.addEventListener('click', () => fileInput?.click());
+  dropzone?.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone?.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer?.files?.length) {
+      queueFiles = Array.from(e.dataTransfer.files);
+      updateQueueDisplay();
+    }
+  });
+  fileInput?.addEventListener('change', (e) => {
+    if (e.target?.files?.length) {
+      queueFiles = Array.from(e.target.files);
+      updateQueueDisplay();
+    }
+  });
+
+  const form = document.getElementById('mediaUploadForm');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!queueFiles.length) return;
+    await handleBatchMediaUpload(form, queueFiles);
+  });
+}
+
+async function handleBatchMediaUpload(form, files = []) {
+  if (!files.length) return;
+  const folder = normalizeStorageFolder(form.querySelector('[name="folder"]')?.value || 'products');
+  const progress = form.querySelector('#mediaProgress');
+  const submitBtn = form.querySelector('#mediaSubmitUploadBtn');
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Uploading...';
+    if (window.lucide) lucide.createIcons();
+  }
+
+  let successCount = 0;
+  let failedCount = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const fileNum = i + 1;
+    if (progress) {
+      progress.textContent = `Uploading file ${fileNum} of ${files.length}: ${file.name}...`;
+    }
+    try {
+      const result = await uploadAsset(file, folder, (pct) => {
+        if (progress) progress.textContent = `Uploading file ${fileNum}/${files.length}: ${file.name} (${pct}%)`;
+      });
+      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+      await saveUploadedMediaRecord(file, result, folder, mediaType, 'manual-upload');
+      successCount++;
+    } catch (err) {
+      failedCount++;
+      console.error('Batch upload item error:', err);
+    }
+  }
+
+  if (successCount > 0) {
+    showToast(`Successfully uploaded ${successCount} media asset${successCount > 1 ? 's' : ''}!`, 'success');
+  }
+  if (failedCount > 0) {
+    showToast(`Failed to upload ${failedCount} asset${failedCount > 1 ? 's' : ''}.`, 'danger');
+  }
+
+  closeModal();
+  renderView(ui.data || {});
 }
 
 async function handleMediaUpload(form) {
   const fileInput = form.querySelector('input[type="file"]');
-  const folder = normalizeStorageFolder(form.querySelector('[name="folder"]').value);
-  const progress = form.querySelector('#mediaProgress');
-  const file = fileInput.files?.[0];
-  if (!file) {
-    showToast('Pick a file first', 'warning');
+  const files = Array.from(fileInput?.files || []);
+  if (!files.length) {
+    showToast('Please pick a file to upload.', 'warning');
     return;
   }
-  progress.textContent = 'Uploading... 0%';
-  try {
-    const result = await uploadAsset(file, folder, (value) => {
-      progress.textContent = `Uploading... ${value}%`;
-    });
-    const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-    try {
-      await saveUploadedMediaRecord(file, result, folder, mediaType, 'manual-upload');
-    } catch (metaError) {
-      try {
-        await deletePublicAsset(result.path);
-      } catch (_) {
-        // If cleanup fails, the upload still exists in Supabase and can be removed later.
-      }
-      throw metaError;
-    }
-    progress.textContent = 'Upload completed';
-    setMediaStatus('Media uploaded.');
-    showToast('Media uploaded');
-    closeModal();
-    renderView(ui.data || {});
-  } catch (error) {
-    progress.textContent = error?.message || 'Upload failed';
-    setMediaStatus(error?.message || 'Upload failed');
-    showToast(error?.message || 'Upload failed', 'danger');
-  }
+  await handleBatchMediaUpload(form, files);
 }
 
 async function handleRecordMediaUpload(form, node, next) {
