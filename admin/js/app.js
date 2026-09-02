@@ -7575,35 +7575,39 @@ function attachGlobalHandlers() {
       } else {
         if (methodId === 'binancepay') {
           updatedPayment.binanceId = identifier;
-          if (logo) updatedPayment.binanceLogo = logo;
-          if (qrImage) updatedPayment.binanceQr = qrImage;
+          updatedPayment.binanceLogo = logo;
+          updatedPayment.binanceQr = qrImage;
         } else if (methodId === 'upi') {
           updatedPayment.upiId = identifier;
-          if (logo) updatedPayment.upiLogo = logo;
-          if (qrImage) updatedPayment.qrImage = qrImage;
+          updatedPayment.upiLogo = logo;
+          updatedPayment.qrImage = qrImage;
         } else if (methodId === 'bep20') {
           updatedPayment.bep20Address = identifier;
-          if (logo) updatedPayment.bep20Logo = logo;
-          if (qrImage) updatedPayment.bep20Qr = qrImage;
+          updatedPayment.bep20Logo = logo;
+          updatedPayment.bep20Qr = qrImage;
         } else if (methodId === 'eth') {
           updatedPayment.ethAddress = identifier;
-          if (logo) updatedPayment.ethLogo = logo;
-          if (qrImage) updatedPayment.ethQr = qrImage;
+          updatedPayment.ethLogo = logo;
+          updatedPayment.ethQr = qrImage;
         } else if (methodId === 'paypal') {
           updatedPayment.paypalLink = identifier;
-          if (logo) updatedPayment.paypalLogo = logo;
-          if (qrImage) updatedPayment.paypalQr = qrImage;
+          updatedPayment.paypalLogo = logo;
+          updatedPayment.paypalQr = qrImage;
         } else if (methodId === 'giftcard') {
           updatedPayment.binanceGiftCardUrl = identifier;
-          if (logo) updatedPayment.giftcardLogo = logo;
-          if (qrImage) updatedPayment.giftcardQr = qrImage;
+          updatedPayment.giftcardLogo = logo;
+          updatedPayment.giftcardQr = qrImage;
         }
       }
 
       try {
         await updateRecord('payment', null, updatedPayment);
+        if (ui.data) {
+          ui.data.payment = { ...(ui.data.payment || {}), ...updatedPayment };
+        }
         showToast(`Payment method "${name}" saved successfully!`, 'success');
         closeModal();
+        renderView(ui.data || {});
       } catch (err) {
         showToast(err?.message || 'Failed to save payment method', 'danger');
       }
@@ -7801,6 +7805,29 @@ function attachGlobalHandlers() {
     if (event.target.id === 'paymentSearch' || event.target.id === 'orderSearch') {
       ui.management.search = event.target.value;
       renderView(ui.data || {});
+      return;
+    }
+    if (event.target.id === 'pmLogoInput') {
+      const val = (event.target.value || '').trim();
+      const preview = document.getElementById('pmLogoPreview');
+      if (preview) {
+        preview.innerHTML = val
+          ? `<img src="${escapeHtml(val)}" alt="Logo" style="width:100%;height:100%;object-fit:contain;padding:4px;" onerror="this.parentElement.innerHTML='<div style=\\'font-size:10px;color:var(--danger);text-align:center;\\'>Invalid URL</div>'" />`
+          : '<i data-lucide="credit-card" style="width: 24px; height: 24px; color: var(--muted);"></i>';
+        if (window.lucide) lucide.createIcons();
+      }
+      return;
+    }
+    if (event.target.id === 'pmQrImageInput') {
+      const val = (event.target.value || '').trim();
+      const preview = document.getElementById('pmQrPreview');
+      if (preview) {
+        preview.innerHTML = val
+          ? `<img src="${escapeHtml(val)}" alt="QR" style="width:100%;height:100%;object-fit:contain;padding:4px;" onerror="this.parentElement.innerHTML='<div style=\\'font-size:10px;color:var(--danger);text-align:center;\\'>Invalid URL</div>'" />`
+          : '<i data-lucide="qr-code" style="width: 32px; height: 32px; color: var(--muted);"></i>';
+        if (window.lucide) lucide.createIcons();
+      }
+      return;
     }
   });
   document.addEventListener('change', (event) => {

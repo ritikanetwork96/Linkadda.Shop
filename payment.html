@@ -19,24 +19,24 @@
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Secure Payment — Linkadda</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <title>Secure Payment — Linkadda</title>  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
 
-    /* â•â• GATEWAY LOADER â•â• */
+    /* ━━ GATEWAY INITIAL LOADER ━━ */
     #gatewayLoader {
       position: fixed;
       inset: 0;
-      background: #070710;
+      background: radial-gradient(circle at 50% 30%, #121024 0%, #06060f 100%);
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      gap: 24px;
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
     #gatewayLoader.hide {
@@ -46,13 +46,13 @@
     }
     .gl-lock-wrap {
       position: relative;
-      width: 80px; height: 80px;
+      width: 76px; height: 76px;
     }
     .gl-lock-ring {
       position: absolute;
       inset: 0;
       border-radius: 50%;
-      border: 2px solid transparent;
+      border: 2.5px solid transparent;
       border-top-color: #f0247a;
       animation: glSpin 1s linear infinite;
     }
@@ -72,196 +72,166 @@
       position: absolute;
       inset: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
       background: linear-gradient(135deg,#f0247a,#7c3aed);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
       animation: glPulse 1.5s ease-in-out infinite;
     }
-    @keyframes glPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes glPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.92)} }
     .gl-text-wrap { text-align: center; }
     .gl-title {
-      font-size: 18px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 20px;
       font-weight: 800;
-      background: linear-gradient(135deg,#f0247a,#7c3aed);
+      background: linear-gradient(135deg, #f0247a, #9d5ff5, #38bdf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
-      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      letter-spacing: -0.4px;
     }
     .gl-sub {
       font-size: 12px;
-      color: #8b8baa;
+      color: #94a3b8;
       font-weight: 500;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
     .gl-bar-wrap {
       width: 220px;
-      height: 3px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 2px;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
       overflow: hidden;
     }
     .gl-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg,#f0247a,#7c3aed);
-      border-radius: 2px;
+      background: linear-gradient(90deg, #f0247a, #7c3aed, #38bdf8);
+      border-radius: 4px;
       transition: width 0.3s ease;
-      box-shadow: 0 0 10px rgba(240,36,122,0.5);
+      box-shadow: 0 0 12px rgba(240,36,122,0.6);
     }
-    .gl-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 200px;
-    }
-    .gl-step {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11.5px;
-      color: rgba(255,255,255,0.25);
-      font-weight: 500;
-      transition: color 0.4s ease;
-    }
-    .gl-step.active { color: rgba(255,255,255,0.85); }
-    .gl-step.done { color: #22c55e; }
-    .gl-step-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      flex-shrink: 0;
-      transition: background 0.4s ease, box-shadow 0.4s ease;
-    }
-    .gl-step.active .gl-step-dot {
-      background: #f0247a;
-      box-shadow: 0 0 8px rgba(240,36,122,0.7);
-      animation: glDotPulse 0.8s ease infinite;
-    }
-    .gl-step.done .gl-step-dot { background: #22c55e; box-shadow: none; animation: none; }
-    @keyframes glDotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.6)} }
-    .gl-badges {
-      display: flex;
-      gap: 10px;
-    }
-    .gl-badge {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      font-weight: 600;
-      color: #8b8baa;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      padding: 5px 10px;
-      border-radius: 20px;
-    }
-    .gl-badge i { font-size: 9px; color: #22c55e; }
   </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --pink: #f0247a;
-      --pink-soft: #e84393;
+      --pink-soft: #fb7185;
       --purple: #7c3aed;
-      --purple-light: #9d5ff5;
-      --dark: #070710;
-      --dark2: #0d0d1a;
-      --card: #111124;
-      --card2: #16162e;
-      --border: rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.12);
-      --text: #f0f0f8;
-      --muted: #8b8baa;
-      --green: #22c55e;
+      --purple-light: #a78bfa;
+      --cyan: #38bdf8;
+      --gold: #f59e0b;
+      --dark: #06060f;
+      --dark2: #0c0c1a;
+      --card: rgba(16, 16, 32, 0.76);
+      --card-hover: rgba(24, 24, 46, 0.88);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --border-glow: rgba(240, 36, 122, 0.45);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #10b981;
       --yellow: #f59e0b;
       --grad: linear-gradient(135deg, #f0247a 0%, #7c3aed 100%);
-      --grad2: linear-gradient(135deg, #f0247a 0%, #9d5ff5 50%, #7c3aed 100%);
-      --glow-pink: 0 0 30px rgba(240,36,122,0.25);
-      --glow-purple: 0 0 30px rgba(124,58,237,0.25);
-      --shadow-card: 0 8px 40px rgba(0,0,0,0.5);
+      --grad-cyan: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      --grad-gold: linear-gradient(135deg, #f59e0b 0%, #e11d48 100%);
+      --glow-pink: 0 0 32px rgba(240, 36, 122, 0.28);
+      --glow-purple: 0 0 32px rgba(124, 58, 237, 0.28);
+      --shadow-card: 0 12px 40px -10px rgba(0, 0, 0, 0.7);
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--dark);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
     }
 
-    /* â”€â”€ AMBIENT BG â”€â”€ */
+    /* ━━ AMBIENT DYNAMIC BACKGROUND ━━ */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 60% 40% at 20% 0%, rgba(240,36,122,0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 50% at 80% 100%, rgba(124,58,237,0.10) 0%, transparent 70%);
+        radial-gradient(ellipse 70% 45% at 20% 0%, rgba(240, 36, 122, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 55% at 85% 90%, rgba(124, 58, 237, 0.14) 0%, transparent 70%),
+        radial-gradient(circle 400px at 50% 50%, rgba(56, 189, 248, 0.04) 0%, transparent 80%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* â”€â”€ HEADER â”€â”€ */
+    /* ━━ HEADER ━━ */
     .pay-header {
-      background: rgba(7,7,16,0.85);
+      background: rgba(6, 6, 15, 0.85);
       border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
+      padding: 14px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
     }
     .back-btn {
       color: var(--muted);
       text-decoration: none;
       font-size: 13px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: color .2s;
-      font-weight: 500;
+      gap: 7px;
+      transition: all .2s ease;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .back-btn:hover { color: var(--pink); }
+    .back-btn:hover {
+      color: #fff;
+      background: rgba(240, 36, 122, 0.12);
+      border-color: rgba(240, 36, 122, 0.3);
+      transform: translateX(-2px);
+    }
     .logo {
       margin-left: auto;
-      font-size: 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 17px;
       font-weight: 800;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.4px;
       background: var(--grad);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
     }
     .secure-badge {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       font-size: 11px;
       color: var(--green);
-      background: rgba(34,197,94,0.08);
-      border: 1px solid rgba(34,197,94,0.2);
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
       padding: 4px 10px;
       border-radius: 20px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.1);
     }
 
-    /* â”€â”€ STEPS BAR â”€â”€ */
+    /* ━━ STEPS NAVIGATION BAR ━━ */
     .steps-wrap {
-      padding: 28px 16px 8px;
-      max-width: 520px;
+      padding: 24px 16px 8px;
+      max-width: 540px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
@@ -276,7 +246,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       position: relative;
     }
     .step-item:not(:last-child)::after {
@@ -285,87 +255,104 @@
       top: 15px;
       left: 60%;
       right: -40%;
-      height: 1px;
-      background: var(--border2);
+      height: 2px;
+      background: rgba(255, 255, 255, 0.08);
       z-index: 0;
-      transition: background 0.5s;
+      transition: background 0.4s ease;
     }
     .step-item.done:not(:last-child)::after {
       background: linear-gradient(90deg, #f0247a, #7c3aed);
+      box-shadow: 0 0 8px rgba(240, 36, 122, 0.4);
     }
     .step-num {
-      width: 30px; height: 30px;
+      width: 32px; height: 32px;
       border-radius: 50%;
-      border: 1.5px solid var(--border2);
+      border: 1.5px solid var(--border-strong);
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 700;
+      font-size: 12px; font-weight: 800;
       position: relative; z-index: 1;
-      background: var(--dark);
-      transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: #090915;
+      transition: all .35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       color: var(--muted);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .step-item.active .step-num {
       border-color: var(--pink);
-      color: var(--pink);
-      box-shadow: 0 0 0 4px rgba(240,36,122,0.12);
+      color: #fff;
+      background: var(--pink);
+      box-shadow: 0 0 0 4px rgba(240,36,122,0.2), var(--glow-pink);
+      transform: scale(1.08);
     }
     .step-item.done .step-num {
       background: var(--grad);
       border-color: transparent;
-      color: transparent;
-      box-shadow: var(--glow-pink);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(124,58,237,0.4);
     }
-    .step-label { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; }
-    .step-item.active .step-label { color: var(--pink); font-weight: 600; }
-    .step-item.done .step-label { color: var(--text); }
+    .step-item.done .step-num::after {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 11px;
+    }
+    .step-item.done .step-num span { display: none; }
+    .step-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.2px; text-align: center; }
+    .step-item.active .step-label { color: #fff; font-weight: 700; }
+    .step-item.done .step-label { color: var(--muted); }
 
-    /* â”€â”€ MAIN CONTAINER â”€â”€ */
+    /* ━━ MAIN CONTAINER ━━ */
     .pay-container {
-      max-width: 520px;
-      margin: 20px auto 80px;
+      max-width: 540px;
+      margin: 16px auto 70px;
       padding: 0 16px;
       position: relative;
       z-index: 1;
     }
 
-    /* â”€â”€ SCREENS â”€â”€ */
-    .screen { display: none; animation: fadeInUp 0.35s ease; }
+    /* ━━ SCREENS ━━ */
+    .screen { display: none; animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     .screen.active { display: block; }
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* â”€â”€ CARDS â”€â”€ */
+    /* ━━ CARDS (GLASSMORPHISM) ━━ */
     .card {
       background: var(--card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 22px;
       padding: 22px;
       margin-bottom: 16px;
       box-shadow: var(--shadow-card);
       position: relative;
       overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
     }
 
-    /* â”€â”€ SUMMARY CARD â”€â”€ */
+    /* ━━ ORDER SUMMARY ━━ */
     .card-label {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 600;
+      letter-spacing: 1.4px;
+      font-weight: 700;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
     }
     .card-label::after {
       content: '';
@@ -382,38 +369,41 @@
       font-size: 14px;
     }
     .summary-row:last-child { border: none; padding-bottom: 0; }
-    .summary-row .lbl { color: var(--muted); font-size: 13px; }
-    .summary-row .val { font-weight: 600; }
+    .summary-row .lbl { color: var(--muted); font-size: 13px; font-weight: 500; }
+    .summary-row .val { font-weight: 700; color: #fff; }
     .summary-row.total .val {
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 22px;
       font-weight: 800;
       background: var(--grad);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
     }
     .crypto-note {
-      margin-top: 12px;
+      margin-top: 14px;
       font-size: 11.5px;
-      color: var(--muted);
-      background: rgba(124,58,237,0.08);
-      border: 1px solid rgba(124,58,237,0.15);
-      border-radius: 10px;
+      color: #cbd5e1;
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 12px;
       padding: 10px 14px;
       display: flex;
-      gap: 8px;
+      gap: 9px;
       align-items: flex-start;
       line-height: 1.5;
     }
     .crypto-note i { color: var(--purple-light); margin-top: 2px; flex-shrink: 0; }
 
-    /* â”€â”€ SECTION TITLE â”€â”€ */
+    /* ━━ SECTION TITLES ━━ */
     .sec-title {
-      font-size: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-weight: 600;
-      margin-bottom: 14px;
+      letter-spacing: 1.3px;
+      font-weight: 800;
+      margin: 20px 0 12px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -425,28 +415,39 @@
       background: var(--border);
     }
 
-    /* â”€â”€ METHOD CARDS â”€â”€ */
+    /* ━━ PAYMENT METHOD CARDS (GRID) ━━ */
     .method-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
     }
     .method-card {
       background: var(--card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1.5px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 18px 12px 14px;
       cursor: pointer;
-      transition: all .25s cubic-bezier(0.4,0,0.2,1);
+      transition: all .28s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       text-align: center;
       position: relative;
       overflow: hidden;
-      box-shadow: var(--shadow-card);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .method-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
     }
     .method-card::after {
       content: '';
@@ -455,70 +456,52 @@
       background: var(--grad);
       opacity: 0;
       transition: opacity .25s;
+      pointer-events: none;
     }
     .method-card:hover {
-      border-color: rgba(240,36,122,0.4);
+      border-color: rgba(240, 36, 122, 0.4);
       transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(240,36,122,0.15);
+      box-shadow: 0 12px 36px rgba(240, 36, 122, 0.16);
+      background: var(--card-hover);
+    }
+    .method-card:active {
+      transform: translateY(-1px) scale(0.98);
     }
     .method-card.selected {
       border-color: var(--pink);
-      box-shadow: 0 0 0 1px rgba(240,36,122,0.3), var(--glow-pink);
+      background: linear-gradient(145deg, rgba(240, 36, 122, 0.1), rgba(16, 16, 32, 0.95));
+      box-shadow: 0 0 0 1.5px var(--pink), var(--glow-pink);
+      transform: translateY(-2px);
     }
-    .method-card.selected::after { opacity: 0.05; }
+    .method-card.selected::after { opacity: 0.04; }
+
     .method-check {
       position: absolute;
       top: 9px; right: 9px;
-      width: 20px; height: 20px;
+      width: 22px; height: 22px;
       background: var(--grad);
       border-radius: 50%;
       display: none;
       align-items: center; justify-content: center;
-      font-size: 9px;
+      font-size: 10px;
+      color: #fff;
       z-index: 2;
-      box-shadow: 0 2px 8px rgba(240,36,122,0.4);
+      box-shadow: 0 2px 10px rgba(240, 36, 122, 0.5);
     }
-    .method-card.selected .method-check { display: flex; }
-    .method-icon {
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      position: relative; z-index: 1;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    }
-    .icon-upi    { background: linear-gradient(135deg,#6b21a8,#4f46e5); }
-    .icon-bep20  { background: linear-gradient(135deg,#f0b90b,#c8870a); }
-    .icon-eth    { background: linear-gradient(135deg,#627eea,#454fbf); }
-    .icon-binance { background: linear-gradient(135deg,#f0b90b,#f59e0b); }
-    .icon-paypal { background: linear-gradient(135deg,#003087,#009cde); }
-    .method-name { font-size: 13px; font-weight: 700; position: relative; z-index: 1; letter-spacing: -0.2px; }
-    .method-sub  { font-size: 10px; color: var(--muted); position: relative; z-index: 1; line-height: 1.4; }
-    .method-tag {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      position: relative; z-index: 1;
-    }
-    .tag-inr  { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
-    .tag-intl { background: rgba(124,58,237,0.12); color: var(--purple-light); border: 1px solid rgba(124,58,237,0.2); }
-    .tag-usdt { background: rgba(240,180,11,0.12); color: #f0b90b; border: 1px solid rgba(240,180,11,0.2); }
+    .method-card.selected .method-check { display: flex; animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-    /* Recommended Badge on Payment Card */
+    /* Recommended Badge */
     .recommended-pill {
       position: absolute;
       top: 8px;
-      left: 10px;
-      background: linear-gradient(135deg, #f59e0b, #e84393);
+      left: 8px;
+      background: linear-gradient(135deg, #f59e0b, #e11d48);
       color: #fff;
       font-size: 9px;
       font-weight: 800;
       padding: 3px 8px;
       border-radius: 20px;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
       display: inline-flex;
@@ -529,37 +512,74 @@
     }
     @keyframes recPulse {
       0%, 100% { transform: scale(1); box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4); }
-      50% { transform: scale(1.04); box-shadow: 0 2px 16px rgba(232, 67, 147, 0.6); }
+      50% { transform: scale(1.04); box-shadow: 0 2px 18px rgba(225, 29, 72, 0.6); }
     }
     .method-card.is-recommended {
       border-color: rgba(245, 158, 11, 0.45);
-      background: linear-gradient(145deg, rgba(245, 158, 11, 0.08), rgba(18, 18, 30, 0.95));
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
-    }
-    .method-card.is-recommended:hover {
-      border-color: rgba(245, 158, 11, 0.7);
-      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.25);
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.08), rgba(18, 18, 36, 0.85));
     }
 
-    /* â”€â”€ PROCEED BUTTON â”€â”€ */
+    .method-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      position: relative; z-index: 1;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .method-card:hover .method-icon { transform: scale(1.06); }
+    .method-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .icon-upi     { background: linear-gradient(135deg,#6b21a8,#4f46e5); }
+    .icon-bep20   { background: linear-gradient(135deg,#f0b90b,#c8870a); }
+    .icon-eth     { background: linear-gradient(135deg,#627eea,#454fbf); }
+    .icon-binance { background: linear-gradient(135deg,#f0b90b,#f59e0b); }
+    .icon-paypal  { background: linear-gradient(135deg,#003087,#0079c1); }
+
+    .method-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; font-weight: 700; position: relative; z-index: 1; letter-spacing: -0.2px; color: #fff; }
+    .method-sub  { font-size: 10px; color: var(--muted); position: relative; z-index: 1; line-height: 1.35; max-width: 100%; }
+    .method-tag {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      position: relative; z-index: 1;
+    }
+    .tag-inr  { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .tag-intl { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); }
+    .tag-usdt { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+
+    /* ━━ PROCEED BUTTON ━━ */
     .btn-proceed {
       width: 100%;
-      padding: 16px;
+      padding: 16px 20px;
       background: var(--grad);
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
       color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      transition: all .25s;
+      transition: all .25s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-family: 'Inter', sans-serif;
+      gap: 9px;
       letter-spacing: -0.2px;
-      box-shadow: 0 4px 20px rgba(240,36,122,0.35);
+      box-shadow: 0 6px 24px rgba(240, 36, 122, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       position: relative;
       overflow: hidden;
     }
@@ -568,62 +588,67 @@
       position: absolute;
       top: 0; left: -100%;
       width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-      transition: left 0.5s;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.6s;
     }
-    .btn-proceed:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(240,36,122,0.45); }
+    .btn-proceed:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(240, 36, 122, 0.55);
+    }
     .btn-proceed:hover::before { left: 100%; }
-    .btn-proceed:active { transform: translateY(0); }
+    .btn-proceed:active { transform: translateY(0) scale(0.99); }
 
-    /* â”€â”€ DETAIL SCREEN â”€â”€ */
+    /* ━━ DETAIL / PAY SCREEN ━━ */
     .detail-top {
       text-align: center;
-      padding: 8px 0 20px;
+      padding: 10px 0 20px;
     }
     .method-pill {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      background: rgba(240,36,122,0.08);
-      border: 1px solid rgba(240,36,122,0.25);
+      background: rgba(240,36,122,0.1);
+      border: 1px solid rgba(240,36,122,0.3);
       border-radius: 24px;
-      padding: 7px 16px;
+      padding: 7px 18px;
       font-size: 12px;
       font-weight: 700;
-      color: var(--pink);
-      margin-bottom: 18px;
+      color: var(--pink-soft);
+      margin-bottom: 16px;
       letter-spacing: 0.2px;
     }
     .amount-big {
-      font-size: 40px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 38px;
       font-weight: 800;
       background: var(--grad);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      line-height: 1;
+      line-height: 1.1;
       margin-bottom: 6px;
-      letter-spacing: -1.5px;
+      letter-spacing: -1px;
     }
     .amount-sub {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    /* â”€â”€ QR SECTION â”€â”€ */
+    /* ━━ QR SECTION ━━ */
     .qr-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 0 8px;
+      padding: 16px 0 10px;
     }
     .qr-frame {
       position: relative;
-      padding: 18px;
-      background: #fff;
+      padding: 16px;
+      background: #ffffff;
       border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(240,36,122,0.2), 0 0 0 1px rgba(240,36,122,0.1);
-      margin-bottom: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: 14px;
+      transition: all 0.3s ease;
     }
     .qr-frame::before {
       content: '';
@@ -632,9 +657,13 @@
       border-radius: 22px;
       background: var(--grad);
       z-index: -1;
-      opacity: 0.6;
+      opacity: 0.7;
     }
-    .qr-frame canvas, .qr-frame img { display: block; border-radius: 4px; }
+    .qr-frame:hover {
+      box-shadow: 0 12px 50px rgba(240, 36, 122, 0.35);
+      transform: scale(1.02);
+    }
+    .qr-frame canvas, .qr-frame img { display: block; border-radius: 8px; }
     .qr-frame img {
       max-width: 180px;
       max-height: 180px;
@@ -647,7 +676,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      color: #666;
+      color: #64748b;
       font-size: 13px;
       line-height: 1.5;
       font-weight: 600;
@@ -655,10 +684,10 @@
     }
 
     .qr-label {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--muted);
       text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-weight: 500;
     }
 
@@ -667,57 +696,56 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 6px;
       padding: 9px 20px;
-      background: linear-gradient(135deg, rgba(240, 36, 122, 0.14), rgba(124, 58, 237, 0.14));
-      border: 1px solid rgba(240, 36, 122, 0.32);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       color: #ffffff;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.22s ease;
-      box-shadow: 0 4px 15px rgba(240, 36, 122, 0.15);
       letter-spacing: 0.2px;
     }
     .download-qr-btn:hover {
-      background: linear-gradient(135deg, rgba(240, 36, 122, 0.28), rgba(124, 58, 237, 0.28));
-      border-color: rgba(240, 36, 122, 0.6);
+      background: linear-gradient(135deg, rgba(240, 36, 122, 0.25), rgba(124, 58, 237, 0.25));
+      border-color: rgba(240, 36, 122, 0.5);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(240, 36, 122, 0.3);
-      color: #ffffff;
-    }
-    .download-qr-btn:active {
-      transform: scale(0.97);
+      box-shadow: 0 6px 20px rgba(240, 36, 122, 0.25);
     }
 
     .network-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 12px;
+      padding: 5px 14px;
       border-radius: 20px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 14px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .net-bsc    { background: rgba(240,185,11,0.12); color: #f0b90b; border: 1px solid rgba(240,185,11,0.25); }
-    .net-erc    { background: rgba(98,126,234,0.12); color: #627eea; border: 1px solid rgba(98,126,234,0.25); }
-    .net-trc    { background: rgba(255,6,10,0.1); color: #ff060a; border: 1px solid rgba(255,6,10,0.2); }
-    .net-upi    { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+    .net-bsc    { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .net-erc    { background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); }
+    .net-upi    { background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
 
-    /* â”€â”€ ADDRESS BOX â”€â”€ */
+    /* ━━ ADDRESS BOX (MONOSPACE) ━━ */
     .addr-box {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 13px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 12px 14px;
       display: flex;
       align-items: center;
       gap: 10px;
       margin: 10px 0;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .addr-box:hover {
+      border-color: rgba(240, 36, 122, 0.35);
+      background: rgba(240, 36, 122, 0.03);
     }
     .addr-text {
       flex: 1;
@@ -726,82 +754,91 @@
       word-break: break-all;
       font-family: 'JetBrains Mono', monospace;
       line-height: 1.4;
-      color: var(--text);
+      color: #fff;
     }
     .copy-btn {
-      background: rgba(240,36,122,0.1);
-      border: 1px solid rgba(240,36,122,0.25);
-      color: var(--pink);
+      background: rgba(240, 36, 122, 0.12);
+      border: 1px solid rgba(240, 36, 122, 0.3);
+      color: var(--pink-soft);
       padding: 8px 14px;
       border-radius: 10px;
       font-size: 12px;
       cursor: pointer;
       white-space: nowrap;
       transition: all .2s;
-      font-weight: 600;
+      font-weight: 700;
       font-family: 'Inter', sans-serif;
       display: flex;
       align-items: center;
       gap: 5px;
       flex-shrink: 0;
     }
-    .copy-btn:hover { background: rgba(240,36,122,0.2); }
-    .copy-btn.copied { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); color: var(--green); }
+    .copy-btn:hover {
+      background: rgba(240, 36, 122, 0.24);
+      color: #fff;
+    }
+    .copy-btn.copied {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
 
     .pay-note {
       font-size: 12px;
-      color: var(--muted);
-      line-height: 1.7;
+      color: #94a3b8;
+      line-height: 1.6;
       margin-top: 12px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 10px;
-      border-left: 2px solid rgba(240,36,122,0.3);
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      border-left: 3px solid var(--pink);
     }
     .warn-note {
       font-size: 12px;
       color: #f59e0b;
-      line-height: 1.7;
+      line-height: 1.6;
       margin-top: 10px;
-      padding: 10px 12px;
-      background: rgba(245,158,11,0.06);
-      border-radius: 10px;
-      border-left: 2px solid rgba(245,158,11,0.4);
+      padding: 10px 14px;
+      background: rgba(245, 158, 11, 0.06);
+      border-radius: 12px;
+      border-left: 3px solid #f59e0b;
       display: flex;
-      gap: 8px;
+      gap: 9px;
       align-items: flex-start;
     }
 
-    /* â”€â”€ TIMER â”€â”€ */
+    /* ━━ TIMER ━━ */
     .timer-card {
       display: flex;
       align-items: center;
       gap: 14px;
       background: var(--card);
+      backdrop-filter: blur(16px);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 14px 18px;
       margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
     .timer-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: rgba(240,36,122,0.1);
-      border: 1px solid rgba(240,36,122,0.2);
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: rgba(240, 36, 122, 0.1);
+      border: 1px solid rgba(240, 36, 122, 0.25);
       display: flex; align-items: center; justify-content: center;
-      color: var(--pink);
-      font-size: 16px;
+      color: var(--pink-soft);
+      font-size: 18px;
       flex-shrink: 0;
     }
     .timer-info { flex: 1; }
-    .timer-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; font-weight: 500; }
-    .timer-num { font-size: 22px; font-weight: 800; color: var(--pink); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+    .timer-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; font-weight: 600; }
+    .timer-num { font-size: 22px; font-weight: 800; color: #fff; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
     .timer-num.expiring { color: #f59e0b; animation: pulse 1s ease infinite; }
     .timer-num.expired { color: #ef4444; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
     .timer-progress {
-      height: 3px;
-      background: var(--border);
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 2px;
       margin-top: 8px;
       overflow: hidden;
@@ -813,26 +850,26 @@
       transition: width 1s linear;
     }
 
-    /* â”€â”€ ALERT â”€â”€ */
+    /* ━━ ALERT ━━ */
     .alert {
-      background: rgba(240,36,122,0.08);
-      border: 1px solid rgba(240,36,122,0.25);
-      border-radius: 10px;
-      padding: 12px 14px;
+      background: rgba(240, 36, 122, 0.1);
+      border: 1px solid rgba(240, 36, 122, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
       font-size: 13px;
-      color: var(--pink);
+      color: #fecdd3;
       margin-bottom: 14px;
       display: none;
       align-items: center;
-      gap: 8px;
-      font-weight: 500;
+      gap: 9px;
+      font-weight: 600;
     }
     .alert.show { display: flex; animation: shake .3s ease; }
     @keyframes shake {
       0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
     }
 
-    /* â”€â”€ BACK LINK â”€â”€ */
+    /* ━━ BACK LINK ━━ */
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -840,50 +877,60 @@
       color: var(--muted);
       font-size: 13px;
       cursor: pointer;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       transition: color .2s;
-      font-weight: 500;
+      font-weight: 600;
     }
-    .back-link:hover { color: var(--pink); }
+    .back-link:hover { color: var(--pink-soft); }
 
-    /* â”€â”€ UPLOAD SCREEN â”€â”€ */
+    /* ━━ UPLOAD SCREEN ━━ */
     .upload-zone {
-      border: 2px dashed rgba(240,36,122,0.3);
-      border-radius: 18px;
-      padding: 40px 24px;
+      border: 2px dashed rgba(240, 36, 122, 0.35);
+      border-radius: 20px;
+      padding: 36px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all .25s;
-      background: rgba(240,36,122,0.02);
+      transition: all .25s ease;
+      background: rgba(240, 36, 122, 0.02);
       position: relative;
       margin-bottom: 16px;
     }
-    .upload-zone:hover { border-color: var(--pink); background: rgba(240,36,122,0.05); }
+    .upload-zone:hover {
+      border-color: var(--pink);
+      background: rgba(240, 36, 122, 0.06);
+      transform: translateY(-2px);
+    }
     .upload-zone input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    .up-icon { font-size: 36px; color: var(--pink); margin-bottom: 12px; display: block; }
-    .upload-zone h4 { font-size: 15px; margin-bottom: 6px; font-weight: 700; }
+    .up-icon { font-size: 38px; color: var(--pink); margin-bottom: 12px; display: block; animation: floatIcon 3s ease-in-out infinite; }
+    @keyframes floatIcon {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .upload-zone h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; margin-bottom: 6px; font-weight: 800; color: #fff; }
     .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
     .preview-img {
       width: 100%;
       max-height: 280px;
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 16px;
       display: none;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
+      margin-bottom: 14px;
+      border: 1px solid var(--border-strong);
+      background: #000;
     }
 
-    /* â”€â”€ SUCCESS SCREEN â”€â”€ */
+    /* ━━ SUCCESS SCREEN ━━ */
     .success-card {
       background: var(--card);
-      border: 1px solid rgba(34,197,94,0.2);
-      border-radius: 20px;
-      padding: 40px 24px 30px;
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 24px;
+      padding: 36px 22px 28px;
       text-align: center;
       margin-bottom: 16px;
-      box-shadow: 0 0 40px rgba(34,197,94,0.08);
+      box-shadow: 0 0 50px rgba(16, 185, 129, 0.1);
       position: relative;
       overflow: hidden;
     }
@@ -895,38 +942,43 @@
       background: linear-gradient(90deg, transparent, var(--green), transparent);
     }
     .success-icon {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg,#16a34a,#22c55e);
+      width: 76px; height: 76px;
+      background: linear-gradient(135deg, #059669, #10b981);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      margin: 0 auto 18px;
-      box-shadow: 0 0 30px rgba(34,197,94,0.3);
+      font-size: 34px;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 36px rgba(16, 185, 129, 0.4);
       animation: popIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     @keyframes popIn {
       from { transform: scale(0); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
-    .success-card h2 { font-size: 24px; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; }
-    .success-card p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+    .success-card h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+    .success-card p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 22px; }
     .tg-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
-      background: linear-gradient(135deg, #229ed9, #1a7ab5);
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
       color: #fff;
-      padding: 14px 28px;
-      border-radius: 14px;
+      padding: 15px 28px;
+      border-radius: 16px;
       text-decoration: none;
-      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
       font-size: 15px;
-      transition: all .2s;
-      box-shadow: 0 4px 20px rgba(34,158,217,0.3);
+      transition: all .22s ease;
+      box-shadow: 0 6px 24px rgba(2, 132, 199, 0.4);
     }
-    .tg-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34,158,217,0.4); }
+    .tg-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(2, 132, 199, 0.55);
+    }
 
-    /* â”€â”€ CONFETTI PARTICLES â”€â”€ */
+    /* ━━ CONFETTI ━━ */
     .confetti-container {
       position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden;
     }
@@ -941,10 +993,10 @@
       100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
 
-    /* â”€â”€ SHIMMER LOADING â”€â”€ */
+    /* ━━ SHIMMER LOADING ━━ */
     .qr-loading {
       width: 180px; height: 180px;
-      background: linear-gradient(90deg, #1a1a2e 25%, #252540 50%, #1a1a2e 75%);
+      background: linear-gradient(90deg, #121226 25%, #1e1e38 50%, #121226 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 8px;
@@ -954,7 +1006,7 @@
       100% { background-position: 200% 0; }
     }
 
-    /* â”€â”€ DIVIDER â”€â”€ */
+    /* ━━ DIVIDER ━━ */
     .or-divider {
       display: flex;
       align-items: center;
@@ -962,7 +1014,9 @@
       margin: 14px 0;
       font-size: 11px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
     }
     .or-divider::before, .or-divider::after {
       content: '';
@@ -971,137 +1025,46 @@
       background: var(--border);
     }
 
-    /* â”€â”€ TRUST BADGES â”€â”€ */
+    /* ━━ TRUST BADGES ━━ */
     .trust-row {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       justify-content: center;
-      margin-top: 16px;
+      margin-top: 20px;
       flex-wrap: wrap;
     }
     .trust-badge {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 10px;
+      gap: 6px;
+      font-size: 11px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 5px 12px;
+      border-radius: 20px;
     }
     .trust-badge i { font-size: 11px; }
     .trust-badge.green i { color: var(--green); }
     .trust-badge.purple i { color: var(--purple-light); }
 
-    /* â”€â”€ RESPONSIVE â”€â”€ */
-    @media (max-width: 400px) {
-      .method-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    /* ━━ MOBILE RESPONSIVENESS (MOBILE-FIRST POLISH) ━━ */
+    @media (max-width: 480px) {
+      .pay-container { margin-top: 10px; padding: 0 12px; }
+      .method-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .method-card { padding: 14px 8px 12px; }
+      .method-icon { width: 44px; height: 44px; font-size: 18px; }
+      .method-name { font-size: 12px; }
+      .method-sub { font-size: 9.5px; }
       .amount-big { font-size: 32px; }
+      .card { padding: 18px 16px; border-radius: 18px; }
+      .btn-proceed { padding: 15px; font-size: 14px; }
+    }
+    @media (max-width: 340px) {
+      .method-grid { grid-template-columns: 1fr; }
     }
 
-    /* â”€â”€ DESIGN ENHANCEMENTS â”€â”€ */
-    /* Floating particles */
-    body::after {
-      content: '';
-      position: fixed;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
-      top: 30%; left: 50%;
-      transform: translateX(-50%);
-      pointer-events: none;
-      z-index: 0;
-      animation: floatBg 8s ease-in-out infinite;
-    }
-    @keyframes floatBg {
-      0%,100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-30px); }
-    }
-
-    /* Enhanced header glow */
-    .pay-header {
-      background: rgba(7,7,16,0.92);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4);
-    }
-
-    /* Card glass shimmer on hover */
-    .card:hover { border-color: rgba(255,255,255,0.1); }
-
-    /* Method card — better hover */
-    .method-card:hover .method-icon {
-      transform: scale(1.08);
-      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-    }
-    .method-icon { transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
-
-    /* Method card selected glow pulse */
-    .method-card.selected {
-      animation: selectedPulse 2s ease infinite;
-    }
-    @keyframes selectedPulse {
-      0%,100% { box-shadow: 0 0 0 1px rgba(240,36,122,0.3), 0 0 20px rgba(240,36,122,0.15); }
-      50% { box-shadow: 0 0 0 1px rgba(240,36,122,0.5), 0 0 35px rgba(240,36,122,0.25); }
-    }
-
-    /* QR frame glow enhanced */
-    .qr-frame {
-      transition: box-shadow 0.3s ease;
-    }
-    .qr-frame:hover {
-      box-shadow: 0 8px 50px rgba(240,36,122,0.35), 0 0 0 1px rgba(240,36,122,0.2);
-    }
-
-    /* Timer card glow when expiring */
-    .timer-num.expiring ~ .timer-progress .timer-bar-fill {
-      background: linear-gradient(90deg, #f59e0b, #ef4444);
-    }
-
-    /* Proceed button shine effect improved */
-    .btn-proceed {
-      box-shadow: 0 4px 20px rgba(240,36,122,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset;
-    }
-
-    /* Success icon glow */
-    .success-icon {
-      box-shadow: 0 0 40px rgba(34,197,94,0.4), 0 0 80px rgba(34,197,94,0.15);
-    }
-
-    /* Upload zone improved */
-    .upload-zone { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
-    .upload-zone:hover { transform: scale(1.01); }
-
-    /* Network badge enhanced */
-    .network-badge {
-      animation: badgeFadeIn 0.4s ease;
-    }
-    @keyframes badgeFadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Step done checkmark */
-    .step-item.done .step-num::after {
-      content: '\2713';
-      position: absolute;
-      font-size: 12px;
-      color: #fff;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    /* Addr box hover */
-    .addr-box {
-      transition: border-color 0.2s ease, background 0.2s ease;
-    }
-    .addr-box:hover { border-color: rgba(240,36,122,0.3); background: rgba(240,36,122,0.03); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--dark); }
-    ::-webkit-scrollbar-thumb { background: rgba(240,36,122,0.3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(240,36,122,0.5); }
-
-    /* Protect Toast Style */
     .protect-toast {
       position: fixed;
       bottom: 24px;
@@ -1219,58 +1182,7 @@
 
     <div class="sec-title">Choose Payment Method</div>
 
-    <div class="method-grid" id="methodGrid">
-      <div class="method-card is-recommended" onclick="selectMethod('binancepay')" id="m-binancepay">
-        <div class="recommended-pill"><i class="fa-solid fa-star"></i> Recommended</div>
-        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon" style="background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0">
-          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="Binance Pay" />
-        </div>
-        <div class="method-name">Binance Pay</div>
-        <div class="method-sub">Direct ID Transfer</div>
-        <div class="method-tag tag-usdt">USDT</div>
-      </div>
-
-      <div class="method-card" onclick="selectMethod('upi')" id="m-upi">
-        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-upi" style="background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png" style="width:100%;height:100%;object-fit:contain;padding:6px" alt="UPI" />
-        </div>
-        <div class="method-name">UPI</div>
-        <div class="method-sub">GPay · PhonePe · Paytm</div>
-        <div class="method-tag tag-inr">₹ INR</div>
-      </div>
-
-      <div class="method-card" onclick="selectMethod('bep20')" id="m-bep20">
-        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-bep20" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
-          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="BEP20" />
-        </div>
-        <div class="method-name">USDT BEP-20</div>
-        <div class="method-sub">Binance Smart Chain</div>
-        <div class="method-tag tag-usdt">USDT</div>
-      </div>
-
-      <div class="method-card" onclick="selectMethod('eth')" id="m-eth">
-        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-eth" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
-          <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="ERC20" />
-        </div>
-        <div class="method-name">USDT ERC-20</div>
-        <div class="method-sub">Ethereum Network</div>
-        <div class="method-tag tag-usdt">USDT</div>
-      </div>
-
-      <div class="method-card" onclick="selectMethod('paypal')" id="m-paypal">
-        <div class="method-check"><i class="fa-solid fa-check" style="font-size:9px"></i></div>
-        <div class="method-icon icon-paypal" style="background:rgba(255,255,255,0.05);overflow:hidden;padding:0">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/320px-PayPal.svg.png" style="width:100%;height:100%;object-fit:contain;padding:6px;border-radius:14px" alt="PayPal" />
-        </div>
-        <div class="method-name">PayPal</div>
-        <div class="method-sub">Secure Transfer</div>
-        <div class="method-tag tag-intl">INTL</div>
-      </div>
-    </div>
+    <div class="method-grid" id="methodGrid"></div>
 
     <div class="alert" id="alertMethod"><i class="fa-solid fa-circle-exclamation"></i> Please select a payment method to continue.</div>
 
@@ -1372,49 +1284,68 @@
         <div class="warn-note"><i class="fa-solid fa-triangle-exclamation"></i> <span>Only send <strong>USDT on Ethereum (ERC-20)</strong> network. Wrong network = lost funds.</span></div>
       </div>
 
-      <!-- BINANCE SECTION -->
+      <!-- BINANCE GIFT CARD SECTION -->
       <div id="binanceSection" style="display:none">
         <div class="qr-wrapper">
-          <div class="network-badge" style="background: rgba(240,185,11,0.12); color: #f0b90b; border: 1px solid rgba(240,185,11,0.25);"><i class="fa-solid fa-coins"></i> Binance Gift Card</div>
-          <div style="padding: 20px 0; text-align: center;">
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, #f0b90b, #e84393); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">100% Anonymous & Instant</div>
+          <div class="network-badge" style="background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25);"><i class="fa-solid fa-gift"></i> Binance Gift Card</div>
+          <div style="padding: 12px 0; text-align: center;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size: 17px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(135deg, #f59e0b, #e11d48); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">100% Anonymous & Instant</div>
+            <div style="font-size: 12px; color: var(--muted);">Purchase digital voucher key and upload proof</div>
           </div>
         </div>
-        <div class="card" style="background: linear-gradient(135deg, rgba(240,185,11,0.08), rgba(232,67,147,0.08)); border-color: rgba(240,185,11,0.2);">
-          <div class="addr-box">
-            <div class="addr-text" id="binanceId" style="font-size: 16px; font-weight: 700;">969887942</div>
-            <button class="copy-btn" onclick="copyText(document.getElementById('binanceId').innerText, this)"><i class="fa-solid fa-copy"></i> Copy ID</button>
-          </div>
+        <div class="or-divider">or send to Binance ID</div>
+        <div class="addr-box">
+          <div class="addr-text" id="binanceId">969887942</div>
+          <button class="copy-btn" onclick="copyText(document.getElementById('binanceId').innerText, this)"><i class="fa-solid fa-copy"></i> Copy ID</button>
         </div>
-        <div class="pay-note" style="margin-top: 16px;">
-          <strong>Payment Steps:</strong>
-          <br>1. Send money to Binance ID: <strong>969887942</strong>
-          <br>2. Buy a Binance Gift Card (100% anonymous)
-          <br>3. Send the gift card code to our Telegram
+        <div class="pay-note">
+          <strong>Gift Card Instructions:</strong><br>
+          1. Buy a Binance Gift Card on G2A / Kinguin for the required amount.<br>
+          2. Click "I've Paid — Upload Screenshot" below.<br>
+          3. Upload your voucher code or screenshot for immediate order delivery.
         </div>
-        <a id="binanceGiftLink" href="https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061" target="_blank" rel="noreferrer" style="display: inline-flex; align-items: center; gap: 8px; color: var(--pink); text-decoration: none; margin-top: 12px; font-weight: 600; transition: all 0.2s;">
-          <i class="fa-solid fa-external-link"></i> Buy Gift Card on G2A
+        <a id="binanceGiftLink" href="https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061" target="_blank" rel="noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; padding: 13px 18px; background: linear-gradient(135deg, #f59e0b, #e11d48); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 18px rgba(245,158,11,0.3); transition: all 0.2s;">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Buy Gift Card on G2A
         </a>
       </div>
 
       <!-- BINANCE PAY SECTION -->
       <div id="binancepaySection" style="display:none">
         <div class="qr-wrapper">
-          <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
-            <img src="https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/logos/binance.png" alt="Binance Pay" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+          <div class="network-badge net-bsc"><i class="fa-solid fa-bolt"></i> Binance Pay (0% Fee)</div>
+          <div class="qr-frame" id="binancepayQRFrame">
+            <div id="binancepayQR"></div>
           </div>
+          <div class="qr-label">Scan with Binance App for instant 0% fee transfer</div>
           <button class="download-qr-btn" onclick="downloadCurrentQRCode('binancepay')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
+        <div class="or-divider">or enter Binance ID</div>
+        <div class="addr-box">
+          <div class="addr-text" id="binancepayId">1197561104</div>
+          <button class="copy-btn" onclick="copyText(document.getElementById('binancepayId').innerText, this)"><i class="fa-solid fa-copy"></i> Copy ID</button>
+        </div>
+        <div class="pay-note">Open Binance App → Pay → Send to Binance ID → Send exact amount → Upload screenshot.</div>
       </div>
 
       <!-- PAYPAL SECTION -->
       <div id="paypalSection" style="display:none">
         <div class="qr-wrapper">
-          <div style="display:flex; justify-content:center; align-items:center; padding: 10px 0;">
-            <img src="https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/logos/paypal.jpg" alt="PayPal" style="max-width:100%; max-height:420px; object-fit:contain; border-radius:16px;" />
+          <div class="network-badge" style="background: rgba(2,132,199,0.12); color: #38bdf8; border: 1px solid rgba(2,132,199,0.25);"><i class="fa-brands fa-paypal"></i> PayPal Global</div>
+          <div class="qr-frame" id="paypalQRFrame">
+            <img id="paypalQrImg" src="images/paypal.svg" alt="PayPal QR" style="max-width:180px; max-height:180px; object-fit:contain; border-radius:12px;" />
           </div>
+          <div class="qr-label">Scan QR or use direct link below</div>
           <button class="download-qr-btn" onclick="downloadCurrentQRCode('paypal')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
+        <div class="or-divider">or click PayPal link</div>
+        <div class="addr-box">
+          <div class="addr-text" id="paypalLink">https://paypal.me/Johnguzman456</div>
+          <button class="copy-btn" onclick="copyText(document.getElementById('paypalLink').innerText, this)"><i class="fa-solid fa-copy"></i> Copy Link</button>
+        </div>
+        <div class="pay-note">Send payment via PayPal → Choose <strong>Friends & Family</strong> if available → Upload payment screenshot.</div>
+        <a id="paypalDirectLink" href="https://paypal.me/Johnguzman456" target="_blank" rel="noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px; padding: 13px 18px; background: linear-gradient(135deg, #003087, #0079c1); color: #fff; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 18px rgba(0,121,193,0.3); transition: all 0.2s;">
+          <i class="fa-brands fa-paypal"></i> Open PayPal in New Tab
+        </a>
       </div>
 
       <!-- CUSTOM METHOD SECTION -->
@@ -1625,9 +1556,10 @@ function esc(str) {
     document.getElementById('glStep4'),
   ];
 
-  let pct = 0;
-  const forceExitLoader = () => {
-    if (!loader || loader.classList.contains('hide')) return;
+  let isExited = false;
+  window.exitGatewayLoader = () => {
+    if (isExited || !loader) return;
+    isExited = true;
     if (bar) bar.style.width = '100%';
     steps.forEach(s => s && s.classList.add('done'));
     loader.classList.add('hide');
@@ -1636,22 +1568,21 @@ function esc(str) {
     }, 250);
   };
 
-  // Ultra-fast exit in 200ms
-  setTimeout(forceExitLoader, 200);
-
+  let pct = 0;
   const tick = setInterval(() => {
-    pct += 40;
-    if (pct > 100) pct = 100;
+    pct += 25;
+    if (pct > 90) pct = 90;
     if (bar) bar.style.width = pct + '%';
-    if (pct >= 100) {
-      clearInterval(tick);
-      forceExitLoader();
-    }
-  }, 16);
+    if (pct >= 90) clearInterval(tick);
+  }, 25);
+
+  // Fallback exit in 500ms max
+  setTimeout(() => window.exitGatewayLoader(), 500);
 })();
-// â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
-// CONFIG — Update your details here
-// â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• 
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONFIG — Dynamic Firebase Integration
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let selectedMethod = 'binancepay';
 var userSelectedMethodManually = false;
 const CONFIG = {
@@ -1661,13 +1592,18 @@ const CONFIG = {
   telegramUrl: 'https://t.me/TRUSTED_BROTHER1234',
   bep20Address: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
   ethAddress: '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
-  binanceId: '969887942',
+  binanceId: '1197561104',
   binanceGiftCardUrl: 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
   paypalLink: 'https://paypal.me/Johnguzman456',
 };
 
-// Immediate cached payment config application (0ms)
+// Immediate cached payment config application (0ms instant render)
 try {
+  const cachedSettings = localStorage.getItem('linkadda_payment_settings');
+  const cachedPayment = localStorage.getItem('linkadda_payment_payment');
+  if (cachedSettings) window.__paymentSettings = JSON.parse(cachedSettings);
+  if (cachedPayment) window.__paymentPayment = JSON.parse(cachedPayment);
+
   const cachedConfig = localStorage.getItem('linkadda_payment_config');
   if (cachedConfig) {
     const parsed = JSON.parse(cachedConfig);
@@ -1769,6 +1705,8 @@ async function loadPaymentConfigFromFirebase() {
       });
 
       try {
+        localStorage.setItem('linkadda_payment_settings', JSON.stringify(settings));
+        localStorage.setItem('linkadda_payment_payment', JSON.stringify(payment));
         localStorage.setItem('linkadda_payment_config', JSON.stringify({
           recommendedMethod: CONFIG.recommendedMethod,
           upiId: CONFIG.upiId,
@@ -1783,6 +1721,9 @@ async function loadPaymentConfigFromFirebase() {
       } catch (_) {}
 
       applyPaymentConfigToUI();
+      if (typeof window.exitGatewayLoader === 'function') {
+        window.exitGatewayLoader();
+      }
     };
 
     if (!paymentConfigSubscribed) {
@@ -1806,6 +1747,9 @@ async function loadPaymentConfigFromFirebase() {
     applyConfig();
   } catch (error) {
     console.warn('Payment config load failed:', error);
+    if (typeof window.exitGatewayLoader === 'function') {
+      window.exitGatewayLoader();
+    }
   }
   return CONFIG;
 }
@@ -1831,7 +1775,7 @@ function renderDynamicPaymentMethods() {
       sub: 'Direct ID Transfer',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconStyle: 'background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0',
+      iconStyle: 'background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
       logo: payment.binanceLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
       alt: 'Binance Pay',
     },
@@ -1841,7 +1785,7 @@ function renderDynamicPaymentMethods() {
       sub: 'GPay · PhonePe · Paytm',
       tag: '₹ INR',
       tagClass: 'tag-inr',
-      iconStyle: 'background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0',
+      iconStyle: 'background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
       logo: payment.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
       alt: 'UPI',
     },
@@ -1851,7 +1795,7 @@ function renderDynamicPaymentMethods() {
       sub: 'Binance Smart Chain',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
+      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
       logo: payment.bep20Logo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png',
       alt: 'BEP20',
     },
@@ -1861,7 +1805,7 @@ function renderDynamicPaymentMethods() {
       sub: 'Ethereum Network',
       tag: 'USDT',
       tagClass: 'tag-usdt',
-      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
+      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
       logo: payment.ethLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png',
       alt: 'ERC20',
     },
@@ -1871,9 +1815,19 @@ function renderDynamicPaymentMethods() {
       sub: 'Secure Transfer',
       tag: 'INTL',
       tagClass: 'tag-intl',
-      iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0',
-      logo: payment.paypalLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/320px-PayPal.svg.png',
+      iconStyle: 'background:linear-gradient(135deg,#003087,#0079c1);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
+      logo: payment.paypalLogo || 'images/paypal.svg',
       alt: 'PayPal',
+    },
+    {
+      id: 'giftcard',
+      name: 'Binance Gift Card',
+      sub: 'Digital Voucher / G2A Key',
+      tag: 'VOUCHER',
+      tagClass: 'tag-intl',
+      iconStyle: 'background:linear-gradient(135deg,#f59e0b,#e11d48);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
+      logo: payment.giftcardLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
+      alt: 'Gift Card',
     },
   ];
 
@@ -1940,6 +1894,12 @@ function applyPaymentConfigToUI() {
   if (ethAddrEl && CONFIG.ethAddress) ethAddrEl.textContent = CONFIG.ethAddress;
   const paypalLinkEl = document.getElementById('paypalLink');
   if (paypalLinkEl && CONFIG.paypalLink) paypalLinkEl.textContent = CONFIG.paypalLink;
+  const paypalDirectLink = document.getElementById('paypalDirectLink');
+  if (paypalDirectLink && CONFIG.paypalLink) paypalDirectLink.href = CONFIG.paypalLink;
+  const paypalQrImg = document.getElementById('paypalQrImg');
+  if (paypalQrImg && (CONFIG.paypalQr || CONFIG.paypalLogo)) {
+    paypalQrImg.src = CONFIG.paypalQr || CONFIG.paypalLogo || 'images/paypal.svg';
+  }
   const binanceGiftLinkEl = document.getElementById('binanceGiftLink');
   if (binanceGiftLinkEl && CONFIG.binanceGiftCardUrl) binanceGiftLinkEl.href = CONFIG.binanceGiftCardUrl;
 
@@ -2952,6 +2912,7 @@ async function gotoPayScreen() {
       eth: 'USDT · ERC-20',
       binancepay: 'Binance Pay',
       binance: 'Binance Gift Card',
+      giftcard: 'Binance Gift Card',
       paypal: 'PayPal Transfer',
     };
 
@@ -2960,7 +2921,7 @@ async function gotoPayScreen() {
     const customMethod = isCustom ? customMethods[selectedMethod] : null;
 
     setText('detailBadgeText', isCustom ? (customMethod.name || 'Custom Payment') : (names[selectedMethod] || selectedMethod.toUpperCase()));
-    setText('detailPaymentMethodLabel', isCustom ? (customMethod.name || 'CUSTOM') : (selectedMethod === 'upi' ? 'UPI' : selectedMethod.toUpperCase()));
+    setText('detailPaymentMethodLabel', isCustom ? (customMethod.name || 'CUSTOM') : (selectedMethod === 'upi' ? 'UPI' : (names[selectedMethod] || selectedMethod.toUpperCase())));
 
     // hide all sections
     ['upi', 'bep20', 'eth', 'binance', 'binancepay', 'paypal', 'custom'].forEach((m) => {
@@ -2994,7 +2955,8 @@ async function gotoPayScreen() {
         }
       }
     } else {
-      const targetSection = document.getElementById(selectedMethod + 'Section');
+      const targetSecId = (selectedMethod === 'giftcard' ? 'binance' : selectedMethod) + 'Section';
+      const targetSection = document.getElementById(targetSecId);
       if (targetSection) targetSection.style.display = 'block';
     }
 
@@ -3016,7 +2978,7 @@ async function gotoPayScreen() {
         generateQR('ethQR', CONFIG.ethAddress, 180);
         setText('ethAddr', CONFIG.ethAddress);
 
-      } else if (selectedMethod === 'binance') {
+      } else if (selectedMethod === 'binance' || selectedMethod === 'giftcard') {
         setText('binanceId', CONFIG.binanceId);
 
       } else if (selectedMethod === 'binancepay') {
@@ -3025,6 +2987,12 @@ async function gotoPayScreen() {
 
       } else if (selectedMethod === 'paypal') {
         setText('paypalLink', CONFIG.paypalLink);
+        const paypalDirectLink = document.getElementById('paypalDirectLink');
+        if (paypalDirectLink && CONFIG.paypalLink) paypalDirectLink.href = CONFIG.paypalLink;
+        const paypalQrImg = document.getElementById('paypalQrImg');
+        if (paypalQrImg && (CONFIG.paypalQr || CONFIG.paypalLogo)) {
+          paypalQrImg.src = CONFIG.paypalQr || CONFIG.paypalLogo || 'images/paypal.svg';
+        }
       }
     }
 
@@ -3037,7 +3005,7 @@ async function gotoPayScreen() {
   }
 }
 
-// â”€â”€ TIMER â”€â”€
+// ━━ TIMER ━━
 function startTimer(secs) {
   clearInterval(timerInterval);
   remainingSecs = secs;
@@ -3065,14 +3033,24 @@ function startTimer(secs) {
   timerInterval = setInterval(tick, 1000);
 }
 
-// ———— GOTO UPLOAD SCREEN ————
+// ━━ GOTO UPLOAD SCREEN ━━
 function gotoUploadScreen() {
   clearInterval(timerInterval);
-  const names = { upi: 'UPI', bep20: 'USDT BEP-20', eth: 'USDT ERC-20', binancepay: 'Binance Pay', paypal: 'PayPal' };
+  const names = {
+    upi: 'UPI',
+    bep20: 'USDT BEP-20',
+    eth: 'USDT ERC-20',
+    binancepay: 'Binance Pay',
+    binance: 'Binance Gift Card',
+    giftcard: 'Binance Gift Card',
+    paypal: 'PayPal',
+  };
+  const customMethods = (window.__paymentPayment && window.__paymentPayment.customMethods) || {};
+  const customName = customMethods[selectedMethod]?.name;
   document.getElementById('uploadOrderName').textContent = orderData.name;
   document.getElementById('uploadAmount').textContent = selectedMethod === 'upi'
     ? (orderData.inr || '—') : paymentAmountForMethod(selectedMethod);
-  document.getElementById('uploadMethod').textContent = names[selectedMethod];
+  document.getElementById('uploadMethod').textContent = customName || names[selectedMethod] || (selectedMethod ? selectedMethod.toUpperCase() : '—');
   showScreen(3);
 }
 

@@ -6772,3 +6772,432 @@ button {
   color: #ffffff;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN PAYMENT HUB & LIVE RECORDS DESIGN SYSTEM (MOBILE-FIRST)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Header & Management Action Bar */
+.payment-management-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Management Summary Metrics Grid */
+.management-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.management-summary-card {
+  position: relative;
+  overflow: hidden;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(24, 24, 27, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.management-summary-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.management-summary-card span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.management-summary-card strong {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.management-summary-card small {
+  font-size: 0.76rem;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.management-summary-card.success strong { color: #34d399; }
+.management-summary-card.warning strong { color: #fbbf24; }
+.management-summary-card.danger strong { color: #f87171; }
+.management-summary-card.primary strong { color: #818cf8; }
+.management-summary-card.accent strong { color: #f472b6; }
+
+/* ━━ PAYMENT METHODS GRID ━━ */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.payment-card {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 20, 28, 0.85);
+  backdrop-filter: blur(16px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.payment-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.payment-card.is-recommended {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: linear-gradient(145deg, rgba(245, 158, 11, 0.06), rgba(20, 20, 32, 0.95));
+  box-shadow: 0 10px 35px rgba(245, 158, 11, 0.15);
+}
+
+.payment-card.is-disabled {
+  opacity: 0.55;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.06);
+  filter: grayscale(25%);
+}
+
+.payment-card.is-disabled:hover {
+  opacity: 0.85;
+  filter: none;
+}
+
+.payment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.payment-card-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.payment-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.payment-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.payment-card-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.payment-card-titles strong {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payment-card-titles span {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Status Toggle Button (Active / Disabled) */
+.payment-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.payment-toggle-btn.is-active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.payment-toggle-btn.is-active:hover {
+  background: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.payment-toggle-btn.is-disabled {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: #f87171;
+}
+
+.payment-toggle-btn.is-disabled:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.payment-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.payment-card-body {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.payment-data-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payment-data-val {
+  font-family: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
+  font-size: 0.84rem;
+  color: #a5b4fc;
+  word-break: break-all;
+  line-height: 1.4;
+  user-select: all;
+}
+
+.payment-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.payment-make-rec-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-make-rec-btn:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.payment-make-rec-btn.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25));
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+}
+
+/* ━━ LIVE PAYMENT RECORDS (NICHE WALE) ━━ */
+.management-filterbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(24, 24, 30, 0.6);
+  border: 1px solid var(--border);
+  align-items: flex-end;
+}
+
+.management-filterbar .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.management-filterbar label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.management-table th {
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.management-table td {
+  padding: 14px 16px;
+  font-size: 0.86rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.management-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.management-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.management-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.management-product-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.management-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ━━ ORDER DETAILS & INSPECTOR MODAL ━━ */
+.management-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.order-id-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+
+.order-id-badge:hover {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+/* ━━ MOBILE RESPONSIVENESS ━━ */
+@media (max-width: 900px) {
+  .management-filterbar {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .payment-management-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .payment-management-head .toolbar {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .management-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .payment-methods-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .management-filterbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
