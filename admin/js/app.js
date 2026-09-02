@@ -24,6 +24,7 @@ import {
   updateRecordsBatch,
   deleteRecord,
   duplicateRecord,
+  getSnapshot,
 } from './state.js';
 import { uploadAsset, deletePublicAsset } from './storage.js';
 import { fetchCurrentSiteCatalog, normalizeCatalogRecords } from './site-import.js';
@@ -2118,7 +2119,7 @@ function summarizeDashboard(range = ui.dashboardRange) {
     totals: stats(),
     liveProducts: products.length,
     liveCategories: listCollection('categories').length,
-    mediaAssets: listCollection('media').length,
+    mediaAssets: getAllUnifiedMediaItems(ui.data || getSnapshot()).length,
   };
 }
 
@@ -2731,11 +2732,11 @@ function mediaPreview(item) {
   const src = resolveMediaSource(rawSrc);
   if (!src) return '';
   if (String(item.type || '').toLowerCase() === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(src)) {
-    return `<video class="thumb-media" src="${escapeHtml(src)}" autoplay muted loop playsinline></video>`;
+    return `<video class="thumb-media" src="${escapeHtml(src)}" preload="none" muted loop playsinline></video>`;
   }
   const fn = src.split('/').pop().split('?')[0];
   const localFallback = `../images/${fn}`;
-  return `<img class="thumb-media" src="${escapeHtml(src)}" alt="${escapeHtml(item.title || item.name || 'Preview')}" loading="lazy" onerror="if(this.src!=='${localFallback}' && !this._triedLocal){this._triedLocal=true; this.src='${localFallback}';}" />`;
+  return `<img class="thumb-media" src="${escapeHtml(src)}" alt="${escapeHtml(item.title || item.name || 'Preview')}" loading="lazy" decoding="async" onerror="if(this.src!=='${localFallback}' && !this._triedLocal){this._triedLocal=true; this.src='${localFallback}';}" />`;
 }
 
 function renderDataPill(label, value) {
@@ -8807,19 +8808,23 @@ async function handleRecordMediaUpload(form, node, next) {
   }
 }
 
-async function initApp(user) {
-  syncTopbar(user);
-  initTheme();
-  startRealtime();
-  attachGlobalHandlers();
-  initRouteHandling();
-  subscribe((data) => {
-    ui.data = data;
-    renderView(data);
-  });
-  renderView(ui.data || {});
-}
+// Instant initial render from cache (0ms - data never disappears on refresh)
+initTheme();
+attachGlobalHandlers();
+initRouteHandling();
+ui.data = getSnapshot();
+renderView(ui.data || {});
 
-protectRoute(initApp);
+// Subscribe to state updates for seamless live sync
+subscribe((data) => {
+  ui.data = data;
+  renderView(data);
+});
+
+// Protect route verifies auth and activates authenticated realtime sync
+protectRoute((user) => {
+  syncTopbar(user);
+  startRealtime();
+});
 
 

@@ -1,8 +1,8 @@
-import { db, ref, onValue, get, set, update, remove, push } from './firebase.js';
+import { db, ref, onValue, get, set, update, remove, push, auth, onAuthStateChanged } from './firebase.js';
 import { RTDB_NODES } from './config.js';
 import { safeJson, slugify, uid } from './utils.js';
 
-const CACHE_KEY = 'linkadda_admin_store_cache_v2';
+const CACHE_KEY = 'linkadda_admin_store_cache_v4';
 
 function loadCachedStore() {
   const initial = {
@@ -20,35 +20,74 @@ function loadCachedStore() {
     media: {},
     visitors: {},
   };
+
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        return { ...initial, ...parsed };
+        Object.keys(initial).forEach((k) => {
+          if (parsed[k] && typeof parsed[k] === 'object' && Object.keys(parsed[k]).length > 0) {
+            initial[k] = parsed[k];
+          }
+        });
       }
     }
   } catch (_) {}
+
   return initial;
 }
 
 const STORE = loadCachedStore();
 const subscribers = new Set();
-let listening = false;
+const activeUnsubs = new Map();
 let emitTimer = null;
+let saveCacheTimer = null;
 
 function saveStoreCache() {
-  try {
-    // Only cache when core nodes are present to avoid caching incomplete loads
-    if (STORE.products && typeof STORE.products === 'object') {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(STORE));
-    }
-  } catch (_) {}
+  if (saveCacheTimer) return;
+  saveCacheTimer = setTimeout(() => {
+    saveCacheTimer = null;
+    try {
+      let existing = {};
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (raw) existing = JSON.parse(raw) || {};
+      } catch (_) {}
+
+      const hasProducts = STORE.products && Object.keys(STORE.products).length > 0;
+      const hasCategories = STORE.categories && Object.keys(STORE.categories).length > 0;
+      const hasMedia = STORE.media && Object.keys(STORE.media).length > 0;
+      const hasSettings = STORE.settings && Object.keys(STORE.settings).length > 0;
+      const hasOrders = STORE.orders && Object.keys(STORE.orders).length > 0;
+      const hasVisitors = STORE.visitors && Object.keys(STORE.visitors).length > 0;
+      const hasEvents = STORE.events && Object.keys(STORE.events).length > 0;
+
+      const updatedCache = {
+        settings: hasSettings ? STORE.settings : (existing.settings || {}),
+        payment: (STORE.payment && Object.keys(STORE.payment).length) ? STORE.payment : (existing.payment || {}),
+        hero: (STORE.hero && Object.keys(STORE.hero).length) ? STORE.hero : (existing.hero || {}),
+        banner: (STORE.banner && Object.keys(STORE.banner).length) ? STORE.banner : (existing.banner || {}),
+        faq: (STORE.faq && Object.keys(STORE.faq).length) ? STORE.faq : (existing.faq || {}),
+        testimonials: (STORE.testimonials && Object.keys(STORE.testimonials).length) ? STORE.testimonials : (existing.testimonials || {}),
+        categories: hasCategories ? STORE.categories : (existing.categories || {}),
+        products: hasProducts ? STORE.products : (existing.products || {}),
+        media: hasMedia ? STORE.media : (existing.media || {}),
+        orders: hasOrders ? STORE.orders : (existing.orders || {}),
+        visitors: hasVisitors ? STORE.visitors : (existing.visitors || {}),
+        events: hasEvents ? STORE.events : (existing.events || {}),
+        analytics: (STORE.analytics && Object.keys(STORE.analytics).length) ? STORE.analytics : (existing.analytics || {}),
+        timestamp: Date.now(),
+      };
+
+      localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
+    } catch (_) {}
+  }, 250);
 }
 
 function emit() {
-  if (emitTimer) clearTimeout(emitTimer);
-  emitTimer = setTimeout(() => {
+  if (emitTimer) cancelAnimationFrame(emitTimer);
+  emitTimer = requestAnimationFrame(() => {
     saveStoreCache();
     const snapshot = getSnapshot();
     subscribers.forEach((fn) => {
@@ -58,7 +97,7 @@ function emit() {
         console.error('Subscriber error:', err);
       }
     });
-  }, 35);
+  });
 }
 
 export function getSnapshot() {
@@ -74,43 +113,36 @@ export function subscribe(fn) {
 function attachNode(key, mode = 'collection') {
   const nodeName = RTDB_NODES[key];
   if (!nodeName) return;
-  onValue(ref(db, nodeName), (snap) => {
-    STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
-    emit();
-  });
-}
 
-export async function fetchAllInitialData() {
-  const nodeKeys = Object.keys(RTDB_NODES);
+  // Clean up previous subscription if any
+  if (activeUnsubs.has(key)) {
+    try {
+      activeUnsubs.get(key)();
+    } catch (_) {}
+    activeUnsubs.delete(key);
+  }
+
   try {
-    const promises = nodeKeys.map(async (key) => {
-      const nodeName = RTDB_NODES[key];
-      try {
-        const snap = await get(ref(db, nodeName));
-        return { key, val: snap.val() };
-      } catch (e) {
-        return { key, val: null };
+    const unsub = onValue(
+      ref(db, nodeName),
+      (snap) => {
+        STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
+        emit();
+      },
+      (err) => {
+        // Silently catch permission errors until auth resolves
+        if (err?.code !== 'PERMISSION_DENIED') {
+          console.warn(`RTDB node ${key} notice:`, err?.message || err);
+        }
       }
-    });
-
-    const results = await Promise.allSettled(promises);
-    results.forEach((res) => {
-      if (res.status === 'fulfilled' && res.value && res.value.val !== null) {
-        STORE[res.value.key] = res.value.val;
-      }
-    });
-    emit();
+    );
+    activeUnsubs.set(key, unsub);
   } catch (err) {
-    console.warn('Initial parallel fetch warning:', err);
+    console.warn(`Attach node ${key} error:`, err);
   }
 }
 
 export function startRealtime() {
-  // Fast parallel bulk load
-  fetchAllInitialData();
-
-  if (listening) return;
-  listening = true;
   attachNode('hero', 'singleton');
   attachNode('categories');
   attachNode('products');
@@ -125,6 +157,11 @@ export function startRealtime() {
   attachNode('media');
   attachNode('visitors');
 }
+
+// Automatically bind listeners to auth state transitions
+onAuthStateChanged(auth, (user) => {
+  startRealtime();
+});
 
 function isSingleton(node) {
   return ['hero', 'banner', 'settings', 'payment', 'analytics'].includes(node);

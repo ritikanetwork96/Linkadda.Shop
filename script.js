@@ -65,10 +65,16 @@
     }
   }, 20);
 
-  // Instant smooth completion on window load
-  window.addEventListener('load', () => {
-    progress = Math.max(progress, 90);
-  }, { once: true });
+  // Instant smooth completion on window/DOM load
+  const finishLoader = () => {
+    progress = 100;
+  };
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    finishLoader();
+  } else {
+    window.addEventListener('load', finishLoader, { once: true });
+    document.addEventListener('DOMContentLoaded', finishLoader, { once: true });
+  }
 })();
 
 const finePointerQuery = window.matchMedia('(hover: hover) and (pointer: fine)');

@@ -24,7 +24,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/admin/assets/admin.css?v=10" />
+  <link rel="stylesheet" href="/admin/assets/admin.css?v=18" />
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body data-theme="dark">
@@ -33,31 +33,25 @@
       <button class="sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Close navigation menu">
         <i data-lucide="x"></i>
       </button>
-      <a class="brand" href="/admin">
+      <div class="brand">
         <div class="brand-mark">L</div>
         <div>
-          <h1>Linkadda Admin</h1>
-          <p>Production control center</p>
+          <div class="brand-title">Linkadda Admin</div>
+          <div class="brand-subtitle">Production control center</div>
         </div>
-      </a>
-      <div class="nav-group">
-        <div class="nav-label">Navigation</div>
-        <nav id="sideNav"></nav>
       </div>
+      <div class="nav-section-label">Navigation</div>
+      <nav class="nav-group" id="sideNav"></nav>
       <div class="sidebar-footer">
-        <button class="btn btn-ghost btn-block" id="sidebarThemeBtn" type="button">
-          <i data-lucide="moon-star"></i> Theme
-        </button>
-        <button class="btn btn-danger btn-block" id="sidebarLogoutBtn" type="button">
-          <i data-lucide="log-out"></i> Logout
-        </button>
+        <button class="btn btn-ghost btn-block" id="sidebarThemeBtn" type="button"><i data-lucide="moon-star"></i> Theme</button>
+        <button class="btn btn-danger btn-block" id="sidebarLogoutBtn" type="button"><i data-lucide="log-out"></i> Logout</button>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar glass">
         <div class="topbar-left">
-          <button class="btn btn-ghost admin-mobile-toggle" id="mobileMenuBtn" type="button">
+          <button class="btn btn-ghost admin-mobile-toggle" id="mobileMenuBtn" type="button" aria-label="Open navigation menu">
             <i data-lucide="menu"></i>
           </button>
           <div class="searchbox">
@@ -66,8 +60,8 @@
           </div>
         </div>
         <div class="topbar-right">
-          <button class="chip" id="notifyBtn" type="button"><i data-lucide="bell"></i><span id="notifyCount">0</span></button>
-          <button class="chip" id="themeBtn" type="button"><i data-lucide="sun-moon"></i></button>
+          <button class="chip" id="notifyBtn" type="button" title="View notifications"><i data-lucide="bell"></i><span id="notifyCount">0</span></button>
+          <button class="chip" id="themeBtn" type="button" title="Toggle Light/Dark Theme"><i data-lucide="sun-moon"></i></button>
           <div class="user-pill">
             <div class="avatar" id="userAvatar">A</div>
             <div>
@@ -79,19 +73,17 @@
         </div>
       </header>
 
-      <section class="content">
-        <div id="viewRoot"></div>
-      </section>
+      <div class="view-root" id="viewRoot"></div>
     </main>
   </div>
 
   <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-  <div class="toast-host" id="toastHost"></div>
-
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal glass" id="modalRoot"></div>
   </div>
+
+  <div class="toast-host" id="toastHost"></div>
 
   <div class="modal-backdrop" id="paletteBackdrop">
     <div class="modal palette glass">
@@ -100,12 +92,12 @@
           <h2 class="section-title">Command Search</h2>
           <p class="section-subtitle">Jump to any admin section or action.</p>
         </div>
-        <button class="btn btn-ghost" id="closePaletteBtn" type="button"><i data-lucide="x"></i></button>
+        <button class="btn btn-ghost" data-close-palette type="button"><i data-lucide="x"></i></button>
       </div>
       <div class="palette-list" id="paletteList"></div>
     </div>
   </div>
 
-  <script type="module" src="/admin/js/app.js?v=10"></script>
+  <script type="module" src="/admin/js/app.js?v=19"></script>
 </body>
 </html>

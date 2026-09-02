@@ -272,7 +272,7 @@ export function protectRoute(onReady) {
 
     if (!hasHandledAuth) {
       hasHandledAuth = true;
-      await registerAdminSession(user);
+      registerAdminSession(user).catch(() => {});
       startSessionWatch(user);
       if (typeof onReady === 'function') onReady(user);
     }
