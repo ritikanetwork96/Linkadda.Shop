@@ -39,13 +39,16 @@ let emitTimer = null;
 
 function saveStoreCache() {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(STORE));
+    // Only cache when core nodes are present to avoid caching incomplete loads
+    if (STORE.products && typeof STORE.products === 'object') {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(STORE));
+    }
   } catch (_) {}
 }
 
 function emit() {
-  if (emitTimer) cancelAnimationFrame(emitTimer);
-  emitTimer = requestAnimationFrame(() => {
+  if (emitTimer) clearTimeout(emitTimer);
+  emitTimer = setTimeout(() => {
     saveStoreCache();
     const snapshot = getSnapshot();
     subscribers.forEach((fn) => {
@@ -55,7 +58,7 @@ function emit() {
         console.error('Subscriber error:', err);
       }
     });
-  });
+  }, 35);
 }
 
 export function getSnapshot() {

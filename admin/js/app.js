@@ -2873,18 +2873,74 @@ function itemPreviewThumb(item) {
   return mediaPreview(item) || '<div class="preview-fallback">No image</div>';
 }
 
-function itemMediaCounts(item) {
-  const rawImages = (Array.isArray(item.images) ? item.images : normalizeEditorList(item.images || '')).map((u) => String(u || '').trim()).filter(Boolean);
-  const rawGallery = (Array.isArray(item.galleryImages) ? item.galleryImages : normalizeEditorList(item.galleryImages || '')).map((u) => String(u || '').trim()).filter(Boolean);
-  const allImages = [...new Set([item.image, item.imageUrl, item.thumbnail, item.photo, ...rawImages, ...rawGallery].map((u) => String(u || '').trim()).filter(Boolean))];
+function extractMediaUrls(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.flatMap(extractMediaUrls);
+  if (typeof val === 'string') {
+    return val.split(/\n|,/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
 
-  const rawVideos = (Array.isArray(item.videos) ? item.videos : normalizeEditorList(item.videos || '')).map((u) => String(u || '').trim()).filter(Boolean);
-  const allVideos = [...new Set([item.video, ...rawVideos].map((u) => String(u || '').trim()).filter(Boolean))];
+function itemMediaCounts(item = {}) {
+  if (!item) return { images: 0, videos: 0, total: 0 };
+  const imagesSet = new Set();
+  const videosSet = new Set();
+
+  const addMediaUrl = (val) => {
+    const urls = extractMediaUrls(val);
+    urls.forEach((u) => {
+      if (/\.(mp4|webm|mov|m4v|ogg)$/i.test(u)) {
+        videosSet.add(u);
+      } else {
+        imagesSet.add(u);
+      }
+    });
+  };
+
+  const addVideoUrl = (val) => {
+    const urls = extractMediaUrls(val);
+    urls.forEach((u) => videosSet.add(u));
+  };
+
+  // Check all known product image keys
+  addMediaUrl(item.image);
+  addMediaUrl(item.imageUrl);
+  addMediaUrl(item.thumbnail);
+  addMediaUrl(item.photo);
+  addMediaUrl(item.cover);
+  addMediaUrl(item.coverImage);
+  addMediaUrl(item.images);
+  addMediaUrl(item.galleryImages);
+  addMediaUrl(item.pics);
+  addMediaUrl(item.photos);
+  addMediaUrl(item.path);
+  addMediaUrl(item.publicUrl);
+
+  // Check all known video keys
+  addVideoUrl(item.video);
+  addVideoUrl(item.videos);
+  addVideoUrl(item.videoUrl);
+
+  // If no explicit image found, check category fallback
+  if (imagesSet.size === 0 && item.category) {
+    const categories = listCollection('categories');
+    const catKey = String(item.category).trim().toLowerCase();
+    const matched = categories.find(c => 
+      String(c.id || '').toLowerCase() === catKey || 
+      String(c.slug || '').toLowerCase() === catKey || 
+      String(c.title || '').toLowerCase() === catKey
+    );
+    if (matched) {
+      addMediaUrl(matched.image);
+      addMediaUrl(matched.images);
+    }
+  }
 
   return {
-    images: allImages.length,
-    videos: allVideos.length,
-    total: allImages.length + allVideos.length,
+    images: imagesSet.size,
+    videos: videosSet.size,
+    total: imagesSet.size + videosSet.size,
   };
 }
 
@@ -6470,43 +6526,43 @@ function getAllUnifiedMediaItems(data = {}) {
 
   // Helper to record asset usage and add missing assets from store catalog
   function recordAssetUsage(rawUrl, label, folderFallback = 'products') {
-    const url = String(rawUrl || '').trim();
-    if (!url) return;
-    const key = normalizeAssetValue(url);
-    if (!key) return;
+    const urls = extractMediaUrls(rawUrl);
+    for (const url of urls) {
+      const key = normalizeAssetValue(url);
+      if (!key) continue;
 
-    const isVid = /\.(mp4|webm|mov|m4v|ogg)$/i.test(url);
+      const isVid = /\.(mp4|webm|mov|m4v|ogg)$/i.test(url);
 
-    if (mediaMap.has(key)) {
-      const existing = mediaMap.get(key);
-      if (label && !existing.usedIn.includes(label)) {
-        existing.usedIn.push(label);
+      if (mediaMap.has(key)) {
+        const existing = mediaMap.get(key);
+        if (label && !existing.usedIn.includes(label)) {
+          existing.usedIn.push(label);
+        }
+        if (!existing.folder || existing.folder === 'all') {
+          existing.folder = folderFallback;
+        }
+        if (existing.status === 'deleted') {
+          existing.status = 'active';
+          existing.deletedAt = null;
+        }
+      } else {
+        const id = slugify(key) || uid('media');
+        mediaMap.set(key, {
+          id,
+          name: mediaFileName(url),
+          folder: folderFallback,
+          type: isVid ? 'video' : 'image',
+          path: url,
+          publicUrl: resolveMediaSource(url) || url,
+          sourcePath: url,
+          source: 'catalog-sync',
+          status: 'active',
+          deletedAt: null,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          usedIn: label ? [label] : [],
+        });
       }
-      if (!existing.folder || existing.folder === 'all') {
-        existing.folder = folderFallback;
-      }
-      // If found in active catalog, mark as active
-      if (existing.status === 'deleted') {
-        existing.status = 'active';
-        existing.deletedAt = null;
-      }
-    } else {
-      const id = slugify(key) || uid('media');
-      mediaMap.set(key, {
-        id,
-        name: mediaFileName(url),
-        folder: folderFallback,
-        type: isVid ? 'video' : 'image',
-        path: url,
-        publicUrl: resolveMediaSource(url) || url,
-        sourcePath: url,
-        source: 'catalog-sync',
-        status: 'active',
-        deletedAt: null,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        usedIn: label ? [label] : [],
-      });
     }
   }
 
@@ -6514,67 +6570,64 @@ function getAllUnifiedMediaItems(data = {}) {
   const products = listCollection('products').filter((p) => p.status !== 'deleted');
   for (const p of products) {
     const pName = p.name || p.title || `Product #${p.id}`;
-    if (p.image) recordAssetUsage(p.image, pName, 'products');
-    if (p.photo) recordAssetUsage(p.photo, pName, 'products');
-    if (p.thumbnail) recordAssetUsage(p.thumbnail, pName, 'products');
-    if (p.coverImage) recordAssetUsage(p.coverImage, pName, 'products');
-    if (p.video) recordAssetUsage(p.video, pName, 'products');
-    if (Array.isArray(p.images)) {
-      p.images.forEach((img) => recordAssetUsage(img, pName, 'products'));
-    }
-    if (Array.isArray(p.galleryImages)) {
-      p.galleryImages.forEach((img) => recordAssetUsage(img, pName, 'products'));
-    }
-    if (Array.isArray(p.videos)) {
-      p.videos.forEach((vid) => recordAssetUsage(vid, pName, 'products'));
-    }
+    recordAssetUsage(p.image, pName, 'products');
+    recordAssetUsage(p.photo, pName, 'products');
+    recordAssetUsage(p.thumbnail, pName, 'products');
+    recordAssetUsage(p.cover, pName, 'products');
+    recordAssetUsage(p.coverImage, pName, 'products');
+    recordAssetUsage(p.path, pName, 'products');
+    recordAssetUsage(p.images, pName, 'products');
+    recordAssetUsage(p.galleryImages, pName, 'products');
+    recordAssetUsage(p.pics, pName, 'products');
+    recordAssetUsage(p.photos, pName, 'products');
+    recordAssetUsage(p.video, pName, 'products');
+    recordAssetUsage(p.videos, pName, 'products');
+    recordAssetUsage(p.videoUrl, pName, 'products');
   }
 
   // 3. Scan All Categories
   const categories = listCollection('categories').filter((c) => c.status !== 'deleted');
   for (const c of categories) {
     const cName = c.name || c.title || `Category #${c.id}`;
-    if (c.image) recordAssetUsage(c.image, cName, 'categories');
-    if (c.icon) recordAssetUsage(c.icon, cName, 'categories');
-    if (c.video) recordAssetUsage(c.video, cName, 'categories');
-    if (Array.isArray(c.images)) {
-      c.images.forEach((img) => recordAssetUsage(img, cName, 'categories'));
-    }
-    if (Array.isArray(c.galleryImages)) {
-      c.galleryImages.forEach((img) => recordAssetUsage(img, cName, 'categories'));
-    }
-    if (Array.isArray(c.videos)) {
-      c.videos.forEach((vid) => recordAssetUsage(vid, cName, 'categories'));
-    }
+    recordAssetUsage(c.image, cName, 'categories');
+    recordAssetUsage(c.imageUrl, cName, 'categories');
+    recordAssetUsage(c.icon, cName, 'categories');
+    recordAssetUsage(c.thumbnail, cName, 'categories');
+    recordAssetUsage(c.photo, cName, 'categories');
+    recordAssetUsage(c.images, cName, 'categories');
+    recordAssetUsage(c.galleryImages, cName, 'categories');
+    recordAssetUsage(c.video, cName, 'categories');
+    recordAssetUsage(c.videos, cName, 'categories');
   }
 
   // 4. Scan Hero Section
   const hero = data.hero || ui.data?.hero || {};
-  if (hero.backgroundImage) recordAssetUsage(hero.backgroundImage, 'Homepage Hero', 'hero');
-  if (hero.image) recordAssetUsage(hero.image, 'Homepage Hero', 'hero');
-  if (hero.video) recordAssetUsage(hero.video, 'Homepage Hero', 'hero');
+  recordAssetUsage(hero.backgroundImage, 'Homepage Hero', 'hero');
+  recordAssetUsage(hero.image, 'Homepage Hero', 'hero');
+  recordAssetUsage(hero.video, 'Homepage Hero', 'hero');
 
   // 5. Scan Banner Section
   const banner = data.banner || ui.data?.banner || {};
-  if (banner.image) recordAssetUsage(banner.image, banner.title ? `Banner: ${banner.title}` : 'Homepage Pinned Deal', 'banners');
-  if (banner.mobileImage) recordAssetUsage(banner.mobileImage, banner.title ? `Banner (Mobile): ${banner.title}` : 'Homepage Deal Mobile', 'banners');
-  if (banner.video) recordAssetUsage(banner.video, banner.title ? `Banner Video: ${banner.title}` : 'Homepage Deal Video', 'banners');
+  recordAssetUsage(banner.image, banner.title ? `Banner: ${banner.title}` : 'Homepage Pinned Deal', 'banners');
+  recordAssetUsage(banner.mobileImage, banner.title ? `Banner (Mobile): ${banner.title}` : 'Homepage Deal Mobile', 'banners');
+  recordAssetUsage(banner.video, banner.title ? `Banner Video: ${banner.title}` : 'Homepage Deal Video', 'banners');
 
   // 6. Scan Settings (Logo & Favicon)
   const settings = data.settings || ui.data?.settings || {};
-  if (settings.logo) recordAssetUsage(settings.logo, 'Store Logo', 'logos');
-  if (settings.darkLogo) recordAssetUsage(settings.darkLogo, 'Store Dark Logo', 'logos');
-  if (settings.favicon) recordAssetUsage(settings.favicon, 'Store Favicon', 'logos');
+  recordAssetUsage(settings.logo, 'Store Logo', 'logos');
+  recordAssetUsage(settings.darkLogo, 'Store Dark Logo', 'logos');
+  recordAssetUsage(settings.favicon, 'Store Favicon', 'logos');
 
   // 7. Scan Payment
   const payment = data.payment || ui.data?.payment || {};
-  if (payment.qrImage) recordAssetUsage(payment.qrImage, 'Payment QR Code', 'payments');
+  recordAssetUsage(payment.qrImage, 'Payment QR Code', 'payments');
+  recordAssetUsage(payment.logo, 'Payment Method Logo', 'payments');
 
-  // 8. Scan Testimonials & FAQ
+  // 8. Scan Testimonials
   const testimonials = listCollection('testimonials');
   for (const t of testimonials) {
-    if (t.avatar) recordAssetUsage(t.avatar, `Testimonial: ${t.name || 'User'}`, 'testimonials');
-    if (t.image) recordAssetUsage(t.image, `Testimonial: ${t.name || 'User'}`, 'testimonials');
+    recordAssetUsage(t.avatar, `Testimonial: ${t.name || 'User'}`, 'testimonials');
+    recordAssetUsage(t.image, `Testimonial: ${t.name || 'User'}`, 'testimonials');
   }
 
   return Array.from(mediaMap.values());
