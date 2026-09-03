@@ -325,10 +325,31 @@ const singleEditors = {
 
 function showToast(message, type = 'info') {
   const node = document.createElement('div');
-  node.className = 'toast';
-  node.innerHTML = `<strong>${escapeHtml(type)}</strong><div>${escapeHtml(message)}</div>`;
+  const typeIcons = {
+    success: 'check-circle-2',
+    danger: 'alert-circle',
+    warning: 'alert-triangle',
+    info: 'bell',
+  };
+  const icon = typeIcons[type] || 'info';
+  node.className = `toast toast-${type} glass`;
+  node.innerHTML = `
+    <div class="toast-icon-wrap">
+      <i data-lucide="${icon}"></i>
+    </div>
+    <div class="toast-body">
+      <strong class="toast-title">${escapeHtml(type.toUpperCase())}</strong>
+      <div class="toast-text">${escapeHtml(message)}</div>
+    </div>
+    <button type="button" class="toast-close" onclick="this.closest('.toast').remove()" aria-label="Dismiss">&times;</button>
+  `;
   toastHost.appendChild(node);
-  setTimeout(() => node.remove(), 3200);
+  if (window.lucide) lucide.createIcons();
+
+  setTimeout(() => {
+    node.classList.add('toast-exit');
+    setTimeout(() => node.remove(), 300);
+  }, 3200);
 }
 
 function setTheme(theme) {
@@ -642,6 +663,27 @@ function renderMediaFallback(label = 'No image selected') {
   return `<div class="preview-fallback">${escapeHtml(label)}</div>`;
 }
 
+function resolveAdminMediaUrl(url) {
+  let clean = String(url || '').trim();
+  if (!clean) return '';
+  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:') || clean.startsWith('blob:')) {
+    if (clean.includes('supabase.co/storage/v1/object/public/media/')) {
+      return clean.replace('https://noecylfqhtfwbjfkjxoo.supabase.co/storage/v1/object/public/media/', 'https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/');
+    }
+    return clean;
+  }
+  if (clean.startsWith('/')) {
+    return clean;
+  }
+  if (clean.startsWith('images/')) {
+    return `/${clean}`;
+  }
+  if (clean.startsWith('products/') || clean.startsWith('categories/')) {
+    return `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/${clean}`;
+  }
+  return `https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/products/${clean}`;
+}
+
 function normalizeProductMedia(record = {}) {
   const rawImage = String(record.image || record.imageUrl || record.thumbnail || record.photo || '').trim();
   const rawImages = (Array.isArray(record.images) ? record.images : normalizeEditorList(record.images || '')).map((u) => String(u || '').trim()).filter(Boolean);
@@ -685,34 +727,41 @@ function normalizeProductMedia(record = {}) {
 }
 
 function renderMediaStudioCard(item, index) {
-  const url = String(item.url || '').trim();
-  if (!url) return '';
-  const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(url);
+  const rawUrl = String(item.url || '').trim();
+  if (!rawUrl) return '';
+  const resolvedUrl = resolveAdminMediaUrl(rawUrl);
+  const isVideo = item.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(rawUrl);
   const isMainImg = Boolean(item.isMainImage);
   const isMainVid = Boolean(item.isMainVideo);
-  
+
   return `
-    <div class="media-card-item ${isMainImg || isMainVid ? 'is-main' : ''}" draggable="true" data-media-item data-index="${index}" data-url="${escapeHtml(url)}" data-type="${isVideo ? 'video' : 'image'}">
-      <span class="media-card-badge ${isVideo ? 'type-vid' : 'type-img'}">${isVideo ? 'VID' : 'IMG'}</span>
-      ${isMainImg ? '<span class="media-card-main-tag"><i data-lucide="star" style="width:10px;height:10px;"></i> Main Img</span>' : ''}
-      ${isMainVid ? '<span class="media-card-main-tag" style="background:#ec4899;"><i data-lucide="play" style="width:10px;height:10px;"></i> Main Vid</span>' : ''}
-      <span class="media-card-index">#${index + 1}</span>
-      
+    <div class="media-card-item ${isMainImg || isMainVid ? 'is-main' : ''}" draggable="true" data-media-item data-index="${index}" data-url="${escapeHtml(rawUrl)}" data-type="${isVideo ? 'video' : 'image'}">
+      <div class="media-card-badge-row">
+        <span class="media-card-badge ${isVideo ? 'type-vid' : 'type-img'}">
+          <i data-lucide="${isVideo ? 'video' : 'image'}" style="width:11px;height:11px;"></i> ${isVideo ? 'VIDEO' : 'IMAGE'}
+        </span>
+        <span class="media-card-index">#${index + 1}</span>
+      </div>
+
+      ${isMainImg ? '<span class="media-card-main-tag img-tag"><i data-lucide="star" style="width:11px;height:11px;"></i> Main Cover</span>' : ''}
+      ${isMainVid ? '<span class="media-card-main-tag vid-tag"><i data-lucide="play-circle" style="width:11px;height:11px;"></i> Main Video</span>' : ''}
+
       <div class="media-card-preview-wrap">
         ${isVideo
-          ? `<video src="${escapeHtml(url)}" autoplay muted loop playsinline preload="metadata"></video>`
-          : `<img src="${escapeHtml(url)}" alt="Media ${index + 1}" loading="lazy" />`
+          ? `<video src="${escapeHtml(resolvedUrl)}" preload="metadata" muted playsinline></video>
+             <div class="media-vid-overlay-play"><i data-lucide="play" style="width:18px;height:18px;"></i></div>`
+          : `<img src="${escapeHtml(resolvedUrl)}" data-raw-src="${escapeHtml(rawUrl)}" alt="Media ${index + 1}" loading="lazy" onerror="if(!this._failed){this._failed=true; if(this.getAttribute('data-raw-src').startsWith('images/')){this.src='/' + this.getAttribute('data-raw-src');}else{this.src='https://rustfs-mi5c.srv1942099.hstgr.cloud/linkadda-media/products/' + this.getAttribute('data-raw-src');}}" />`
         }
       </div>
 
       <div class="media-card-actions-overlay">
-        ${!isVideo && !isMainImg ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-image" data-index="${index}"><i data-lucide="star" style="width:11px;height:11px;"></i> Set Main</button>` : ''}
-        ${isVideo && !isMainVid ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-video" data-index="${index}"><i data-lucide="play" style="width:11px;height:11px;"></i> Set Main</button>` : ''}
-        
+        ${!isVideo && !isMainImg ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-image" data-index="${index}"><i data-lucide="star" style="width:11px;height:11px;"></i> Set Cover</button>` : ''}
+        ${isVideo && !isMainVid ? `<button type="button" class="media-card-btn btn-make-main" data-role="set-main-video" data-index="${index}"><i data-lucide="play" style="width:11px;height:11px;"></i> Set Video</button>` : ''}
+
         <div class="media-action-row">
-          <button type="button" class="media-card-btn" data-role="media-move-prev" data-index="${index}" title="Move Left / Up"><i data-lucide="arrow-left" style="width:12px;height:12px;"></i></button>
-          <button type="button" class="media-card-btn" data-role="media-move-next" data-index="${index}" title="Move Right / Down"><i data-lucide="arrow-right" style="width:12px;height:12px;"></i></button>
-          <button type="button" class="media-card-btn btn-remove" data-role="media-card-remove" data-index="${index}" title="Remove Media"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+          <button type="button" class="media-card-btn" data-role="media-move-prev" data-index="${index}" title="Move Left / Earlier"><i data-lucide="arrow-left" style="width:12px;height:12px;"></i></button>
+          <button type="button" class="media-card-btn" data-role="media-move-next" data-index="${index}" title="Move Right / Later"><i data-lucide="arrow-right" style="width:12px;height:12px;"></i></button>
+          <button type="button" class="media-card-btn btn-remove" data-role="media-card-remove" data-index="${index}" title="Delete Media"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
         </div>
       </div>
     </div>
@@ -726,11 +775,11 @@ function renderMediaStudio(record = {}) {
   const totalCount = mediaItems.length;
 
   return `
-    <div class="editor-section">
+    <div class="editor-section media-studio-section">
       <div class="editor-section-head">
         <div>
-          <h4>Media Studio (Unlimited Images & Videos)</h4>
-          <p>Add as many images and videos as you want. Upload files directly or paste URLs.</p>
+          <h4><i data-lucide="film" style="color: #06b6d4; width: 18px; height: 18px;"></i> 4. Media Studio (Unlimited Images & Videos)</h4>
+          <p>Upload photos & videos or paste direct links. Storefront slideshow me automatically live preview hoga.</p>
         </div>
       </div>
 
@@ -739,10 +788,10 @@ function renderMediaStudio(record = {}) {
           <div class="media-studio-stats">
             <span class="media-stat-chip img-chip" data-role="stat-imgs"><i data-lucide="image" style="width:14px;height:14px;"></i> <strong>${imgCount}</strong> Images</span>
             <span class="media-stat-chip vid-chip" data-role="stat-vids"><i data-lucide="video" style="width:14px;height:14px;"></i> <strong>${vidCount}</strong> Videos</span>
-            <span class="media-stat-chip"><i data-lucide="layers" style="width:14px;height:14px;"></i> <strong>${totalCount}</strong> Total Media</span>
+            <span class="media-stat-chip total-chip"><i data-lucide="layers" style="width:14px;height:14px;"></i> <strong>${totalCount}</strong> Total Media</span>
           </div>
           <div class="media-studio-actions">
-            <button type="button" class="btn media-btn-upload" data-role="media-upload-trigger"><i data-lucide="upload-cloud"></i> Upload Media (Files)</button>
+            <button type="button" class="btn media-btn-upload" data-role="media-upload-trigger"><i data-lucide="upload-cloud"></i> Upload Files (Images/Videos)</button>
             <button type="button" class="btn btn-ghost" data-role="media-url-toggle"><i data-lucide="link"></i> Add via URL</button>
             <input type="file" class="sr-only" accept="image/*,video/*" multiple data-role="media-multi-file-input" />
           </div>
@@ -761,9 +810,9 @@ function renderMediaStudio(record = {}) {
         <div class="media-items-grid" data-role="media-studio-grid">
           ${mediaItems.length ? mediaItems.map((item, index) => renderMediaStudioCard(item, index)).join('') : `
             <div class="media-empty-state">
-              <i data-lucide="image-plus"></i>
-              <strong style="color:var(--text);font-size:0.95rem;">No media items added yet</strong>
-              <p>Upload images/videos or paste URLs above. They will show directly on the live storefront slideshow.</p>
+              <i data-lucide="image-plus" style="width:36px;height:36px;color:#a855f7;"></i>
+              <strong style="color:var(--text);font-size:1rem;">No media items added yet</strong>
+              <p>Click "Upload Files" or "Add via URL" above to add photos & videos for this product.</p>
             </div>
           `}
         </div>
@@ -789,25 +838,27 @@ function renderProductPreview(record = {}, activeIndex = 0) {
     mediaHtml = renderMediaFallback('No media added yet');
   } else if (totalSlides === 1) {
     const single = mediaItems[0];
+    const resolved = resolveAdminMediaUrl(single.url);
     const isVid = single.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(single.url);
     mediaHtml = `
       <div class="editor-slideshow-wrap">
         <div class="editor-slideshow-slide active">
           ${isVid
-            ? `<video src="${escapeHtml(single.url)}" autoplay muted loop playsinline></video>`
-            : `<img src="${escapeHtml(single.url)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
+            ? `<video src="${escapeHtml(resolved)}" autoplay muted loop playsinline></video>`
+            : `<img src="${escapeHtml(resolved)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
           }
         </div>
       </div>
     `;
   } else {
     const slidesHtml = mediaItems.map((m, i) => {
+      const resolved = resolveAdminMediaUrl(m.url);
       const isVid = m.type === 'video' || /\.(mp4|webm|mov|m4v)$/i.test(m.url);
       return `
         <div class="editor-slideshow-slide ${i === safeIdx ? 'active' : ''}" data-slide-index="${i}">
           ${isVid
-            ? `<video src="${escapeHtml(m.url)}" autoplay muted loop playsinline></video>`
-            : `<img src="${escapeHtml(m.url)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
+            ? `<video src="${escapeHtml(resolved)}" autoplay muted loop playsinline></video>`
+            : `<img src="${escapeHtml(resolved)}" alt="${escapeHtml(record.title || 'Preview')}" loading="lazy" />`
           }
         </div>
       `;
@@ -846,6 +897,82 @@ function renderProductPreview(record = {}, activeIndex = 0) {
           <div><span>Images</span><strong>${escapeHtml(String(allImages.length))}</strong></div>
           <div><span>Videos</span><strong>${escapeHtml(String(allVideos.length))}</strong></div>
         </div>
+        ${Array.isArray(record.tiers) && record.tiers.length > 0 ? `
+          <div class="editor-preview-tiers" style="margin-top: 10px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 10px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">
+              <i data-lucide="layers" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle;"></i> Pack Options (${record.tiers.length}):
+            </div>
+            ${record.tiers.map((t, i) => `
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid ${i === 0 ? 'rgba(232,67,147,0.5)' : 'rgba(255,255,255,0.08)'}; border-radius: 6px; padding: 4px 8px; font-size: 11px;">
+                <span style="color: #f8fafc; font-weight: 600;">${escapeHtml(t.label || `Option ${i + 1}`)}</span>
+                <span style="color: #ec4899; font-weight: 700;">₹${escapeHtml(t.inr || '0')}${t.usd ? `<span style="color:#94a3b8; font-size:10px; font-weight:500;"> / $${escapeHtml(t.usd)}</span>` : ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderTierRow(tier = {}, index = 0) {
+  return `
+    <div class="tier-row glass" data-role="tier-row" data-index="${index}">
+      <div class="tier-row-top">
+        <span class="tier-num-badge"><i data-lucide="layers"></i> Option #${index + 1}</span>
+        <button type="button" class="btn btn-ghost tier-remove-btn" data-role="remove-tier-btn" data-index="${index}" title="Remove this option">
+          <i data-lucide="trash-2"></i> Remove
+        </button>
+      </div>
+      <div class="tier-row-fields">
+        <div class="field tier-label-box">
+          <label style="font-size: 11px; font-weight: 600; color: #a5b4fc; margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="tag" style="width: 12px; height: 12px;"></i> Option Title / Name *
+          </label>
+          <input class="input" type="text" data-role="tier-label" placeholder="e.g. 1 TG Group Only" value="${escapeHtml(tier.label || '')}" style="font-size: 13px;" />
+        </div>
+        <div class="field tier-price-box">
+          <label style="font-size: 11px; font-weight: 600; color: #34d399; margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="indian-rupee" style="width: 12px; height: 12px;"></i> Price INR (₹) *
+          </label>
+          <input class="input" type="text" data-role="tier-inr" placeholder="150" value="${escapeHtml(tier.inr || '')}" style="font-size: 13px;" />
+        </div>
+        <div class="field tier-usd-box">
+          <label style="font-size: 11px; font-weight: 600; color: #38bdf8; margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
+            <i data-lucide="dollar-sign" style="width: 12px; height: 12px;"></i> Price USD ($)
+          </label>
+          <input class="input" type="text" data-role="tier-usd" placeholder="9" value="${escapeHtml(tier.usd || '')}" style="font-size: 13px;" />
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTierEditor(tiers = []) {
+  const list = Array.isArray(tiers) ? tiers : [];
+  return `
+    <div class="editor-section tier-editor-wrapper" data-role="tier-editor-section">
+      <div class="editor-section-head" style="flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h4><i data-lucide="layers" style="color: #a855f7; width: 18px; height: 18px;"></i> 3. Sub-Plans / Group Options (Unlimited)</h4>
+          <p>Add separate purchase options (e.g. 1 TG Group @ ₹150 / $9, 4 Groups VIP @ ₹400 / $24). Card me interactive buttons dikhenge.</p>
+        </div>
+        <div class="tier-header-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-ghost" data-role="add-tier-btn" style="color: #c084fc; border-color: rgba(192, 132, 252, 0.35); font-size: 12px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 5px; font-weight: 700;">
+            <i data-lucide="plus"></i> Add Sub-Option
+          </button>
+          <button type="button" class="btn btn-primary" data-role="quick-save-tiers-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: rgba(16, 185, 129, 0.4); font-size: 12px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 5px; font-weight: 700;">
+            <i data-lucide="check"></i> Save Sub-Options
+          </button>
+        </div>
+      </div>
+      
+      <div class="tier-items-list" data-role="tier-items-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+        ${list.length > 0 ? list.map((tier, index) => renderTierRow(tier, index)).join('') : `
+          <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
+            No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
+          </div>
+        `}
       </div>
     </div>
   `;
@@ -864,6 +991,7 @@ function renderProductEditor(record = {}, schema = null) {
     creators: normalizeEditorList(record.creators || []),
     platforms: normalizeEditorList(record.platforms || []),
     features: normalizeEditorList(record.features || []),
+    tiers: Array.isArray(record.tiers) ? record.tiers : [],
   };
   const categories = getCategoryOptions();
   const currentCategory = String(data.category || '').trim();
@@ -989,10 +1117,13 @@ function renderProductEditor(record = {}, schema = null) {
             </div>
           </div>
 
-          <!-- Section 3: Unlimited Media Studio -->
+          <!-- Section 3: Sub-Plans / Group Options (Tiers) -->
+          ${renderTierEditor(data.tiers)}
+
+          <!-- Section 4: Unlimited Media Studio -->
           ${renderMediaStudio(data)}
 
-          <!-- Section 4: Features & Tags -->
+          <!-- Section 5: Features & Tags -->
           <div class="editor-section">
             <div class="editor-section-head">
               <div>
@@ -1034,12 +1165,14 @@ function renderProductEditor(record = {}, schema = null) {
         </section>
       </div>
 
-      <!-- Sticky Footer Actions -->
-      <div class="editor-footer glass">
-        <div class="editor-upload-state" data-role="upload-state" style="font-size: 12.5px; color: var(--muted);">Ready to save.</div>
-        <div class="toolbar editor-footer-actions">
+      <!-- Bottom Actions (Natural non-sticky flow) -->
+      <div class="editor-bottom-actions">
+        <div class="editor-upload-state" data-role="upload-state">
+          <i data-lucide="info" style="width:14px;height:14px;"></i> Ready to save changes.
+        </div>
+        <div class="editor-action-buttons">
           <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
-          <button type="submit" class="btn btn-primary" data-role="save-product" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 22px;">
+          <button type="submit" class="btn btn-primary btn-save-main" data-role="save-product">
             <i data-lucide="check"></i> ${isEdit ? 'Update Product' : 'Create Product'}
           </button>
         </div>
@@ -1266,6 +1399,15 @@ function getProductEditorRecord(form) {
   const platforms = syncTagEditor(form, 'platforms');
   const features = syncTagEditor(form, 'features');
 
+  // Extract tiers / sub-plans
+  const tierRows = [...form.querySelectorAll('[data-role="tier-row"]')];
+  const tiers = tierRows.map((row) => {
+    const label = String(row.querySelector('[data-role="tier-label"]')?.value || '').trim();
+    const inr = String(row.querySelector('[data-role="tier-inr"]')?.value || '').replace(/[₹\s,]/g, '').trim();
+    const usd = String(row.querySelector('[data-role="tier-usd"]')?.value || '').replace(/[\$\s,]/g, '').trim();
+    return { label, inr, usd };
+  }).filter((t) => t.label || t.inr || t.usd);
+
   return {
     title: form.querySelector('[name="title"]')?.value || '',
     slug: form.querySelector('[name="slug"]')?.value || '',
@@ -1284,6 +1426,7 @@ function getProductEditorRecord(form) {
     creators,
     platforms,
     features,
+    tiers,
     orderLink: form.querySelector('[name="orderLink"]')?.value || '',
     status: form.querySelector('[name="status"]')?.value || 'active',
     displayOrder: form.querySelector('[name="displayOrder"]')?.value || '0',
@@ -1576,10 +1719,81 @@ function attachProductEditorBehaviors(form) {
       updateProductEditorPreview(form);
       return;
     }
+    if (event.target.matches('[data-role="tier-label"],[data-role="tier-inr"],[data-role="tier-usd"]')) {
+      updateProductEditorPreview(form);
+      return;
+    }
   });
 
   // Click delegation
   form.addEventListener('click', (event) => {
+    // Add Tier / Sub-Option button
+    const addTierBtn = event.target.closest('[data-role="add-tier-btn"]');
+    if (addTierBtn) {
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      if (list) {
+        const emptyState = list.querySelector('[data-role="tier-empty-state"]');
+        if (emptyState) emptyState.remove();
+        const currentRows = list.querySelectorAll('[data-role="tier-row"]');
+        const newIdx = currentRows.length;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderTierRow({ label: '', inr: '', usd: '' }, newIdx);
+        const newRow = tempDiv.firstElementChild;
+        list.appendChild(newRow);
+        const labelInput = newRow.querySelector('[data-role="tier-label"]');
+        if (labelInput) labelInput.focus();
+        updateProductEditorPreview(form);
+        if (window.lucide) lucide.createIcons();
+      }
+      return;
+    }
+
+    // Remove Tier / Sub-Option button
+    const removeTierBtn = event.target.closest('[data-role="remove-tier-btn"]');
+    if (removeTierBtn) {
+      const row = removeTierBtn.closest('[data-role="tier-row"]');
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      if (row) {
+        row.remove();
+        if (list && !list.querySelector('[data-role="tier-row"]')) {
+          list.innerHTML = `
+            <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
+              No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
+            </div>
+          `;
+        }
+        updateProductEditorPreview(form);
+      }
+      return;
+    }
+
+    // Quick Save Sub-Options button
+    const quickSaveBtn = event.target.closest('[data-role="quick-save-tiers-btn"]');
+    if (quickSaveBtn) {
+      const prodId = form.dataset.id;
+      const prodData = getProductEditorRecord(form);
+      const tiers = prodData.tiers || [];
+      if (prodId) {
+        (async () => {
+          try {
+            quickSaveBtn.disabled = true;
+            quickSaveBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Saving...';
+            await updateRecord('products', prodId, { tiers });
+            showToast(`Sub-options saved successfully (${tiers.length} items)!`, 'success');
+          } catch (err) {
+            showToast(err?.message || 'Failed to save sub-options', 'danger');
+          } finally {
+            quickSaveBtn.disabled = false;
+            quickSaveBtn.innerHTML = '<i data-lucide="check"></i> Save Sub-Options';
+            if (window.lucide) lucide.createIcons();
+          }
+        })();
+      } else {
+        showToast('Sub-options added! Naya product create karne ke liye niche "Create Product" dabayein.', 'info');
+      }
+      return;
+    }
+
     // Slideshow dot click in preview
     const slideDot = event.target.closest('[data-slide-dot]');
     if (slideDot) {
@@ -1725,11 +1939,23 @@ function openProductEditor(record, schema) {
   openModal(`
     <div class="product-editor-modal">
       <div class="panel-head product-editor-head">
-        <div>
-          <h2 class="section-title">${escapeHtml(isEdit ? 'Edit Product' : 'Add Product')}</h2>
-          <p class="section-subtitle">${escapeHtml(schema.description)}</p>
+        <div class="product-editor-head-left">
+          <button class="btn btn-ghost modal-close-btn" data-close-modal type="button" aria-label="Close modal" title="Back / Close">
+            <i data-lucide="arrow-left"></i>
+          </button>
+          <div class="product-editor-head-title">
+            <h2 class="section-title">${escapeHtml(isEdit ? (record.title || 'Edit Product') : 'Create New Product')}</h2>
+            <div class="product-editor-head-meta">
+              <span class="badge ${isEdit ? 'badge-primary' : 'badge-success'}">${isEdit ? 'Editing' : 'New'}</span>
+              ${record.id ? `<span class="product-id-pill">${escapeHtml(record.id)}</span>` : ''}
+            </div>
+          </div>
         </div>
-        <button class="btn btn-ghost" data-close-modal type="button"><i data-lucide="x"></i></button>
+        <div class="product-editor-head-right">
+          <button type="submit" form="recordForm" class="btn btn-primary btn-header-save" data-role="save-product">
+            <i data-lucide="check"></i> <span>${isEdit ? 'Save Changes' : 'Create'}</span>
+          </button>
+        </div>
       </div>
       ${renderProductEditor(record, schema)}
     </div>
@@ -8266,6 +8492,7 @@ function attachGlobalHandlers() {
           galleryImages: prodData.galleryImages,
           video: prodData.video,
           videos: prodData.videos,
+          tiers: Array.isArray(prodData.tiers) ? prodData.tiers : [],
         };
       }
       const duplicate = existingItems.find((item) => item.slug && item.slug === next.slug && item.id !== id);

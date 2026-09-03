@@ -2190,7 +2190,16 @@ function applyOrderToUI(nextOrder = {}) {
   if (backBtn && targetId) {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const ext = isLocal ? '.html' : '';
-    backBtn.href = `index${ext}?product=${encodeURIComponent(targetId)}`;
+    backBtn.href = `index${ext}#product-${encodeURIComponent(targetId)}`;
+  }
+  if (backBtn && !backBtn._hasBackListener) {
+    backBtn._hasBackListener = true;
+    backBtn.addEventListener('click', function(e) {
+      if (window.history.length > 1) {
+        e.preventDefault();
+        window.history.back();
+      }
+    });
   }
 }
 
@@ -2246,9 +2255,15 @@ function findDefaultCatalogProduct(targetId) {
   if (pName && pInr) {
     const inrVal = extractMoneyNumber(pInr);
     const usdVal = extractMoneyNumber(pUsd);
+    const pTier = params.get('tier') || '';
+    let prodName = decodeURIComponent(pName);
+    if (pTier && !prodName.includes(pTier)) {
+      prodName = `${prodName} (${pTier})`;
+    }
     applyOrderToUI({
       id: pId || 'product',
-      name: decodeURIComponent(pName),
+      name: prodName,
+      tier: pTier,
       inr: formatCurrencyValue(inrVal, 'INR'),
       usd: Number.isFinite(usdVal) ? formatCurrencyValue(usdVal, 'USD') : '—',
       amountINRValue: inrVal,
@@ -2382,17 +2397,27 @@ function findLiveProductForOrder(orderInfo = {}) {
 function mergeOrderWithProduct(orderInfo = {}, productRecord = null) {
   if (orderInfo.isCart) return orderInfo;
   if (!productRecord) return orderInfo;
+
+  const hasCustomPrice = Number.isFinite(orderInfo.amountINRValue) && orderInfo.amountINRValue > 0;
+  const hasTierOrCustomName = Boolean(orderInfo.tier || (orderInfo.name && orderInfo.name !== 'Product' && orderInfo.name !== 'Loading order details...'));
+
+  const finalINR = hasCustomPrice ? orderInfo.inr : (productRecord.inr || formatCurrencyValue(productRecord.amountINRValue ?? productRecord.rawINR, 'INR') || orderInfo.inr || '—');
+  const finalUSD = (hasCustomPrice && Number.isFinite(orderInfo.amountUSDValue)) ? orderInfo.usd : (productRecord.usd || formatCurrencyValue(productRecord.amountUSDValue ?? productRecord.rawUSD, 'USD') || orderInfo.usd || '—');
+  const finalINRValue = hasCustomPrice ? orderInfo.amountINRValue : (productRecord.amountINRValue ?? orderInfo.amountINRValue);
+  const finalUSDValue = (hasCustomPrice && Number.isFinite(orderInfo.amountUSDValue)) ? orderInfo.amountUSDValue : (productRecord.amountUSDValue ?? orderInfo.amountUSDValue);
+  const finalName = hasTierOrCustomName ? orderInfo.name : (productRecord.title || productRecord.name || orderInfo.name || 'Product');
+
   return {
     ...orderInfo,
     id: productRecord.id || orderInfo.id || '',
     slug: productRecord.slug || orderInfo.slug || '',
-    name: productRecord.title || productRecord.name || orderInfo.name || 'Product',
-    inr: productRecord.inr || formatCurrencyValue(productRecord.amountINRValue ?? productRecord.rawINR, 'INR') || orderInfo.inr || '—',
-    usd: productRecord.usd || formatCurrencyValue(productRecord.amountUSDValue ?? productRecord.rawUSD, 'USD') || orderInfo.usd || '—',
-    rawINR: productRecord.rawINR || orderInfo.rawINR || '',
-    rawUSD: productRecord.rawUSD || orderInfo.rawUSD || '',
-    amountINRValue: productRecord.amountINRValue ?? orderInfo.amountINRValue,
-    amountUSDValue: productRecord.amountUSDValue ?? orderInfo.amountUSDValue,
+    name: finalName,
+    inr: finalINR,
+    usd: finalUSD,
+    rawINR: hasCustomPrice ? orderInfo.rawINR : (productRecord.rawINR || orderInfo.rawINR || ''),
+    rawUSD: hasCustomPrice ? orderInfo.rawUSD : (productRecord.rawUSD || orderInfo.rawUSD || ''),
+    amountINRValue: finalINRValue,
+    amountUSDValue: finalUSDValue,
     available: true,
     reason: '',
   };
@@ -2802,9 +2827,17 @@ async function ensureCheckoutOrderLoaded() {
     }
 
     if (matched) {
-      const inrNum = Number.isFinite(matched.amountINRValue) ? matched.amountINRValue : (extractMoneyNumber(pInr) || extractMoneyNumber(matched.rawINR || matched.inr));
-      const usdNum = Number.isFinite(matched.amountUSDValue) ? matched.amountUSDValue : (extractMoneyNumber(pUsd) || extractMoneyNumber(matched.rawUSD || matched.usd));
+      const customInr = extractMoneyNumber(pInr);
+      const customUsd = extractMoneyNumber(pUsd);
+      const pTier = params.get('tier') || '';
+      const inrNum = Number.isFinite(customInr) && customInr > 0 ? customInr : (Number.isFinite(matched.amountINRValue) ? matched.amountINRValue : (extractMoneyNumber(matched.rawINR || matched.inr) || 0));
+      const usdNum = Number.isFinite(customUsd) && customUsd > 0 ? customUsd : (Number.isFinite(matched.amountUSDValue) ? matched.amountUSDValue : (extractMoneyNumber(matched.rawUSD || matched.usd) || 0));
       let orderId = requestedCheckout.orderId || '';
+
+      let prodName = pName ? decodeURIComponent(pName) : (matched.title || matched.name || 'Product');
+      if (pTier && !prodName.includes(pTier)) {
+        prodName = `${prodName} (${pTier})`;
+      }
 
       if (!orderId && window._fbPush && window.__linkaddaDb) {
         orderId = window._fbPush(window._fbRef(window.__linkaddaDb, 'orders')).key;
@@ -2816,12 +2849,13 @@ async function ensureCheckoutOrderLoaded() {
         checkoutToken: requestedCheckout.token || '',
         productId: matched.id || matched.key || requestedCheckout.productId || '',
         productSlug: matched.slug || '',
-        productName: matched.title || matched.name || 'Product',
+        productName: prodName,
+        tier: pTier,
         amount: Number.isFinite(inrNum) ? inrNum : (Number.isFinite(usdNum) ? usdNum : ''),
         amountINR: Number.isFinite(inrNum) ? inrNum : null,
         amountUSD: Number.isFinite(usdNum) ? usdNum : null,
-        inr: matched.inr || (Number.isFinite(inrNum) ? formatCurrencyValue(inrNum, 'INR') : '—'),
-        usd: matched.usd || (Number.isFinite(usdNum) ? formatCurrencyValue(usdNum, 'USD') : '—'),
+        inr: Number.isFinite(inrNum) ? formatCurrencyValue(inrNum, 'INR') : (matched.inr || '—'),
+        usd: Number.isFinite(usdNum) ? formatCurrencyValue(usdNum, 'USD') : (matched.usd || '—'),
         rawINR: inrNum,
         rawUSD: usdNum,
         amountINRValue: inrNum,

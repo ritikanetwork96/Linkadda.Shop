@@ -2762,60 +2762,143 @@ body {
 /* ===== VIDEO TIER SELECTOR ===== */
 .vid-tier-label {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: #c084fc;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 14px 0 10px;
-  display: flex;
+  letter-spacing: 0.6px;
+  margin: 10px 0 6px;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(232,67,147,0.07);
-  border: 1px solid rgba(232,67,147,0.18);
-  border-radius: 8px;
-  padding: 8px 12px;
+  background: rgba(192, 132, 252, 0.08);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: fit-content;
 }
-.vid-tier-label i { color: var(--primary); font-size: 0.85rem; }
+.vid-tier-label i { color: #f0247a; font-size: 0.8rem; }
 
 .vid-tier-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 14px;
+  margin: 6px 0 10px;
+  width: 100%;
 }
 
 .vid-tier-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
+  padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
+  gap: 8px;
 }
 .vid-tier-item:hover {
-  border-color: var(--primary);
-  background: rgba(232,67,147,0.08);
+  border-color: rgba(240, 36, 122, 0.45);
+  background: rgba(240, 36, 122, 0.08);
+  transform: translateY(-1px);
 }
 .vid-tier-item.vid-tier-selected {
-  background: rgba(232,67,147,0.12);
-  border: 1.5px solid var(--primary);
-  box-shadow: 0 0 12px rgba(232,67,147,0.25);
+  background: linear-gradient(135deg, rgba(240, 36, 122, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
+  border: 1.5px solid #f0247a;
+  box-shadow: 0 0 14px rgba(240, 36, 122, 0.25), inset 0 0 12px rgba(240, 36, 122, 0.08);
+}
+
+.vid-tier-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vid-tier-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-size: 8px;
+  color: transparent;
+}
+.vid-tier-selected .vid-tier-radio {
+  border-color: #f0247a;
+  background: #f0247a;
+  box-shadow: 0 0 10px rgba(240, 36, 122, 0.6);
+  color: #ffffff;
+}
+
+.vid-tier-active-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 8px;
+  padding: 5px 10px;
+  margin: 4px 0 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.vid-tier-active-summary strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+.vid-tier-active-summary i {
+  color: #10b981;
+  font-size: 0.85rem;
 }
 
 .vid-tier-count {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  color: var(--text);
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.vid-tier-selected .vid-tier-count { color: #fff; }
+.vid-tier-selected .vid-tier-count { color: #ffffff; font-weight: 700; }
+
+.vid-tier-right {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-shrink: 0;
+}
 
 .vid-tier-price {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #f0247a;
+}
+.vid-tier-selected .vid-tier-price {
+  color: #fb7185;
+  text-shadow: 0 0 8px rgba(240, 36, 122, 0.35);
+}
+
+.vid-tier-usd {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.vid-tier-selected .vid-tier-usd {
+  color: #cbd5e1;
+}
+
+.vid-tier-active-price {
+  margin: 6px 0 10px;
 }
 
 .vid-tier-btn {
@@ -2825,7 +2908,7 @@ body {
   background: var(--gradient);
   color: #fff;
   border: none;
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-radius: 12px;
   font-size: 0.92rem;
   font-weight: 700;

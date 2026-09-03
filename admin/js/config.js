@@ -76,6 +76,7 @@ export const DEFAULT_EMPTY = {
   galleryImages: [],
   video: '',
   videos: [],
+  tiers: [],
   status: 'active',
   displayOrder: 0,
 };

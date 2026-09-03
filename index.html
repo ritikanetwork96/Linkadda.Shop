@@ -552,18 +552,30 @@
     const fallbackId = String(item.id || '').trim();
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
     const ext = isLocal ? '.html' : '';
-    const fallback = fallbackId
-      ? `payment${ext}?productId=${encodeURIComponent(fallbackId)}`
-      : `payment${ext}`;
+
+    const params = new URLSearchParams();
+    if (fallbackId) params.set('productId', fallbackId);
+    if (item.title) params.set('name', item.title);
+    if (item.inr) params.set('inr', String(item.inr).replace(/[^\d.]/g, ''));
+    if (item.usd) params.set('usd', String(item.usd).replace(/[^\d.]/g, ''));
+    if (item.tier) params.set('tier', item.tier);
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const fallback = `payment${ext}${queryString}`;
     if (!raw) return fallback;
 
     try {
       const parsed = new URL(raw, window.location.origin);
       const isCheckoutUrl = /\/payment(?:\.html)?$/i.test(parsed.pathname);
       if (isCheckoutUrl) {
-        const params = new URLSearchParams(parsed.search);
-        const nextId = params.get('productId') || params.get('id') || fallbackId;
-        return nextId ? `payment${ext}?productId=${encodeURIComponent(nextId)}` : `payment${ext}`;
+        const p = new URLSearchParams(parsed.search);
+        const nextId = p.get('productId') || p.get('id') || fallbackId;
+        if (nextId) p.set('productId', nextId);
+        if (item.title && !p.has('name') && !p.has('title')) p.set('name', item.title);
+        if (item.inr && !p.has('inr') && !p.has('price')) p.set('inr', String(item.inr).replace(/[^\d.]/g, ''));
+        if (item.usd && !p.has('usd')) p.set('usd', String(item.usd).replace(/[^\d.]/g, ''));
+        if (item.tier && !p.has('tier')) p.set('tier', item.tier);
+        return `payment${ext}?${p.toString()}`;
       }
     } catch (_) {}
 
@@ -575,23 +587,28 @@
     const card = link.closest('.pcard');
     const tierList = link.closest('.vid-tier-list');
     const tierItem = link.closest('.vid-tier-item');
-    const selectedTier = tierList?.querySelector('.vid-tier-item.vid-tier-selected') || tierItem;
+    const selectedTier = tierList?.querySelector('.vid-tier-item.vid-tier-selected') || card?.querySelector('.vid-tier-item.vid-tier-selected') || tierItem;
     const inr = cleanPrice(
       selectedTier?.dataset?.inr ||
-      card?.querySelector('.pcard-price')?.textContent ||
       link.dataset?.inr ||
+      card?.querySelector('.pcard-price')?.textContent ||
       ''
     );
     const usd = cleanPrice(
       selectedTier?.dataset?.usd ||
-      card?.querySelector('.pcard-price-usd')?.textContent ||
       link.dataset?.usd ||
+      card?.querySelector('.pcard-price-usd')?.textContent ||
       ''
     );
-    const title = decodeURIComponent(link.dataset.name || card?.querySelector('.pcard-title')?.textContent?.trim() || link.textContent?.trim() || '');
+    const tier = selectedTier?.dataset?.vids || link.dataset?.tier || '';
+    const baseTitle = decodeURIComponent(link.dataset.baseTitle || card?.querySelector('.pcard-title')?.textContent?.trim() || '');
+    let title = decodeURIComponent(link.dataset.name || card?.querySelector('.pcard-title')?.textContent?.trim() || link.textContent?.trim() || '');
+    if (tier && baseTitle && !title.includes(tier)) {
+      title = `${baseTitle} (${tier})`;
+    }
     const slug = link.dataset.slug || card?.dataset?.slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '');
     const id = link.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || link.dataset.fbId || slug || title || '';
-    return { id, slug, title, inr, usd };
+    return { id, slug, title, inr, usd, tier };
   }
 
   function createCheckoutToken() {
@@ -1306,15 +1323,55 @@
     if(hasTiers) {
       const btnId='vb_'+id;
       const cartBtnId='vcb_'+id;
-      const tierItems=cat.tiers.map((t,i)=>`<div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd)}"><span class="vid-tier-count">${esc(t.label)}</span><span class="vid-tier-price">&#8377;${esc(t.inr)}</span></div>`).join('');
-      const first=cat.tiers[0];
-      bottom=`<div class="vid-tier-label"><i class="fa-solid fa-film"></i> Choose your pack</div>
+      const rawTiers = Array.isArray(cat.tiers) ? cat.tiers.filter(t => t && (t.label || t.inr)) : [];
+      const mainINR = cat.priceINR ? String(cat.priceINR).replace(/[₹\s,]/g, '') : '';
+      const mainUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[\$\s,]/g, '') : '';
+      const hasMainInTiers = rawTiers.some(t => {
+        const lbl = (t.label || '').toLowerCase();
+        return (mainINR && t.inr === mainINR) || lbl.includes('full') || lbl.includes('all group') || lbl.includes('main') || lbl.includes('vip pack');
+      });
+
+      let allOptions = [];
+      if (mainINR && !hasMainInTiers) {
+        allOptions = [
+          { label: 'Full Collection Pack (All Groups)', inr: mainINR, usd: mainUSD, isMain: true },
+          ...rawTiers
+        ];
+      } else {
+        allOptions = rawTiers;
+      }
+
+      const first = allOptions[0] || { label: 'Standard Pack', inr: mainINR || '0', usd: mainUSD || '' };
+      const initialTitle = first.isMain ? (cat.title || 'Product') : `${cat.title || 'Product'} (${first.label})`;
+
+      const tierItems = allOptions.map((t, i) => `
+        <div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd||'')}" data-is-main="${t.isMain ? '1' : '0'}" data-title="${esc(cat.title)} (${esc(t.label)})">
+          <div class="vid-tier-left">
+            <span class="vid-tier-radio"><i class="fa-solid fa-check"></i></span>
+            <span class="vid-tier-count">${esc(t.label)}</span>
+          </div>
+          <div class="vid-tier-right">
+            <span class="vid-tier-price">&#8377;${esc(t.inr)}</span>
+            ${t.usd ? `<span class="vid-tier-usd">/ $${esc(t.usd)}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+
+      bottom=`
+      <div class="vid-tier-label"><i class="fa-solid fa-layer-group"></i> Choose Pack / Group Option</div>
       <div class="vid-tier-list" id="${btnId}_list">${tierItems}</div>
+      <div class="vid-tier-active-summary" id="sum_${btnId}">
+        <i class="fa-solid fa-circle-check"></i> Selected: <strong>${esc(first.label)}</strong> (&#8377;${esc(first.inr)})
+      </div>
+      <div class="pcard-price-row vid-tier-active-price" id="pr_${btnId}">
+        <div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">&#8377;${esc(first.inr)}</span></div>
+        ${first.usd ? `<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">$${esc(first.usd)}</span></div>` : ''}
+      </div>
       <div class="pcard-actions">
-        <a href="${esc(normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(id)}`, { id, slug: cat.slug, title: cat.title }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}">
+        <a href="${esc(normalizeCheckoutUrl('payment', { id, slug: cat.slug, title: initialTitle, inr: first.inr, usd: first.usd, tier: first.label }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(initialTitle)}" data-base-title="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}">
           Order Now <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}" data-img="${esc(firstImg)}">
+        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(initialTitle)}" data-base-title="${esc(cat.title||'')}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}" data-img="${esc(firstImg)}">
           🛒 Add to Cart
         </button>
       </div>`;
@@ -1708,31 +1765,56 @@
 
   // -- VID TIERS INIT --
   function initVidTiers() {
-    document.querySelectorAll('.vid-tier-list').forEach(list=>{
-      const btnId=list.id.replace('_list','');
-      const btn=document.getElementById(btnId);
-      const card=list.closest('.pcard');
-      const cartBtn=card ? card.querySelector('.vid-tier-cart-btn, .btn-add-cart') : null;
-      
-      list.querySelectorAll('.vid-tier-item').forEach(item=>{
-        item.addEventListener('click',()=>{
-          list.querySelectorAll('.vid-tier-item').forEach(i=>i.classList.remove('vid-tier-selected'));
+    document.querySelectorAll('.vid-tier-list').forEach(list => {
+      const btnId = list.id.replace('_list', '');
+      const btn = document.getElementById(btnId);
+      const card = list.closest('.pcard');
+      const cartBtn = card ? card.querySelector('.vid-tier-cart-btn, .btn-add-cart') : null;
+      const priceRow = card ? card.querySelector('.vid-tier-active-price') : null;
+      const baseTitle = btn?.dataset?.baseTitle ? decodeURIComponent(btn.dataset.baseTitle) : (card?.querySelector('.pcard-title')?.textContent?.trim() || 'Product');
+      const productId = btn?.dataset?.productId || card?.dataset?.productId || card?.dataset?.fbId || '';
+      const slug = card?.dataset?.slug || '';
+
+      list.querySelectorAll('.vid-tier-item').forEach(item => {
+        item.addEventListener('click', () => {
+          list.querySelectorAll('.vid-tier-item').forEach(i => i.classList.remove('vid-tier-selected'));
           item.classList.add('vid-tier-selected');
           const tierLabel = item.dataset.vids || item.querySelector('.vid-tier-count')?.textContent?.trim() || '';
           const inrVal = item.dataset.inr || '';
           const usdVal = item.dataset.usd || '';
-          
-          if(btn){
-            btn.innerHTML=`Order Now \u2013 ${tierLabel} \u20B9${inrVal} <i class="fa-solid fa-arrow-right"></i>`;
+          const isMain = item.dataset.isMain === '1';
+          const fullTitle = isMain ? baseTitle : `${baseTitle} (${tierLabel})`;
+
+          if (btn) {
+            btn.innerHTML = `Order Now <i class="fa-solid fa-arrow-right"></i>`;
             btn.dataset.inr = inrVal;
             btn.dataset.usd = usdVal;
-            btn.dataset.tier = tierLabel;
-            btn.href=normalizeCheckoutUrl(`payment?productId=${encodeURIComponent(btn.dataset.productId || '')}`, { id: btn.dataset.productId || '', slug: '', title: btn.dataset.name ? decodeURIComponent(btn.dataset.name) : '' });
+            btn.dataset.tier = isMain ? '' : tierLabel;
+            btn.dataset.name = encodeURIComponent(fullTitle);
+            btn.href = normalizeCheckoutUrl('payment', {
+              id: productId,
+              slug,
+              title: fullTitle,
+              inr: inrVal,
+              usd: usdVal,
+              tier: isMain ? '' : tierLabel
+            });
           }
-          if(cartBtn){
+          if (cartBtn) {
             cartBtn.dataset.inr = inrVal;
             cartBtn.dataset.usd = usdVal;
-            cartBtn.dataset.tier = tierLabel;
+            cartBtn.dataset.tier = isMain ? '' : tierLabel;
+            cartBtn.dataset.name = fullTitle;
+          }
+          if (priceRow) {
+            const inrEl = priceRow.querySelector('.pcard-price');
+            const usdEl = priceRow.querySelector('.pcard-price-usd');
+            if (inrEl) inrEl.textContent = inrVal ? `₹${inrVal}` : '';
+            if (usdEl) usdEl.textContent = usdVal ? `$${usdVal}` : '';
+          }
+          const summaryEl = card ? card.querySelector('.vid-tier-active-summary') : null;
+          if (summaryEl) {
+            summaryEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Selected: <strong>${esc(tierLabel)}</strong> (&#8377;${inrVal})`;
           }
         });
       });
@@ -1795,6 +1877,7 @@
       }
       focusSharedProduct();
       if (typeof focusSharedCategory === 'function') focusSharedCategory();
+      if (typeof restoreReturnPosition === 'function') restoreReturnPosition();
     } catch (err) {
       console.error('Failed to render live grid:', err);
     }
@@ -2002,25 +2085,115 @@
     }
   }
 
+  // -- RESTORE EXACT SCROLL & PRODUCT POSITION ON RETURN FROM PAYMENT --
+  var returnPositionRestored = false;
+
+  function restoreReturnPosition() {
+    const prodId = sessionStorage.getItem('last_ordered_product_id');
+    const scrollY = sessionStorage.getItem('last_ordered_scroll_y');
+    const savedCat = sessionStorage.getItem('last_ordered_category');
+
+    if (!prodId && !scrollY) return;
+
+    if (savedCat && typeof activeCategoryFilter !== 'undefined' && activeCategoryFilter !== savedCat && savedCat !== 'all') {
+      activeCategoryFilter = savedCat;
+      renderCategoryFilters();
+      renderLiveGrid();
+    }
+
+    if (prodId) {
+      const queryId = String(prodId).toLowerCase().trim();
+      let targetCard = document.getElementById('product-' + prodId);
+      if (!targetCard) {
+        const cards = document.querySelectorAll('.pcard');
+        for (const card of cards) {
+          const fbId = String(card.dataset.fbId || card.dataset.productId || '').toLowerCase();
+          const slug = String(card.dataset.slug || '').toLowerCase();
+          if (fbId === queryId || slug === queryId || (fbId && queryId.includes(fbId)) || (slug && queryId.includes(slug))) {
+            targetCard = card;
+            break;
+          }
+        }
+      }
+
+      if (targetCard) {
+        returnPositionRestored = true;
+        const performScroll = () => {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        performScroll();
+        setTimeout(performScroll, 120);
+        setTimeout(performScroll, 350);
+        setTimeout(performScroll, 750);
+        setTimeout(() => {
+          sessionStorage.removeItem('last_ordered_product_id');
+          sessionStorage.removeItem('last_ordered_scroll_y');
+          sessionStorage.removeItem('last_ordered_category');
+        }, 1500);
+        return;
+      }
+    }
+
+    if (scrollY && !isNaN(Number(scrollY)) && Number(scrollY) > 0) {
+      returnPositionRestored = true;
+      const performWinScroll = () => {
+        window.scrollTo({ top: Number(scrollY), behavior: 'smooth' });
+      };
+      performWinScroll();
+      setTimeout(performWinScroll, 120);
+      setTimeout(performWinScroll, 350);
+      setTimeout(() => {
+        sessionStorage.removeItem('last_ordered_product_id');
+        sessionStorage.removeItem('last_ordered_scroll_y');
+        sessionStorage.removeItem('last_ordered_category');
+      }, 1500);
+    }
+  }
+
+  // Save product and scroll position whenever any checkout button is clicked
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('a.btn-order-now, a.vid-tier-btn, a.btn-card, a.cpb-btn, a[href*="payment"]');
+    if (btn) {
+      const card = btn.closest('.pcard');
+      const prodId = btn.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || card?.dataset?.slug || '';
+      if (prodId) {
+        sessionStorage.setItem('last_ordered_product_id', prodId);
+      }
+      sessionStorage.setItem('last_ordered_scroll_y', String(window.scrollY));
+      if (typeof activeCategoryFilter !== 'undefined') {
+        sessionStorage.setItem('last_ordered_category', activeCategoryFilter);
+      }
+    }
+  }, { capture: true });
+
   window.addEventListener('hashchange', () => {
     sharedFocusDone = false;
     focusSharedProduct();
     sharedCategoryDone = false;
     focusSharedCategory();
+    restoreReturnPosition();
   });
   window.addEventListener('popstate', () => {
     sharedFocusDone = false;
     focusSharedProduct();
     sharedCategoryDone = false;
     focusSharedCategory();
+    restoreReturnPosition();
+  });
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted || sessionStorage.getItem('last_ordered_product_id') || sessionStorage.getItem('last_ordered_scroll_y')) {
+      setTimeout(restoreReturnPosition, 100);
+    }
   });
   window.addEventListener('load', () => {
     focusSharedProduct();
     focusSharedCategory();
+    restoreReturnPosition();
   });
   document.addEventListener('DOMContentLoaded', () => {
     focusSharedProduct();
     focusSharedCategory();
+    restoreReturnPosition();
   });
 
   document.addEventListener('click', (event) => {
@@ -2108,8 +2281,9 @@
       const imgEl = card.querySelector('.pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
       img = imgEl?.getAttribute('src') || '';
     }
-    
-    return { id, name, inr, usd, tier, img };
+
+    const displayName = tier && !name.includes(tier) ? `${name} (${tier})` : name;
+    return { id, name: displayName, inr, usd, tier, img };
   }
 
   function addToCart(item) {
