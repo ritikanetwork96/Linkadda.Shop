@@ -3741,6 +3741,21 @@ function initTelegramSlider(btnEl) {
     }
   }
 
+  function nudgeHint() {
+    if (btnEl.classList.contains('unlocked') || isDragging) return;
+    calcMaxDrag();
+    if (navigator.vibrate) {
+      try { navigator.vibrate(20); } catch (_) {}
+    }
+    // Quick instructional bounce
+    setDragPosition(Math.min(38, maxDrag * 0.3), true);
+    setTimeout(() => {
+      if (!isDragging && !btnEl.classList.contains('unlocked')) {
+        setDragPosition(0, true);
+      }
+    }, 220);
+  }
+
   thumb.addEventListener('pointerdown', onPointerDown, { passive: false });
   window.addEventListener('pointermove', onPointerMove, { passive: false });
   window.addEventListener('pointerup', onPointerUp);
@@ -3757,14 +3772,13 @@ function initTelegramSlider(btnEl) {
     onPointerDown(e);
   });
 
-  // Tap / click fallback: if user clicks without dragging, smooth auto-slide to unlock
+  // If user merely taps or clicks without sliding, show instructional nudge instead of opening!
   btnEl.addEventListener('click', (e) => {
     e.preventDefault();
     if (btnEl.classList.contains('unlocked')) return;
-    if (hasMoved) return;
-    calcMaxDrag();
-    setDragPosition(maxDrag, true);
-    triggerUnlock();
+    if (!hasMoved) {
+      nudgeHint();
+    }
   });
 }
 
