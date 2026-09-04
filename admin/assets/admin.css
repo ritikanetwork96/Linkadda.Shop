@@ -8979,6 +8979,57 @@ button {
   border-radius: 14px;
 }
 
+.tier-presets-box {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tier-presets-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tier-presets-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tier-preset-btn {
+  font-size: 11.5px !important;
+  padding: 5px 10px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  color: #e2e8f0 !important;
+  transition: all 0.15s ease !important;
+  cursor: pointer;
+}
+
+.tier-preset-btn:hover {
+  background: rgba(168, 85, 247, 0.18) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  color: #f3e8ff !important;
+  transform: translateY(-1px);
+}
+
+.tier-preset-btn.custom-add {
+  color: #c084fc !important;
+  border-color: rgba(192, 132, 252, 0.4) !important;
+  font-weight: 600;
+}
+
 .tier-row {
   display: flex;
   flex-direction: column;
@@ -9014,6 +9065,22 @@ button {
   gap: 5px;
 }
 
+.tier-action-btn {
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  transition: all 0.15s ease !important;
+}
+
+.tier-action-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
 .tier-remove-btn {
   color: #f87171 !important;
   border-color: rgba(248, 113, 113, 0.3) !important;
@@ -9021,6 +9088,7 @@ button {
   padding: 4px 10px !important;
   border-radius: 8px !important;
 }
+
 .tier-remove-btn:hover {
   background: rgba(248, 113, 113, 0.15) !important;
   border-color: #f87171 !important;
@@ -9034,6 +9102,40 @@ button {
 
 .tier-row-fields .field {
   margin: 0 !important;
+}
+
+/* Catalog Card Sub-Plan Badge & Button */
+.catalog-tier-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.catalog-tier-badge-btn:hover {
+  background: rgba(168, 85, 247, 0.28);
+  border-color: rgba(168, 85, 247, 0.6);
+  color: #f3e8ff;
+  transform: translateY(-1px);
+}
+
+.catalog-action-btn.action-tiers {
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.catalog-action-btn.action-tiers:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+  color: #f3e8ff;
 }
 
 @media (max-width: 640px) {
@@ -9665,9 +9767,7 @@ button {
   }
 
   .modal,
-  #modalRoot,
-  .modal:has(.product-editor-modal),
-  .modal:has(.category-editor-modal) {
+  #modalRoot {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -9678,12 +9778,24 @@ button {
     border-radius: 0 !important;
     border: none !important;
     margin: 0 !important;
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    padding: 16px 14px 60px 14px !important;
+    display: block !important;
     background: #0d0e14 !important;
     box-shadow: none !important;
     transform: none !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal:has(.product-editor-modal),
+  .modal:has(.category-editor-modal),
+  #modalRoot:has(.product-editor-modal),
+  #modalRoot:has(.category-editor-modal) {
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
     overflow: hidden !important;
   }
 

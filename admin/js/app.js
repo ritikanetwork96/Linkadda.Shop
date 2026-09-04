@@ -631,6 +631,30 @@ function normalizeEditorList(value) {
     .filter(Boolean);
 }
 
+export function normalizeTierList(raw) {
+  if (!raw) return [];
+  let list = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === 'object') {
+    list = Object.values(raw);
+  } else if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) list = parsed;
+      else if (typeof parsed === 'object') list = Object.values(parsed);
+    } catch (_) {}
+  }
+  return list
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => ({
+      label: String(item.label || item.title || item.name || '').trim(),
+      inr: String(item.inr || item.priceINR || item.price || '').replace(/[₹\s,]/g, '').trim(),
+      usd: String(item.usd || item.priceUSD || '').replace(/[\$\s,]/g, '').trim(),
+    }))
+    .filter((item) => item.label || item.inr || item.usd);
+}
+
 function mergeUniqueList(existing, incoming) {
   const seen = new Set();
   return [...existing, ...incoming].filter((item) => {
@@ -897,32 +921,50 @@ function renderProductPreview(record = {}, activeIndex = 0) {
           <div><span>Images</span><strong>${escapeHtml(String(allImages.length))}</strong></div>
           <div><span>Videos</span><strong>${escapeHtml(String(allVideos.length))}</strong></div>
         </div>
-        ${Array.isArray(record.tiers) && record.tiers.length > 0 ? `
-          <div class="editor-preview-tiers" style="margin-top: 10px; display: flex; flex-direction: column; gap: 4px;">
-            <div style="font-size: 10px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">
-              <i data-lucide="layers" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle;"></i> Pack Options (${record.tiers.length}):
-            </div>
-            ${record.tiers.map((t, i) => `
-              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid ${i === 0 ? 'rgba(232,67,147,0.5)' : 'rgba(255,255,255,0.08)'}; border-radius: 6px; padding: 4px 8px; font-size: 11px;">
-                <span style="color: #f8fafc; font-weight: 600;">${escapeHtml(t.label || `Option ${i + 1}`)}</span>
-                <span style="color: #ec4899; font-weight: 700;">₹${escapeHtml(t.inr || '0')}${t.usd ? `<span style="color:#94a3b8; font-size:10px; font-weight:500;"> / $${escapeHtml(t.usd)}</span>` : ''}</span>
+        ${(() => {
+          const previewTiers = normalizeTierList(record.tiers);
+          if (!previewTiers.length) return '';
+          return `
+            <div class="editor-preview-tiers" style="margin-top: 10px; display: flex; flex-direction: column; gap: 4px;">
+              <div style="font-size: 10px; text-transform: uppercase; color: #a5b4fc; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">
+                <i data-lucide="layers" style="width: 11px; height: 11px; display: inline-block; vertical-align: middle;"></i> Pack Options (${previewTiers.length}):
               </div>
-            `).join('')}
-          </div>
-        ` : ''}
+              ${previewTiers.map((t, i) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid ${i === 0 ? 'rgba(232,67,147,0.5)' : 'rgba(255,255,255,0.08)'}; border-radius: 6px; padding: 4px 8px; font-size: 11px;">
+                  <span style="color: #f8fafc; font-weight: 600;">${escapeHtml(t.label || `Option ${i + 1}`)}</span>
+                  <span style="color: #ec4899; font-weight: 700;">₹${escapeHtml(t.inr || '0')}${t.usd ? `<span style="color:#94a3b8; font-size:10px; font-weight:500;"> / $${escapeHtml(t.usd)}</span>` : ''}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        })()}
       </div>
     </div>
   `;
 }
 
-function renderTierRow(tier = {}, index = 0) {
+function renderTierRow(tier = {}, index = 0, total = 1) {
   return `
     <div class="tier-row glass" data-role="tier-row" data-index="${index}">
       <div class="tier-row-top">
-        <span class="tier-num-badge"><i data-lucide="layers"></i> Option #${index + 1}</span>
-        <button type="button" class="btn btn-ghost tier-remove-btn" data-role="remove-tier-btn" data-index="${index}" title="Remove this option">
-          <i data-lucide="trash-2"></i> Remove
-        </button>
+        <div class="tier-num-badge-wrap" style="display: flex; align-items: center; gap: 6px;">
+          <span class="tier-num-badge"><i data-lucide="layers"></i> Option #${index + 1}</span>
+          ${tier.label ? `<span class="chip subtle" style="font-size: 10px; padding: 1px 7px; color: #c084fc; border-color: rgba(192,132,252,0.3);">${escapeHtml(tier.label)}</span>` : ''}
+        </div>
+        <div class="tier-row-actions" style="display: flex; align-items: center; gap: 4px;">
+          <button type="button" class="btn btn-ghost tier-action-btn" data-role="move-tier-up" data-index="${index}" title="Move Up" ${index === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+            <i data-lucide="arrow-up" style="width: 13px; height: 13px;"></i>
+          </button>
+          <button type="button" class="btn btn-ghost tier-action-btn" data-role="move-tier-down" data-index="${index}" title="Move Down" ${index >= total - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+            <i data-lucide="arrow-down" style="width: 13px; height: 13px;"></i>
+          </button>
+          <button type="button" class="btn btn-ghost tier-action-btn" data-role="duplicate-tier-btn" data-index="${index}" title="Duplicate this option">
+            <i data-lucide="copy" style="width: 13px; height: 13px;"></i>
+          </button>
+          <button type="button" class="btn btn-ghost tier-remove-btn" data-role="remove-tier-btn" data-index="${index}" title="Remove this option">
+            <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Remove
+          </button>
+        </div>
       </div>
       <div class="tier-row-fields">
         <div class="field tier-label-box">
@@ -949,7 +991,7 @@ function renderTierRow(tier = {}, index = 0) {
 }
 
 function renderTierEditor(tiers = []) {
-  const list = Array.isArray(tiers) ? tiers : [];
+  const list = normalizeTierList(tiers);
   return `
     <div class="editor-section tier-editor-wrapper" data-role="tier-editor-section">
       <div class="editor-section-head" style="flex-wrap: wrap; gap: 10px;">
@@ -968,7 +1010,7 @@ function renderTierEditor(tiers = []) {
       </div>
       
       <div class="tier-items-list" data-role="tier-items-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
-        ${list.length > 0 ? list.map((tier, index) => renderTierRow(tier, index)).join('') : `
+        ${list.length > 0 ? list.map((tier, index) => renderTierRow(tier, index, list.length)).join('') : `
           <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
             No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
           </div>
@@ -976,6 +1018,51 @@ function renderTierEditor(tiers = []) {
       </div>
     </div>
   `;
+}
+
+function refreshTierRowIndices(container) {
+  if (!container) return;
+  const list = container.querySelector('[data-role="tier-items-list"]');
+  if (!list) return;
+  const rows = [...list.querySelectorAll('[data-role="tier-row"]')];
+  if (!rows.length) {
+    if (!list.querySelector('[data-role="tier-empty-state"]')) {
+      list.innerHTML = `
+        <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
+          No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
+        </div>
+      `;
+    }
+  } else {
+    const emptyState = list.querySelector('[data-role="tier-empty-state"]');
+    if (emptyState) emptyState.remove();
+
+    rows.forEach((row, idx) => {
+      row.dataset.index = idx;
+      const badge = row.querySelector('.tier-num-badge');
+      if (badge) badge.innerHTML = `<i data-lucide="layers"></i> Option #${idx + 1}`;
+      
+      const upBtn = row.querySelector('[data-role="move-tier-up"]');
+      const downBtn = row.querySelector('[data-role="move-tier-down"]');
+      if (upBtn) {
+        upBtn.dataset.index = idx;
+        upBtn.disabled = idx === 0;
+        upBtn.style.opacity = idx === 0 ? '0.3' : '1';
+        upBtn.style.cursor = idx === 0 ? 'not-allowed' : 'pointer';
+      }
+      if (downBtn) {
+        downBtn.dataset.index = idx;
+        downBtn.disabled = idx === rows.length - 1;
+        downBtn.style.opacity = idx === rows.length - 1 ? '0.3' : '1';
+        downBtn.style.cursor = idx === rows.length - 1 ? 'not-allowed' : 'pointer';
+      }
+      const dupBtn = row.querySelector('[data-role="duplicate-tier-btn"]');
+      if (dupBtn) dupBtn.dataset.index = idx;
+      const removeBtn = row.querySelector('[data-role="remove-tier-btn"]');
+      if (removeBtn) removeBtn.dataset.index = idx;
+    });
+  }
+  if (window.lucide) lucide.createIcons();
 }
 
 function renderProductEditor(record = {}, schema = null) {
@@ -991,7 +1078,7 @@ function renderProductEditor(record = {}, schema = null) {
     creators: normalizeEditorList(record.creators || []),
     platforms: normalizeEditorList(record.platforms || []),
     features: normalizeEditorList(record.features || []),
-    tiers: Array.isArray(record.tiers) ? record.tiers : [],
+    tiers: normalizeTierList(record.tiers || []),
   };
   const categories = getCategoryOptions();
   const currentCategory = String(data.category || '').trim();
@@ -1737,13 +1824,89 @@ function attachProductEditorBehaviors(form) {
         const currentRows = list.querySelectorAll('[data-role="tier-row"]');
         const newIdx = currentRows.length;
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = renderTierRow({ label: '', inr: '', usd: '' }, newIdx);
+        tempDiv.innerHTML = renderTierRow({ label: '', inr: '', usd: '' }, newIdx, newIdx + 1);
         const newRow = tempDiv.firstElementChild;
         list.appendChild(newRow);
+        refreshTierRowIndices(form);
         const labelInput = newRow.querySelector('[data-role="tier-label"]');
         if (labelInput) labelInput.focus();
         updateProductEditorPreview(form);
-        if (window.lucide) lucide.createIcons();
+      }
+      return;
+    }
+
+    // Tier Preset button
+    const presetBtn = event.target.closest('.tier-preset-btn:not(.custom-add)');
+    if (presetBtn) {
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      if (list) {
+        const emptyState = list.querySelector('[data-role="tier-empty-state"]');
+        if (emptyState) emptyState.remove();
+        const currentRows = list.querySelectorAll('[data-role="tier-row"]');
+        const newIdx = currentRows.length;
+        const label = presetBtn.dataset.presetLabel || '';
+        const inr = presetBtn.dataset.presetInr || '';
+        const usd = presetBtn.dataset.presetUsd || '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderTierRow({ label, inr, usd }, newIdx, newIdx + 1);
+        const newRow = tempDiv.firstElementChild;
+        list.appendChild(newRow);
+        refreshTierRowIndices(form);
+        const inrInput = newRow.querySelector('[data-role="tier-inr"]');
+        if (inrInput) inrInput.focus();
+        updateProductEditorPreview(form);
+      }
+      return;
+    }
+
+    // Move Tier Up button
+    const moveUpBtn = event.target.closest('[data-role="move-tier-up"]');
+    if (moveUpBtn && !moveUpBtn.disabled) {
+      const row = moveUpBtn.closest('[data-role="tier-row"]');
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      const prev = row?.previousElementSibling;
+      if (row && prev && prev.matches('[data-role="tier-row"]') && list) {
+        list.insertBefore(row, prev);
+        refreshTierRowIndices(form);
+        updateProductEditorPreview(form);
+      }
+      return;
+    }
+
+    // Move Tier Down button
+    const moveDownBtn = event.target.closest('[data-role="move-tier-down"]');
+    if (moveDownBtn && !moveDownBtn.disabled) {
+      const row = moveDownBtn.closest('[data-role="tier-row"]');
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      const next = row?.nextElementSibling;
+      if (row && next && next.matches('[data-role="tier-row"]') && list) {
+        list.insertBefore(next, row);
+        refreshTierRowIndices(form);
+        updateProductEditorPreview(form);
+      }
+      return;
+    }
+
+    // Duplicate Tier button
+    const dupTierBtn = event.target.closest('[data-role="duplicate-tier-btn"]');
+    if (dupTierBtn) {
+      const row = dupTierBtn.closest('[data-role="tier-row"]');
+      const list = form.querySelector('[data-role="tier-items-list"]');
+      if (row && list) {
+        const label = row.querySelector('[data-role="tier-label"]')?.value || '';
+        const inr = row.querySelector('[data-role="tier-inr"]')?.value || '';
+        const usd = row.querySelector('[data-role="tier-usd"]')?.value || '';
+        const currentRows = list.querySelectorAll('[data-role="tier-row"]');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderTierRow({ label: `${label} (Copy)`, inr, usd }, currentRows.length, currentRows.length + 1);
+        const newRow = tempDiv.firstElementChild;
+        if (row.nextSibling) {
+          list.insertBefore(newRow, row.nextSibling);
+        } else {
+          list.appendChild(newRow);
+        }
+        refreshTierRowIndices(form);
+        updateProductEditorPreview(form);
       }
       return;
     }
@@ -1752,16 +1915,9 @@ function attachProductEditorBehaviors(form) {
     const removeTierBtn = event.target.closest('[data-role="remove-tier-btn"]');
     if (removeTierBtn) {
       const row = removeTierBtn.closest('[data-role="tier-row"]');
-      const list = form.querySelector('[data-role="tier-items-list"]');
       if (row) {
         row.remove();
-        if (list && !list.querySelector('[data-role="tier-row"]')) {
-          list.innerHTML = `
-            <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
-              No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
-            </div>
-          `;
-        }
+        refreshTierRowIndices(form);
         updateProductEditorPreview(form);
       }
       return;
@@ -1779,6 +1935,9 @@ function attachProductEditorBehaviors(form) {
             quickSaveBtn.disabled = true;
             quickSaveBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Saving...';
             await updateRecord('products', prodId, { tiers });
+            if (ui.data?.products?.[prodId]) {
+              ui.data.products[prodId].tiers = tiers;
+            }
             showToast(`Sub-options saved successfully (${tiers.length} items)!`, 'success');
           } catch (err) {
             showToast(err?.message || 'Failed to save sub-options', 'danger');
@@ -1965,6 +2124,234 @@ function openProductEditor(record, schema) {
     attachProductEditorBehaviors(form);
   }
   if (window.lucide) lucide.createIcons();
+}
+
+function openTiersEditorModal(product = {}) {
+  const isProduct = Boolean(product && product.id);
+  if (!isProduct) {
+    showToast('Product not found to edit sub-plans', 'danger');
+    return;
+  }
+  const currentTiers = normalizeTierList(product.tiers);
+
+  openModal(`
+    <div class="product-editor-modal tier-quick-modal-shell">
+      <div class="panel-head product-editor-head">
+        <div class="product-editor-head-left">
+          <button class="btn btn-ghost modal-close-btn" data-close-modal type="button" aria-label="Close modal" title="Back / Close">
+            <i data-lucide="arrow-left"></i>
+          </button>
+          <div class="product-editor-head-title">
+            <h2 class="section-title">${escapeHtml(product.title || product.slug || 'Product Sub-Plans')}</h2>
+            <div class="product-editor-head-meta">
+              <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);"><i data-lucide="layers" style="width: 12px; height: 12px;"></i> Sub-Plans & Tiers</span>
+              <span class="product-id-pill">${escapeHtml(product.id)}</span>
+              ${product.priceINR ? `<span class="chip subtle">Base: ₹${escapeHtml(String(product.priceINR).replace(/[₹\s]/g, ''))}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="product-editor-head-right">
+          <button type="button" class="btn btn-primary btn-header-save" data-role="modal-save-tiers-btn" data-id="${escapeHtml(product.id)}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i data-lucide="check"></i> <span>Save Sub-Plans</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tier-quick-modal-body" style="padding: 20px;">
+        <form id="tierQuickForm" data-id="${escapeHtml(product.id)}" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="tier-items-list" data-role="tier-items-list" style="display: flex; flex-direction: column; gap: 10px;">
+            ${currentTiers.length > 0 ? currentTiers.map((tier, index) => renderTierRow(tier, index, currentTiers.length)).join('') : `
+              <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 24px 16px; text-align: center; border: 1px dashed rgba(168,85,247,0.3); border-radius: 12px; color: var(--muted); font-size: 13.5px; background: rgba(168,85,247,0.02);">
+                <i data-lucide="layers" style="width: 32px; height: 32px; color: #a855f7; margin-bottom: 8px; opacity: 0.7;"></i>
+                <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 4px;">No Sub-Plans Configured</div>
+                <div>Aap is product ke liye alag se purchase options (jaise 1 Group ₹150, 4 Groups ₹400) de sakte hain. Niche <strong>"+ Add Option"</strong> dabayein.</div>
+              </div>
+            `}
+          </div>
+
+          <div class="tier-quick-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="btn btn-ghost" data-role="add-tier-btn" style="color: #c084fc; border-color: rgba(192, 132, 252, 0.35);">
+                <i data-lucide="plus"></i> Add Another Option
+              </button>
+              <button type="button" class="btn btn-ghost" data-role="clear-all-tiers" style="color: #f87171;">
+                <i data-lucide="trash"></i> Clear All
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+              <button type="submit" class="btn btn-primary" data-role="modal-save-tiers-btn" data-id="${escapeHtml(product.id)}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-weight: 700;">
+                <i data-lucide="check"></i> Save Sub-Plans
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  `);
+
+  const form = document.getElementById('tierQuickForm');
+  if (form) {
+    attachTierQuickEditorBehaviors(form, product);
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+function attachTierQuickEditorBehaviors(form, product) {
+  const productId = form.dataset.id || product.id;
+  const list = form.querySelector('[data-role="tier-items-list"]');
+  if (!list) return;
+
+  function refreshIndices() {
+    refreshTierRowIndices(form);
+  }
+
+  function addRow(data = { label: '', inr: '', usd: '' }, focus = true) {
+    const emptyState = list.querySelector('[data-role="tier-empty-state"]');
+    if (emptyState) emptyState.remove();
+
+    const currentRows = list.querySelectorAll('[data-role="tier-row"]');
+    const newIdx = currentRows.length;
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = renderTierRow(data, newIdx, newIdx + 1);
+    const newRow = tempDiv.firstElementChild;
+    list.appendChild(newRow);
+    refreshIndices();
+    if (focus) {
+      const targetInput = newRow.querySelector(data.label ? '[data-role="tier-inr"]' : '[data-role="tier-label"]');
+      if (targetInput) targetInput.focus();
+    }
+    return newRow;
+  }
+
+  async function handleSaveTiers() {
+    const tierRows = [...list.querySelectorAll('[data-role="tier-row"]')];
+    const tiers = tierRows.map((row) => {
+      const label = String(row.querySelector('[data-role="tier-label"]')?.value || '').trim();
+      const inr = String(row.querySelector('[data-role="tier-inr"]')?.value || '').replace(/[₹\s,]/g, '').trim();
+      const usd = String(row.querySelector('[data-role="tier-usd"]')?.value || '').replace(/[\$\s,]/g, '').trim();
+      return { label, inr, usd };
+    }).filter((t) => t.label || t.inr || t.usd);
+
+    const modalRoot = form.closest('.tier-quick-modal-shell') || form;
+    const saveBtns = modalRoot.querySelectorAll('[data-role="modal-save-tiers-btn"]');
+    saveBtns.forEach((btn) => {
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Saving...';
+    });
+
+    try {
+      await updateRecord('products', productId, { tiers });
+      if (ui.data?.products?.[productId]) {
+        ui.data.products[productId].tiers = tiers;
+      }
+      showToast(`Sub-plans updated successfully (${tiers.length} options configured)!`, 'success');
+      closeModal();
+      renderView(ui.data || {});
+    } catch (err) {
+      showToast(err?.message || 'Failed to save sub-plans', 'danger');
+    } finally {
+      saveBtns.forEach((btn) => {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check"></i> Save Sub-Plans';
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleSaveTiers();
+  });
+
+  const modalContainer = form.closest('.tier-quick-modal-shell') || form;
+  modalContainer.addEventListener('click', (event) => {
+    const saveBtn = event.target.closest('[data-role="modal-save-tiers-btn"]');
+    if (saveBtn) {
+      event.preventDefault();
+      handleSaveTiers();
+      return;
+    }
+
+    const presetBtn = event.target.closest('.tier-preset-btn:not(.custom-add)');
+    if (presetBtn) {
+      const label = presetBtn.dataset.presetLabel || '';
+      const inr = presetBtn.dataset.presetInr || '';
+      const usd = presetBtn.dataset.presetUsd || '';
+      addRow({ label, inr, usd }, true);
+      return;
+    }
+
+    const addBtn = event.target.closest('[data-role="add-tier-btn"]');
+    if (addBtn) {
+      addRow({ label: '', inr: '', usd: '' }, true);
+      return;
+    }
+
+    const clearBtn = event.target.closest('[data-role="clear-all-tiers"]');
+    if (clearBtn) {
+      if (confirm('Clear all sub-plan options for this product?')) {
+        list.innerHTML = '';
+        refreshIndices();
+      }
+      return;
+    }
+
+    const removeBtn = event.target.closest('[data-role="remove-tier-btn"]');
+    if (removeBtn) {
+      const row = removeBtn.closest('[data-role="tier-row"]');
+      if (row) {
+        row.remove();
+        refreshIndices();
+      }
+      return;
+    }
+
+    const upBtn = event.target.closest('[data-role="move-tier-up"]');
+    if (upBtn && !upBtn.disabled) {
+      const row = upBtn.closest('[data-role="tier-row"]');
+      const prev = row?.previousElementSibling;
+      if (row && prev && prev.matches('[data-role="tier-row"]')) {
+        list.insertBefore(row, prev);
+        refreshIndices();
+      }
+      return;
+    }
+
+    const downBtn = event.target.closest('[data-role="move-tier-down"]');
+    if (downBtn && !downBtn.disabled) {
+      const row = downBtn.closest('[data-role="tier-row"]');
+      const next = row?.nextElementSibling;
+      if (row && next && next.matches('[data-role="tier-row"]')) {
+        list.insertBefore(next, row);
+        refreshIndices();
+      }
+      return;
+    }
+
+    const dupBtn = event.target.closest('[data-role="duplicate-tier-btn"]');
+    if (dupBtn) {
+      const row = dupBtn.closest('[data-role="tier-row"]');
+      if (row) {
+        const label = row.querySelector('[data-role="tier-label"]')?.value || '';
+        const inr = row.querySelector('[data-role="tier-inr"]')?.value || '';
+        const usd = row.querySelector('[data-role="tier-usd"]')?.value || '';
+        const currentRows = list.querySelectorAll('[data-role="tier-row"]');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderTierRow({ label: `${label} (Copy)`, inr, usd }, currentRows.length, currentRows.length + 1);
+        const newRow = tempDiv.firstElementChild;
+        if (row.nextSibling) {
+          list.insertBefore(newRow, row.nextSibling);
+        } else {
+          list.appendChild(newRow);
+        }
+        refreshIndices();
+      }
+      return;
+    }
+  });
+
+  refreshIndices();
 }
 
 function openCategoryEditor(record, schema) {
@@ -3268,11 +3655,17 @@ function openCategoryProducts(item) {
 function renderCatalogProductCard(item, node) {
   const active = isSelected(item.id);
   const features = normalizeFeatureList(item.features);
+  const tiers = normalizeTierList(item.tiers);
+  const tierCount = tiers.length;
   const toggleAction = String(item.status || 'active') === 'hidden' ? 'Show' : 'Hide';
   const toggleIcon = String(item.status || 'active') === 'hidden' ? 'eye' : 'eye-off';
   const posBadge = `<button type="button" class="catalog-pos-badge-btn" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Click to move position">Pos #${item.displayOrder || '1'} ↕</button>`;
+  const tierBadge = tierCount > 0 
+    ? `<button type="button" class="catalog-tier-badge-btn" data-action="edit-tiers" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Click to manage ${tierCount} sub-plans"><i data-lucide="layers"></i> ${tierCount} Sub-Plans</button>` 
+    : '';
   const badges = [
     posBadge,
+    tierBadge,
     item.category ? `<span class="chip">${escapeHtml(item.category)}</span>` : '',
     catalogCardBadge(item.status),
     itemMediaCountBadgeHtml(item),
@@ -3292,6 +3685,7 @@ function renderCatalogProductCard(item, node) {
   const metricsList = [
     { label: 'INR', value: cleanPriceINR(item.priceINR) },
     { label: 'USD', value: cleanPriceUSD(item.priceUSD) },
+    { label: 'Sub-Plans', value: tierCount > 0 ? `${tierCount} options` : '—' },
     { label: 'Media', value: itemMediaCountLabel(item) },
   ];
   if (item.orderCount || item.orders) {
@@ -3332,6 +3726,7 @@ function renderCatalogProductCard(item, node) {
       <div class="catalog-card-actions">
         <button type="button" class="catalog-action-btn action-preview" data-action="preview" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="eye"></i> Preview</button>
         <button type="button" class="catalog-action-btn action-edit" data-action="edit" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="pencil"></i> Edit</button>
+        <button type="button" class="catalog-action-btn action-tiers" data-action="edit-tiers" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Manage Sub-Plans / Options"><i data-lucide="layers"></i> Sub-Plans${tierCount > 0 ? ` (${tierCount})` : ''}</button>
         <button type="button" class="catalog-action-btn action-move-pos" data-action="move-position" data-node="${node}" data-id="${escapeHtml(item.id)}" title="Move position"><i data-lucide="arrow-up-down"></i> Move</button>
         <button type="button" class="catalog-action-btn action-share" data-action="share-product" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="share-2"></i> Share</button>
         <button type="button" class="catalog-action-btn action-duplicate" data-action="duplicate" data-node="${node}" data-id="${escapeHtml(item.id)}"><i data-lucide="copy"></i> Duplicate</button>
@@ -6106,109 +6501,111 @@ function renderOrderDetailsModal(item = {}) {
   const prodName = orderProductName(item);
 
   return `
-    <div class="panel-head management-modal-head" style="padding-bottom: 16px; border-bottom: 1px solid var(--border);">
-      <div>
-        <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Order & Payment Inspector</div>
-        <h2 class="section-title" style="font-size: 20px; font-weight: 800; color: #fff;">${escapeHtml(prodName)}</h2>
-        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
-          <span class="order-id-badge" data-action="copy-order-id" data-id="${escapeHtml(orderId)}" title="Click to copy Order ID" style="cursor: pointer;">
-            <i data-lucide="copy" style="width: 12px; height: 12px;"></i> #${escapeHtml(orderId)}
-          </span>
-          <span class="order-status-pill ${isPaid ? 'paid' : isFailed ? 'rejected' : 'pending'}">
-            ${isPaid ? '🟢 Verified & Paid' : isFailed ? '🔴 Rejected' : '🟡 Pending Verification'}
-          </span>
+    <div class="order-inspector-container" style="width: 100%; max-width: 960px; margin: 0 auto; padding: 4px 4px 30px 4px; box-sizing: border-box;">
+      <div class="panel-head management-modal-head" style="padding-bottom: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+        <div style="min-width: 0; flex: 1;">
+          <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Order & Payment Inspector</div>
+          <h2 class="section-title" style="font-size: 20px; font-weight: 800; color: #fff; line-height: 1.3; word-break: break-word;">${escapeHtml(prodName)}</h2>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+            <span class="order-id-badge" data-action="copy-order-id" data-id="${escapeHtml(orderId)}" title="Click to copy Order ID" style="cursor: pointer;">
+              <i data-lucide="copy" style="width: 12px; height: 12px;"></i> #${escapeHtml(orderId)}
+            </span>
+            <span class="order-status-pill ${isPaid ? 'paid' : isFailed ? 'rejected' : 'pending'}">
+              ${isPaid ? '🟢 Verified & Paid' : isFailed ? '🔴 Rejected' : '🟡 Pending Verification'}
+            </span>
+          </div>
         </div>
+        <button class="btn btn-ghost" data-close-modal type="button" onclick="closeModal()" title="Close Inspector" style="padding: 8px; border-radius: 50%; flex-shrink: 0;"><i data-lucide="x"></i></button>
       </div>
-      <button class="btn btn-ghost" data-close-modal type="button" onclick="closeModal()" title="Close Inspector" style="padding: 8px; border-radius: 50%;"><i data-lucide="x"></i></button>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
-      
-      <!-- Left: Proof Screenshot / Product Media -->
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-          <span>Payment Screenshot Proof</span>
-          ${proof ? `<a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" class="btn btn-ghost btn-sm" style="font-size: 11px; padding: 2px 8px;"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Open Full Size</a>` : ''}
-        </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
         
-        <div class="glass" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--border); min-height: 240px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative;">
-          ${proof ? `
-            <a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-              <img src="${escapeHtml(proof)}" alt="Payment Proof" style="max-width: 100%; max-height: 360px; object-fit: contain; display: block; cursor: zoom-in;" />
-            </a>
-          ` : `
-            <div style="text-align: center; color: var(--muted); padding: 30px;">
-              <i data-lucide="image-off" style="width: 40px; height: 40px; opacity: 0.4; margin-bottom: 8px;"></i>
-              <div style="font-size: 13px;">No payment screenshot uploaded by customer.</div>
+        <!-- Left: Proof Screenshot / Product Media -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+            <span>Payment Screenshot Proof</span>
+            ${proof ? `<a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" class="btn btn-ghost btn-sm" style="font-size: 11px; padding: 2px 8px;"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Open Full Size</a>` : ''}
+          </div>
+          
+          <div class="glass" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--border); min-height: 240px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative;">
+            ${proof ? `
+              <a href="${escapeHtml(proof)}" target="_blank" rel="noreferrer" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <img src="${escapeHtml(proof)}" alt="Payment Proof" style="max-width: 100%; max-height: 360px; object-fit: contain; display: block; cursor: zoom-in;" />
+              </a>
+            ` : `
+              <div style="text-align: center; color: var(--muted); padding: 30px;">
+                <i data-lucide="image-off" style="width: 40px; height: 40px; opacity: 0.4; margin-bottom: 8px;"></i>
+                <div style="font-size: 13px;">No payment screenshot uploaded by customer.</div>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- Right: Order & Buyer Metadata -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
+            Transaction & Buyer Breakdown
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--muted);">Amount Paid</div>
+              <div style="font-size: 18px; font-weight: 800; color: #34d399; margin-top: 2px;">${escapeHtml(amountFormatted)}</div>
             </div>
-          `}
+            <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--muted);">Payment Method</div>
+              <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">${escapeHtml(methodName)}</div>
+            </div>
+          </div>
+
+          <div class="glass" style="padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+              <span style="color: var(--muted);">Buyer Details:</span>
+              <strong style="color: #fff;">${escapeHtml(orderCustomerLabel(item))}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+              <span style="color: var(--muted);">Order Date:</span>
+              <span style="color: #fff;">${escapeHtml(formatDateTime(orderDateValue(item)))} (${escapeHtml(formatRelativeTime(orderDateValue(item)))})</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+              <span style="color: var(--muted);">Txn / Ref ID:</span>
+              <code style="color: #818cf8; font-size: 11.5px;">${escapeHtml(orderTransactionId(item))}</code>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12.5px;">
+              <span style="color: var(--muted);">Payment State:</span>
+              <strong style="color: ${isPaid ? '#34d399' : isFailed ? '#f87171' : '#fbbf24'};">${escapeHtml(orderStatusLabel(item))}</strong>
+            </div>
+          </div>
+
+          ${delivery ? `
+            <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.04);">
+              <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase;">Delivery / Access Notes:</div>
+              <div style="font-size: 12.5px; color: #fff; margin-top: 4px;">${escapeHtml(delivery)}</div>
+            </div>
+          ` : ''}
         </div>
+
       </div>
 
-      <!-- Right: Order & Buyer Metadata -->
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
-          Transaction & Buyer Breakdown
+      <!-- Action Toolbar -->
+      <div class="toolbar" style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 20px;">
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-danger btn-sm" type="button" data-action="delete-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 12px; padding: 8px 14px;">
+            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete Order
+          </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
-            <div style="font-size: 11px; color: var(--muted);">Amount Paid</div>
-            <div style="font-size: 18px; font-weight: 800; color: #34d399; margin-top: 2px;">${escapeHtml(amountFormatted)}</div>
-          </div>
-          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);">
-            <div style="font-size: 11px; color: var(--muted);">Payment Method</div>
-            <div style="font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px;">${escapeHtml(methodName)}</div>
-          </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-ghost" type="button" data-close-modal onclick="closeModal()" style="font-size: 13px; padding: 8px 16px;">
+            Close
+          </button>
+          <button class="btn btn-ghost" type="button" data-action="reject-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 16px; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+            <i data-lucide="x-circle" style="width: 15px; height: 15px;"></i> Reject Payment
+          </button>
+          <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 20px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669) !important; border: none !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+            <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Approve & Verify Order
+          </button>
         </div>
-
-        <div class="glass" style="padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-            <span style="color: var(--muted);">Buyer Details:</span>
-            <strong style="color: #fff;">${escapeHtml(orderCustomerLabel(item))}</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-            <span style="color: var(--muted);">Order Date:</span>
-            <span style="color: #fff;">${escapeHtml(formatDateTime(orderDateValue(item)))} (${escapeHtml(formatRelativeTime(orderDateValue(item)))})</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-            <span style="color: var(--muted);">Txn / Ref ID:</span>
-            <code style="color: #818cf8; font-size: 11.5px;">${escapeHtml(orderTransactionId(item))}</code>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 12.5px;">
-            <span style="color: var(--muted);">Payment State:</span>
-            <strong style="color: ${isPaid ? '#34d399' : isFailed ? '#f87171' : '#fbbf24'};">${escapeHtml(orderStatusLabel(item))}</strong>
-          </div>
-        </div>
-
-        ${delivery ? `
-          <div class="glass" style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(99,102,241,0.2); background: rgba(99,102,241,0.04);">
-            <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase;">Delivery / Access Notes:</div>
-            <div style="font-size: 12.5px; color: #fff; margin-top: 4px;">${escapeHtml(delivery)}</div>
-          </div>
-        ` : ''}
-      </div>
-
-    </div>
-
-    <!-- Action Toolbar -->
-    <div class="toolbar" style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-danger btn-sm" type="button" data-action="delete-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 12px; padding: 8px 14px;">
-          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete Order
-        </button>
-      </div>
-
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button class="btn btn-ghost" type="button" data-close-modal onclick="closeModal()" style="font-size: 13px; padding: 8px 16px;">
-          Close
-        </button>
-        <button class="btn btn-ghost" type="button" data-action="reject-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 16px; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
-          <i data-lucide="x-circle" style="width: 15px; height: 15px;"></i> Reject Payment
-        </button>
-        <button class="btn btn-primary" type="button" data-action="approve-order" data-id="${escapeHtml(item.id || '')}" style="font-size: 13px; padding: 8px 20px; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669) !important; border: none !important; color: white !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
-          <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i> Approve & Verify Order
-        </button>
       </div>
     </div>
   `;
@@ -7874,6 +8271,12 @@ function attachGlobalHandlers() {
     }
     if (action === 'edit') {
       openRecordEditor(node, collectionSchemas[node], getItem(node, id) || {});
+      return;
+    }
+    if (action === 'edit-tiers') {
+      const prod = getItem('products', id) || listCollection('products').find((p) => p.id === id);
+      if (prod) openTiersEditorModal(prod);
+      else showToast('Product not found to manage sub-plans', 'danger');
       return;
     }
     if (action === 'preview') {

@@ -72,9 +72,13 @@ body.media-viewer-open {
   padding: 0 24px;
 }
 
-section:not(.hero) {
+section.why-us,
+section.pricing-banner,
+section.testimonials,
+section.contact,
+section.faq-section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 900px;
+  contain-intrinsic-size: 1px 600px;
 }
 
 .particles,
@@ -83,12 +87,7 @@ section:not(.hero) {
 .shooting-star,
 .marquee-wrap,
 .marquee-track,
-.hero-visual,
-.why-card,
-.cat-card,
-.pcard,
-.testi-card,
-.contact-card {
+.hero-visual {
   contain: layout paint;
 }
 
@@ -2908,21 +2907,23 @@ body {
   background: var(--gradient);
   color: #fff;
   border: none;
-  padding: 12px 18px;
+  padding: 11px 12px;
   border-radius: 12px;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 20px rgba(232,67,147,0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(232,67,147,0.35);
   text-decoration: none;
+  box-sizing: border-box;
 }
 .vid-tier-btn:hover {
+  filter: brightness(1.12);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(232,67,147,0.5);
+  box-shadow: 0 6px 22px rgba(232,67,147,0.5);
 }
 
 /* Premium Card Highlight pulse animation */
@@ -3104,8 +3105,8 @@ body {
   margin-bottom: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  width: 100%;
-  box-sizing: border-box;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .pcard-actions {
@@ -3113,10 +3114,13 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   width: 100%;
-  padding: 6px 16px 16px 16px;
+  padding: 8px 16px 16px 16px;
   box-sizing: border-box;
   background: transparent;
   border-top: none;
+  position: relative;
+  z-index: 2;
+  min-height: 54px;
 }
 
 .pcard-actions .btn-card-action {
@@ -3125,6 +3129,7 @@ body {
   justify-content: center;
   gap: 7px;
   padding: 11px 12px;
+  min-height: 44px;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -3136,6 +3141,10 @@ body {
   text-align: center;
   white-space: nowrap;
   box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pcard-actions .btn-add-cart {
@@ -3175,6 +3184,64 @@ body {
 .pcard-actions .btn-order-now.btn-card-gold {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+}
+
+/* ━━ BUTTON ON-CLICK PROGRESS FILL ━━ */
+.btn-progress-active {
+  position: relative !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.btn-progress-active .btn-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(56, 189, 248, 0.28), rgba(255, 255, 255, 0.38));
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+.btn-progress-active .btn-progress-line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3.5px;
+  width: 0%;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff, 0 0 18px #38bdf8;
+  border-radius: 0 0 16px 16px;
+  z-index: 3;
+  pointer-events: none;
+}
+.btn-progress-content {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+@keyframes btnFillProgress {
+  0%   { width: 0%; }
+  50%  { width: 68%; }
+  100% { width: 100%; }
+}
+
+@media (max-width: 380px) {
+  .pcard-actions {
+    gap: 6px;
+    padding: 6px 12px 14px 12px;
+  }
+  .pcard-actions .btn-card-action {
+    font-size: 0.76rem !important;
+    padding: 10px 6px !important;
+    gap: 4px;
+    min-height: 40px;
+  }
 }
 
 /* Pinned Deal Cart Button */

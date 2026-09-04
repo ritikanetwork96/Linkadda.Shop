@@ -641,6 +641,30 @@
     return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function normalizeTierList(raw) {
+    if (!raw) return [];
+    let list = [];
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === 'object') {
+      list = Object.values(raw);
+    } else if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+        else if (typeof parsed === 'object') list = Object.values(parsed);
+      } catch (_) {}
+    }
+    return list
+      .filter((item) => item && typeof item === 'object')
+      .map((item) => ({
+        label: String(item.label || item.title || item.name || '').trim(),
+        inr: String(item.inr || item.priceINR || item.price || '').replace(/[₹\s,]/g, '').trim(),
+        usd: String(item.usd || item.priceUSD || '').replace(/[\$\s,]/g, '').trim(),
+      }))
+      .filter((item) => item.label || item.inr || item.usd);
+  }
+
   const liveCollections = {
     categories: {},
     products: {}
@@ -991,8 +1015,15 @@
     if (isCustomLink) return;
 
     event.preventDefault();
-    link.style.pointerEvents = 'none';
-    link.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Opening...';
+    if (!link.dataset.originalHtml) {
+      link.dataset.originalHtml = link.innerHTML;
+    }
+    link.classList.add('btn-progress-active');
+    link.innerHTML = `
+      <span class="btn-progress-bar" style="animation: btnFillProgress 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;"></span>
+      <span class="btn-progress-line" style="animation: btnFillProgress 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;"></span>
+      <span class="btn-progress-content"><i class="fa-solid fa-spinner fa-spin"></i> Opening...</span>
+    `;
 
     try {
       const checkoutMeta = resolveCheckoutMeta(link);
@@ -1025,7 +1056,7 @@
       const ext = isLocal ? '.html' : '';
       const targetUrl = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}&name=${encodeURIComponent(checkoutMeta.title || '')}&inr=${encodeURIComponent(checkoutMeta.inr || '')}&usd=${encodeURIComponent(checkoutMeta.usd || '')}`;
 
-      // Write to Firebase with safe 1200ms timeout to guarantee transmission before page redirect
+      // Write to Firebase with safe 350ms race timeout so redirection is instantaneous and never hangs
       const writePromise = Promise.all([
         set(orderRef, payload),
         set(push(ref(db, 'events')), getOrderClickMeta(link)).catch(() => {})
@@ -1033,7 +1064,7 @@
 
       await Promise.race([
         writePromise,
-        new Promise(r => setTimeout(r, 1200))
+        new Promise(r => setTimeout(r, 350))
       ]);
 
       window.location.href = targetUrl;
@@ -1313,7 +1344,8 @@
   // -- BUILD CARD --
   function buildCard(id, cat) {
     const media = resolveMediaList(cat);
-    const hasTiers = cat.tiers && cat.tiers.length;
+    const rawTiers = normalizeTierList(cat.tiers);
+    const hasTiers = rawTiers.length > 0;
     const features = normalizeFeatureList(cat.features).map(f=>`<li><i class="fa-solid fa-check"></i> ${esc(f)}</li>`).join('');
     const pill = cat.badge ? `<span class="pcard-pill${cat.badgeStyle?' '+esc(cat.badgeStyle):''}">${cat.badgeIcon?`<i class="fa-solid ${esc(cat.badgeIcon)}"></i> `:''}${esc(cat.badge)}</span>` : '';
     const orderLink = normalizeCheckoutUrl(cat.orderLink, { id, slug: cat.slug, title: cat.title });
@@ -1323,29 +1355,12 @@
     if(hasTiers) {
       const btnId='vb_'+id;
       const cartBtnId='vcb_'+id;
-      const rawTiers = Array.isArray(cat.tiers) ? cat.tiers.filter(t => t && (t.label || t.inr)) : [];
       const mainINR = cat.priceINR ? String(cat.priceINR).replace(/[₹\s,]/g, '') : '';
       const mainUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[\$\s,]/g, '') : '';
-      const hasMainInTiers = rawTiers.some(t => {
-        const lbl = (t.label || '').toLowerCase();
-        return (mainINR && t.inr === mainINR) || lbl.includes('full') || lbl.includes('all group') || lbl.includes('main') || lbl.includes('vip pack');
-      });
+      const baseTitle = cat.title || 'Product';
 
-      let allOptions = [];
-      if (mainINR && !hasMainInTiers) {
-        allOptions = [
-          { label: 'Full Collection Pack (All Groups)', inr: mainINR, usd: mainUSD, isMain: true },
-          ...rawTiers
-        ];
-      } else {
-        allOptions = rawTiers;
-      }
-
-      const first = allOptions[0] || { label: 'Standard Pack', inr: mainINR || '0', usd: mainUSD || '' };
-      const initialTitle = first.isMain ? (cat.title || 'Product') : `${cat.title || 'Product'} (${first.label})`;
-
-      const tierItems = allOptions.map((t, i) => `
-        <div class="vid-tier-item${i===0?' vid-tier-selected':''}" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd||'')}" data-is-main="${t.isMain ? '1' : '0'}" data-title="${esc(cat.title)} (${esc(t.label)})">
+      const tierItems = rawTiers.map((t) => `
+        <div class="vid-tier-item" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd||'')}" data-title="${esc(baseTitle)} (${esc(t.label)})">
           <div class="vid-tier-left">
             <span class="vid-tier-radio"><i class="fa-solid fa-check"></i></span>
             <span class="vid-tier-count">${esc(t.label)}</span>
@@ -1358,20 +1373,18 @@
       `).join('');
 
       bottom=`
-      <div class="vid-tier-label"><i class="fa-solid fa-layer-group"></i> Choose Pack / Group Option</div>
-      <div class="vid-tier-list" id="${btnId}_list">${tierItems}</div>
-      <div class="vid-tier-active-summary" id="sum_${btnId}">
-        <i class="fa-solid fa-circle-check"></i> Selected: <strong>${esc(first.label)}</strong> (&#8377;${esc(first.inr)})
-      </div>
+      <div class="vid-tier-label"><i class="fa-solid fa-layer-group"></i> Choose Pack / Option (Optional)</div>
+      <div class="vid-tier-list" id="${btnId}_list" data-main-inr="${esc(mainINR)}" data-main-usd="${esc(mainUSD)}" data-base-title="${esc(baseTitle)}">${tierItems}</div>
+      <div class="vid-tier-active-summary" id="sum_${btnId}" style="display:none;"></div>
       <div class="pcard-price-row vid-tier-active-price" id="pr_${btnId}">
-        <div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">&#8377;${esc(first.inr)}</span></div>
-        ${first.usd ? `<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">$${esc(first.usd)}</span></div>` : ''}
+        <div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">&#8377;${esc(mainINR || '0')}</span></div>
+        ${mainUSD ? `<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">$${esc(mainUSD)}</span></div>` : ''}
       </div>
       <div class="pcard-actions">
-        <a href="${esc(normalizeCheckoutUrl('payment', { id, slug: cat.slug, title: initialTitle, inr: first.inr, usd: first.usd, tier: first.label }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(initialTitle)}" data-base-title="${encodeURIComponent(cat.title||'')}" data-product-id="${esc(id)}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}">
+        <a href="${esc(normalizeCheckoutUrl('payment', { id, slug: cat.slug, title: baseTitle, inr: mainINR, usd: mainUSD }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(baseTitle)}" data-base-title="${encodeURIComponent(baseTitle)}" data-product-id="${esc(id)}" data-inr="${esc(mainINR)}" data-usd="${esc(mainUSD)}" data-tier="">
           Order Now <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(initialTitle)}" data-base-title="${esc(cat.title||'')}" data-inr="${esc(first.inr)}" data-usd="${esc(first.usd)}" data-tier="${esc(first.label)}" data-img="${esc(firstImg)}">
+        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(baseTitle)}" data-base-title="${esc(baseTitle)}" data-inr="${esc(mainINR)}" data-usd="${esc(mainUSD)}" data-tier="" data-img="${esc(firstImg)}">
           🛒 Add to Cart
         </button>
       </div>`;
@@ -1771,50 +1784,92 @@
       const card = list.closest('.pcard');
       const cartBtn = card ? card.querySelector('.vid-tier-cart-btn, .btn-add-cart') : null;
       const priceRow = card ? card.querySelector('.vid-tier-active-price') : null;
-      const baseTitle = btn?.dataset?.baseTitle ? decodeURIComponent(btn.dataset.baseTitle) : (card?.querySelector('.pcard-title')?.textContent?.trim() || 'Product');
+      const baseTitle = list.dataset.baseTitle || (btn?.dataset?.baseTitle ? decodeURIComponent(btn.dataset.baseTitle) : (card?.querySelector('.pcard-title')?.textContent?.trim() || 'Product'));
+      const mainINR = list.dataset.mainInr || (btn?.dataset?.inr || '');
+      const mainUSD = list.dataset.mainUsd || (btn?.dataset?.usd || '');
       const productId = btn?.dataset?.productId || card?.dataset?.productId || card?.dataset?.fbId || '';
       const slug = card?.dataset?.slug || '';
+      const summaryEl = card ? card.querySelector('.vid-tier-active-summary') : null;
 
       list.querySelectorAll('.vid-tier-item').forEach(item => {
         item.addEventListener('click', () => {
-          list.querySelectorAll('.vid-tier-item').forEach(i => i.classList.remove('vid-tier-selected'));
-          item.classList.add('vid-tier-selected');
-          const tierLabel = item.dataset.vids || item.querySelector('.vid-tier-count')?.textContent?.trim() || '';
-          const inrVal = item.dataset.inr || '';
-          const usdVal = item.dataset.usd || '';
-          const isMain = item.dataset.isMain === '1';
-          const fullTitle = isMain ? baseTitle : `${baseTitle} (${tierLabel})`;
+          const isAlreadySelected = item.classList.contains('vid-tier-selected');
 
-          if (btn) {
-            btn.innerHTML = `Order Now <i class="fa-solid fa-arrow-right"></i>`;
-            btn.dataset.inr = inrVal;
-            btn.dataset.usd = usdVal;
-            btn.dataset.tier = isMain ? '' : tierLabel;
-            btn.dataset.name = encodeURIComponent(fullTitle);
-            btn.href = normalizeCheckoutUrl('payment', {
-              id: productId,
-              slug,
-              title: fullTitle,
-              inr: inrVal,
-              usd: usdVal,
-              tier: isMain ? '' : tierLabel
-            });
-          }
-          if (cartBtn) {
-            cartBtn.dataset.inr = inrVal;
-            cartBtn.dataset.usd = usdVal;
-            cartBtn.dataset.tier = isMain ? '' : tierLabel;
-            cartBtn.dataset.name = fullTitle;
-          }
-          if (priceRow) {
-            const inrEl = priceRow.querySelector('.pcard-price');
-            const usdEl = priceRow.querySelector('.pcard-price-usd');
-            if (inrEl) inrEl.textContent = inrVal ? `₹${inrVal}` : '';
-            if (usdEl) usdEl.textContent = usdVal ? `$${usdVal}` : '';
-          }
-          const summaryEl = card ? card.querySelector('.vid-tier-active-summary') : null;
-          if (summaryEl) {
-            summaryEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Selected: <strong>${esc(tierLabel)}</strong> (&#8377;${inrVal})`;
+          if (isAlreadySelected) {
+            // UNSELECT / TOGGLE OFF: Reset back to Main Product
+            item.classList.remove('vid-tier-selected');
+
+            if (btn) {
+              btn.innerHTML = `Order Now <i class="fa-solid fa-arrow-right"></i>`;
+              btn.dataset.inr = mainINR;
+              btn.dataset.usd = mainUSD;
+              btn.dataset.tier = '';
+              btn.dataset.name = encodeURIComponent(baseTitle);
+              btn.href = normalizeCheckoutUrl('payment', {
+                id: productId,
+                slug,
+                title: baseTitle,
+                inr: mainINR,
+                usd: mainUSD,
+                tier: ''
+              });
+            }
+            if (cartBtn) {
+              cartBtn.dataset.inr = mainINR;
+              cartBtn.dataset.usd = mainUSD;
+              cartBtn.dataset.tier = '';
+              cartBtn.dataset.name = baseTitle;
+            }
+            if (priceRow) {
+              const inrEl = priceRow.querySelector('.pcard-price');
+              const usdEl = priceRow.querySelector('.pcard-price-usd');
+              if (inrEl) inrEl.textContent = mainINR ? `₹${mainINR}` : '';
+              if (usdEl) usdEl.textContent = mainUSD ? `$${mainUSD}` : '';
+            }
+            if (summaryEl) {
+              summaryEl.style.display = 'none';
+              summaryEl.innerHTML = '';
+            }
+          } else {
+            // SELECT THIS TIER
+            list.querySelectorAll('.vid-tier-item').forEach(i => i.classList.remove('vid-tier-selected'));
+            item.classList.add('vid-tier-selected');
+            const tierLabel = item.dataset.vids || item.querySelector('.vid-tier-count')?.textContent?.trim() || '';
+            const inrVal = item.dataset.inr || '';
+            const usdVal = item.dataset.usd || '';
+            const fullTitle = `${baseTitle} (${tierLabel})`;
+
+            if (btn) {
+              btn.innerHTML = `Order Now <i class="fa-solid fa-arrow-right"></i>`;
+              btn.dataset.inr = inrVal;
+              btn.dataset.usd = usdVal;
+              btn.dataset.tier = tierLabel;
+              btn.dataset.name = encodeURIComponent(fullTitle);
+              btn.href = normalizeCheckoutUrl('payment', {
+                id: productId,
+                slug,
+                title: fullTitle,
+                inr: inrVal,
+                usd: usdVal,
+                tier: tierLabel
+              });
+            }
+            if (cartBtn) {
+              cartBtn.dataset.inr = inrVal;
+              cartBtn.dataset.usd = usdVal;
+              cartBtn.dataset.tier = tierLabel;
+              cartBtn.dataset.name = fullTitle;
+            }
+            if (priceRow) {
+              const inrEl = priceRow.querySelector('.pcard-price');
+              const usdEl = priceRow.querySelector('.pcard-price-usd');
+              if (inrEl) inrEl.textContent = inrVal ? `₹${inrVal}` : '';
+              if (usdEl) usdEl.textContent = usdVal ? `$${usdVal}` : '';
+            }
+            if (summaryEl) {
+              summaryEl.style.display = 'block';
+              summaryEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Selected: <strong>${esc(tierLabel)}</strong> (&#8377;${inrVal}) <span style="font-size:0.75rem;opacity:0.75;margin-left:4px;">(tap to unselect)</span>`;
+            }
           }
         });
       });
@@ -2166,6 +2221,19 @@
     }
   }, { capture: true });
 
+  function resetOrderButtons() {
+    document.querySelectorAll('a.btn-order-now, a.vid-tier-btn, a.cpb-btn, a.btn-card').forEach(btn => {
+      btn.style.pointerEvents = '';
+      btn.classList.remove('btn-progress-active');
+      if (btn.dataset.originalHtml) {
+        btn.innerHTML = btn.dataset.originalHtml;
+        delete btn.dataset.originalHtml;
+      } else if (btn.innerHTML.includes('Opening...')) {
+        btn.innerHTML = btn.classList.contains('cpb-btn') ? '<i class="fa-solid fa-gem"></i> Claim Deal' : 'Order Now <i class="fa-solid fa-arrow-right"></i>';
+      }
+    });
+  }
+
   window.addEventListener('hashchange', () => {
     sharedFocusDone = false;
     focusSharedProduct();
@@ -2174,6 +2242,7 @@
     restoreReturnPosition();
   });
   window.addEventListener('popstate', () => {
+    resetOrderButtons();
     sharedFocusDone = false;
     focusSharedProduct();
     sharedCategoryDone = false;
@@ -2181,16 +2250,24 @@
     restoreReturnPosition();
   });
   window.addEventListener('pageshow', (event) => {
+    resetOrderButtons();
     if (event.persisted || sessionStorage.getItem('last_ordered_product_id') || sessionStorage.getItem('last_ordered_scroll_y')) {
       setTimeout(restoreReturnPosition, 100);
     }
   });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      resetOrderButtons();
+    }
+  });
   window.addEventListener('load', () => {
+    resetOrderButtons();
     focusSharedProduct();
     focusSharedCategory();
     restoreReturnPosition();
   });
   document.addEventListener('DOMContentLoaded', () => {
+    resetOrderButtons();
     focusSharedProduct();
     focusSharedCategory();
     restoreReturnPosition();
@@ -2585,18 +2662,22 @@
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-add-cart, .cpb-btn-cart');
     if (!btn) return;
+    if (btn.classList.contains('added')) return;
     
     e.preventDefault();
     const meta = extractProductMetaFromCard(btn);
     addToCart(meta);
     
     // Temporary visual state on button
-    const origHtml = btn.innerHTML;
+    if (!btn.dataset.origHtml) {
+      btn.dataset.origHtml = btn.innerHTML;
+    }
+    const origHtml = btn.dataset.origHtml || '🛒 Add to Cart';
     btn.classList.add('added');
     btn.innerHTML = '✓ Added!';
     setTimeout(() => {
       btn.classList.remove('added');
-      btn.innerHTML = origHtml;
+      btn.innerHTML = btn.dataset.origHtml || origHtml;
     }, 1400);
   });
 
