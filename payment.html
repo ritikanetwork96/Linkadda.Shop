@@ -1041,6 +1041,168 @@
       transform: translateY(0) scale(0.98);
     }
 
+    /* ━━ INTERACTIVE SLIDE TO TELEGRAM BUTTON ━━ */
+    .tg-slide-btn {
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 60px !important;
+      min-height: 60px !important;
+      padding: 5px !important;
+      background: rgba(15, 23, 42, 0.78) !important;
+      border: 1.5px solid rgba(56, 189, 248, 0.4) !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 8px 30px rgba(2, 132, 199, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+      overflow: hidden !important;
+      text-decoration: none !important;
+      cursor: grab !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      touch-action: none !important;
+      box-sizing: border-box !important;
+      isolation: isolate;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    }
+    .tg-slide-btn:active {
+      cursor: grabbing !important;
+    }
+    .tg-slide-btn.tg-slide-alt {
+      background: rgba(15, 23, 42, 0.88) !important;
+      border-color: rgba(56, 189, 248, 0.3) !important;
+    }
+    .tg-slide-btn:hover {
+      border-color: rgba(56, 189, 248, 0.7) !important;
+      box-shadow: 0 10px 36px rgba(2, 132, 199, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+    }
+
+    /* Slide Fill behind Thumb */
+    .tg-slide-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 54px;
+      background: linear-gradient(90deg, #0088cc 0%, #0284c7 60%, #38bdf8 100%);
+      border-radius: 9999px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+      pointer-events: none;
+      z-index: 2;
+      will-change: width;
+    }
+    .tg-slide-fill.with-transition {
+      transition: width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    }
+
+    /* Slide Center Label */
+    .tg-slide-label {
+      position: relative;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding-left: 44px;
+      pointer-events: none;
+      will-change: opacity;
+    }
+    .tg-slide-label-text {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0%, #ffffff 50%, rgba(255, 255, 255, 0.55) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: tgSlideTextShimmer 2.4s linear infinite;
+      white-space: nowrap;
+    }
+    .tg-slide-chevrons {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      color: #38bdf8;
+      font-size: 13px;
+      animation: tgChevronsBounce 1.4s ease-in-out infinite;
+    }
+    .tg-slide-chevrons i:nth-child(1) { opacity: 0.35; }
+    .tg-slide-chevrons i:nth-child(2) { opacity: 0.7; }
+    .tg-slide-chevrons i:nth-child(3) { opacity: 1; }
+
+    @keyframes tgSlideTextShimmer {
+      0% { background-position: 200% center; }
+      100% { background-position: -200% center; }
+    }
+    @keyframes tgChevronsBounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+
+    /* Slide Thumb Handle */
+    .tg-slide-thumb {
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      bottom: 5px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0088cc 0%, #29b6f6 100%);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.75), 0 0 12px rgba(56, 189, 248, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 24px;
+      z-index: 5;
+      cursor: grab;
+      touch-action: none;
+      will-change: transform;
+    }
+    .tg-slide-thumb:active {
+      cursor: grabbing;
+    }
+    .tg-slide-thumb.with-transition {
+      transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    }
+    .tg-slide-thumb::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.6), transparent 70%);
+      opacity: 0.6;
+      animation: tgThumbGlowPulse 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes tgThumbGlowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.15); opacity: 0.85; }
+    }
+
+    /* Unlocked State */
+    .tg-slide-btn.unlocked {
+      pointer-events: none !important;
+      border-color: #22c55e !important;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.5) !important;
+    }
+    .tg-slide-btn.unlocked .tg-slide-fill {
+      background: linear-gradient(90deg, #10b981 0%, #22c55e 100%) !important;
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.7) !important;
+    }
+    .tg-slide-btn.unlocked .tg-slide-thumb {
+      background: linear-gradient(135deg, #10b981, #22c55e) !important;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.8) !important;
+    }
+    .tg-slide-btn.unlocked .tg-slide-label-text {
+      background: none;
+      -webkit-text-fill-color: #ffffff;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
     /* ━━ ACTIVE BUTTON ON-CLICK PROGRESS FILL ━━ */
     .btn-progress-active {
       position: relative !important;
@@ -1701,9 +1863,21 @@
       <p>
         Telegram mein <strong style="color:var(--text)">screenshot attach</strong> karke message send karo — order <strong style="color:var(--green)">5-15 minutes</strong> mein deliver ho jaayega.
       </p>
-      <a id="tgLink" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn">
-        <i class="fa-brands fa-telegram" style="font-size:20px"></i>
-        Send Screenshot on Telegram
+      <a id="tgLink" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn tg-slide-btn" role="button" aria-label="Slide to Send Screenshot on Telegram">
+        <div class="tg-slide-fill"></div>
+        <div class="tg-slide-label">
+          <span class="tg-slide-label-text">Slide to Send Screenshot</span>
+          <span class="tg-slide-chevrons">
+            <i class="fa-solid fa-angle-right"></i>
+            <i class="fa-solid fa-angle-right"></i>
+            <i class="fa-solid fa-angle-right"></i>
+          </span>
+        </div>
+        <div class="tg-slide-thumb">
+          <div class="tg-thumb-icon">
+            <i class="fa-brands fa-telegram"></i>
+          </div>
+        </div>
       </a>
       <p style="margin-top:14px;font-size:12px;color:var(--muted);">
         <i class="fa-solid fa-circle-info" style="color:var(--purple-light)"></i>
@@ -1714,11 +1888,23 @@
     <div class="card" style="background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.15);text-align:center;">
       <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:14px;">
         <i class="fa-solid fa-triangle-exclamation" style="color:var(--yellow)"></i>
-        If Telegram didn't open automatically, tap the button below:
+        If Telegram didn't open automatically, slide the button below:
       </p>
-      <a id="tgLinkBottom" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn" style="display:inline-flex;">
-        <i class="fa-brands fa-telegram" style="font-size:18px"></i>
-        Open Telegram DM
+      <a id="tgLinkBottom" href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="tg-btn tg-slide-btn tg-slide-alt" role="button" aria-label="Slide to Open Telegram DM">
+        <div class="tg-slide-fill"></div>
+        <div class="tg-slide-label">
+          <span class="tg-slide-label-text">Slide to Open Telegram DM</span>
+          <span class="tg-slide-chevrons">
+            <i class="fa-solid fa-angle-right"></i>
+            <i class="fa-solid fa-angle-right"></i>
+            <i class="fa-solid fa-angle-right"></i>
+          </span>
+        </div>
+        <div class="tg-slide-thumb">
+          <div class="tg-thumb-icon">
+            <i class="fa-brands fa-telegram"></i>
+          </div>
+        </div>
       </a>
     </div>
 
@@ -3421,6 +3607,174 @@ async function confirmUpload() {
       submitBtn.innerHTML = originalText;
     }, 400);
   }
+}
+
+// ━━ INTERACTIVE SLIDE TO TELEGRAM CONTROLLER ━━
+function initTelegramSlider(btnEl) {
+  if (!btnEl || btnEl._sliderInitialized) return;
+  btnEl._sliderInitialized = true;
+
+  const fill = btnEl.querySelector('.tg-slide-fill');
+  const thumb = btnEl.querySelector('.tg-slide-thumb');
+  const label = btnEl.querySelector('.tg-slide-label');
+  const labelText = btnEl.querySelector('.tg-slide-label-text');
+  const thumbIcon = btnEl.querySelector('.tg-thumb-icon i');
+
+  if (!thumb || !fill) return;
+
+  let isDragging = false;
+  let startX = 0;
+  let currentX = 0;
+  let maxDrag = 0;
+  let hasMoved = false;
+
+  function calcMaxDrag() {
+    const trackWidth = btnEl.clientWidth || 320;
+    const thumbWidth = thumb.offsetWidth || 50;
+    maxDrag = Math.max(0, trackWidth - thumbWidth - 10);
+    return maxDrag;
+  }
+
+  function setDragPosition(x, animate = false) {
+    if (animate) {
+      thumb.classList.add('with-transition');
+      fill.classList.add('with-transition');
+    } else {
+      thumb.classList.remove('with-transition');
+      fill.classList.remove('with-transition');
+    }
+
+    thumb.style.transform = `translateX(${x}px)`;
+    const thumbWidth = thumb.offsetWidth || 50;
+    fill.style.width = `${x + thumbWidth + 4}px`;
+
+    const progress = maxDrag > 0 ? x / maxDrag : 0;
+    if (label) {
+      label.style.opacity = String(Math.max(0.06, 1 - progress * 1.3));
+    }
+  }
+
+  function resetSlider() {
+    setDragPosition(0, true);
+    setTimeout(() => {
+      btnEl.classList.remove('unlocked');
+      if (thumbIcon) {
+        thumbIcon.className = 'fa-brands fa-telegram';
+      }
+      if (labelText && labelText.dataset.origText) {
+        labelText.textContent = labelText.dataset.origText;
+      }
+      if (label) label.style.opacity = '1';
+    }, 360);
+  }
+
+  function triggerUnlock() {
+    if (btnEl.classList.contains('unlocked')) return;
+    btnEl.classList.add('unlocked');
+    calcMaxDrag();
+    setDragPosition(maxDrag, true);
+
+    if (navigator.vibrate) {
+      try { navigator.vibrate([35, 45, 40]); } catch (_) {}
+    }
+
+    if (thumbIcon) {
+      thumbIcon.className = 'fa-solid fa-check';
+    }
+    if (labelText) {
+      if (!labelText.dataset.origText) labelText.dataset.origText = labelText.textContent;
+      labelText.textContent = 'Opening Telegram...';
+    }
+    if (label) {
+      label.style.opacity = '1';
+    }
+
+    const targetUrl = btnEl.getAttribute('href') || btnEl.href || 'https://t.me/TRUSTED_BROTHER1234';
+
+    setTimeout(() => {
+      window.open(targetUrl, '_blank');
+      // Reset after 3 seconds so user can slide again if needed
+      setTimeout(resetSlider, 3000);
+    }, 280);
+  }
+
+  // Pointer drag events
+  function onPointerDown(e) {
+    if (btnEl.classList.contains('unlocked')) return;
+    isDragging = true;
+    hasMoved = false;
+    startX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    calcMaxDrag();
+    thumb.classList.remove('with-transition');
+    fill.classList.remove('with-transition');
+    try {
+      if (thumb.setPointerCapture && e.pointerId) {
+        thumb.setPointerCapture(e.pointerId);
+      }
+    } catch (_) {}
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const deltaX = clientX - startX;
+    if (Math.abs(deltaX) > 4) {
+      hasMoved = true;
+    }
+    currentX = Math.max(0, Math.min(deltaX, maxDrag));
+    setDragPosition(currentX, false);
+
+    // If dragged past 82% threshold, auto-complete unlock immediately!
+    if (currentX >= maxDrag * 0.82) {
+      isDragging = false;
+      triggerUnlock();
+    }
+  }
+
+  function onPointerUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    if (currentX >= maxDrag * 0.65) {
+      triggerUnlock();
+    } else {
+      resetSlider();
+    }
+  }
+
+  thumb.addEventListener('pointerdown', onPointerDown, { passive: false });
+  window.addEventListener('pointermove', onPointerMove, { passive: false });
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+
+  // Touch fallback
+  thumb.addEventListener('touchstart', onPointerDown, { passive: false });
+  window.addEventListener('touchmove', onPointerMove, { passive: false });
+  window.addEventListener('touchend', onPointerUp);
+
+  // Allow dragging anywhere from the track
+  btnEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.tg-slide-thumb')) return;
+    onPointerDown(e);
+  });
+
+  // Tap / click fallback: if user clicks without dragging, smooth auto-slide to unlock
+  btnEl.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (btnEl.classList.contains('unlocked')) return;
+    if (hasMoved) return;
+    calcMaxDrag();
+    setDragPosition(maxDrag, true);
+    triggerUnlock();
+  });
+}
+
+function setupTelegramButtons() {
+  ['tgLink', 'tgLinkBottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      initTelegramSlider(el);
+    }
+  });
 }
 
 // ———— COMPRESS & PROCESS SCREENSHOT ————
