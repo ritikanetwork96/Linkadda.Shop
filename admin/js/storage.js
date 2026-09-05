@@ -235,7 +235,12 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
     console.warn('Server upload to /api/upload failed, using instant direct Data URL:', err);
   }
 
-  // 2. Direct Base64 Data URL Fallback (100% reliable, zero 404s, works everywhere)
+  // 2. Safe Fallback: NEVER allow large Base64 strings or videos to enter the database
+  if (file.type?.startsWith('video/') || (dataUrl && dataUrl.length > 80000)) {
+    throw new Error('Storage upload failed. Please check your internet connection or file size (max 15MB).');
+  }
+
+  // Tiny assets (<60KB) only may safely fallback
   if (typeof onProgress === 'function') onProgress(100);
   return {
     path,

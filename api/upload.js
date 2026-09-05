@@ -16,6 +16,14 @@ function getEnvConfig() {
   return { endpoint, bucket, region, accessKeyId, secretAccessKey };
 }
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '15mb',
+    },
+  },
+};
+
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');

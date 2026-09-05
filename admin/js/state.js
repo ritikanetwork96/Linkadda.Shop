@@ -44,43 +44,36 @@ const activeUnsubs = new Map();
 let emitTimer = null;
 let saveCacheTimer = null;
 
+function syncWebsiteCache() {
+  try {
+    const liveCache = {
+      categories: STORE.categories || {},
+      products: STORE.products || {},
+      banner: STORE.banner || {},
+      timestamp: Date.now(),
+    };
+    localStorage.setItem('linkadda_cached_live_data', JSON.stringify(liveCache));
+  } catch (_) {}
+}
+
 function saveStoreCache() {
   if (saveCacheTimer) return;
   saveCacheTimer = setTimeout(() => {
     saveCacheTimer = null;
     try {
-      let existing = {};
-      try {
-        const raw = localStorage.getItem(CACHE_KEY);
-        if (raw) existing = JSON.parse(raw) || {};
-      } catch (_) {}
-
-      const hasProducts = STORE.products && Object.keys(STORE.products).length > 0;
-      const hasCategories = STORE.categories && Object.keys(STORE.categories).length > 0;
-      const hasMedia = STORE.media && Object.keys(STORE.media).length > 0;
-      const hasSettings = STORE.settings && Object.keys(STORE.settings).length > 0;
-      const hasOrders = STORE.orders && Object.keys(STORE.orders).length > 0;
-      const hasVisitors = STORE.visitors && Object.keys(STORE.visitors).length > 0;
-      const hasEvents = STORE.events && Object.keys(STORE.events).length > 0;
-
       const updatedCache = {
-        settings: hasSettings ? STORE.settings : (existing.settings || {}),
-        payment: (STORE.payment && Object.keys(STORE.payment).length) ? STORE.payment : (existing.payment || {}),
-        hero: (STORE.hero && Object.keys(STORE.hero).length) ? STORE.hero : (existing.hero || {}),
-        banner: (STORE.banner && Object.keys(STORE.banner).length) ? STORE.banner : (existing.banner || {}),
-        faq: (STORE.faq && Object.keys(STORE.faq).length) ? STORE.faq : (existing.faq || {}),
-        testimonials: (STORE.testimonials && Object.keys(STORE.testimonials).length) ? STORE.testimonials : (existing.testimonials || {}),
-        categories: hasCategories ? STORE.categories : (existing.categories || {}),
-        products: hasProducts ? STORE.products : (existing.products || {}),
-        media: hasMedia ? STORE.media : (existing.media || {}),
-        orders: hasOrders ? STORE.orders : (existing.orders || {}),
-        visitors: hasVisitors ? STORE.visitors : (existing.visitors || {}),
-        events: hasEvents ? STORE.events : (existing.events || {}),
-        analytics: (STORE.analytics && Object.keys(STORE.analytics).length) ? STORE.analytics : (existing.analytics || {}),
+        settings: STORE.settings || {},
+        payment: STORE.payment || {},
+        hero: STORE.hero || {},
+        banner: STORE.banner || {},
+        faq: STORE.faq || {},
+        testimonials: STORE.testimonials || {},
+        categories: STORE.categories || {},
+        products: STORE.products || {},
         timestamp: Date.now(),
       };
-
       localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
+      syncWebsiteCache();
     } catch (_) {}
   }, 250);
 }
@@ -101,7 +94,11 @@ function emit() {
 }
 
 export function getSnapshot() {
-  return safeJson(STORE);
+  const copy = {};
+  for (const k in STORE) {
+    copy[k] = typeof STORE[k] === 'object' && STORE[k] !== null ? { ...STORE[k] } : STORE[k];
+  }
+  return copy;
 }
 
 export function subscribe(fn) {
@@ -142,7 +139,10 @@ function attachNode(key, mode = 'collection') {
   }
 }
 
+let isRealtimeStarted = false;
 export function startRealtime() {
+  if (isRealtimeStarted) return;
+  isRealtimeStarted = true;
   attachNode('hero', 'singleton');
   attachNode('categories');
   attachNode('products');
@@ -180,9 +180,16 @@ export async function saveRecord(node, id, data) {
   };
   if (!payload.createdAt) payload.createdAt = Date.now();
   if (isSingleton(node)) {
+    STORE[node] = payload;
+    emit();
+    syncWebsiteCache();
     await set(nodeRef(node), payload);
     return payload;
   }
+  if (!STORE[node]) STORE[node] = {};
+  STORE[node][payload.id] = payload;
+  emit();
+  syncWebsiteCache();
   await set(nodeRef(node, payload.id), payload);
   return payload;
 }
@@ -195,9 +202,16 @@ export async function createRecord(node, data) {
     updatedAt: Date.now(),
   };
   if (isSingleton(node)) {
+    STORE[node] = payload;
+    emit();
+    syncWebsiteCache();
     await set(nodeRef(node), payload);
     return payload;
   }
+  if (!STORE[node]) STORE[node] = {};
+  STORE[node][payload.id] = payload;
+  emit();
+  syncWebsiteCache();
   await set(nodeRef(node, payload.id), payload);
   return payload;
 }
@@ -205,23 +219,46 @@ export async function createRecord(node, data) {
 export async function updateRecord(node, id, data) {
   if (isSingleton(node)) {
     const next = { ...(STORE[node] || {}), ...data, updatedAt: Date.now() };
+    STORE[node] = next;
+    emit();
+    syncWebsiteCache();
     await set(nodeRef(node), next);
     return next;
   }
+  const current = STORE[node]?.[id] || {};
+  const next = { ...current, ...data, id, updatedAt: Date.now() };
+  if (!STORE[node]) STORE[node] = {};
+  STORE[node][id] = next;
+  emit();
+  syncWebsiteCache();
   await update(nodeRef(node, id), { ...data, updatedAt: Date.now() });
-  return { id, ...data };
+  return next;
 }
 
 export async function updateRecordsBatch(node, batchMap) {
   const nodeName = RTDB_NODES[node];
   if (!nodeName) throw new Error(`Unknown node: ${node}`);
+  if (!STORE[node]) STORE[node] = {};
+  for (const [id, item] of Object.entries(batchMap)) {
+    STORE[node][id] = { ...(STORE[node][id] || {}), ...(item || {}) };
+  }
+  emit();
+  syncWebsiteCache();
   await update(ref(db, nodeName), batchMap);
 }
 
 export async function deleteRecord(node, id) {
   if (isSingleton(node)) {
+    delete STORE[node];
+    emit();
+    syncWebsiteCache();
     await set(nodeRef(node), null);
     return;
+  }
+  if (STORE[node] && STORE[node][id]) {
+    delete STORE[node][id];
+    emit();
+    syncWebsiteCache();
   }
   await remove(nodeRef(node, id));
 }

@@ -336,15 +336,23 @@ button {
   border-radius: 12px;
   color: var(--muted);
   font-weight: 500;
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   border: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
 }
 
 .nav-link:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   transform: translateX(4px);
+}
+
+.nav-link:active {
+  transform: scale(0.96) translateX(2px) !important;
+  transition: transform 50ms cubic-bezier(0.2, 0, 0, 1) !important;
+  background: rgba(99, 102, 241, 0.15) !important;
 }
 
 .nav-link::before {
@@ -10113,5 +10121,81 @@ button {
 .toast-close:hover {
   color: #ffffff;
 }
+
+/* ================================================================
+   ULTRA-TACTILE BUTTON & NAVIGATION FEEDBACK (Zero Dead Feel)
+   ================================================================ */
+
+.btn, .nav-link, .catalog-tab, .chip, .sidebar-footer button, .table-action-btn, button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:active, .sidebar-footer button:active, .catalog-tab:active, .chip:active, button:active {
+  transform: scale(0.95) !important;
+  transition: transform 50ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.nav-link:active {
+  transform: scale(0.96) translateX(2px) !important;
+  transition: transform 50ms cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+.nav-link.nav-link-pressed {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  transform: scale(0.97) translateX(3px) !important;
+}
+
+.click-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(99, 102, 241, 0.25) 60%, transparent 100%);
+  transform: translate(-50%, -50%) scale(0);
+  animation: clickRippleAnim 400ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  z-index: 9999;
+}
+
+@keyframes clickRippleAnim {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.8);
+    opacity: 0;
+  }
+}
+
+.route-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #38bdf8);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.9), 0 0 20px rgba(168, 85, 247, 0.6);
+  z-index: 99999;
+  pointer-events: none;
+  transition: width 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+}
+
+.view-root {
+  animation: viewFadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0.8;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 

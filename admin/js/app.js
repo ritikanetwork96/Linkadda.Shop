@@ -8105,18 +8105,37 @@ function softUpdateCatalog() {
   initCatalogDragAndDrop();
 }
 
+let routeProgressBar = null;
+function triggerRouteProgressBar() {
+  if (!routeProgressBar) {
+    routeProgressBar = document.createElement('div');
+    routeProgressBar.className = 'route-progress-bar';
+    document.body.appendChild(routeProgressBar);
+  }
+  routeProgressBar.style.transition = 'none';
+  routeProgressBar.style.width = '0%';
+  routeProgressBar.style.opacity = '1';
+  requestAnimationFrame(() => {
+    routeProgressBar.style.transition = 'width 240ms cubic-bezier(0.16, 1, 0.3, 1)';
+    routeProgressBar.style.width = '100%';
+    setTimeout(() => {
+      routeProgressBar.style.opacity = '0';
+    }, 260);
+  });
+}
+
 function applyRoute(path) {
+  const targetRoute = (path === 'products' || path === 'categories') ? 'catalog' : (NAV_ITEMS.some((item) => item.key === path) ? path : 'dashboard');
   if (path === 'products') {
-    ui.route = 'catalog';
     ui.catalogTab = 'products';
   } else if (path === 'categories') {
-    ui.route = 'catalog';
     ui.catalogTab = 'categories';
-  } else {
-    ui.route = NAV_ITEMS.some((item) => item.key === path) ? path : 'dashboard';
   }
+  ui.route = targetRoute;
   ui.page = 1;
+  triggerRouteProgressBar();
   renderView(ui.data || {});
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function syncTopbar(user) {
@@ -8139,6 +8158,30 @@ function initRouteHandling() {
 }
 
 function attachGlobalHandlers() {
+  // Global Tactile Ripple & Click Pulse Effect on all buttons, tabs, links, chips
+  document.addEventListener('pointerdown', (event) => {
+    const target = event.target.closest('.btn, .nav-link, .catalog-tab, .chip, button, a.btn-card, [data-action], .sidebar-close, .admin-mobile-toggle, .user-pill');
+    if (!target) return;
+    
+    const rect = target.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'click-ripple';
+    const size = Math.max(rect.width, rect.height) * 1.6;
+    ripple.style.width = `${size}px`;
+    ripple.style.height = `${size}px`;
+    ripple.style.left = `${event.clientX - rect.left}px`;
+    ripple.style.top = `${event.clientY - rect.top}px`;
+    
+    const computedStyle = window.getComputedStyle(target);
+    if (computedStyle.position === 'static') {
+      target.style.position = 'relative';
+    }
+    target.style.overflow = 'hidden';
+    
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 420);
+  });
+
   document.getElementById('themeBtn')?.addEventListener('click', toggleTheme);
   document.getElementById('sidebarThemeBtn')?.addEventListener('click', toggleTheme);
   document.getElementById('logoutBtn')?.addEventListener('click', logout);
@@ -8188,8 +8231,15 @@ function attachGlobalHandlers() {
     if (routeBtn) {
       event.preventDefault();
       const route = routeBtn.dataset.route;
-      window.location.hash = `#/${route}`;
-      applyRoute(route);
+      routeBtn.classList.add('nav-link-pressed');
+      setTimeout(() => routeBtn.classList.remove('nav-link-pressed'), 250);
+
+      const targetHash = `#/${route}`;
+      if (window.location.hash !== targetHash) {
+        window.location.hash = targetHash;
+      } else {
+        applyRoute(route);
+      }
       if (isMobileViewport()) closeSidebar();
       return;
     }
@@ -8202,8 +8252,12 @@ function attachGlobalHandlers() {
     closeCatalogActionMenus();
     if (action === 'goto') {
       const route = actionBtn.dataset.route;
-      window.location.hash = `#/${route}`;
-      applyRoute(route);
+      const targetHash = `#/${route}`;
+      if (window.location.hash !== targetHash) {
+        window.location.hash = targetHash;
+      } else {
+        applyRoute(route);
+      }
       return;
     }
     if (action === 'refresh') {
@@ -8911,10 +8965,14 @@ function attachGlobalHandlers() {
         else await createRecord(node, next);
         const afterRefs = recordAssetRefs(next);
         const removedRefs = beforeRefs.filter((refValue) => !afterRefs.includes(normalizeAssetValue(refValue)));
-        for (const refValue of removedRefs) {
-          await deleteMediaIfUnused(refValue, { node, id });
+        if (removedRefs.length) {
+          setTimeout(() => {
+            removedRefs.forEach((refValue) => {
+              deleteMediaIfUnused(refValue, { node, id }).catch(() => {});
+            });
+          }, 0);
         }
-        showToast(`${schema.label} saved`);
+        showToast(`${schema.label} saved`, 'success');
       } catch (error) {
         showToast(error?.message || `Failed to save ${schema.label.toLowerCase()}`, 'danger');
         return;

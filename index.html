@@ -708,7 +708,7 @@
     return Object.entries(records)
       .map(([id, item]) => ({ id, ...(item || {}) }))
       .filter(item => item && (item.status === undefined || item.status === 'active'))
-      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (a.updatedAt || 0) - (b.updatedAt || 0));
+      .sort((a, b) => (Number(a.displayOrder) || 0) - (Number(b.displayOrder) || 0) || (Number(b.updatedAt || b.createdAt) || 0) - (Number(a.updatedAt || a.createdAt) || 0));
   }
 
   function getLiveRecords() {
@@ -1977,6 +1977,31 @@
     saveCachedLiveData();
     scheduleRenderLiveStore();
   });
+
+  // Instant cross-tab sync: updates storefront in 0ms when admin saves changes in another tab
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'linkadda_cached_live_data' && e.newValue) {
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (parsed.categories && Object.keys(parsed.categories).length) liveCollections.categories = parsed.categories;
+        if (parsed.products && Object.keys(parsed.products).length) liveCollections.products = parsed.products;
+        if (parsed.banner && Object.keys(parsed.banner).length) liveCollections.banner = parsed.banner;
+        scheduleRenderLiveStore();
+      } catch (_) {}
+    }
+  });
+
+  // Fast parallel REST fetch to ensure instant fresh data even before WebSocket handshakes
+  fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/products.json')
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data === 'object' && Object.keys(data).length) {
+        liveCollections.products = data;
+        saveCachedLiveData();
+        scheduleRenderLiveStore();
+      }
+    })
+    .catch(() => {});
 
   var sharedFocusDone = false;
   var sharedFocusTargetId = '';
