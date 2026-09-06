@@ -50,20 +50,20 @@ function validateUploadFile(file) {
     if (!allowedImages.includes(type) && !file.name?.match(/\.(png|jpe?g|webp|gif|svg|avif)$/i)) {
       throw new Error('Unsupported image format.');
     }
-    const maxImageBytes = 15 * 1024 * 1024; // 15 MB
+    const maxImageBytes = 30 * 1024 * 1024; // 30 MB
     if (Number(file.size || 0) > maxImageBytes) {
-      throw new Error('Image is too large. Max size is 15 MB.');
+      throw new Error('Image is too large. Max size is 30 MB.');
     }
   }
 
   if (isVideo) {
     const allowedVideos = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/ogg'];
-    if (!allowedVideos.includes(type)) {
+    if (!allowedVideos.includes(type) && !file.name?.match(/\.(mp4|webm|mov|m4v|ogg)$/i)) {
       throw new Error('Unsupported video format.');
     }
-    const maxVideoBytes = 100 * 1024 * 1024; // 100 MB
+    const maxVideoBytes = 150 * 1024 * 1024; // 150 MB
     if (Number(file.size || 0) > maxVideoBytes) {
-      throw new Error('Video is too large. Max size is 100 MB.');
+      throw new Error('Video is too large. Max size is 150 MB.');
     }
   }
 }
@@ -120,7 +120,7 @@ export async function deletePublicAsset(path) {
 /**
  * Compress an image in the browser using canvas for instant fast uploads & storage
  */
-async function compressImage(file, maxDimension = 1200, quality = 0.85) {
+async function compressImage(file, maxDimension = 1400, quality = 0.85) {
   if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
     return file; // SVGs and GIFs shouldn't be flattened with canvas
   }
@@ -162,25 +162,27 @@ async function compressImage(file, maxDimension = 1200, quality = 0.85) {
   });
 }
 
-function readFileAsDataUrl(file) {
+function readFileAsDataUrl(fileOrBlob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Failed to read file as data URL.'));
-    reader.readAsDataURL(file);
+    reader.onerror = () => reject(new Error('Failed to read file.'));
+    reader.readAsDataURL(fileOrBlob);
   });
 }
 
 /**
  * Universal Asset Uploader:
- * 1. Tries Serverless API `/api/upload` (streams directly to RustFS S3).
- * 2. If `/api/upload` fails or unavailable, converts image to Base64 Data URL.
- * 3. Guarantees that returned publicUrl is 100% accessible, never returns a 404 URL.
+ * 1. Small files (<= 2.5MB): Direct fast upload to `/api/upload`.
+ * 2. Large files (> 2.5MB, e.g. 6MB, 15MB images, or videos up to 150MB):
+ *    Automatically slices file into 2MB chunks and uploads via `/api/upload`,
+ *    then signals the server to assemble them in RustFS S3.
+ * 3. Never blocked by Vercel's 4.5MB serverless payload limit.
  */
 export async function uploadAsset(file, folder = 'products', onProgress) {
   validateUploadFile(file);
 
-  if (typeof onProgress === 'function') onProgress(10);
+  if (typeof onProgress === 'function') onProgress(5);
 
   const ext = (file.name && file.name.includes('.'))
     ? file.name.split('.').pop()
@@ -192,20 +194,25 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
   const path = joinPath(folder, fileName);
 
   // For logos and QR codes, use dedicated dimensions
-  const maxDim = (folder === 'logos' || folder === 'qrcodes') ? 600 : 1400;
+  const maxDim = (folder === 'logos' || folder === 'qrcodes') ? 600 : 1600;
   let fileToUpload = file;
   if (file.type?.startsWith('image/')) {
-    fileToUpload = await compressImage(file, maxDim, 0.88);
+    try {
+      fileToUpload = await compressImage(file, maxDim, 0.85);
+    } catch (_) {
+      fileToUpload = file;
+    }
   }
 
-  if (typeof onProgress === 'function') onProgress(30);
+  if (typeof onProgress === 'function') onProgress(15);
 
-  const dataUrl = await readFileAsDataUrl(fileToUpload);
+  const CHUNK_THRESHOLD = 2.5 * 1024 * 1024; // 2.5 MB
 
-  if (typeof onProgress === 'function') onProgress(50);
+  // ━━ A. DIRECT UPLOAD FOR SMALL ASSETS (<= 2.5 MB) ━━
+  if (fileToUpload.size <= CHUNK_THRESHOLD) {
+    const dataUrl = await readFileAsDataUrl(fileToUpload);
+    if (typeof onProgress === 'function') onProgress(40);
 
-  // 1. Try Serverless RustFS S3 Upload (/api/upload)
-  try {
     const res = await fetch('/api/upload', {
       method: 'POST',
       headers: {
@@ -219,34 +226,99 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
       }),
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.publicUrl) {
-        if (typeof onProgress === 'function') onProgress(100);
-        return {
-          path: data.key || path,
-          publicUrl: data.publicUrl,
-          rustfsUrl: data.publicUrl,
-          dataUrl,
-        };
+    if (!res.ok) {
+      let errMsg = 'Storage upload failed.';
+      try {
+        const errJson = await res.json();
+        if (errJson?.error) errMsg = errJson.error;
+      } catch (_) {
+        errMsg = `Upload failed with status ${res.status}: ${res.statusText}`;
       }
+      throw new Error(errMsg);
     }
-  } catch (err) {
-    console.warn('Server upload to /api/upload failed, using instant direct Data URL:', err);
+
+    const data = await res.json();
+    if (typeof onProgress === 'function') onProgress(100);
+
+    return {
+      path: data.key || path,
+      publicUrl: data.publicUrl,
+      rustfsUrl: data.publicUrl,
+      dataUrl,
+    };
   }
 
-  // 2. Safe Fallback: NEVER allow large Base64 strings or videos to enter the database
-  if (file.type?.startsWith('video/') || (dataUrl && dataUrl.length > 80000)) {
-    throw new Error('Storage upload failed. Please check your internet connection or file size (max 15MB).');
+  // ━━ B. CHUNKED UPLOAD FOR LARGE FILES (> 2.5 MB up to 150 MB) ━━
+  const CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB per slice (safely below Vercel's 4.5MB ceiling)
+  const totalParts = Math.ceil(fileToUpload.size / CHUNK_SIZE);
+  const uploadId = `up_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
+  for (let i = 0; i < totalParts; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(fileToUpload.size, start + CHUNK_SIZE);
+    const slice = fileToUpload.slice(start, end);
+    const chunkDataUrl = await readFileAsDataUrl(slice);
+
+    const chunkRes = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'chunk',
+        uploadId,
+        partIndex: i,
+        base64: chunkDataUrl,
+      }),
+    });
+
+    if (!chunkRes.ok) {
+      let errMsg = `Failed uploading chunk ${i + 1} of ${totalParts}.`;
+      try {
+        const errJson = await chunkRes.json();
+        if (errJson?.error) errMsg = errJson.error;
+      } catch (_) {}
+      throw new Error(errMsg);
+    }
+
+    const pct = Math.round(15 + ((i + 1) / totalParts) * 75);
+    if (typeof onProgress === 'function') onProgress(pct);
   }
 
-  // Tiny assets (<60KB) only may safely fallback
+  // Final Assembly Step
+  if (typeof onProgress === 'function') onProgress(93);
+
+  const assembleRes = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      action: 'assemble',
+      uploadId,
+      totalParts,
+      folder,
+      filename: fileName,
+      contentType: fileToUpload.type || file.type || 'application/octet-stream',
+    }),
+  });
+
+  if (!assembleRes.ok) {
+    let errMsg = 'Failed to assemble uploaded media parts.';
+    try {
+      const errJson = await assembleRes.json();
+      if (errJson?.error) errMsg = errJson.error;
+    } catch (_) {}
+    throw new Error(errMsg);
+  }
+
+  const resultData = await assembleRes.json();
   if (typeof onProgress === 'function') onProgress(100);
+
   return {
-    path,
-    publicUrl: dataUrl,
-    rustfsUrl: dataUrl,
-    dataUrl,
-    isDataUrl: true,
+    path: resultData.key || path,
+    publicUrl: resultData.publicUrl,
+    rustfsUrl: resultData.publicUrl,
+    dataUrl: '',
   };
 }

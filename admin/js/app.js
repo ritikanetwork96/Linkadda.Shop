@@ -803,7 +803,7 @@ function renderMediaStudio(record = {}) {
       <div class="editor-section-head">
         <div>
           <h4><i data-lucide="film" style="color: #06b6d4; width: 18px; height: 18px;"></i> 4. Media Studio (Unlimited Images & Videos)</h4>
-          <p>Upload photos & videos or paste direct links. Storefront slideshow me automatically live preview hoga.</p>
+          <p>Upload photos & videos or paste direct links. Storefront slideshow automatically previews live.</p>
         </div>
       </div>
 
@@ -1012,7 +1012,7 @@ function renderTierEditor(tiers = []) {
       <div class="tier-items-list" data-role="tier-items-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
         ${list.length > 0 ? list.map((tier, index) => renderTierRow(tier, index, list.length)).join('') : `
           <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
-            No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
+            No sub-options added. If you want to offer separate group or variant options (e.g. 1 Group ₹150), click <strong>"+ Add Sub-Option"</strong> above.
           </div>
         `}
       </div>
@@ -1029,7 +1029,7 @@ function refreshTierRowIndices(container) {
     if (!list.querySelector('[data-role="tier-empty-state"]')) {
       list.innerHTML = `
         <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 16px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,0.015);">
-          No sub-options added. Agar aapko alag se group/variant options dene hain (jaise 1 Group ₹150) to upar <strong>"+ Add Sub-Option"</strong> click karein.
+          No sub-options added. If you want to offer separate group or variant options (e.g. 1 Group ₹150), click <strong>"+ Add Sub-Option"</strong> above.
         </div>
       `;
     }
@@ -1108,7 +1108,7 @@ function renderProductEditor(record = {}, schema = null) {
             <strong style="font-size: 12.5px; color: #a5b4fc; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
               <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> Live Sync Tip
             </strong>
-            <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;">Jese hi aap images/videos add karenge ya details change karenge, ye card live update hoga.</p>
+            <p style="font-size: 12px; color: var(--muted); margin: 0; line-height: 1.4;">This card updates in real time as you add media and change product details.</p>
           </div>
         </aside>
 
@@ -1120,14 +1120,14 @@ function renderProductEditor(record = {}, schema = null) {
             <div class="editor-section-head">
               <div>
                 <h4><i data-lucide="package" style="color: #818cf8; width: 18px; height: 18px;"></i> 1. Basic Identity & Category</h4>
-                <p>Product ka name, category aur storefront highlight tags.</p>
+                <p>Product name, category, and storefront highlight tags.</p>
               </div>
             </div>
             
             <div class="field full" style="margin-bottom: 14px;">
               <label for="title" style="font-weight: 700;">Product Title *</label>
               <input class="input" type="text" name="title" id="title" value="${escapeHtml(data.title || '')}" placeholder="e.g. Spx Pack #2 (400+ Videos)" required style="font-size: 14px; font-weight: 600;" />
-              <small class="field-hint">Ye main title hai jo storefront card aur search me sabse pehle dikhayi dega.</small>
+              <small class="field-hint">Main title displayed on storefront cards and search results.</small>
             </div>
 
             <div class="product-grid-2">
@@ -1137,19 +1137,19 @@ function renderProductEditor(record = {}, schema = null) {
                   <option value="">Uncategorized (All Products)</option>
                   ${categoryOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${String(option.value) === currentCategory ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
                 </select>
-                <small class="field-hint">Product kis collection/filter me show hoga.</small>
+                <small class="field-hint">The collection and filter category where this product appears.</small>
               </div>
 
               <div class="field">
                 <label for="slug">URL Slug</label>
                 <input class="input" type="text" name="slug" id="slug" value="${escapeHtml(data.slug || '')}" placeholder="e.g. spx-pack-2" />
-                <small class="field-hint">Clean link address (khaali chhodne par auto-generate ho jayega).</small>
+                <small class="field-hint">Clean URL slug (auto-generated from title if left empty).</small>
               </div>
 
               <div class="field">
                 <label for="badge">Highlight Badge Text</label>
                 <input class="input" type="text" name="badge" id="badge" value="${escapeHtml(data.badge || '')}" placeholder="e.g. 4K QUALITY, HOT, TOP RATED" />
-                <small class="field-hint">Product card ke top corner par glowing badge.</small>
+                <small class="field-hint">Glowing badge displayed on the top corner of the product card.</small>
               </div>
 
               <div class="field">
@@ -1157,14 +1157,14 @@ function renderProductEditor(record = {}, schema = null) {
                 <select class="select" name="badgeStyle" id="badgeStyle">
                   ${badgeStyles.map((option) => `<option value="${escapeHtml(option.value)}" ${String(option.value) === currentBadgeStyle ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
                 </select>
-                <small class="field-hint">Badge ka color aur visual tone.</small>
+                <small class="field-hint">Badge color and visual theme.</small>
               </div>
             </div>
 
             <div class="field full" style="margin-top: 14px;">
               <label for="description">Full Description</label>
               <textarea class="textarea" name="description" id="description" rows="3" placeholder="Describe content, quality, updates, and specifications...">${escapeHtml(data.description || '')}</textarea>
-              <small class="field-hint">Product ke features aur details (card preview aur customer detail view me dikhegi).</small>
+              <small class="field-hint">Product features and details shown in card preview and customer modal.</small>
             </div>
           </div>
 
@@ -1181,25 +1181,25 @@ function renderProductEditor(record = {}, schema = null) {
               <div class="field">
                 <label for="priceINR" style="font-weight: 700;">INR Price (₹)</label>
                 <input class="input" type="text" name="priceINR" id="priceINR" value="${escapeHtml(data.priceINR || '')}" placeholder="e.g. 299" />
-                <small class="field-hint">Indian customers ke liye price (₹ sign automatic lag jayega).</small>
+                <small class="field-hint">Price for Indian customers (₹ currency symbol is added automatically).</small>
               </div>
 
               <div class="field">
                 <label for="priceUSD" style="font-weight: 700;">USD Price ($)</label>
                 <input class="input" type="text" name="priceUSD" id="priceUSD" value="${escapeHtml(data.priceUSD || '')}" placeholder="e.g. 14" />
-                <small class="field-hint">International buyers ke liye price in dollars ($).</small>
+                <small class="field-hint">Price for international buyers in US dollars ($).</small>
               </div>
 
               <div class="field">
                 <label for="orderLink">Order / Telegram Link</label>
                 <input class="input" type="text" name="orderLink" id="orderLink" value="${escapeHtml(data.orderLink || '')}" placeholder="https://t.me/... or /payment.html" />
-                <small class="field-hint">Buy Now dabane par customer is link par navigate karega.</small>
+                <small class="field-hint">Direct checkout destination when customer clicks Buy Now.</small>
               </div>
 
               <div class="field">
                 <label for="displayOrder">Display Ranking Order (#)</label>
                 <input class="input" type="number" name="displayOrder" id="displayOrder" value="${escapeHtml(String(data.displayOrder ?? 0))}" placeholder="0" />
-                <small class="field-hint">Catalog position number (1 = sabse pehle/upar show hoga).</small>
+                <small class="field-hint">Catalog sorting order (1 = appears first at the top).</small>
               </div>
             </div>
           </div>
@@ -1239,7 +1239,7 @@ function renderProductEditor(record = {}, schema = null) {
                   <option value="hidden" ${String(data.status || 'active') === 'hidden' ? 'selected' : ''}>🟡 Hidden (Temporarily Disabled)</option>
                   <option value="draft" ${String(data.status || 'active') === 'draft' ? 'selected' : ''}>⚪ Draft (In-Progress)</option>
                 </select>
-                <small class="field-hint">Active karne par turant website par live ho jayega.</small>
+                <small class="field-hint">When active, this product will be immediately visible on the live store.</small>
               </div>
               <div class="field">
                 <label>Realtime Sync Status</label>
@@ -1948,7 +1948,7 @@ function attachProductEditorBehaviors(form) {
           }
         })();
       } else {
-        showToast('Sub-options added! Naya product create karne ke liye niche "Create Product" dabayein.', 'info');
+        showToast('Sub-options added! Click "Create Product" below to save the product.', 'info');
       }
       return;
     }
@@ -2164,7 +2164,7 @@ function openTiersEditorModal(product = {}) {
               <div class="tier-empty-placeholder" data-role="tier-empty-state" style="padding: 24px 16px; text-align: center; border: 1px dashed rgba(168,85,247,0.3); border-radius: 12px; color: var(--muted); font-size: 13.5px; background: rgba(168,85,247,0.02);">
                 <i data-lucide="layers" style="width: 32px; height: 32px; color: #a855f7; margin-bottom: 8px; opacity: 0.7;"></i>
                 <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 4px;">No Sub-Plans Configured</div>
-                <div>Aap is product ke liye alag se purchase options (jaise 1 Group ₹150, 4 Groups ₹400) de sakte hain. Niche <strong>"+ Add Option"</strong> dabayein.</div>
+                <div>You can offer custom purchase options (e.g. 1 Group ₹150, 4 Groups ₹400). Click <strong>"+ Add Option"</strong> below.</div>
               </div>
             `}
           </div>
