@@ -511,7 +511,8 @@ function showToast() {
   toastIdx++;
   const toast = document.createElement('div');
   toast.className = 'toast';
-  toast.innerHTML = `<i class="${data.icon}"></i><span>${data.msg}</span>`;
+  toast.style.cssText = 'background: rgba(18, 18, 30, 0.96) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.18) !important; border-left: 3px solid #f0247a !important; box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;';
+  toast.innerHTML = `<i class="${data.icon}" style="color: #f0247a !important; flex-shrink: 0; font-size: 1rem;"></i><span style="color: #ffffff !important; font-weight: 600 !important; font-size: 0.86rem; letter-spacing: 0.2px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">${data.msg}</span>`;
   document.body.appendChild(toast);
   requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.add('show'); }); });
   setTimeout(() => {
@@ -710,4 +711,101 @@ document.querySelectorAll('.faq-item').forEach(item => {
       devOpen = false;
     }
   }, 1000);
+})();
+
+// ===== THEME MANAGER (DARK / LIGHT MODE & SYSTEM AUTO-DEDICATION) =====
+(function() {
+  const THEME_KEY = 'linkadda_theme';
+  const MANUAL_KEY = 'linkadda_theme_manual';
+
+  function getSystemTheme() {
+    try {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        return 'light';
+      }
+    } catch (_) {}
+    return 'dark';
+  }
+
+  function getActiveTheme() {
+    try {
+      const isManual = localStorage.getItem(MANUAL_KEY);
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      if (isManual && savedTheme) {
+        return savedTheme;
+      }
+    } catch (_) {}
+    return 'dark';
+  }
+
+  function updateButtonUI(theme) {
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    const label = document.getElementById('themeToggleLabel');
+    if (toggleBtn) {
+      if (theme === 'light') {
+        toggleBtn.classList.add('is-light');
+        if (label) label.textContent = 'Dark Mode';
+      } else {
+        toggleBtn.classList.remove('is-light');
+        if (label) label.textContent = 'Light Mode';
+      }
+    }
+  }
+
+  function applyTheme(theme, isManualAction) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+
+    if (isManualAction) {
+      try {
+        localStorage.setItem(MANUAL_KEY, 'true');
+        localStorage.setItem(THEME_KEY, theme);
+      } catch (_) {}
+    }
+
+    updateButtonUI(theme);
+    window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme } }));
+  }
+
+  function initTheme() {
+    const initialTheme = getActiveTheme();
+    applyTheme(initialTheme, false);
+
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'light' ? 'dark' : 'light';
+        applyTheme(next, true);
+      });
+    }
+
+    // Auto-listen to system device changes in real-time
+    if (window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+      const handleSystemChange = function(e) {
+        try {
+          const isManual = localStorage.getItem(MANUAL_KEY);
+          // Follow system theme if the user hasn't explicitly set manual preference
+          if (!isManual) {
+            const systemTheme = e.matches ? 'light' : 'dark';
+            applyTheme(systemTheme, false);
+          }
+        } catch (_) {}
+      };
+
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleSystemChange);
+      } else if (typeof mediaQuery.addListener === 'function') {
+        mediaQuery.addListener(handleSystemChange);
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
 })();

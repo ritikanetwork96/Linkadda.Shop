@@ -24,6 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
 
     /* ━━ GATEWAY INITIAL LOADER ━━ */
@@ -1657,6 +1658,9 @@
             <div id="upiQRError" class="qr-empty" style="display:none">Payment QR is not configured.</div>
           </div>
           <div class="qr-label">Scan with GPay · PhonePe · Paytm · Any UPI App</div>
+          <a href="#" id="upiDirectPayBtn" class="btn-upi-direct" style="display: none; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; margin-bottom: 6px; padding: 12px 18px; border-radius: 12px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; font-weight: 700; font-size: 0.92rem; text-decoration: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); transition: all 0.2s ease;">
+            <i class="fa-solid fa-bolt"></i> Pay via UPI App (Auto-Fill Amount)
+          </a>
           <button class="download-qr-btn" onclick="downloadCurrentQRCode('upi')"><i class="fa-solid fa-download"></i> Download QR Code</button>
         </div>
         <div class="or-divider">or copy UPI ID</div>
@@ -2477,6 +2481,9 @@ function applyOrderToUI(nextOrder = {}) {
     available: nextOrder.available !== undefined ? nextOrder.available : true,
   };
   updateOrderSummaryUI();
+  if (typeof renderUpiQr === 'function') {
+    renderUpiQr();
+  }
 
   const backBtn = document.getElementById('headerBackBtn');
   const targetId = orderData.id || requestedCheckout.productId;
@@ -2765,13 +2772,11 @@ function getUpiPaymentAmount() {
 
 function buildUpiPaymentUri() {
   const amount = getUpiPaymentAmount();
-  const params = new URLSearchParams({
-    pa: CONFIG.upiId || '',
-    pn: 'Linkadda',
-    cu: 'INR',
-    mode: '02',
-    purpose: '00',
-  });
+  const upiId = CONFIG.upiId || 'Ritikane@ptyes';
+  const params = new URLSearchParams();
+  params.set('pa', upiId);
+  params.set('pn', 'Linkadda');
+  params.set('cu', 'INR');
   if (amount > 0) {
     params.set('am', amount.toFixed(2));
   }
@@ -2785,6 +2790,44 @@ function buildUpiPaymentUri() {
   return `upi://pay?${params.toString()}`;
 }
 
+let isDecodingQr = false;
+async function checkAndDecodeUpiFromQrImage(imgUrl) {
+  if (!imgUrl || isDecodingQr || typeof window.jsQR !== 'function') return;
+  isDecodingQr = true;
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = window.jsQR(imgData.data, imgData.width, imgData.height);
+        if (code && code.data) {
+          const match = code.data.match(/[?&]pa=([^&]+)/i);
+          if (match && match[1]) {
+            const detectedUpi = decodeURIComponent(match[1]).trim();
+            if (detectedUpi && detectedUpi !== CONFIG.upiId) {
+              CONFIG.upiId = detectedUpi;
+              const upiIdEl = document.getElementById('upiIdText');
+              if (upiIdEl) upiIdEl.textContent = detectedUpi;
+              renderUpiQr();
+            }
+          }
+        }
+      } catch (_) {}
+      isDecodingQr = false;
+    };
+    img.onerror = () => { isDecodingQr = false; };
+    img.src = imgUrl;
+  } catch (_) {
+    isDecodingQr = false;
+  }
+}
+
 function renderUpiQr() {
   const frame = document.getElementById('upiQRFrame');
   const qrGeneratedEl = document.getElementById('upiQRGenerated');
@@ -2793,28 +2836,38 @@ function renderUpiQr() {
   const qrLoading = document.getElementById('upiQRLoading');
   if (!frame || !qrGeneratedEl || !qrImage || !qrError || !qrLoading) return;
 
-  const imageSrc = safeUrl(CONFIG.qrImage, '');
   qrLoading.style.display = 'none';
 
-  if (imageSrc) {
-    qrGeneratedEl.style.display = 'none';
-    qrGeneratedEl.innerHTML = '';
-    qrImage.src = imageSrc;
-    qrImage.style.display = 'block';
-    qrError.style.display = 'none';
-    return;
+  const upiId = CONFIG.upiId || 'Ritikane@ptyes';
+  const upiIdEl = document.getElementById('upiIdText');
+  if (upiIdEl) upiIdEl.textContent = upiId;
+
+  // Auto-detect UPI ID from uploaded QR image if present
+  if (CONFIG.qrImage) {
+    checkAndDecodeUpiFromQrImage(CONFIG.qrImage);
   }
 
-  if (window.QRCode && CONFIG.upiId) {
+  const upiUri = buildUpiPaymentUri();
+
+  // Update Direct Mobile UPI Pay Button
+  const directBtn = document.getElementById('upiDirectPayBtn');
+  if (directBtn) {
+    directBtn.href = upiUri;
+    directBtn.style.display = 'inline-flex';
+  }
+
+  // Priority 1: ALWAYS generate dynamic QR code with exact pre-filled amount!
+  // This guarantees auto-detection across GPay, PhonePe, Paytm, BHIM, Cred!
+  if (window.QRCode && upiId) {
     qrImage.style.display = 'none';
     qrError.style.display = 'none';
     qrGeneratedEl.style.display = 'block';
     qrGeneratedEl.innerHTML = '';
     try {
       new QRCode(qrGeneratedEl, {
-        text: buildUpiPaymentUri(),
-        width: 180,
-        height: 180,
+        text: upiUri,
+        width: 190,
+        height: 190,
         colorDark: '#000000',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M,
@@ -2825,11 +2878,26 @@ function renderUpiQr() {
     }
   }
 
+  // Fallback: If dynamic generation fails, show static uploaded image if present
+  const imageSrc = safeUrl(CONFIG.qrImage, '');
+  if (imageSrc) {
+    qrGeneratedEl.style.display = 'none';
+    qrGeneratedEl.innerHTML = '';
+    qrImage.src = imageSrc;
+    qrImage.style.display = 'block';
+    qrError.style.display = 'none';
+    return;
+  }
+
   qrGeneratedEl.style.display = 'none';
   qrGeneratedEl.innerHTML = '';
   qrImage.removeAttribute('src');
   qrImage.style.display = 'none';
   qrError.style.display = 'flex';
+}
+
+function setupUPIQR() {
+  renderUpiQr();
 }
 
 
@@ -3211,6 +3279,7 @@ function selectMethod(m, isUserAction) {
   var alertEl = document.getElementById('alertMethod');
   if (alertEl) alertEl.classList.remove('show');
   if (typeof updateOrderSummaryUI === 'function') updateOrderSummaryUI();
+  if (m === 'upi' && typeof renderUpiQr === 'function') renderUpiQr();
 }
 
 function downloadCurrentQRCode(methodId) {

@@ -17,6 +17,20 @@
         window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
       }
     })();
+    // Theme Bootstrap (System Theme Dedicated + Manual Override)
+    (function() {
+      try {
+        var manual = localStorage.getItem('linkadda_theme_manual');
+        var saved = localStorage.getItem('linkadda_theme');
+        var theme = 'dark';
+        if (manual && saved) {
+          theme = saved;
+        } else {
+          theme = 'dark'; // Always default to dark luxury theme
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {}
+    })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Linkadda Shop</title>
@@ -24,8 +38,136 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/style.css?v=7" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css?v=20260906c" />
+  <style id="critical-hero-toast-fix">
+    /* Hero Title: White top line, neon glowing gradient for second line */
+    .hero-title,
+    [data-theme="light"] .hero-title,
+    [data-theme="dark"] .hero-title,
+    .hero .hero-title {
+      color: #ffffff !important;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 0, 0, 0.8) !important;
+    }
+    .hero-title span,
+    .hero-title .gradient-text,
+    .hero-title .highlight,
+    .gradient-text,
+    [data-theme="light"] .gradient-text,
+    [data-theme="light"] .hero-title span,
+    [data-theme="light"] .hero-title .highlight,
+    [data-theme="dark"] .hero-title span,
+    [data-theme="dark"] .hero-title .highlight {
+      background: linear-gradient(135deg, #ff2a8d 0%, #ff65a3 35%, #fca5a5 70%, #ffffff 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      display: inline-block !important;
+      filter: drop-shadow(0 2px 14px rgba(255, 42, 141, 0.75)) drop-shadow(0 0 28px rgba(255, 101, 163, 0.6)) !important;
+      font-weight: 700 !important;
+    }
+    .hero-sub,
+    [data-theme="light"] .hero-sub,
+    [data-theme="dark"] .hero-sub,
+    .hero .hero-sub {
+      color: #f1f5f9 !important;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.7) !important;
+    }
+    /* Toast notifications: Dark glass pill with crisp white text & bright pink icon */
+    .toast,
+    [data-theme="light"] .toast,
+    [data-theme="dark"] .toast {
+      background: rgba(18, 18, 30, 0.96) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-left: 3px solid #f0247a !important;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+    }
+    .toast span,
+    .toast div,
+    .toast p,
+    [data-theme="light"] .toast span,
+    [data-theme="dark"] .toast span {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      font-size: 0.86rem !important;
+      letter-spacing: 0.2px !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+    }
+    .toast i,
+    [data-theme="light"] .toast i,
+    [data-theme="dark"] .toast i {
+      color: #f0247a !important;
+    }
+    /* Video Tiers (Light Mode) - High contrast & crystal clear visibility */
+    [data-theme="light"] .vid-tier-label {
+      background: rgba(240, 36, 122, 0.08) !important;
+      border-color: rgba(240, 36, 122, 0.25) !important;
+      color: #db2777 !important;
+      font-weight: 700 !important;
+    }
+    [data-theme="light"] .vid-tier-label i {
+      color: #f0247a !important;
+    }
+    [data-theme="light"] .vid-tier-item {
+      background: #ffffff !important;
+      border: 1.5px solid #e2e8f0 !important;
+      color: #0f172a !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+    }
+    [data-theme="light"] .vid-tier-item:hover {
+      background: #fff5f9 !important;
+      border-color: rgba(240, 36, 122, 0.45) !important;
+      transform: translateY(-2px);
+    }
+    [data-theme="light"] .vid-tier-item.vid-tier-selected {
+      background: linear-gradient(135deg, #fff0f7 0%, #f5f3ff 100%) !important;
+      border-color: #f0247a !important;
+      box-shadow: 0 4px 16px rgba(240, 36, 122, 0.16) !important;
+    }
+    [data-theme="light"] .vid-tier-count,
+    [data-theme="light"] .vid-tier-item .vid-tier-count {
+      color: #1e293b !important;
+      font-weight: 600 !important;
+    }
+    [data-theme="light"] .vid-tier-item.vid-tier-selected .vid-tier-count {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+    [data-theme="light"] .vid-tier-radio {
+      border: 2px solid #94a3b8 !important;
+      background: #ffffff !important;
+    }
+    [data-theme="light"] .vid-tier-item.vid-tier-selected .vid-tier-radio {
+      border-color: #f0247a !important;
+      background: #f0247a !important;
+      box-shadow: inset 0 0 0 3px #ffffff !important;
+    }
+    [data-theme="light"] .vid-tier-item.vid-tier-selected .vid-tier-radio i {
+      color: #ffffff !important;
+    }
+    [data-theme="light"] .vid-tier-price {
+      color: #0f172a !important;
+      font-weight: 700 !important;
+    }
+    [data-theme="light"] .vid-tier-usd {
+      color: #64748b !important;
+      font-weight: 600 !important;
+    }
+    [data-theme="light"] .vid-tier-active-summary {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border: 1px solid rgba(16, 185, 129, 0.28) !important;
+      color: #047857 !important;
+    }
+    [data-theme="light"] .vid-tier-active-summary strong {
+      color: #065f46 !important;
+    }
+    [data-theme="light"] .pcard-platforms {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #475569 !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -497,6 +639,16 @@
       </div>
       <div class="footer-bottom">
         <p>&copy; 2026 Linkadda Shop. All rights reserved.</p>
+        <div class="footer-theme-toggle-wrap">
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Light or Dark Theme" title="Toggle Light or Dark Theme">
+            <span class="theme-toggle-track">
+              <i class="fa-solid fa-moon theme-icon-dark"></i>
+              <i class="fa-solid fa-sun theme-icon-light"></i>
+              <span class="theme-toggle-thumb"></span>
+            </span>
+            <span class="theme-toggle-label" id="themeToggleLabel">Light Mode</span>
+          </button>
+        </div>
         <p>Made with <i class="fa-solid fa-heart" style="color:#e84393;"></i> in India</p>
       </div>
     </div>
@@ -786,11 +938,20 @@
     if (h.title) {
       const el = document.querySelector('.hero-title');
       if (el) {
-        const parts = h.title.split('\n');
-        if (parts.length > 1) {
-          el.innerHTML = esc(parts[0]) + '<br/><span class="gradient-text">' + esc(parts.slice(1).join(' ')) + '</span>';
+        let raw = String(h.title).trim();
+        let clean = raw.replace(/<\/?(span|b|strong|em|p|h\d)[^>]*>/gi, '').trim();
+        let parts = clean.includes('<br') ? clean.split(/<br\s*\/?>/i) : clean.split('\n');
+        if (parts.length === 1) {
+          const upper = parts[0].toUpperCase();
+          if (upper.includes('CONTENT SELLER')) {
+            const idx = upper.indexOf('CONTENT SELLER');
+            parts = [parts[0].substring(0, idx).trim(), parts[0].substring(idx).trim()];
+          }
+        }
+        if (parts.length > 1 && parts[1]) {
+          el.innerHTML = esc(parts[0]) + '<br /><span class="gradient-text">' + esc(parts.slice(1).join(' ')) + '</span>';
         } else {
-          el.innerHTML = esc(h.title);
+          el.innerHTML = esc(clean);
         }
       }
     }
@@ -818,7 +979,15 @@
     if (h.stat1 && nums[0]) nums[0].textContent = h.stat1;
     if (h.stat2 && nums[1]) nums[1].textContent = h.stat2;
     if (h.stat3 && nums[2]) nums[2].textContent = h.stat3;
-    if (heroBg) heroBg.style.backgroundImage = h.backgroundImage ? `url(${safeUrl(h.backgroundImage)})` : defaultSiteState.hero.backgroundImage;
+    if (heroBg) {
+      if (h.backgroundImage) {
+        heroBg.style.backgroundImage = `url(${safeUrl(h.backgroundImage)})`;
+        if (heroSec) heroSec.classList.add('has-custom-bg');
+      } else {
+        heroBg.style.backgroundImage = defaultSiteState.hero.backgroundImage;
+        if (heroSec && !defaultSiteState.hero.backgroundImage) heroSec.classList.remove('has-custom-bg');
+      }
+    }
   }
 
   function applyBanner(b) {

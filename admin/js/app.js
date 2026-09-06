@@ -9257,6 +9257,41 @@ function attachGlobalHandlers() {
         showToast('Uploading payment QR code...', 'info');
         const preview = document.getElementById('pmQrPreview');
         if (preview) preview.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;">Uploading...</div>';
+
+        // Auto-decode UPI ID directly from uploaded QR image
+        try {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              try {
+                if (typeof window.jsQR === 'function') {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                  ctx.drawImage(img, 0, 0);
+                  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const code = window.jsQR(imgData.data, imgData.width, imgData.height);
+                  if (code && code.data) {
+                    const match = code.data.match(/[?&]pa=([^&]+)/i);
+                    if (match && match[1]) {
+                      const detectedUpi = decodeURIComponent(match[1]).trim();
+                      const idInput = document.getElementById('pmIdentifier');
+                      if (idInput && detectedUpi) {
+                        idInput.value = detectedUpi;
+                        showToast(`Auto-detected UPI ID: ${detectedUpi} from QR!`, 'success');
+                      }
+                    }
+                  }
+                }
+              } catch (_) {}
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        } catch (_) {}
+
         uploadAsset(file, 'qrcodes').then((res) => {
           const input = document.getElementById('pmQrImageInput');
           if (input) input.value = res.publicUrl;
