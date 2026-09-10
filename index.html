@@ -662,6 +662,7 @@
   </div>
 
   <script src="/script.js?v=7"></script>
+  <script src="/preload.js" defer></script>
 
   <!-- ------ FIREBASE INTEGRATION ------ -->
   <script type="module">
@@ -2108,13 +2109,14 @@
   }
 
   // -- INSTANT LOCAL CACHED CATALOG (0ms initial load) --
+  // Priority: 1) localStorage cache  2) Pre-embedded catalog snapshot  3) Wait for Firebase
   try {
     const cachedLive = localStorage.getItem('linkadda_cached_live_data');
-    if (cachedLive) {
-      const parsed = JSON.parse(cachedLive);
-      if (parsed.categories && Object.keys(parsed.categories).length) liveCollections.categories = parsed.categories;
-      if (parsed.products && Object.keys(parsed.products).length) liveCollections.products = parsed.products;
-      if (parsed.banner && Object.keys(parsed.banner).length) liveCollections.banner = parsed.banner;
+    const source = cachedLive ? JSON.parse(cachedLive) : (window.__preloadedCatalog || null);
+    if (source) {
+      if (source.categories && Object.keys(source.categories).length) liveCollections.categories = source.categories;
+      if (source.products && Object.keys(source.products).length) liveCollections.products = source.products;
+      if (source.banner && Object.keys(source.banner).length) liveCollections.banner = source.banner;
       renderCategoryFilters();
       renderLiveGrid();
       renderPinnedBanner();
