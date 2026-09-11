@@ -23,13 +23,17 @@
 }
 
 html {
-  scroll-behavior: smooth;
-  scrollbar-gutter: stable;
-  scroll-padding-top: 90px;
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
   max-width: 100%;
   overscroll-behavior-x: none;
+}
+
+@media (min-width: 1024px) {
+  html {
+    scrollbar-gutter: stable;
+    scroll-padding-top: 90px;
+  }
 }
 
 body {
@@ -46,9 +50,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* GPU Hardware Acceleration for 60fps Smooth Animations & Stutter-free Scroll */
+/* GPU Hardware Acceleration for fixed floating elements (cards rendered in unified viewport layer) */
 .header,
-.pcard,
 .cat-card,
 .btn-card-action,
 .floating-badge,
@@ -60,7 +63,6 @@ body {
 .vid-tier-item {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
   will-change: auto;
 }
 
@@ -82,6 +84,12 @@ section.contact,
 section.faq-section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 600px;
+}
+
+.fk-card,
+.pcard {
+  content-visibility: auto;
+  contain-intrinsic-size: 180px 320px;
 }
 
 .particles,
@@ -920,6 +928,15 @@ section.faq-section {
   25%       { transform: translate(60px, -40px) scale(1.1); }
   50%       { transform: translate(-40px, 60px) scale(0.95); }
   75%       { transform: translate(30px, 30px) scale(1.05); }
+}
+
+@media (max-width: 768px) {
+  .aurora,
+  .aurora-blob {
+    display: none !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
 }
 
 /* ===== GLITCH TITLE ===== */

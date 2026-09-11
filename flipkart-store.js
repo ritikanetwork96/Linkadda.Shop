@@ -64,13 +64,29 @@
       }
     }
 
+    // 3b. If prod came from categories and has productRef or matching slug in products, inherit real price & tiers
+    if (prod && !prod.priceINR && collections.products) {
+      const allProds = Object.values(collections.products);
+      const matched = (prod.productRef && (collections.products[prod.productRef] || allProds.find(p => String(p?.id) === String(prod.productRef) || String(p?.slug) === String(prod.productRef))))
+                   || allProds.find(p => (prod.slug && String(p?.slug) === String(prod.slug)) || String(p?.id) === String(prod.id));
+      if (matched) {
+        prod = Object.assign({}, matched, prod, {
+          priceINR: matched.priceINR,
+          priceUSD: matched.priceUSD,
+          originalPriceINR: matched.originalPriceINR || matched.priceOriginal,
+          originalPriceUSD: matched.originalPriceUSD,
+          tiers: matched.tiers || prod.tiers
+        });
+      }
+    }
+
     // 4. Check global products cache
     if (!prod && window.__productsCache && window.__productsCache[id]) {
       prod = Object.assign({ id }, window.__productsCache[id]);
     }
 
     // 5. DOM Scrape Fallback (Extract from the clicked card directly)
-    if (!prod) {
+    if (!prod || !prod.priceINR) {
       const card = document.getElementById(`product-${id}`) ||
                    document.querySelector(`[data-product-id="${id}"]`) ||
                    document.querySelector(`[data-fb-id="${id}"]`);
@@ -78,18 +94,29 @@
         const titleEl = card.querySelector('.fk-card-title') || card.querySelector('h3');
         const priceInrEl = card.querySelector('[data-inr]') || card.querySelector('.fk-price-inr');
         const priceUsdEl = card.querySelector('[data-usd]') || card.querySelector('.fk-price-usd');
+        const mrpCutEl = card.querySelector('.fk-mrp-cut');
         const imgEl = card.querySelector('img');
 
-        prod = {
-          id: id,
-          title: titleEl ? titleEl.textContent.trim() : 'VIP 4K Video Collection',
-          priceINR: priceInrEl ? (priceInrEl.getAttribute('data-inr') || priceInrEl.textContent.replace(/[^\d]/g, '')) : '399',
-          priceUSD: priceUsdEl ? (priceUsdEl.getAttribute('data-usd') || priceUsdEl.textContent.replace(/[^\d]/g, '')) : '14',
-          image: imgEl ? imgEl.src : '',
-          images: imgEl ? [imgEl.src] : [],
-          rating: '4.9',
-          reviewsCount: '840'
-        };
+        const scrapedINR = priceInrEl ? (priceInrEl.getAttribute('data-inr') || priceInrEl.textContent.replace(/[^\d]/g, '')) : '';
+        const scrapedUSD = priceUsdEl ? (priceUsdEl.getAttribute('data-usd') || priceUsdEl.textContent.replace(/[^\d]/g, '')) : '';
+
+        if (prod) {
+          if (!prod.priceINR && scrapedINR) prod.priceINR = scrapedINR;
+          if (!prod.priceUSD && scrapedUSD) prod.priceUSD = scrapedUSD;
+          if (!prod.originalPriceINR && mrpCutEl) prod.originalPriceINR = mrpCutEl.textContent.replace(/[^\d]/g, '');
+        } else {
+          prod = {
+            id: id,
+            title: titleEl ? titleEl.textContent.trim() : 'VIP 4K Video Collection',
+            priceINR: scrapedINR || '399',
+            priceUSD: scrapedUSD || '14',
+            originalPriceINR: mrpCutEl ? mrpCutEl.textContent.replace(/[^\d]/g, '') : '',
+            image: imgEl ? imgEl.src : '',
+            images: imgEl ? [imgEl.src] : [],
+            rating: '4.9',
+            reviewsCount: '840'
+          };
+        }
       }
     }
 
@@ -677,12 +704,14 @@
       }
     }
 
-    const mrpINR = prod.originalPriceINR
-      ? String(prod.originalPriceINR).replace(/[^\d]/g, '')
-      : Math.round(Number(currentINR || 399) * 1.5 / 10) * 10;
-    const mrpUSD = prod.originalPriceUSD
-      ? String(prod.originalPriceUSD).replace(/[^\d]/g, '')
-      : Math.round(Number(currentUSD || 14) * 1.4);
+    const rawMrpINR = prod.originalPriceINR || prod.priceOriginal || prod.mrpINR;
+    const rawMrpUSD = prod.originalPriceUSD || prod.priceOriginalUSD || prod.mrpUSD;
+    const mrpINR = rawMrpINR
+      ? String(rawMrpINR).replace(/[^\d]/g, '')
+      : Math.max(Number(currentINR) + 100, Math.round(Number(currentINR) * 1.8 / 10) * 10 - 1);
+    const mrpUSD = rawMrpUSD
+      ? String(rawMrpUSD).replace(/[^\d]/g, '')
+      : Math.max(Number(currentUSD) + 5, Math.round(Number(currentUSD) * 1.8));
 
     // 1. Dual Selling Price (Shown together side-by-side)
     const sellingPriceEl = document.getElementById('fkPvSellingPrice');
@@ -703,7 +732,7 @@
     // 3. Discount Percentage
     const discountEl = document.getElementById('fkPvDiscountTag');
     if (discountEl) {
-      const disc = Math.min(92, Math.max(25, Math.round(((Number(mrpINR) - Number(currentINR)) / Number(mrpINR)) * 100)));
+      const disc = Math.min(90, Math.max(15, Math.round(((Number(mrpINR) - Number(currentINR)) / Number(mrpINR)) * 100)));
       discountEl.textContent = `${disc}% OFF`;
     }
 

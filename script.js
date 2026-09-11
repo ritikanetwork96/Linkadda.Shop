@@ -95,17 +95,30 @@ function rafThrottle(fn) {
 }
 
 // ===== HEADER SCROLL =====
+// ===== HEADER SCROLL (Zero layout-thrashing cached calculation) =====
 const header = document.getElementById('header');
 const progressBar = document.createElement('div');
 progressBar.className = 'scroll-progress';
 document.body.prepend(progressBar);
+
+let cachedMaxScroll = 1;
+const recalculateMaxScroll = () => {
+  cachedMaxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+};
+recalculateMaxScroll();
+window.addEventListener('resize', recalculateMaxScroll, { passive: true });
+window.addEventListener('load', recalculateMaxScroll, { passive: true, once: true });
+window.addEventListener('linkadda:catalog-updated', recalculateMaxScroll, { passive: true });
+
+let isHeaderScrolled = false;
 const updateScrollState = () => {
   const scrollY = window.scrollY || window.pageYOffset || 0;
-  if (header) {
-    header.classList.toggle('scrolled', scrollY > 40);
+  const shouldBeScrolled = scrollY > 40;
+  if (header && isHeaderScrolled !== shouldBeScrolled) {
+    isHeaderScrolled = shouldBeScrolled;
+    header.classList.toggle('scrolled', shouldBeScrolled);
   }
-  const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-  const pct = Math.max(0, Math.min(100, (scrollY / maxScroll) * 100));
+  const pct = Math.max(0, Math.min(100, (scrollY / cachedMaxScroll) * 100));
   progressBar.style.width = pct + '%';
 };
 const requestScrollStateUpdate = rafThrottle(updateScrollState);
@@ -113,11 +126,13 @@ window.addEventListener('scroll', requestScrollStateUpdate, { passive: true });
 window.addEventListener('resize', requestScrollStateUpdate, { passive: true });
 updateScrollState();
 
-// ===== AURORA BACKGROUND =====
-const aurora = document.createElement('div');
-aurora.className = 'aurora';
-aurora.innerHTML = '<div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div>';
-document.body.prepend(aurora);
+// ===== AURORA BACKGROUND (Desktop Only for Maximum Mobile Scroll Performance) =====
+if (window.innerWidth > 768 && pointerEffectsEnabled()) {
+  const aurora = document.createElement('div');
+  aurora.className = 'aurora';
+  aurora.innerHTML = '<div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div>';
+  document.body.prepend(aurora);
+}
 
 // ===== CURSOR GLOW =====
 if (pointerEffectsEnabled()) {

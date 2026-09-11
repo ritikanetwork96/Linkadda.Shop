@@ -39,8 +39,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260906c" />
-  <link rel="stylesheet" href="flipkart-store.css?v=20260912b" />
+  <link rel="stylesheet" href="style.css?v=20260912d" />
+  <link rel="stylesheet" href="flipkart-store.css?v=20260912c" />
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
     .hero-title,
@@ -1030,8 +1030,8 @@
     <div class="lightbox-caption" id="lightboxCaption"></div>
   </div>
 
-  <script src="script.js?v=8"></script>
-  <script src="preload.js" defer></script>
+  <script src="script.js?v=9"></script>
+  <script src="preload.js?v=2" defer></script>
 
   <!-- ------ FIREBASE INTEGRATION ------ -->
   <script type="module">
@@ -1275,22 +1275,20 @@
 
   function getLiveRecords() {
     const prods = normalizeRecords(liveCollections.products);
-    const cats = normalizeRecords(liveCollections.categories);
-    let all = [];
-    if (!prods.length) all = cats;
-    else if (!cats.length) all = prods;
-    else {
-      const map = new Map();
-      cats.forEach(c => map.set(String(c.id), c));
-      prods.forEach(p => {
-        const existing = map.get(String(p.id));
-        map.set(String(p.id), existing ? Object.assign({}, existing, p) : p);
+    if (prods && prods.length > 0) {
+      // Re-sort strictly by displayOrder to match Admin Panel Catalog position
+      return prods.sort((a, b) => {
+        const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
+        const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
+        if (orderA !== orderB) return orderA - orderB;
+        const timeA = Number(a.createdAt || a.updatedAt) || 0;
+        const timeB = Number(b.createdAt || b.updatedAt) || 0;
+        return timeB - timeA;
       });
-      all = Array.from(map.values());
     }
 
-    // Re-sort strictly by displayOrder to match Admin Panel Catalog position
-    return all.sort((a, b) => {
+    const cats = normalizeRecords(liveCollections.categories);
+    return cats.sort((a, b) => {
       const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
       const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
       if (orderA !== orderB) return orderA - orderB;
@@ -2447,10 +2445,12 @@
     const cleanINR = cat.priceINR ? String(cat.priceINR).replace(/[^\d]/g, '') : '399';
     const cleanUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[^\d]/g, '') : '14';
 
-    // MRP & Discount calculation
-    const mrpINR = cat.originalPriceINR ? String(cat.originalPriceINR).replace(/[^\d]/g, '') : Math.round(Number(cleanINR) * 3.6 / 10) * 10;
-    const mrpUSD = cat.originalPriceUSD ? String(cat.originalPriceUSD).replace(/[^\d]/g, '') : Math.round(Number(cleanUSD) * 3.2);
-    const discountPercent = Math.min(92, Math.max(25, Math.round(((mrpINR - cleanINR) / mrpINR) * 100)));
+    // MRP & Discount calculation (Uses admin originalPriceINR / priceOriginal if set, else realistic ~45% OFF)
+    const rawMrpINR = cat.originalPriceINR || cat.priceOriginal || cat.mrpINR;
+    const rawMrpUSD = cat.originalPriceUSD || cat.priceOriginalUSD || cat.mrpUSD;
+    const mrpINR = rawMrpINR ? String(rawMrpINR).replace(/[^\d]/g, '') : Math.max(Number(cleanINR) + 100, Math.round(Number(cleanINR) * 1.8 / 10) * 10 - 1);
+    const mrpUSD = rawMrpUSD ? String(rawMrpUSD).replace(/[^\d]/g, '') : Math.max(Number(cleanUSD) + 5, Math.round(Number(cleanUSD) * 1.8));
+    const discountPercent = Math.min(90, Math.max(15, Math.round(((Number(mrpINR) - Number(cleanINR)) / Number(mrpINR)) * 100)));
 
     const rating = cat.rating || '4.9';
     const h = hashId(id);
@@ -3087,7 +3087,7 @@
   // -- INSTANT LOCAL CACHED CATALOG (0ms initial load) --
   // Priority: 1) localStorage cache  2) Pre-embedded catalog snapshot  3) Wait for Firebase
   try {
-    const cachedLive = localStorage.getItem('linkadda_cached_live_data');
+    const cachedLive = localStorage.getItem('linkadda_cached_live_data_v4');
     const source = cachedLive ? JSON.parse(cachedLive) : (window.__preloadedCatalog || null);
     if (source) {
       if (source.categories && Object.keys(source.categories).length) liveCollections.categories = source.categories;
@@ -3101,7 +3101,7 @@
 
   function saveCachedLiveData() {
     try {
-      localStorage.setItem('linkadda_cached_live_data', JSON.stringify({
+      localStorage.setItem('linkadda_cached_live_data_v4', JSON.stringify({
         categories: liveCollections.categories,
         products: liveCollections.products,
         banner: liveCollections.banner,
@@ -4368,6 +4368,6 @@
   </script>
 
   <script type="module" src="media-resolver.js"></script>
-  <script src="flipkart-store.js?v=10"></script>
+  <script src="flipkart-store.js?v=11"></script>
 </body>
 </html>
