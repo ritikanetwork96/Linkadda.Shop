@@ -156,6 +156,7 @@ export function startRealtime() {
   attachNode('analytics', 'singleton');
   attachNode('media');
   attachNode('visitors');
+  attachNode('reviews');
 }
 
 // Automatically bind listeners to auth state transitions

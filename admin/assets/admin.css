@@ -9957,10 +9957,22 @@ button {
   }
 
   .editor-bottom-actions {
+    position: sticky !important;
+    bottom: -1px !important;
+    background: rgba(15, 17, 26, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 12px !important;
-    padding: 16px 0 20px 0 !important;
+    gap: 10px !important;
+    padding: 14px 16px 18px 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6) !important;
+    z-index: 100 !important;
+    border-radius: 0 0 16px 16px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-bottom: -16px !important;
   }
 
   .editor-action-buttons {

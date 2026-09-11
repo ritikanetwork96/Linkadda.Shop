@@ -3995,6 +3995,24 @@ async function saveOrderToFirebase(amountText, methodName) {
         updatedAt: Date.now(),
       });
     }
+
+    // Save to user's localStorage so they can view their order history
+    try {
+      const existingOrders = JSON.parse(localStorage.getItem('linkadda_user_orders') || '[]');
+      const userOrderSummary = {
+        orderId: orderId,
+        productName: payload.productName,
+        amountDisplay: payload.amountDisplay,
+        paymentMethod: payload.paymentMethod,
+        status: 'pending',
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+      };
+      const filtered = existingOrders.filter(o => o.orderId !== orderId);
+      filtered.unshift(userOrderSummary);
+      localStorage.setItem('linkadda_user_orders', JSON.stringify(filtered.slice(0, 30)));
+    } catch (_) {}
+
     orderData.orderId = orderId;
     return { orderId };
   } catch(e) {

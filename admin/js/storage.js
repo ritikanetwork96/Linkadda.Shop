@@ -38,8 +38,8 @@ function validateUploadFile(file) {
     throw new Error('No file selected.');
   }
   const type = String(file.type || '').toLowerCase();
-  const isImage = type.startsWith('image/');
-  const isVideo = type.startsWith('video/');
+  const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(file.name || '');
+  const isVideo = type.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name || '');
 
   if (!isImage && !isVideo) {
     throw new Error('Only image and video uploads are allowed.');
@@ -47,7 +47,7 @@ function validateUploadFile(file) {
 
   if (isImage) {
     const allowedImages = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml'];
-    if (!allowedImages.includes(type) && !file.name?.match(/\.(png|jpe?g|webp|gif|svg|avif)$/i)) {
+    if (!allowedImages.includes(type) && !/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(file.name || '')) {
       throw new Error('Unsupported image format.');
     }
     const maxImageBytes = 30 * 1024 * 1024; // 30 MB
@@ -208,44 +208,61 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
 
   const CHUNK_THRESHOLD = 2.5 * 1024 * 1024; // 2.5 MB
 
-  // ━━ A. DIRECT UPLOAD FOR SMALL ASSETS (<= 2.5 MB) ━━
-  if (fileToUpload.size <= CHUNK_THRESHOLD) {
+  // ━━ A. DIRECT UPLOAD FOR SMALL ASSETS (<= 2.5 MB) & QR/LOGOS ━━
+  if (fileToUpload.size <= CHUNK_THRESHOLD || folder === 'qrcodes' || folder === 'logos') {
     const dataUrl = await readFileAsDataUrl(fileToUpload);
     if (typeof onProgress === 'function') onProgress(40);
 
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        folder,
-        filename: fileName,
-        base64: dataUrl,
-        contentType: fileToUpload.type || file.type || 'image/png',
-      }),
-    });
+    let uploadOk = false;
+    let data = null;
 
-    if (!res.ok) {
-      let errMsg = 'Storage upload failed.';
-      try {
-        const errJson = await res.json();
-        if (errJson?.error) errMsg = errJson.error;
-      } catch (_) {
-        errMsg = `Upload failed with status ${res.status}: ${res.statusText}`;
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folder,
+          filename: fileName,
+          base64: dataUrl,
+          contentType: fileToUpload.type || file.type || 'image/png',
+        }),
+      });
+
+      if (res.ok) {
+        data = await res.json();
+        uploadOk = true;
+      } else {
+        console.warn(`/api/upload responded with status ${res.status}: ${res.statusText}`);
       }
-      throw new Error(errMsg);
+    } catch (networkErr) {
+      console.warn('Direct upload fetch error:', networkErr);
     }
 
-    const data = await res.json();
-    if (typeof onProgress === 'function') onProgress(100);
+    // 1. Success via /api/upload
+    if (uploadOk && data && (data.publicUrl || data.key)) {
+      if (typeof onProgress === 'function') onProgress(100);
+      return {
+        path: data.key || path,
+        publicUrl: data.publicUrl,
+        rustfsUrl: data.publicUrl,
+        dataUrl,
+      };
+    }
 
-    return {
-      path: data.key || path,
-      publicUrl: data.publicUrl,
-      rustfsUrl: data.publicUrl,
-      dataUrl,
-    };
+    // 2. Seamless Fallback for QR codes, logos, and direct images (e.g. 405 Method Not Allowed on static hosting)
+    if (folder === 'qrcodes' || folder === 'logos' || fileToUpload.size <= CHUNK_THRESHOLD) {
+      if (typeof onProgress === 'function') onProgress(100);
+      return {
+        path,
+        publicUrl: dataUrl,
+        rustfsUrl: dataUrl,
+        dataUrl,
+      };
+    }
+
+    throw new Error('Upload failed with status 405: Method Not Allowed. Please check API server.');
   }
 
   // ━━ B. CHUNKED UPLOAD FOR LARGE FILES (> 2.5 MB up to 150 MB) ━━

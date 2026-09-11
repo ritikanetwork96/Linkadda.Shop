@@ -40,6 +40,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css?v=20260906c" />
+  <link rel="stylesheet" href="flipkart-store.css?v=20260912b" />
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
     .hero-title,
@@ -53,9 +54,7 @@
     .hero-title .gradient-text,
     .hero-title .highlight,
     .gradient-text,
-    [data-theme="light"] .gradient-text,
-    [data-theme="light"] .hero-title span,
-    [data-theme="light"] .hero-title .highlight,
+    [data-theme="dark"] .gradient-text,
     [data-theme="dark"] .hero-title span,
     [data-theme="dark"] .hero-title .highlight {
       background: linear-gradient(135deg, #ff2a8d 0%, #ff65a3 35%, #fca5a5 70%, #ffffff 100%) !important;
@@ -64,6 +63,25 @@
       background-clip: text !important;
       display: inline-block !important;
       filter: drop-shadow(0 2px 14px rgba(255, 42, 141, 0.75)) drop-shadow(0 0 28px rgba(255, 101, 163, 0.6)) !important;
+      font-weight: 700 !important;
+    }
+    [data-theme="light"] .gradient-text {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #be123c 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      display: inline-block !important;
+      filter: drop-shadow(0 1px 3px rgba(225, 29, 72, 0.25)) !important;
+      font-weight: 800 !important;
+    }
+    [data-theme="light"] .hero-title span,
+    [data-theme="light"] .hero-title .highlight {
+      background: linear-gradient(135deg, #ff2a8d 0%, #ff65a3 40%, #ffffff 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+      display: inline-block !important;
+      filter: drop-shadow(0 2px 14px rgba(255, 42, 141, 0.75)) !important;
       font-weight: 700 !important;
     }
     .hero-sub,
@@ -169,10 +187,10 @@
     }
   </style>
 </head>
-<body>
+<body class="fk-mode">
 
   <!-- ===== LOADING SCREEN ===== -->
-  <div class="loader-wrap" id="loaderWrap">
+  <div class="loader-wrap" id="loaderWrap" style="display:none !important;">
     <div class="loader-bg"></div>
     <div class="loader-content">
       <div class="loader-rings">
@@ -184,8 +202,8 @@
         <i class="fa-solid fa-fire-flame-curved loader-icon"></i>
       </div>
       <div class="loader-text-wrap">
-        <h2 class="loader-title">Linkadda <span class="loader-accent">Shop</span></h2>
-        <p class="loader-sub">Loading premium content...</p>
+        <h2 class="loader-title">LinkAdda <span class="loader-accent">Shop</span></h2>
+        <p class="loader-sub">Loading authentic store...</p>
       </div>
       <div class="loader-bar-wrap">
         <div class="loader-bar" id="loaderBar"></div>
@@ -195,36 +213,54 @@
     <div class="loader-particles" id="loaderParticles"></div>
   </div>
 
-  <!-- Floating particles -->
-  <div class="particles" id="particles"></div>
+  <!-- ===== SIGNATURE LUXURY HEADER ===== -->
+  <header class="fk-header" id="fkHeader">
+    <div class="fk-header-inner">
+      <div class="fk-header-top-row">
+        <a href="#services" class="fk-brand-col">
+          <span class="fk-logo-text">LinkAdda <i class="fa-solid fa-crown fk-brand-crown"></i></span>
+          <span class="fk-brand-sub">Premium Content Marketplace</span>
+        </a>
 
-  <!-- Header -->
-  <header class="header" id="header">
-    <div class="header-inner">
-      <div class="logo">
-        <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
-        <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
+        <div class="fk-header-actions">
+          <button type="button" class="theme-toggle-header-btn" id="headerThemeToggleBtn" onclick="window.toggleStoreTheme(event)" title="Toggle Light / Dark Mode" aria-label="Toggle Light or Dark Theme">
+            <i class="fa-solid fa-moon" id="headerThemeMoon"></i>
+            <i class="fa-solid fa-sun" id="headerThemeSun" style="display:none; color:#f59e0b;"></i>
+          </button>
+          <button type="button" class="fk-cart-btn-wrap" id="headerCartBtn" title="Shopping Cart">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span class="fk-cart-btn-text">Cart</span>
+            <span class="fk-cart-count-badge" id="cartBadgeHeader" style="display:none;">0</span>
+          </button>
+        </div>
       </div>
-      <nav class="nav">
-        <a href="#home" class="nav-link">Home</a>
-        <a href="#services" class="nav-link">Services</a>
-        <a href="#pricing" class="nav-link">Pricing</a>
-        <a href="#faq" class="nav-link">FAQ</a>
-        <a href="#contact" class="nav-link">Contact</a>
-      </nav>
-      <button class="header-search-btn" id="headerSearchBtn" aria-label="Search" title="Search Products & FAQs">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <span class="header-search-text">Search</span>
-      </button>
-      <button class="header-cart-btn" id="headerCartBtn" aria-label="Open Shopping Cart" title="View Cart">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span class="cart-badge" id="cartBadgeHeader" style="display: none;">0</span>
-      </button>
-      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-header">Get Started</a>
-      <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
+
+      <div class="fk-search-row">
+        <div class="fk-search-box" onclick="window.openUniversalSearch && window.openUniversalSearch()" style="cursor: pointer;">
+          <i class="fa-solid fa-magnifying-glass fk-search-icon-left"></i>
+          <input type="search" class="fk-search-input" id="fkSearchInput" placeholder="Search videos, creators, categories..." readonly style="cursor: pointer;" />
+          <button type="button" class="fk-search-btn" id="fkSearchBtn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <button type="button" class="fk-filter-btn" id="fkFilterBtn" onclick="window.scrollToCategories()" title="Categories Filter" aria-label="Categories Filter">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+
+      <div class="fk-quick-pills-bar" id="fkQuickPillsBar">
+        <button type="button" class="fk-quick-pill active" onclick="window.handleQuickPill(this, 'all')"><i class="fa-solid fa-fire"></i> All</button>
+        <button type="button" class="fk-quick-pill" onclick="window.handleQuickPill(this, 'trending')"><i class="fa-solid fa-arrow-trend-up"></i> Trending</button>
+        <button type="button" class="fk-quick-pill" onclick="window.handleQuickPill(this, 'indian')"><span class="fk-flag-emoji">🇮🇳</span> Indian</button>
+        <button type="button" class="fk-quick-pill" onclick="window.handleQuickPill(this, 'new')"><i class="fa-solid fa-star"></i> New</button>
+        <button type="button" class="fk-quick-pill" onclick="window.handleQuickPill(this, 'categories')"><i class="fa-solid fa-table-cells-large"></i> Categories</button>
+      </div>
     </div>
+  </header>
+
     <!-- Mobile nav -->
     <div class="mobile-nav" id="mobileNav">
+      <button class="header-currency-toggle" id="mobCurrencyToggle" type="button" style="margin: 0 auto 10px; width: fit-content;">
+        <i class="fa-solid fa-coins"></i> <span id="mobCurrencyToggleText">Currency: ₹ INR</span>
+      </button>
       <button class="mob-search-btn" id="mobSearchBtn">
         <i class="fa-solid fa-magnifying-glass"></i> Search Products & FAQs
       </button>
@@ -237,7 +273,6 @@
       <a href="#faq" class="mob-link">FAQ</a>
       <a href="#contact" class="mob-link">Contact</a>
     </div>
-  </header>
 
   <!-- Floating Left Cart Dock -->
   <button class="floating-cart-left" id="leftFloatingCart" aria-label="Shopping Cart" title="View Cart">
@@ -283,8 +318,307 @@
     </div>
   </aside>
 
+  <!-- Wishlist Drawer & Backdrop -->
+  <div class="wishlist-backdrop" id="wishlistBackdrop" onclick="closeWishlistDrawer()"></div>
+  <aside class="wishlist-drawer" id="wishlistDrawer" aria-label="Liked Packs">
+    <div class="wishlist-drawer-header">
+      <div class="wishlist-drawer-title">
+        <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
+        <span>Liked Packs (<span id="wishlistDrawerCount">0</span>)</span>
+      </div>
+      <div class="wishlist-drawer-actions">
+        <button type="button" class="wishlist-close-btn" id="wishlistCloseBtn" onclick="closeWishlistDrawer()" aria-label="Close Wishlist">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+    <div class="wishlist-drawer-body" id="wishlistDrawerBody">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="wishlist-drawer-footer" id="wishlistDrawerFooter">
+      <button type="button" class="btn-primary" id="wishlistAddAllBtn" onclick="addAllLikedToCart()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="fa-solid fa-cart-plus"></i> Add All Liked to Cart
+      </button>
+    </div>
+  </aside>
+
+  <!-- User Orders History Drawer & Backdrop -->
+  <div class="orders-backdrop" id="ordersBackdrop" onclick="closeOrdersDrawer()"></div>
+  <aside class="orders-drawer" id="ordersDrawer" aria-label="My Orders">
+    <div class="orders-drawer-header">
+      <div class="orders-drawer-title">
+        <i class="fa-solid fa-receipt" style="color:#10b981;"></i>
+        <span>My Orders (<span id="ordersDrawerCount">0</span>)</span>
+      </div>
+      <div class="orders-drawer-actions">
+        <button type="button" class="orders-close-btn" id="ordersCloseBtn" onclick="closeOrdersDrawer()" aria-label="Close Orders">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+    <div class="orders-drawer-body" id="ordersDrawerBody">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="orders-drawer-footer" id="ordersDrawerFooter">
+      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+        <i class="fa-brands fa-telegram"></i> Telegram Support for Orders
+      </a>
+    </div>
+  </aside>
+
+  <!-- Floating Telegram Support Button (Always visible on screen) -->
+  <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="floating-tg-dock" id="floatingTgDock" aria-label="Contact Telegram Support" title="Chat with Us on Telegram">
+    <i class="fa-brands fa-telegram"></i>
+    <span class="floating-tg-pulse"></span>
+  </a>
+
   <!-- Cart Toast Notifications -->
   <div class="cart-toast-container" id="cartToastContainer"></div>
+
+  <!-- ===== LINKADDA LUXURY DARK FULL-SCREEN PRODUCT DETAILS VIEW ===== -->
+  <div class="fk-product-view-overlay" id="fkProductPageOverlay" aria-label="Product Details Page">
+    <!-- Pinned Top Bar -->
+    <header class="fk-pv-topbar">
+      <button type="button" class="fk-pv-back-btn" onclick="closeFkProductPage()" aria-label="Back">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <div class="fk-pv-title-bar" id="fkPvTitleBar">Product Details</div>
+      <div class="fk-pv-top-actions">
+        <button type="button" class="fk-pv-action-btn" id="fkPvShareBtn" onclick="window.shareCurrentFkProduct(event)" title="Share this pack" aria-label="Share">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+        <button type="button" class="fk-pv-action-btn" id="fkPvWishlistBtn" onclick="window.toggleFkWishlist(event, window.__fkActiveProduct ? window.__fkActiveProduct.id : '')" title="Like this pack">
+          <i class="fa-solid fa-heart"></i>
+        </button>
+        <button type="button" class="fk-pv-action-btn" onclick="openCartDrawer()" title="View Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="fk-cart-count-badge" id="cartBadgePv" style="display:none;">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="fk-pv-content">
+      <div class="fk-pv-layout">
+        <!-- Media Column -->
+        <div class="fk-pv-media-column">
+          <div class="fk-gallery-card">
+            <div class="fk-gallery-stage" id="fkPvGalleryStage"></div>
+            <div class="fk-gallery-thumbs" id="fkPvGalleryThumbs"></div>
+          </div>
+        </div>
+
+        <!-- Info Column -->
+        <div class="fk-pv-info-column">
+          <!-- Title & Rating Card -->
+          <section class="fk-info-section">
+            <h1 class="fk-pv-product-title" id="fkPvProductTitle">Product Title</h1>
+            <div class="fk-pv-rating-bar">
+              <span class="fk-pv-rating-badge"><span id="fkPvRatingScore">4.9</span> <i class="fa-solid fa-star" style="color:var(--la-gold);font-size:11px;"></i></span>
+              <span class="fk-pv-rating-text" id="fkPvRatingText">Verified VIP Access · 100% Genuine Media</span>
+              <span class="fk-verified-badge"><i class="fa-solid fa-shield-halved"></i> LinkAdda Verified</span>
+            </div>
+
+            <!-- Special Price Block (Simultaneous Dual Currency) -->
+            <div class="fk-pv-price-card">
+              <div class="fk-special-tag" id="fkPvSpecialTag"><i class="fa-solid fa-crown" style="font-size:10px;"></i> VIP Special Price (UPI & USDT Crypto)</div>
+              <div class="fk-pv-price-row">
+                <div class="fk-pv-selling-price" id="fkPvSellingPrice">
+                  <span class="pv-inr">₹399</span>
+                  <span class="pv-sep">/</span>
+                  <span class="pv-usd">$14 <small>USDT</small></span>
+                </div>
+                <span class="fk-pv-mrp-cut" id="fkPvMRPCut">₹1,440 / $45</span>
+                <span class="fk-pv-discount-tag" id="fkPvDiscountTag">72% OFF</span>
+              </div>
+              <div class="fk-pv-savings-text" id="fkPvSavingsText">
+                <i class="fa-solid fa-coins"></i> You save ₹1,041 / $31 on this pack!
+              </div>
+            </div>
+          </section>
+
+          <!-- CHOOSE PACK / OPTION (OPTIONAL) (Only if configured by admin) -->
+          <div id="fkPvVariantsSection"></div>
+
+          <!-- Desktop Inline Action Row (Clean, Not Floating) -->
+          <div class="la-desktop-cta-row">
+            <button type="button" class="fk-btn-cart-action" onclick="addFkProductToCart()">
+              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+            </button>
+            <a href="#" class="fk-btn-buy-action" id="fkPvBuyBtnDesktop">
+              <i class="fa-solid fa-bolt"></i> Buy Now & Get Instant Access
+            </a>
+          </div>
+
+          <!-- 1. Real Product Description (From Admin Panel) -->
+          <section class="fk-desc-section" id="fkPvDescSection" style="display: none;">
+            <div class="fk-section-subheading">
+              <i class="fa-solid fa-file-lines" style="color: #06b6d4;"></i> Product Description & Details
+            </div>
+            <div class="fk-pv-description" id="fkPvDescription"></div>
+          </section>
+
+          <!-- 2. Real Included Features (From Admin Panel) -->
+          <section class="fk-features-section" id="fkPvFeaturesSection" style="display: none;">
+            <div class="fk-section-subheading">
+              <i class="fa-solid fa-circle-check" style="color: #10b981;"></i> What's Included In This Pack
+            </div>
+            <div class="fk-features-list" id="fkPvFeaturesList"></div>
+          </section>
+
+          <!-- 3. Real Creators & Platforms Tags (From Admin Panel) -->
+          <section class="fk-tags-section" id="fkPvTagsSection" style="display: none;">
+            <div class="fk-section-subheading">
+              <i class="fa-solid fa-tags" style="color: #f59e0b;"></i> Featured Creators & Platforms
+            </div>
+            <div class="fk-pv-tags-wrap" id="fkPvTagsWrap"></div>
+          </section>
+
+          <!-- Available Offers & Trust Assurance -->
+          <section class="fk-offers-section" id="fkPvOffersSection">
+            <div class="fk-section-subheading" id="fkPvTrustHeading">
+              <i class="fa-solid fa-shield-halved" style="color:var(--la-green);"></i> Trust & Discrete Billing Assurance
+            </div>
+            <div class="fk-offers-list" id="fkPvOffersList"></div>
+          </section>
+
+          <!-- Dynamic Pack Specifications (Matched to Real Data) -->
+          <section class="fk-specs-section" id="fkPvSpecsSection">
+            <div class="fk-section-subheading" id="fkPvSpecsHeading">
+              <i class="fa-solid fa-list-check" style="color:var(--la-pink);"></i> Pack Specifications
+            </div>
+            <table class="fk-specs-table">
+              <tbody id="fkPvSpecsTableBody"></tbody>
+            </table>
+          </section>
+
+          <!-- Seller Card -->
+          <div class="fk-seller-card">
+            <div class="fk-seller-info">
+              <div class="fk-seller-icon">
+                <i class="fa-solid fa-store"></i>
+              </div>
+              <div>
+                <div class="fk-seller-sub">OFFICIAL CREATOR / SELLER</div>
+                <div class="fk-seller-name" id="fkPvSellerName">LinkAdda Verified Studio</div>
+              </div>
+            </div>
+            <div class="fk-seller-rating" id="fkPvSellerRating">4.9 <i class="fa-solid fa-star"></i></div>
+          </div>
+
+          <!-- Ratings & Reviews Section -->
+          <section class="fk-reviews-section">
+            <div class="fk-reviews-header-bar">
+              <div>
+                <div class="fk-reviews-heading" style="font-size:16px;font-weight:700;">Ratings & Verified Reviews</div>
+                <div style="font-size:12px;color:var(--la-text-secondary);margin-top:2px;">
+                  Average <span id="fkPvBigRating">4.9</span> <i class="fa-solid fa-star" style="color:var(--la-gold);font-size:11px;"></i> from real VIP buyers
+                </div>
+              </div>
+              <button type="button" class="fk-rate-btn" onclick="openFkReviewModal()">
+                <i class="fa-solid fa-pen-to-square"></i> Rate Product
+              </button>
+            </div>
+            <div class="fk-reviews-list" id="fkPvReviewsList"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Sticky Bottom Bar (ADD TO CART + BUY NOW) -->
+    <div class="fk-pv-bottom-bar">
+      <button type="button" class="fk-btn-cart-action" onclick="addFkProductToCart()">
+        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+      </button>
+      <a href="#" class="fk-btn-buy-action" id="fkPvBuyBtn">
+        <i class="fa-solid fa-bolt"></i> Buy Now
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== FULLSCREEN 4K MEDIA LIGHTBOX MODAL ===== -->
+  <div class="fk-lightbox-modal" id="fkLightboxModal" onclick="if(event.target===this) closeFkLightbox()">
+    <button type="button" class="fk-lightbox-close" onclick="closeFkLightbox()" aria-label="Close Lightbox">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <button type="button" class="fk-lightbox-nav fk-lightbox-prev" id="fkLightboxPrev" onclick="moveFkLightbox(-1)" aria-label="Previous image">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="fk-lightbox-content" id="fkLightboxContent"></div>
+    <button type="button" class="fk-lightbox-nav fk-lightbox-next" id="fkLightboxNext" onclick="moveFkLightbox(1)" aria-label="Next image">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+    <div class="fk-lightbox-footer">
+      <div class="fk-lightbox-counter" id="fkLightboxCounter">1 / 1</div>
+      <div class="fk-lightbox-dots" id="fkLightboxDots"></div>
+    </div>
+  </div>
+
+  <!-- ===== REVIEW SUBMISSION POPUP MODAL ===== -->
+  <div class="fk-review-modal fk-modal-backdrop" id="fkReviewModal">
+    <div class="fk-review-dialog fk-modal-card">
+      <div class="fk-dialog-header">
+        <h3 class="fk-dialog-title"><i class="fa-solid fa-star" style="color:var(--la-gold);"></i> Write a Review</h3>
+        <button type="button" class="fk-dialog-close" onclick="closeFkReviewModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="fk-modal-sub">Share your feedback about this pack. Your review will be published instantly.</p>
+      <form id="fkReviewForm" onsubmit="submitFkReview(event)">
+        <div class="fk-form-group">
+          <label>Rating (Select Stars)</label>
+          <div class="fk-star-picker fk-star-select-row" id="fkStarPicker">
+            <i class="fa-solid fa-star active" data-s="1" onclick="setFkStarRating(1)"></i>
+            <i class="fa-solid fa-star active" data-s="2" onclick="setFkStarRating(2)"></i>
+            <i class="fa-solid fa-star active" data-s="3" onclick="setFkStarRating(3)"></i>
+            <i class="fa-solid fa-star active" data-s="4" onclick="setFkStarRating(4)"></i>
+            <i class="fa-solid fa-star active" data-s="5" onclick="setFkStarRating(5)"></i>
+          </div>
+        </div>
+        <div class="fk-form-group">
+          <label>Your Name / Nickname</label>
+          <input type="text" id="fkRevName" class="fk-form-input fk-input-field" placeholder="e.g. Rahul S. or Anonymous" required />
+        </div>
+        <div class="fk-form-group">
+          <label>Headline</label>
+          <input type="text" id="fkRevTitle" class="fk-form-input fk-input-field" placeholder="Review Title (e.g. Clean 4K Quality)" required />
+        </div>
+        <div class="fk-form-group">
+          <label>Your Review / Experience</label>
+          <textarea id="fkRevText" class="fk-form-textarea fk-input-field" rows="3" placeholder="Tell us about the video quality, download speed, or collection..." required></textarea>
+        </div>
+        <div class="fk-modal-actions">
+          <button type="button" class="fk-btn-cancel-review" onclick="closeFkReviewModal()">Cancel</button>
+          <button type="submit" class="fk-btn-submit-review">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== FLIPKART MOBILE STICKY APP BAR ===== -->
+  <nav class="fk-mobile-appbar" aria-label="Mobile Navigation">
+    <a href="#home" class="fk-appbar-item active">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#services" class="fk-appbar-item">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Categories</span>
+    </a>
+    <button type="button" class="fk-appbar-item" id="fkAppbarWishlistBtn" onclick="openWishlistDrawer()" aria-label="Liked Items">
+      <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
+      <span class="fk-appbar-badge" id="fkAppbarWishlistBadge" style="display:none;background:#e11d48;">0</span>
+      <span>Liked</span>
+    </button>
+    <button type="button" class="fk-appbar-item" id="fkAppbarCartBtn" onclick="openCartDrawer()" aria-label="Shopping Cart">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="fk-appbar-badge" id="fkAppbarCartBadge" style="display:none;">0</span>
+      <span>Cart</span>
+    </button>
+    <button type="button" class="fk-appbar-item" id="fkAppbarOrdersBtn" onclick="openOrdersDrawer()" aria-label="My Orders">
+      <i class="fa-solid fa-receipt" style="color:#10b981;"></i>
+      <span class="fk-appbar-badge" id="fkAppbarOrdersBadge" style="display:none;background:#10b981;">0</span>
+      <span>Orders</span>
+    </button>
+  </nav>
 
   <!-- Hero -->
   <section class="hero" id="home">
@@ -412,7 +746,7 @@
                data-name="All Collection Pack"
                data-inr="4399"
                data-usd="109">
-              🛒 Add to Cart
+              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
             </button>
             <a href="payment.html" class="btn-primary cpb-btn"
                data-product-id="pinned-deal"
@@ -640,7 +974,7 @@
       <div class="footer-bottom">
         <p>&copy; 2026 Linkadda Shop. All rights reserved.</p>
         <div class="footer-theme-toggle-wrap">
-          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Light or Dark Theme" title="Toggle Light or Dark Theme">
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="window.toggleStoreTheme(event)" aria-label="Toggle Light or Dark Theme" title="Toggle Light or Dark Theme">
             <span class="theme-toggle-track">
               <i class="fa-solid fa-moon theme-icon-dark"></i>
               <i class="fa-solid fa-sun theme-icon-light"></i>
@@ -648,6 +982,41 @@
             </span>
             <span class="theme-toggle-label" id="themeToggleLabel">Light Mode</span>
           </button>
+          <script>
+            window.toggleStoreTheme = function(e) {
+              if (e && typeof e.preventDefault === 'function') e.preventDefault();
+              var doc = document.documentElement;
+              var cur = doc.getAttribute('data-theme') || document.body.getAttribute('data-theme') || 'dark';
+              var next = cur === 'light' ? 'dark' : 'light';
+              doc.setAttribute('data-theme', next);
+              document.body.setAttribute('data-theme', next);
+              try {
+                localStorage.setItem('theme', next);
+                localStorage.setItem('theme_manual', 'true');
+              } catch(err){}
+              var btn = document.getElementById('themeToggleBtn');
+              var lbl = document.getElementById('themeToggleLabel');
+              if (btn) {
+                if (next === 'light') btn.classList.add('is-light');
+                else btn.classList.remove('is-light');
+              }
+              if (lbl) {
+                lbl.textContent = next === 'light' ? 'Dark Mode' : 'Light Mode';
+              }
+              window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme: next } }));
+            };
+            (function(){
+              try {
+                var s = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', s);
+                document.body.setAttribute('data-theme', s);
+                var btn = document.getElementById('themeToggleBtn');
+                var lbl = document.getElementById('themeToggleLabel');
+                if (btn && s === 'light') btn.classList.add('is-light');
+                if (lbl && s === 'light') lbl.textContent = 'Dark Mode';
+              } catch(e){}
+            })();
+          </script>
         </div>
         <p>Made with <i class="fa-solid fa-heart" style="color:#e84393;"></i> in India</p>
       </div>
@@ -661,8 +1030,8 @@
     <div class="lightbox-caption" id="lightboxCaption"></div>
   </div>
 
-  <script src="/script.js?v=7"></script>
-  <script src="/preload.js" defer></script>
+  <script src="script.js?v=8"></script>
+  <script src="preload.js" defer></script>
 
   <!-- ------ FIREBASE INTEGRATION ------ -->
   <script type="module">
@@ -683,6 +1052,10 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   window.__linkaddaDb = db;
+  window.__linkaddaDbRef = ref;
+  window.__linkaddaDbGet = get;
+  window.__linkaddaDbPush = push;
+  window.__linkaddaDbSet = set;
   var activeSlideshowObserver = null;
 
   function safeUrl(value, fallback = '') {
@@ -783,12 +1156,40 @@
   }
 
   // -- VISITOR TRACKING (once per session) --
-  if (!sessionStorage.getItem('visit_tracked')) {
-    sessionStorage.setItem('visit_tracked', '1');
-    const today = new Date().toISOString().slice(0, 10);
-    const visitRef = push(ref(db, 'visitors'));
-    set(visitRef, { date: today, timestamp: Date.now(), page: 'index' });
-  }
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+  try {
+    const visKey = `linkadda_vis_count_${todayDateStr}`;
+    let currentVis = Number(localStorage.getItem(visKey) || 0);
+    if (!sessionStorage.getItem('visit_tracked')) {
+      sessionStorage.setItem('visit_tracked', '1');
+      const visitRef = push(ref(db, 'visitors'));
+      set(visitRef, { date: todayDateStr, timestamp: Date.now(), page: 'index' }).catch(() => {});
+      currentVis += 1;
+      localStorage.setItem(visKey, String(currentVis));
+    }
+    if (window.__linkaddaToast && currentVis > 0) {
+      window.__linkaddaToast.setVisitorCount(currentVis);
+    }
+  } catch (_) {}
+
+  // -- TELEGRAM CLICKS TRACKING --
+  document.addEventListener('click', (event) => {
+    const tgLink = event.target.closest('a[href*="t.me"], .floating-tg-dock, #floatingTgDock, .btn-contact');
+    if (tgLink) {
+      try {
+        if (window.__linkaddaToast) {
+          window.__linkaddaToast.recordTelegramClick();
+        }
+        push(ref(db, 'events'), {
+          type: 'telegram_click',
+          page: 'index',
+          date: todayDateStr,
+          timestamp: Date.now(),
+          targetUrl: tgLink.getAttribute('href') || ''
+        }).catch(() => {});
+      } catch (_) {}
+    }
+  });
 
   function esc(str) {
     return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -822,6 +1223,7 @@
     categories: {},
     products: {}
   };
+  window.liveCollections = liveCollections;
   const USE_LIVE_GRID = true;
   const defaultSiteState = {
     title: document.title,
@@ -861,11 +1263,41 @@
     return Object.entries(records)
       .map(([id, item]) => ({ id, ...(item || {}) }))
       .filter(item => item && (item.status === undefined || item.status === 'active'))
-      .sort((a, b) => (Number(a.displayOrder) || 0) - (Number(b.displayOrder) || 0) || (Number(b.updatedAt || b.createdAt) || 0) - (Number(a.updatedAt || a.createdAt) || 0));
+      .sort((a, b) => {
+        const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
+        const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
+        if (orderA !== orderB) return orderA - orderB;
+        const timeA = Number(a.createdAt || a.updatedAt) || 0;
+        const timeB = Number(b.createdAt || b.updatedAt) || 0;
+        return timeB - timeA;
+      });
   }
 
   function getLiveRecords() {
-    return normalizeRecords(liveCollections.products);
+    const prods = normalizeRecords(liveCollections.products);
+    const cats = normalizeRecords(liveCollections.categories);
+    let all = [];
+    if (!prods.length) all = cats;
+    else if (!cats.length) all = prods;
+    else {
+      const map = new Map();
+      cats.forEach(c => map.set(String(c.id), c));
+      prods.forEach(p => {
+        const existing = map.get(String(p.id));
+        map.set(String(p.id), existing ? Object.assign({}, existing, p) : p);
+      });
+      all = Array.from(map.values());
+    }
+
+    // Re-sort strictly by displayOrder to match Admin Panel Catalog position
+    return all.sort((a, b) => {
+      const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
+      const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
+      if (orderA !== orderB) return orderA - orderB;
+      const timeA = Number(a.createdAt || a.updatedAt) || 0;
+      const timeB = Number(b.createdAt || b.updatedAt) || 0;
+      return timeB - timeA;
+    });
   }
 
   function applySiteSettings(s) {
@@ -1141,7 +1573,41 @@
   }
 
   // -- LIVE DATA LISTENERS (Realtime sync from Admin Panel) --
-  onValue(ref(db, 'settings'), snap => { const val = snap.val(); saveSettingsCache('settings', val); applySiteSettings(val); });
+  let lastHandledApprovedTime = 0;
+  let lastHandledReviewTime = 0;
+  onValue(ref(db, 'settings'), snap => {
+    const val = snap.val();
+    saveSettingsCache('settings', val);
+    applySiteSettings(val);
+    if (window.__linkaddaToast && val) {
+      window.__linkaddaToast.updateConfig(val);
+      if (Array.isArray(val.recentApproved)) {
+        window.__linkaddaToast.setApprovedOrders(val.recentApproved);
+      }
+      if (Array.isArray(val.recentApprovedReviews)) {
+        window.__linkaddaToast.setApprovedReviews(val.recentApprovedReviews);
+      }
+      if (val.liveActivity) {
+        if (val.liveActivity.todayVisitors !== undefined) window.__linkaddaToast.setVisitorCount(val.liveActivity.todayVisitors);
+        if (val.liveActivity.telegramClicks !== undefined) window.__linkaddaToast.setTelegramClicks(val.liveActivity.telegramClicks);
+      }
+      // Instant celebration popup when admin just approved an order in real-time
+      if (val.lastOrderApprovedAt && val.lastOrderApprovedAt > lastHandledApprovedTime && (Date.now() - val.lastOrderApprovedAt < 45000)) {
+        lastHandledApprovedTime = val.lastOrderApprovedAt;
+        window.__linkaddaToast.addApprovedOrder({
+          name: val.lastApprovedOrderTitle || 'VIP Pack',
+          id: val.lastApprovedOrderId || ''
+        });
+      }
+      // Instant celebration popup when admin just approved a customer review in real-time
+      if (val.lastReviewApprovedAt && val.lastReviewApprovedAt > lastHandledReviewTime && (Date.now() - val.lastReviewApprovedAt < 45000)) {
+        lastHandledReviewTime = val.lastReviewApprovedAt;
+        if (val.lastApprovedReview) {
+          window.__linkaddaToast.addApprovedReview(val.lastApprovedReview);
+        }
+      }
+    }
+  });
   onValue(ref(db, 'hero'), snap => { const val = snap.val(); saveSettingsCache('hero', val); applyHero(val); });
   onValue(ref(db, 'banner'), snap => {
     const val = snap.val();
@@ -1511,73 +1977,554 @@
     viewer.requestFullscreen?.().catch(() => {});
   }
 
-  // -- BUILD CARD --
-  function buildCard(id, cat) {
-    const media = resolveMediaList(cat);
-    const rawTiers = normalizeTierList(cat.tiers);
-    const hasTiers = rawTiers.length > 0;
-    const features = normalizeFeatureList(cat.features).map(f=>`<li><i class="fa-solid fa-check"></i> ${esc(f)}</li>`).join('');
-    const pill = cat.badge ? `<span class="pcard-pill${cat.badgeStyle?' '+esc(cat.badgeStyle):''}">${cat.badgeIcon?`<i class="fa-solid ${esc(cat.badgeIcon)}"></i> `:''}${esc(cat.badge)}</span>` : '';
-    const orderLink = normalizeCheckoutUrl(cat.orderLink, { id, slug: cat.slug, title: cat.title });
-    const firstImg = media.images[0] || '';
+  // Helper for deterministic metrics
+  function hashId(str) {
+    let hash = 0;
+    const s = String(str || '');
+    for (let i = 0; i < s.length; i++) {
+      hash = ((hash << 5) - hash) + s.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
 
-    let bottom = '';
-    if(hasTiers) {
-      const btnId='vb_'+id;
-      const cartBtnId='vcb_'+id;
-      const mainINR = cat.priceINR ? String(cat.priceINR).replace(/[₹\s,]/g, '') : '';
-      const mainUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[\$\s,]/g, '') : '';
-      const baseTitle = cat.title || 'Product';
+  // --- WISHLIST / LIKED SYSTEM (PERMANENT LOCALSTORAGE PERSISTENCE) ---
+  const WISHLIST_KEY = 'la_wishlist';
+  const WISHLIST_LEGACY_KEY = 'linkadda_wishlist';
 
-      const tierItems = rawTiers.map((t) => `
-        <div class="vid-tier-item" data-vids="${esc(t.label)}" data-inr="${esc(t.inr)}" data-usd="${esc(t.usd||'')}" data-title="${esc(baseTitle)} (${esc(t.label)})">
-          <div class="vid-tier-left">
-            <span class="vid-tier-radio"><i class="fa-solid fa-check"></i></span>
-            <span class="vid-tier-count">${esc(t.label)}</span>
-          </div>
-          <div class="vid-tier-right">
-            <span class="vid-tier-price">&#8377;${esc(t.inr)}</span>
-            ${t.usd ? `<span class="vid-tier-usd">/ $${esc(t.usd)}</span>` : ''}
-          </div>
-        </div>
-      `).join('');
+  function getWishlist() {
+    try {
+      const raw = localStorage.getItem(WISHLIST_KEY) || localStorage.getItem(WISHLIST_LEGACY_KEY) || '[]';
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.map(String) : [];
+    } catch (_) {
+      return [];
+    }
+  }
 
-      bottom=`
-      <div class="vid-tier-label"><i class="fa-solid fa-layer-group"></i> Choose Pack / Option (Optional)</div>
-      <div class="vid-tier-list" id="${btnId}_list" data-main-inr="${esc(mainINR)}" data-main-usd="${esc(mainUSD)}" data-base-title="${esc(baseTitle)}">${tierItems}</div>
-      <div class="vid-tier-active-summary" id="sum_${btnId}" style="display:none;"></div>
-      <div class="pcard-price-row vid-tier-active-price" id="pr_${btnId}">
-        <div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">&#8377;${esc(mainINR || '0')}</span></div>
-        ${mainUSD ? `<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">$${esc(mainUSD)}</span></div>` : ''}
-      </div>
-      <div class="pcard-actions">
-        <a href="${esc(normalizeCheckoutUrl('payment', { id, slug: cat.slug, title: baseTitle, inr: mainINR, usd: mainUSD }))}" class="btn-card-action btn-order-now vid-tier-btn" id="${btnId}" data-name="${encodeURIComponent(baseTitle)}" data-base-title="${encodeURIComponent(baseTitle)}" data-product-id="${esc(id)}" data-inr="${esc(mainINR)}" data-usd="${esc(mainUSD)}" data-tier="">
-          Order Now <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <button type="button" class="btn-card-action btn-add-cart vid-tier-cart-btn" id="${cartBtnId}" data-product-id="${esc(id)}" data-name="${esc(baseTitle)}" data-base-title="${esc(baseTitle)}" data-inr="${esc(mainINR)}" data-usd="${esc(mainUSD)}" data-tier="" data-img="${esc(firstImg)}">
-          🛒 Add to Cart
-        </button>
-      </div>`;
+  function saveWishlist(list) {
+    try {
+      const unique = Array.from(new Set((list || []).map(String)));
+      localStorage.setItem(WISHLIST_KEY, JSON.stringify(unique));
+      localStorage.setItem(WISHLIST_LEGACY_KEY, JSON.stringify(unique));
+      updateWishlistUI();
+    } catch (_) {}
+  }
+
+  function isWishlisted(productId) {
+    return getWishlist().includes(String(productId));
+  }
+
+  function updateWishlistUI() {
+    const list = getWishlist();
+    const count = list.length;
+    const countStrip = document.getElementById('fkWishlistCountStrip');
+    if (countStrip) countStrip.textContent = count;
+    document.querySelectorAll('.pill-liked-count').forEach(el => { el.textContent = count; });
+    const badgeHeader = document.getElementById('wishlistBadgeHeader');
+    if (badgeHeader) {
+      badgeHeader.textContent = count;
+      badgeHeader.style.display = count > 0 ? 'flex' : 'none';
+    }
+    const badgeAppbar = document.getElementById('fkAppbarWishlistBadge');
+    if (badgeAppbar) {
+      badgeAppbar.textContent = count;
+      badgeAppbar.style.display = count > 0 ? 'flex' : 'none';
+    }
+  }
+
+  window.getWishlist = getWishlist;
+  window.saveWishlist = saveWishlist;
+  window.isWishlisted = isWishlisted;
+  window.updateWishlistUI = updateWishlistUI;
+
+  window.toggleFkWishlist = function(e, productId) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    const pid = String(productId);
+    let list = getWishlist();
+    const idx = list.indexOf(pid);
+    let nowLiked = false;
+
+    if (idx > -1) {
+      list.splice(idx, 1);
+      nowLiked = false;
     } else {
-      bottom=`<div class="pcard-price-row">${cat.priceINR?`<div class="pcard-price-block"><span class="pcard-price-label">INR</span><span class="pcard-price">${esc(cat.priceINR)}</span></div>`:''} ${cat.priceUSD?`<div class="pcard-price-block"><span class="pcard-price-label">USD</span><span class="pcard-price-usd">${esc(cat.priceUSD)}</span></div>`:''}</div>
-      <div class="pcard-actions">
-        <a href="${esc(orderLink)}" class="btn-card-action btn-order-now" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(cat.priceINR||'')}" data-usd="${esc(cat.priceUSD||'')}">
-          Order Now <i class="fa-solid fa-arrow-right"></i>
-        </a>
-        <button type="button" class="btn-card-action btn-add-cart" data-product-id="${esc(id)}" data-name="${esc(cat.title||'')}" data-inr="${esc(cat.priceINR||'')}" data-usd="${esc(cat.priceUSD||'')}" data-img="${esc(firstImg)}">
-          🛒 Add to Cart
-        </button>
-      </div>`;
+      list.push(pid);
+      nowLiked = true;
+    }
+    saveWishlist(list);
+
+    // Sync all heart buttons for this productId across the page
+    document.querySelectorAll(`.fk-card-wishlist-btn[data-id="${pid}"]`).forEach(btn => {
+      btn.classList.toggle('active', nowLiked);
+      btn.setAttribute('title', nowLiked ? 'Liked Pack' : 'Like this Pack');
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.className = nowLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+      }
+      if (nowLiked) {
+        btn.classList.add('heart-pulse');
+        setTimeout(() => btn.classList.remove('heart-pulse'), 600);
+      }
+    });
+
+    // Also update product details sheet heart if open
+    const pvHeart = document.getElementById('fkPvWishlistBtn');
+    if (pvHeart && pvHeart.dataset.id === pid) {
+      pvHeart.classList.toggle('active', nowLiked);
+      const icon = pvHeart.querySelector('i');
+      if (icon) icon.className = nowLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
     }
 
-    return `<div class="pcard" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
-      ${buildSlideshow(media.images,media.videos,cat.title)}
-      ${pill?`<div class="pcard-badge-row">${pill}</div>`:''}
-      <h3 class="pcard-title">${esc(cat.title)}</h3>
-      ${cat.creators?`<div class="pcard-creators">${esc(cat.creators)}</div>`:''}
-      ${features?`<ul class="pcard-features">${features}</ul>`:''}
-      ${cat.platforms?`<div class="pcard-platforms">${esc(cat.platforms)}</div>`:''}
-      ${bottom}
+    if (typeof showCartToast === 'function') {
+      showCartToast(nowLiked ? 'Pack saved to Liked collection ❤️' : 'Removed from Liked collection', false);
+    } else if (typeof window.showToast === 'function') {
+      window.showToast(nowLiked ? 'Pack saved to Liked collection ❤️' : 'Removed from Liked collection');
+    }
+
+    // Re-render if currently filtered to liked tab
+    if (activeCategoryFilter === 'liked') {
+      renderLiveGrid();
+    }
+    const wlDrawer = document.getElementById('wishlistDrawer');
+    if (wlDrawer && wlDrawer.classList.contains('open')) {
+      renderWishlistDrawer();
+    }
+  };
+
+  // --- WISHLIST / LIKED SLIDE-OUT DRAWER SYSTEM ---
+  function openWishlistDrawer() {
+    renderWishlistDrawer();
+    const drawer = document.getElementById('wishlistDrawer');
+    const backdrop = document.getElementById('wishlistBackdrop');
+    if (drawer) drawer.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.classList.add('wishlist-open');
+  }
+
+  function closeWishlistDrawer() {
+    const drawer = document.getElementById('wishlistDrawer');
+    const backdrop = document.getElementById('wishlistBackdrop');
+    if (drawer) drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.classList.remove('wishlist-open');
+  }
+
+  window.openWishlistDrawer = openWishlistDrawer;
+  window.closeWishlistDrawer = closeWishlistDrawer;
+
+  function renderWishlistDrawer() {
+    const body = document.getElementById('wishlistDrawerBody');
+    const countEl = document.getElementById('wishlistDrawerCount');
+    const footer = document.getElementById('wishlistDrawerFooter');
+    if (!body) return;
+
+    const list = getWishlist();
+    if (countEl) countEl.textContent = list.length;
+
+    if (!list.length) {
+      if (footer) footer.style.display = 'none';
+      body.innerHTML = `
+        <div class="cart-empty-state">
+          <div class="cart-empty-icon" style="color:#f43f5e;"><i class="fa-regular fa-heart"></i></div>
+          <h4>No Liked Packs Yet</h4>
+          <p>Tap the ❤️ heart button on any pack to save it to your wishlist and access it anytime.</p>
+          <button type="button" class="btn-primary" onclick="closeWishlistDrawer()" style="display:inline-flex;align-items:center;gap:8px;margin:8px auto 0;">
+            <i class="fa-solid fa-cubes"></i> Browse Packs
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (footer) footer.style.display = 'block';
+
+    const records = typeof getLiveRecords === 'function' ? getLiveRecords() : [];
+    const likedItems = list.map(id => records.find(r => String(r.id) === String(id))).filter(Boolean);
+
+    if (!likedItems.length) {
+      if (footer) footer.style.display = 'none';
+      body.innerHTML = `
+        <div class="cart-empty-state">
+          <div class="cart-empty-icon" style="color:#f43f5e;"><i class="fa-regular fa-heart"></i></div>
+          <h4>No Liked Packs Yet</h4>
+          <p>Tap the ❤️ heart button on any pack to save it to your wishlist.</p>
+        </div>
+      `;
+      return;
+    }
+
+    body.innerHTML = likedItems.map(item => {
+      const media = resolveMediaList(item);
+      const img = (media.images && media.images[0]) || '';
+      const inr = item.priceINR ? String(item.priceINR).replace(/[^\d]/g, '') : '399';
+      const usd = item.priceUSD ? String(item.priceUSD).replace(/[^\d]/g, '') : '14';
+      const orderLink = normalizeCheckoutUrl('payment.html', {
+        id: item.id,
+        title: item.title,
+        inr: inr,
+        usd: usd
+      });
+
+      return `
+        <div class="cart-item-card" id="wishlistItem-${esc(item.id)}">
+          <div class="cart-item-thumb">
+            ${img ? `<img src="${esc(img)}" alt="${esc(item.title)}" />` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#555;"><i class="fa-solid fa-film"></i></div>'}
+          </div>
+          <div class="cart-item-info">
+            <div>
+              <div class="cart-item-title" onclick="closeWishlistDrawer(); openFkProductPage('${esc(item.id)}');" style="cursor:pointer;" title="${esc(item.title)}">${esc(item.title)}</div>
+              <div style="font-size:11px;color:var(--la-text-muted);margin-top:2px;">VIP 4K 60FPS · Instant Mega/Drive</div>
+            </div>
+            <div class="cart-item-price-row">
+              <div>
+                <span class="cart-item-price">₹${inr}</span>
+                <span class="cart-item-price-usd"> / $${usd}</span>
+              </div>
+              <button type="button" class="cart-item-remove" onclick="removeWishlistItem('${esc(item.id)}')" title="Remove from Liked" aria-label="Remove">
+                <i class="fa-solid fa-heart-crack" style="color:#f43f5e;"></i>
+              </button>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;">
+              <button type="button" class="fk-card-btn-cart" style="flex:1;padding:6px 10px;font-size:11px;" onclick="addLikedItemToCart('${esc(item.id)}', this)">
+                <i class="fa-solid fa-cart-shopping"></i> Add
+              </button>
+              <a href="${esc(orderLink)}" class="fk-card-btn-buy" style="flex:1;padding:6px 10px;font-size:11px;text-decoration:none;">
+                <i class="fa-solid fa-bolt"></i> Buy
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.addLikedItemToCart = function(id, btn) {
+    const records = typeof getLiveRecords === 'function' ? getLiveRecords() : [];
+    const item = records.find(r => String(r.id) === String(id));
+    if (!item) return;
+
+    const media = resolveMediaList(item);
+    const img = (media.images && media.images[0]) || '';
+    const inr = item.priceINR ? String(item.priceINR).replace(/[^\d]/g, '') : '399';
+    const usd = item.priceUSD ? String(item.priceUSD).replace(/[^\d]/g, '') : '14';
+
+    addToCart({
+      id: item.id,
+      name: item.title,
+      inr: Number(inr),
+      usd: Number(usd),
+      img: img,
+      qty: 1
+    });
+
+    if (btn) {
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Add';
+      }, 1500);
+    }
+  };
+
+  window.removeWishlistItem = function(id) {
+    toggleFkWishlist(null, id);
+    renderWishlistDrawer();
+  };
+
+  window.addAllLikedToCart = function() {
+    const list = getWishlist();
+    const records = typeof getLiveRecords === 'function' ? getLiveRecords() : [];
+    list.forEach(id => {
+      const item = records.find(r => String(r.id) === String(id));
+      if (item) {
+        const media = resolveMediaList(item);
+        const img = (media.images && media.images[0]) || '';
+        const inr = item.priceINR ? String(item.priceINR).replace(/[^\d]/g, '') : '399';
+        const usd = item.priceUSD ? String(item.priceUSD).replace(/[^\d]/g, '') : '14';
+        addToCart({
+          id: item.id,
+          name: item.title,
+          inr: Number(inr),
+          usd: Number(usd),
+          img: img,
+          qty: 1
+        });
+      }
+    });
+    closeWishlistDrawer();
+    openCartDrawer();
+  };
+
+  // --- USER ORDERS HISTORY DRAWER SYSTEM ---
+  function getStoredUserOrders() {
+    try {
+      return JSON.parse(localStorage.getItem('linkadda_user_orders') || '[]');
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function updateOrdersBadge() {
+    const orders = getStoredUserOrders();
+    const count = orders.length;
+    const badge = document.getElementById('fkAppbarOrdersBadge');
+    const headerBtn = document.getElementById('headerOrdersBtn');
+    if (badge) {
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
+
+  function openOrdersDrawer() {
+    renderOrdersDrawer();
+    const drawer = document.getElementById('ordersDrawer');
+    const backdrop = document.getElementById('ordersBackdrop');
+    if (drawer) drawer.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    document.body.classList.add('orders-open');
+  }
+
+  function closeOrdersDrawer() {
+    const drawer = document.getElementById('ordersDrawer');
+    const backdrop = document.getElementById('ordersBackdrop');
+    if (drawer) drawer.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+    document.body.classList.remove('orders-open');
+  }
+
+  function renderOrdersDrawer() {
+    const body = document.getElementById('ordersDrawerBody');
+    const countEl = document.getElementById('ordersDrawerCount');
+    if (!body) return;
+
+    const orders = getStoredUserOrders();
+    if (countEl) countEl.textContent = orders.length;
+
+    if (!orders.length) {
+      body.innerHTML = `
+        <div class="cart-empty-state">
+          <div class="cart-empty-icon" style="color:#10b981;"><i class="fa-solid fa-receipt"></i></div>
+          <h4>No Orders Placed Yet</h4>
+          <p>Your placed orders and discrete delivery status will appear here automatically.</p>
+          <button type="button" class="btn-primary" onclick="closeOrdersDrawer()" style="display:inline-flex;align-items:center;gap:8px;margin:8px auto 0;">
+            <i class="fa-solid fa-bolt"></i> Explore Best Deals
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    body.innerHTML = orders.map(ord => `
+      <div class="order-item-card">
+        <div class="order-card-header">
+          <div class="order-card-id-block">
+            <span class="order-id-label">ORDER #</span>
+            <span class="order-id-num">${esc(String(ord.orderId || 'VIP-ORDER').slice(-10))}</span>
+          </div>
+          <span class="order-status-pill ${ord.status === 'completed' ? 'done' : 'pending'}">
+            <i class="fa-solid ${ord.status === 'completed' ? 'fa-check' : 'fa-clock'}"></i>
+            ${ord.status === 'completed' ? 'Delivered' : 'Processing'}
+          </span>
+        </div>
+        <div class="order-card-title">${esc(ord.productName || 'VIP Content Pack')}</div>
+        <div class="order-card-meta-row">
+          <span class="order-meta-item"><i class="fa-solid fa-wallet"></i> ${esc(ord.paymentMethod || 'UPI / Crypto')}</span>
+          <span class="order-meta-sep">•</span>
+          <span class="order-meta-item"><i class="fa-regular fa-clock"></i> ${esc(ord.date || 'Recent')}</span>
+        </div>
+        <div class="order-card-footer">
+          <span class="order-paid-amount">${esc(ord.amountDisplay || '₹399')}</span>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="order-track-btn">
+            <i class="fa-brands fa-telegram"></i> Get Access
+          </a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.openOrdersDrawer = openOrdersDrawer;
+  window.closeOrdersDrawer = closeOrdersDrawer;
+  window.renderOrdersDrawer = renderOrdersDrawer;
+  window.updateOrdersBadge = updateOrdersBadge;
+
+  // Initialize badges
+  document.addEventListener('DOMContentLoaded', updateOrdersBadge);
+  setTimeout(updateOrdersBadge, 1200);
+
+  // Card Action Button Handlers
+  window.handleCardAddToCart = function(e, btn) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (!btn) return;
+    if (btn.classList.contains('added')) return;
+
+    const meta = extractProductMetaFromCard(btn);
+    addToCart(meta);
+
+    if (!btn.dataset.origHtml) {
+      btn.dataset.origHtml = btn.innerHTML;
+    }
+    btn.classList.add('added');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+
+    setTimeout(() => {
+      btn.classList.remove('added');
+      btn.innerHTML = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add';
+    }, 1500);
+  };
+
+  window.handleCardBuyNow = function(e, btn, link) {
+    if (e) {
+      e.stopPropagation();
+    }
+    const targetUrl = link || btn.getAttribute('href') || 'payment.html';
+    window.location.href = targetUrl;
+  };
+
+  window.scrollToCategories = function() {
+    const grid = document.getElementById('categoryFilterPills') || document.getElementById('categoriesGrid') || document.getElementById('services');
+    if (grid) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  window.handleQuickPill = function(btn, filterKey) {
+    document.querySelectorAll('.fk-quick-pill').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    if (filterKey === 'categories') {
+      window.scrollToCategories();
+      return;
+    }
+    if (filterKey === 'all') {
+      window.filterFkCategory('all');
+      return;
+    }
+    if (filterKey === 'indian') {
+      const cats = normalizeRecords(liveCollections.categories);
+      const match = cats.find(c => /indian|desi|bhabhi/i.test(c.title || c.id));
+      if (match) {
+        window.filterFkCategory(match.id);
+      } else {
+        window.filterFkCategory('all');
+      }
+      return;
+    }
+    if (filterKey === 'trending' || filterKey === 'new') {
+      window.filterFkCategory('all');
+      window.scrollToCategories();
+    }
+  };
+
+  window.filterFkCategory = function(catKey) {
+    document.querySelectorAll('.fk-cat-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.cat === catKey);
+    });
+
+    activeCategoryFilter = catKey;
+    renderCategoryFilters();
+    renderLiveGrid();
+
+    const grid = document.getElementById('categoriesGrid') || document.getElementById('services');
+    if (grid) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // -- BUILD CARD (AUTHENTIC LUXURY E-COMMERCE CARD) --
+  function buildCard(id, cat) {
+    const media = resolveMediaList(cat);
+    const firstImg = (media.images && media.images[0]) || '';
+    const cleanINR = cat.priceINR ? String(cat.priceINR).replace(/[^\d]/g, '') : '399';
+    const cleanUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[^\d]/g, '') : '14';
+
+    // MRP & Discount calculation
+    const mrpINR = cat.originalPriceINR ? String(cat.originalPriceINR).replace(/[^\d]/g, '') : Math.round(Number(cleanINR) * 3.6 / 10) * 10;
+    const mrpUSD = cat.originalPriceUSD ? String(cat.originalPriceUSD).replace(/[^\d]/g, '') : Math.round(Number(cleanUSD) * 3.2);
+    const discountPercent = Math.min(92, Math.max(25, Math.round(((mrpINR - cleanINR) / mrpINR) * 100)));
+
+    const rating = cat.rating || '4.9';
+    const h = hashId(id);
+    const reviewsVal = cat.reviewsCount || `${(h % 600) + 820}`;
+    const baseTitle = cat.title || 'Exclusive Pack';
+    const orderLink = normalizeCheckoutUrl('payment.html', {
+      id: id,
+      title: baseTitle,
+      inr: cleanINR,
+      usd: cleanUSD
+    });
+    const isLiked = isWishlisted(id);
+
+    const customBadge = (cat.badge || cat.tag || cat.customBadge || '').trim();
+    const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip"><i class="fa-solid fa-sparkles"></i> ${esc(customBadge)}</span></div>` : '';
+
+    return `<div class="fk-card" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
+      ${badgeHtml}
+      <div class="fk-card-top-actions">
+        <button type="button" class="fk-card-action-circle fk-card-wishlist-btn${isLiked ? ' active' : ''}" data-id="${esc(id)}" onclick="window.toggleFkWishlist(event, '${esc(id)}')" aria-label="${isLiked ? 'Remove from Liked' : 'Save to Liked'}" title="${isLiked ? 'Liked Pack' : 'Like this Pack'}">
+          <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+        </button>
+      </div>
+      <div class="fk-card-media" onclick="window.openFkProductPage('${esc(id)}')">
+        ${firstImg ? `<img src="${esc(firstImg)}" alt="${esc(baseTitle)}" loading="lazy" />` : '<div class="fk-card-no-img"><i class="fa-solid fa-film"></i> Exclusive Pack</div>'}
+        <div class="fk-card-media-gradient"></div>
+        <div class="fk-card-quick-view-overlay"><i class="fa-solid fa-expand"></i> Quick View</div>
+      </div>
+      <div class="fk-card-body">
+        <div class="fk-card-seller-row">
+          <span class="fk-card-seller"><i class="fa-solid fa-circle-check"></i> LinkAdda<span class="fk-seller-verified-txt"> Verified</span></span>
+          <span class="fk-discrete-badge"><i class="fa-solid fa-shield-halved"></i> Discrete</span>
+        </div>
+        <h3 class="fk-card-title" onclick="window.openFkProductPage('${esc(id)}')">${esc(baseTitle)}</h3>
+        <div class="fk-card-rating-row">
+          <span class="fk-rating-star"><i class="fa-solid fa-star"></i></span>
+          <span class="fk-rating-val">${rating}</span>
+          <span class="fk-rating-count">(${esc(reviewsVal)})</span>
+        </div>
+        <div class="fk-card-price-row">
+          <div class="fk-dual-price">
+            <span class="fk-price-inr">₹${cleanINR}</span>
+            <span class="fk-price-sep">/</span>
+            <span class="fk-price-usd">$${cleanUSD}</span>
+          </div>
+          <div class="fk-price-sub-row">
+            <span class="fk-mrp-cut">₹${mrpINR}</span>
+            <span class="fk-discount-tag">${discountPercent}% OFF</span>
+          </div>
+        </div>
+        <div class="fk-card-meta-perks">
+          <span><i class="fa-solid fa-bolt"></i> Instant Link</span>
+          <span><i class="fa-solid fa-cloud"></i> Mega &amp; Drive</span>
+        </div>
+        <div class="fk-card-actions-row">
+          <button type="button" class="fk-card-btn-cart btn-add-cart" 
+            data-product-id="${esc(id)}" 
+            data-name="${esc(baseTitle)}" 
+            data-inr="${cleanINR}" 
+            data-usd="${cleanUSD}" 
+            data-img="${esc(firstImg)}"
+            onclick="window.handleCardAddToCart(event, this);">
+            <i class="fa-solid fa-cart-shopping"></i> Add
+          </button>
+          <a href="${esc(orderLink)}" class="fk-card-btn-buy" 
+            data-product-id="${esc(id)}" 
+            data-name="${encodeURIComponent(baseTitle)}" 
+            data-inr="${cleanINR}" 
+            data-usd="${cleanUSD}"
+            onclick="window.handleCardBuyNow(event, this, '${esc(orderLink)}');">
+            <i class="fa-solid fa-bolt"></i> Buy
+          </a>
+        </div>
+      </div>
     </div>`;
   }
 
@@ -1680,7 +2627,7 @@
                data-name="All Collection Pack"
                data-inr="4399"
                data-usd="109">
-              🛒 Add to Cart
+              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
             </button>
           </div>
         </div>
@@ -1721,7 +2668,7 @@
              data-name="${esc(data.title || 'All Collection Pack')}"
              data-inr="${esc(data.priceOfferINR || '')}"
              data-usd="${esc(data.priceOfferUSD || '')}">
-            🛒 Add to Cart
+            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
           </button>
         </div>
       </div>
@@ -1744,6 +2691,11 @@
     // 1. "All" Pill
     const isAllActive = activeCategoryFilter === 'all';
     pillsHtml += `<button class="category-pill${isAllActive ? ' active' : ''}" data-cat-id="all">All</button>`;
+    
+    // 1b. "Liked" Pill
+    const isLikedActive = activeCategoryFilter === 'liked';
+    const wishlistCount = typeof getWishlist === 'function' ? getWishlist().length : 0;
+    pillsHtml += `<button class="category-pill${isLikedActive ? ' active' : ''}" data-cat-id="liked" style="${isLikedActive ? 'background:linear-gradient(135deg,#f43f5e,#e11d48);border-color:#fda4af;color:#fff;' : ''}"><i class="fa-solid fa-heart" style="color:${isLikedActive ? '#fff' : '#f43f5e'};margin-right:4px;"></i> Liked (<span class="pill-liked-count">${wishlistCount}</span>)</button>`;
     
     // 2. Visible Categories Pills
     visibleCats.forEach(cat => {
@@ -2055,26 +3007,50 @@
       let records = getLiveRecords();
 
       // Apply category filtering
-      if (activeCategoryFilter !== 'all') {
+      if (activeCategoryFilter === 'liked') {
+        const wishlist = getWishlist();
+        records = records.filter(item => wishlist.includes(String(item.id)));
+      } else if (activeCategoryFilter !== 'all') {
         const selectedCat = liveCollections.categories[activeCategoryFilter] || {};
-        const catTitleLower = String(selectedCat.title || '').trim().toLowerCase();
-        const catSlugLower = String(selectedCat.slug || '').trim().toLowerCase();
+        const catTitleLower = String(selectedCat.title || activeCategoryFilter).trim().toLowerCase();
+        const catSlugLower = String(selectedCat.slug || activeCategoryFilter).trim().toLowerCase();
         const catIdLower = String(activeCategoryFilter).trim().toLowerCase();
 
         records = records.filter(item => {
-          if (item.id === activeCategoryFilter) return true;
+          if (String(item.id) === String(activeCategoryFilter)) return true;
           const itemCatLower = String(item.category || '').trim().toLowerCase();
-          return itemCatLower && (
-            itemCatLower === catTitleLower || 
-            itemCatLower === catSlugLower || 
-            itemCatLower === catIdLower ||
-            itemCatLower.includes(catTitleLower)
+          const itemTitleLower = String(item.title || '').trim().toLowerCase();
+          const itemSlugLower = String(item.slug || '').trim().toLowerCase();
+
+          return (
+            (itemCatLower && (
+              itemCatLower === catTitleLower || 
+              itemCatLower === catSlugLower || 
+              itemCatLower === catIdLower ||
+              itemCatLower.includes(catTitleLower) ||
+              catTitleLower.includes(itemCatLower)
+            )) ||
+            (itemSlugLower && (itemSlugLower === catSlugLower || itemSlugLower === catIdLower)) ||
+            (catTitleLower && itemTitleLower.includes(catTitleLower))
           );
         });
       }
 
       if (!records.length) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
+        if (activeCategoryFilter === 'liked') {
+          grid.innerHTML = `
+            <div class="fk-wishlist-empty-state" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+              <div style="font-size: 3.2rem; color: #f43f5e; margin-bottom: 14px; animation: heartPulse 1.5s infinite;"><i class="fa-solid fa-heart"></i></div>
+              <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--la-text); margin-bottom: 8px;">No Liked Packs Yet</h3>
+              <p style="font-size: 0.95rem; color: var(--la-text-muted); max-width: 420px; margin: 0 auto 20px; line-height: 1.5;">Tap the ❤️ heart button on any pack to save it to your personal liked collection.</p>
+              <button type="button" class="btn-primary" onclick="filterFkCategory('all')" style="padding: 10px 24px; border-radius: 9999px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto;">
+                <i class="fa-solid fa-cubes"></i> Browse All Packs
+              </button>
+            </div>
+          `;
+        } else {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
+        }
       } else {
         grid.innerHTML = records.map(item => {
           try {
@@ -2174,6 +3150,32 @@
     })
     .catch(() => {});
 
+  fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/categories.json')
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data === 'object' && Object.keys(data).length) {
+        liveCollections.categories = data;
+        saveCachedLiveData();
+        scheduleRenderLiveStore();
+      }
+    })
+    .catch(() => {});
+
+  onValue(ref(db,'testimonials'), snap => {
+    liveCollections.testimonials = snap.val() || {};
+  });
+
+  onValue(ref(db,'settings'), snap => {
+    liveCollections.settings = snap.val() || {};
+  });
+
+  fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/testimonials.json')
+    .then(r => r.json())
+    .then(data => {
+      if (data && typeof data === 'object') liveCollections.testimonials = data;
+    })
+    .catch(() => {});
+
   var sharedFocusDone = false;
   var sharedFocusTargetId = '';
 
@@ -2202,13 +3204,13 @@
 
     const queryId = focusId.toLowerCase().trim();
 
-    // Helper to find card in DOM
+    // 1. Helper to find card in DOM (.fk-card, .pcard, [data-product-id], [data-fb-id])
     function findCardInDOM() {
-      const cards = document.querySelectorAll('.pcard');
+      const cards = document.querySelectorAll('.fk-card, .pcard, [data-product-id], [data-fb-id]');
       for (const card of cards) {
-        const fbId = String(card.dataset.fbId || '').toLowerCase();
+        const fbId = String(card.dataset.fbId || card.dataset.productId || '').toLowerCase();
         const slug = String(card.dataset.slug || '').toLowerCase();
-        const cardTitleText = String(card.querySelector('.pcard-title')?.textContent || '').trim();
+        const cardTitleText = String(card.querySelector('.fk-card-title, .pcard-title, h3')?.textContent || '').trim();
         const slugifiedTitle = cardTitleText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         const rawTitleLower = cardTitleText.toLowerCase();
 
@@ -2220,10 +3222,10 @@
     }
 
     let targetCard = findCardInDOM();
+    let foundProdId = '';
 
     // 2. If card is NOT in current DOM grid, check if it exists in live catalog data
-    if (!targetCard && liveCollections && liveCollections.products) {
-      let foundProd = null;
+    if (liveCollections && liveCollections.products) {
       for (const [pId, pData] of Object.entries(liveCollections.products)) {
         if (!pData) continue;
         const pIdLower = String(pId).toLowerCase();
@@ -2231,13 +3233,13 @@
         const pSlugLower = String(pData.slug || '').toLowerCase();
         const pSlugifiedTitle = pTitleLower.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         if (pIdLower === queryId || pSlugLower === queryId || pSlugifiedTitle === queryId || pTitleLower.includes(queryId) || queryId.includes(pIdLower)) {
-          foundProd = pData;
+          foundProdId = pId;
           break;
         }
       }
 
       // If product exists in database but is hidden by current active category filter, reveal all products
-      if (foundProd && activeCategoryFilter !== 'all') {
+      if (foundProdId && activeCategoryFilter !== 'all') {
         activeCategoryFilter = 'all';
         renderCategoryFilters();
         renderLiveGrid();
@@ -2245,35 +3247,44 @@
       }
     }
 
+    if (targetCard && !foundProdId) {
+      foundProdId = targetCard.dataset.fbId || targetCard.dataset.productId || targetCard.id.replace('product-', '');
+    }
+
     // 3. Highlight and scroll to target product card
     if (targetCard) {
-      if (sharedFocusDone && targetCard.classList.contains('pcard-highlight')) return;
+      if (!sharedFocusDone) {
+        sharedFocusDone = true;
 
-      sharedFocusDone = true;
+        document.querySelectorAll('.fk-card, .pcard').forEach(c => {
+          c.classList.remove('pcard-highlight');
+          c.classList.remove('pcard-focused-steady');
+        });
 
-      document.querySelectorAll('.pcard').forEach(c => {
-        c.classList.remove('pcard-highlight');
-        c.classList.remove('pcard-focused-steady');
-      });
+        targetCard.classList.add('pcard-highlight');
 
-      targetCard.classList.add('pcard-highlight');
+        const performScroll = () => {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
 
-      const performScroll = () => {
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      };
+        performScroll();
+        setTimeout(performScroll, 250);
+        setTimeout(performScroll, 600);
 
-      performScroll();
-      setTimeout(performScroll, 200);
-      setTimeout(performScroll, 500);
-      setTimeout(performScroll, 1000);
-      setTimeout(performScroll, 1800);
+        setTimeout(() => {
+          if (targetCard.classList.contains('pcard-highlight')) {
+            targetCard.classList.remove('pcard-highlight');
+            targetCard.classList.add('pcard-focused-steady');
+          }
+        }, 7000);
+      }
+    }
 
+    // 4. Auto-open product details sheet on share navigation
+    if (foundProdId && typeof window.openFkProductPage === 'function') {
       setTimeout(() => {
-        if (targetCard.classList.contains('pcard-highlight')) {
-          targetCard.classList.remove('pcard-highlight');
-          targetCard.classList.add('pcard-focused-steady');
-        }
-      }, 7000);
+        window.openFkProductPage(foundProdId);
+      }, 400);
     }
   }
 
@@ -2520,10 +3531,20 @@
   }
 
   function extractProductMetaFromCard(btn) {
-    const card = btn.closest('.pcard') || btn.closest('.collection-pack-banner');
+    const card = btn.closest('.fk-card') || btn.closest('.pcard') || btn.closest('.collection-pack-banner');
     
-    let id = btn.dataset.productId || card?.dataset?.fbId || '';
-    let name = btn.dataset.name ? decodeURIComponent(btn.dataset.name) : (card?.querySelector('.pcard-title, .cpb-title')?.textContent?.trim() || 'Product');
+    let id = btn.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || '';
+    let name = '';
+    if (btn.dataset.name) {
+      try {
+        name = decodeURIComponent(btn.dataset.name);
+      } catch (_) {
+        name = btn.dataset.name;
+      }
+    }
+    if (!name && card) {
+      name = card.querySelector('.fk-card-title, .pcard-title, .cpb-title')?.textContent?.trim() || 'Product';
+    }
     if (!id) {
       id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     }
@@ -2540,18 +3561,18 @@
         if (!tier) tier = selectedTier.dataset.vids || selectedTier.querySelector('.vid-tier-count')?.textContent?.trim() || '';
       }
       if (!inr) {
-        const inrText = card.querySelector('.pcard-price, .cpb-offer')?.textContent?.trim() || '';
+        const inrText = card.querySelector('.fk-price-inr, .pcard-price, .cpb-offer')?.textContent?.trim() || '';
         inr = parseMoneyNumber(inrText);
       }
       if (!usd) {
-        const usdText = card.querySelector('.pcard-price-usd, .cpb-usd')?.textContent?.trim() || '';
+        const usdText = card.querySelector('.fk-price-usd, .pcard-price-usd, .cpb-usd')?.textContent?.trim() || '';
         usd = parseMoneyNumber(usdText);
       }
     }
     
     let img = btn.dataset.img || '';
     if (!img && card) {
-      const imgEl = card.querySelector('.pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
+      const imgEl = card.querySelector('.fk-card-media img, .pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
       img = imgEl?.getAttribute('src') || '';
     }
 
@@ -2614,6 +3635,8 @@
       document.getElementById('cartBadgeHeader'),
       document.getElementById('cartBadgeLeft'),
       document.getElementById('cartBadgeMob'),
+      document.getElementById('cartBadgePv'),
+      document.getElementById('fkAppbarCartBadge'),
     ];
     
     badges.forEach(b => {
@@ -2633,6 +3656,8 @@
     const badges = [
       document.getElementById('cartBadgeHeader'),
       document.getElementById('cartBadgeLeft'),
+      document.getElementById('cartBadgePv'),
+      document.getElementById('fkAppbarCartBadge'),
     ];
     badges.forEach(b => {
       if (b) {
@@ -2746,6 +3771,10 @@
       <button type="button" class="cart-add-more-btn" id="cartAddMoreBtn">
         <i class="fa-solid fa-plus"></i> Add More Products
       </button>
+      <div class="cart-trust-perks" style="margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:9px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(255,255,255,0.65);">
+        <div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> 100% Discrete Billing & Safe UPI / Crypto</div>
+        <div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> Instant Mega / Google Drive VIP Delivery</div>
+      </div>
     `;
 
     body.querySelectorAll('.cart-item-remove').forEach(btn => {
@@ -2777,6 +3806,12 @@
     if (backdrop) backdrop.classList.remove('open');
     document.body.style.overflow = '';
   }
+
+  // Globally expose for storefront integration
+  window.addToCart = addToCart;
+  window.openCartDrawer = openCartDrawer;
+  window.closeCartDrawer = closeCartDrawer;
+  window.updateCartBadges = updateCartBadges;
 
   async function checkoutCart() {
     const cart = getCart();
@@ -2868,17 +3903,18 @@
     if (!btn.dataset.origHtml) {
       btn.dataset.origHtml = btn.innerHTML;
     }
-    const origHtml = btn.dataset.origHtml || '🛒 Add to Cart';
+    const origHtml = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add to Cart';
     btn.classList.add('added');
-    btn.innerHTML = '✓ Added!';
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
     setTimeout(() => {
       btn.classList.remove('added');
       btn.innerHTML = btn.dataset.origHtml || origHtml;
     }, 1400);
   });
 
-  // Initial cart badge update on page load
+  // Initial cart and wishlist badges update on page load
   updateCartBadges();
+  if (typeof updateWishlistUI === 'function') updateWishlistUI();
   </script>
 
   <style>
@@ -2990,7 +4026,83 @@
         document.body.style.overflow = '';
       }
 
+      window.openUniversalSearch = openModal;
+      window.closeUniversalSearch = closeModal;
+
       if (openBtnHeader) openBtnHeader.addEventListener('click', openModal);
+      const fkSearchIn = document.getElementById('fkSearchInput');
+      const fkSearchBtn = document.getElementById('fkSearchBtn');
+      const fkSearchBox = document.querySelector('.fk-search-box');
+
+      // Live In-Page Grid Search Filtering (Instant, no page hijack)
+      window.filterFkCardsBySearch = function(query) {
+        const term = (query || '').trim().toLowerCase();
+        const cards = document.querySelectorAll('#categoriesGrid .fk-card, #categoriesGrid .pcard');
+        let visibleCount = 0;
+        cards.forEach(card => {
+          const text = (card.textContent || '').toLowerCase();
+          const id = (card.dataset?.productId || card.dataset?.fbId || card.id || '').toLowerCase();
+          const slug = (card.dataset?.slug || '').toLowerCase();
+          const match = !term || text.includes(term) || id.includes(term) || slug.includes(term);
+          card.style.display = match ? '' : 'none';
+          if (match) visibleCount++;
+        });
+
+        let noResultsEl = document.getElementById('fkGridNoSearch');
+        if (visibleCount === 0 && term) {
+          if (!noResultsEl) {
+            noResultsEl = document.createElement('div');
+            noResultsEl.id = 'fkGridNoSearch';
+            noResultsEl.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 45px 16px; color: var(--la-text-muted); font-size: 14px;';
+            const grid = document.getElementById('categoriesGrid');
+            if (grid) grid.appendChild(noResultsEl);
+          }
+          noResultsEl.innerHTML = `
+            <div style="font-size: 2.5rem; color: #f43f5e; margin-bottom: 12px;"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--la-text); margin-bottom: 6px;">No packs found matching "${escapeHtml(query)}"</h4>
+            <p style="font-size: 0.9rem; color: var(--la-text-muted); margin-bottom: 16px;">Try searching with different keywords like Indian, Leaks, 4K, VIP, etc.</p>
+            <button type="button" class="btn-primary" onclick="window.clearFkSearch()" style="padding: 8px 20px; font-size: 13px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto; cursor: pointer;">
+              <i class="fa-solid fa-rotate-left"></i> Reset Search
+            </button>
+          `;
+          noResultsEl.style.display = 'block';
+        } else if (noResultsEl) {
+          noResultsEl.style.display = 'none';
+        }
+      };
+
+      window.clearFkSearch = function() {
+        if (fkSearchIn) fkSearchIn.value = '';
+        window.filterFkCardsBySearch('');
+      };
+
+      if (fkSearchIn) {
+        fkSearchIn.addEventListener('click', (e) => {
+          e.preventDefault();
+          searchInput.value = '';
+          openModal();
+        });
+        fkSearchIn.addEventListener('focus', (e) => {
+          e.preventDefault();
+          fkSearchIn.blur();
+          searchInput.value = '';
+          openModal();
+        });
+      }
+      if (fkSearchBox) {
+        fkSearchBox.addEventListener('click', () => {
+          searchInput.value = '';
+          openModal();
+        });
+      }
+      if (fkSearchBtn) {
+        fkSearchBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          searchInput.value = '';
+          openModal();
+        });
+      }
+
       if (openBtnMob) openBtnMob.addEventListener('click', () => {
         const mobNav = document.getElementById('mobileNav');
         if (mobNav) mobNav.classList.remove('open');
@@ -3036,14 +4148,14 @@
         });
 
         // 2. Search Categories & Products (.pcard only - excluding pinned banner)
-        const productCards = Array.from(document.querySelectorAll('.pcard'));
+        const productCards = Array.from(document.querySelectorAll('.pcard, .fk-card'));
         productCards.forEach((card) => {
-          const title = (card.querySelector('.pcard-title')?.textContent || '').toLowerCase();
-          const creators = (card.querySelector('.pcard-creators')?.textContent || '').toLowerCase();
-          const features = (card.querySelector('.pcard-features')?.textContent || '').toLowerCase();
+          const title = (card.querySelector('.pcard-title, .fk-card-title')?.textContent || '').toLowerCase();
+          const creators = (card.querySelector('.pcard-creators, .fk-card-seller')?.textContent || '').toLowerCase();
+          const features = (card.querySelector('.pcard-features, .fk-card-meta-perks')?.textContent || '').toLowerCase();
           const platforms = (card.querySelector('.pcard-platforms')?.textContent || '').toLowerCase();
-          const price = (card.querySelector('.pcard-price')?.textContent || '').toLowerCase();
-          const pill = (card.querySelector('.pcard-pill')?.textContent || '').toLowerCase();
+          const price = (card.querySelector('.pcard-price, .fk-card-price-row')?.textContent || '').toLowerCase();
+          const pill = (card.querySelector('.pcard-pill, .fk-card-badge-vip')?.textContent || '').toLowerCase();
 
           const isMatch = !term ||
             title.includes(term) ||
@@ -3128,19 +4240,19 @@
           resultsContainer.appendChild(groupHeader);
 
           matchedProducts.forEach((card) => {
-            const title = card.querySelector('.pcard-title')?.textContent || 'Product';
-            const creators = card.querySelector('.pcard-creators')?.textContent || '';
-            const price = card.querySelector('.pcard-price')?.textContent || '';
-            const orderHref = card.querySelector('.btn-order-now')?.getAttribute('href') || 'payment.html';
+            const title = card.querySelector('.pcard-title, .fk-card-title')?.textContent || 'Product';
+            const creators = card.querySelector('.pcard-creators, .fk-card-seller')?.textContent || '';
+            const price = card.querySelector('.pcard-price, .fk-card-price-row')?.textContent || '';
+            const orderHref = card.querySelector('.btn-order-now, .fk-card-btn-buy')?.getAttribute('href') || 'payment.html';
 
             // Multi-tier Image Extractor
             let imgSrc = '';
-            const imgEl = card.querySelector('.fb-slide-active img, .fb-slide img, .pslide-active img, .pcard-img-wrap img, .pcard-img, img');
+            const imgEl = card.querySelector('.fb-slide-active img, .fb-slide img, .pslide-active img, .pcard-img-wrap img, .pcard-img, .fk-card-media img, img');
             if (imgEl && imgEl.getAttribute('src') && !imgEl.getAttribute('src').includes('undefined')) {
               imgSrc = imgEl.getAttribute('src');
             }
             if (!imgSrc) {
-              const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn');
+              const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn, .fk-card-btn-cart');
               if (cartBtn && cartBtn.dataset && cartBtn.dataset.img) {
                 imgSrc = cartBtn.dataset.img;
               }
@@ -3150,8 +4262,8 @@
               ? `<img src="${imgSrc}" alt="${title}" class="src-thumb" onerror="this.onerror=null; this.outerHTML='<div class=\\'src-thumb-fallback\\'><i class=\\'fa-solid fa-fire-flame-curved\\'></i></div>';" />`
               : `<div class="src-thumb-fallback"><i class="fa-solid fa-fire-flame-curved"></i></div>`;
 
-            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn');
-            const productId = cartBtn?.getAttribute('data-product-id') || title.toLowerCase().replace(/\s+/g, '-');
+            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn, .fk-card-btn-cart');
+            const productId = cartBtn?.getAttribute('data-product-id') || card.getAttribute('data-product-id') || title.toLowerCase().replace(/\s+/g, '-');
             const productInr = cartBtn?.getAttribute('data-inr') || price.replace(/[^\d]/g, '') || '599';
             const productUsd = cartBtn?.getAttribute('data-usd') || '39';
 
@@ -3183,9 +4295,13 @@
             itemEl.addEventListener('click', (e) => {
               if (e.target.closest('.src-actions')) return;
               closeModal();
-              card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              card.classList.add('search-highlight');
-              setTimeout(() => card.classList.remove('search-highlight'), 1400);
+              if (typeof window.openFkProductPage === 'function' && card.dataset?.productId) {
+                window.openFkProductPage(card.dataset.productId);
+              } else {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('search-highlight');
+                setTimeout(() => card.classList.remove('search-highlight'), 1400);
+              }
             });
 
             resultsContainer.appendChild(itemEl);
@@ -3251,6 +4367,7 @@
   })();
   </script>
 
-  <script type="module" src="/media-resolver.js"></script>
+  <script type="module" src="media-resolver.js"></script>
+  <script src="flipkart-store.js?v=10"></script>
 </body>
 </html>

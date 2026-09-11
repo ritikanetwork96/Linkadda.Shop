@@ -135,14 +135,7 @@ if (pointerEffectsEnabled()) {
   document.addEventListener('pointerover', () => { cursorGlow.style.opacity = '1'; });
 }
 
-// ===== FLOATING TELEGRAM BADGE =====
-const badge = document.createElement('a');
-badge.href = 'https://t.me/TRUSTED_BROTHER1234';
-badge.target = '_blank';
-badge.className = 'floating-badge';
-badge.innerHTML = '<i class="fa-brands fa-telegram"></i>';
-badge.title = 'DM on Telegram';
-document.body.appendChild(badge);
+// Floating telegram badge removed as requested (Support icon in bottom appbar is active)
 
 // ===== SECTION DIVIDERS =====
 document.querySelectorAll('section').forEach(sec => {
@@ -154,26 +147,33 @@ document.querySelectorAll('section').forEach(sec => {
 // ===== MOBILE MENU =====
 const menuToggle = document.getElementById('menuToggle');
 const mobileNav  = document.getElementById('mobileNav');
-menuToggle.addEventListener('click', () => {
-  mobileNav.classList.toggle('open');
-  const icon = menuToggle.querySelector('i');
-  icon.classList.toggle('fa-bars');
-  icon.classList.toggle('fa-xmark');
-});
-mobileNav.querySelectorAll('.mob-link').forEach(link => {
-  link.addEventListener('click', () => {
-    mobileNav.classList.remove('open');
+if (menuToggle && mobileNav) {
+  menuToggle.addEventListener('click', () => {
+    mobileNav.classList.toggle('open');
     const icon = menuToggle.querySelector('i');
-    icon.classList.add('fa-bars');
-    icon.classList.remove('fa-xmark');
+    if (icon) {
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-xmark');
+    }
   });
-});
+  mobileNav.querySelectorAll('.mob-link').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      const icon = menuToggle.querySelector('i');
+      if (icon) {
+        icon.classList.add('fa-bars');
+        icon.classList.remove('fa-xmark');
+      }
+    });
+  });
+}
 
 // ===== PARTICLES =====
 const particlesContainer = document.getElementById('particles');
 const colors = ['#e84393', '#7c3aed', '#f472b6', '#a855f7'];
 
 function createParticle() {
+  if (!particlesContainer) return;
   const p = document.createElement('div');
   p.className = 'particle';
   const size = Math.random() * 5 + 2;
@@ -190,10 +190,12 @@ function createParticle() {
   particlesContainer.appendChild(p);
   setTimeout(() => p.remove(), (duration + delay) * 1000);
 }
-const particleInterval = finePointer() ? 1200 : 2000;
-setInterval(createParticle, particleInterval);
-const particleBurstCount = finePointer() ? 10 : 5;
-for (let i = 0; i < particleBurstCount; i++) createParticle();
+if (particlesContainer) {
+  const particleInterval = finePointer() ? 1200 : 2000;
+  setInterval(createParticle, particleInterval);
+  const particleBurstCount = finePointer() ? 10 : 5;
+  for (let i = 0; i < particleBurstCount; i++) createParticle();
+}
 
 // ===== GLITCH EFFECT ON HERO TITLE =====
 const gradientTexts = document.querySelectorAll('.gradient-text');
@@ -494,36 +496,332 @@ if (heroVisual) {
   });
 }
 
-// ===== TOAST NOTIFICATIONS =====
-const toastMessages = [
-  { icon: 'fa-solid fa-fire-flame-curved', msg: 'New order received just now!' },
-  { icon: 'fa-solid fa-star',              msg: 'Someone just left a 5-star review!' },
-  { icon: 'fa-brands fa-telegram',         msg: '3 people DM\'d on Telegram today!' },
-  { icon: 'fa-solid fa-bolt',              msg: 'Mega Pack claimed by a buyer!' },
-];
-let toastIdx = 0;
-function showToast() {
-  const drawer = document.getElementById('cartDrawer');
-  if (drawer && drawer.classList.contains('open')) {
-    return; // Don't show toast popups when cart drawer is open
-  }
-  const data = toastMessages[toastIdx % toastMessages.length];
-  toastIdx++;
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.style.cssText = 'background: rgba(18, 18, 30, 0.96) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.18) !important; border-left: 3px solid #f0247a !important; box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;';
-  toast.innerHTML = `<i class="${data.icon}" style="color: #f0247a !important; flex-shrink: 0; font-size: 1rem;"></i><span style="color: #ffffff !important; font-weight: 600 !important; font-size: 0.86rem; letter-spacing: 0.2px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">${data.msg}</span>`;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.add('show'); }); });
+// ===== DYNAMIC TOAST NOTIFICATIONS & SOCIAL PROOF SYSTEM =====
+(function() {
+  const toastEngine = {
+    config: {
+      enabled: true,
+      interval: 8000,
+      duration: 3500,
+      showApprovedOrders: true,
+      showApprovedReviews: true,
+      showTelegramClicks: true,
+      showVisitors: true,
+      visitorBaseOffset: 100,
+      telegramClicksBaseOffset: 50,
+      visitorTemplate: '{count}+ visitors visited the website today!',
+      telegramTemplate: '{count}+ people DM\'d on Telegram today!',
+      approvedOrderTemplate: '⚡ Order approved: {name} just delivered!',
+      approvedReviewTemplate: '⭐ {stars} ({rating}/5) from {name}: {comment}',
+      customMessages: []
+    },
+    state: {
+      approvedOrders: [],
+      approvedOrderIdx: 0,
+      approvedReviews: [],
+      approvedReviewIdx: 0,
+      visitorsCount: 15,
+      telegramClicks: 8,
+      timerId: null,
+      isShowing: false,
+      cycleStage: 0
+    },
+
+    formatMilestone(count, step = 100, minVal = 50) {
+      const num = Math.max(0, Number(count) || 0);
+      if (num < minVal) return `${minVal}+`;
+      const rounded = Math.floor(num / step) * step;
+      return `${rounded > 0 ? rounded : minVal}+`;
+    },
+
+    getNextMessage() {
+      const cfg = this.config;
+      const st = this.state;
+      const candidates = [];
+
+      // 1. REAL Approved Orders (persistent pool 1 to 10 orders approved by admin)
+      if (cfg.showApprovedOrders && Array.isArray(st.approvedOrders) && st.approvedOrders.length > 0) {
+        const order = st.approvedOrders[st.approvedOrderIdx % st.approvedOrders.length];
+        st.approvedOrderIdx = (st.approvedOrderIdx + 1) % st.approvedOrders.length;
+        const orderName = (typeof order === 'string' ? order : (order.name || order.productName || order.package || order.title || 'Package')).trim();
+        const msg = cfg.approvedOrderTemplate.replace('{name}', orderName);
+        candidates.push({ icon: 'fa-solid fa-circle-check', msg, type: 'order' });
+      }
+
+      // 2. REAL Approved Reviews & Ratings (approved by admin)
+      if (cfg.showApprovedReviews && Array.isArray(st.approvedReviews) && st.approvedReviews.length > 0) {
+        const rev = st.approvedReviews[st.approvedReviewIdx % st.approvedReviews.length];
+        st.approvedReviewIdx = (st.approvedReviewIdx + 1) % st.approvedReviews.length;
+        const ratingNum = Math.min(5, Math.max(1, Number(rev.rating) || 5));
+        const stars = '★'.repeat(ratingNum);
+        const author = (rev.name || rev.author || 'Verified Buyer').trim();
+        const prod = (rev.productName || rev.product || '').trim();
+        const rawComment = (rev.comment || rev.text || rev.title || 'Verified 5-star rating').trim();
+        const comment = rawComment.length > 45 ? rawComment.slice(0, 42) + '...' : rawComment;
+        
+        let msg = cfg.approvedReviewTemplate
+          .replace('{stars}', stars)
+          .replace('{rating}', ratingNum)
+          .replace('{name}', author)
+          .replace('{product}', prod ? `on ${prod}` : '')
+          .replace('{comment}', `"${comment}"`);
+        candidates.push({ icon: 'fa-solid fa-star', msg, type: 'review' });
+      }
+
+      // 3. REAL Telegram DMs Milestone (only if real clicks exist)
+      if (cfg.showTelegramClicks) {
+        const totalTg = (Number(st.telegramClicks) || 0) + (Number(cfg.telegramClicksBaseOffset) || 0);
+        if (totalTg > 0) {
+          let msg = '';
+          if (totalTg >= 50) {
+            const milestoneTg = this.formatMilestone(totalTg, 50, 50);
+            msg = cfg.telegramTemplate.replace('{count}', milestoneTg.replace('+', ''));
+          } else {
+            msg = `✈️ ${totalTg} people reached out on Telegram today!`;
+          }
+          candidates.push({ icon: 'fa-brands fa-telegram', msg, type: 'telegram' });
+        }
+      }
+
+      // 4. REAL Website Visitors Milestone (only if real visits exist)
+      if (cfg.showVisitors) {
+        const totalVis = (Number(st.visitorsCount) || 0) + (Number(cfg.visitorBaseOffset) || 0);
+        if (totalVis > 0) {
+          let msg = '';
+          if (totalVis >= 100) {
+            const milestoneVis = this.formatMilestone(totalVis, 100, 100);
+            msg = cfg.visitorTemplate.replace('{count}', milestoneVis.replace('+', ''));
+          } else {
+            msg = `👥 ${totalVis} visitors explored the website today!`;
+          }
+          candidates.push({ icon: 'fa-solid fa-users', msg, type: 'visitors' });
+        }
+      }
+
+      // 5. Custom Admin Announcements (if configured by admin)
+      if (Array.isArray(cfg.customMessages) && cfg.customMessages.length > 0) {
+        cfg.customMessages.forEach(item => {
+          if (item && item.msg) candidates.push(item);
+        });
+      }
+
+      if (!candidates.length) {
+        return null; // Zero fake data: if no real approved data exists, don't show fake popups
+      }
+
+      const item = candidates[st.cycleStage % candidates.length];
+      st.cycleStage = (st.cycleStage + 1) % candidates.length;
+      return item;
+    },
+
+    showToast(overrideData = null) {
+      const cfg = this.config;
+      if (!cfg.enabled) return;
+
+      const drawer = document.getElementById('cartDrawer');
+      if (drawer && drawer.classList.contains('open')) {
+        return; // Don't interrupt open cart drawer
+      }
+
+      const data = overrideData || this.getNextMessage();
+      if (!data || !data.msg) return; // No fake or empty data
+
+      // STRICT ZERO OVERLAP GUARANTEE: Remove any existing toast immediately
+      document.querySelectorAll('.toast').forEach(t => t.remove());
+
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.cssText = 'background: rgba(18, 18, 30, 0.96) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.18) !important; border-left: 3px solid #f0247a !important; box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important; z-index: 99999 !important;';
+      toast.innerHTML = `<i class="${data.icon || 'fa-solid fa-fire-flame-curved'}" style="color: #f0247a !important; flex-shrink: 0; font-size: 1rem;"></i><span style="color: #ffffff !important; font-weight: 600 !important; font-size: 0.86rem; letter-spacing: 0.2px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">${data.msg}</span>`;
+      
+      document.body.appendChild(toast);
+      this.state.isShowing = true;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          toast.classList.add('show');
+        });
+      });
+
+      const displayDuration = Number(cfg.duration) || 3500;
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          try { toast.remove(); } catch (_) {}
+          this.state.isShowing = false;
+        }, 450);
+      }, displayDuration);
+    },
+
+    start() {
+      if (this.state.timerId) clearInterval(this.state.timerId);
+      const intervalMs = Math.max(5000, Number(this.config.interval) || 8000);
+      this.state.timerId = setInterval(() => {
+        this.showToast();
+      }, intervalMs);
+    },
+
+    updateConfig(newSettings) {
+      if (!newSettings || typeof newSettings !== 'object') return;
+      
+      // Toast enable / disable
+      if (newSettings.toastEnabled !== undefined) {
+        this.config.enabled = newSettings.toastEnabled !== false && newSettings.toastEnabled !== 'false';
+      }
+      if (newSettings.toastInterval) {
+        this.config.interval = Math.max(5000, Number(newSettings.toastInterval) * 1000 || 8000);
+      }
+      if (newSettings.toastShowApprovedOrders !== undefined) {
+        this.config.showApprovedOrders = newSettings.toastShowApprovedOrders !== false && newSettings.toastShowApprovedOrders !== 'false';
+      }
+      if (newSettings.toastShowTelegramClicks !== undefined) {
+        this.config.showTelegramClicks = newSettings.toastShowTelegramClicks !== false && newSettings.toastShowTelegramClicks !== 'false';
+      }
+      if (newSettings.toastShowApprovedReviews !== undefined) {
+        this.config.showApprovedReviews = newSettings.toastShowApprovedReviews !== false && newSettings.toastShowApprovedReviews !== 'false';
+      }
+      if (newSettings.toastApprovedReviewTemplate) {
+        this.config.approvedReviewTemplate = String(newSettings.toastApprovedReviewTemplate);
+      }
+      if (newSettings.toastShowVisitors !== undefined) {
+        this.config.showVisitors = newSettings.toastShowVisitors !== false && newSettings.toastShowVisitors !== 'false';
+      }
+      if (newSettings.toastVisitorBaseOffset !== undefined && newSettings.toastVisitorBaseOffset !== null && newSettings.toastVisitorBaseOffset !== '') {
+        const parsed = Number(newSettings.toastVisitorBaseOffset);
+        this.config.visitorBaseOffset = !isNaN(parsed) && parsed >= 0 ? parsed : 100;
+      } else {
+        this.config.visitorBaseOffset = 100;
+      }
+      if (newSettings.toastTelegramClicksBaseOffset !== undefined && newSettings.toastTelegramClicksBaseOffset !== null && newSettings.toastTelegramClicksBaseOffset !== '') {
+        const parsed = Number(newSettings.toastTelegramClicksBaseOffset);
+        this.config.telegramClicksBaseOffset = !isNaN(parsed) && parsed >= 0 ? parsed : 50;
+      } else {
+        this.config.telegramClicksBaseOffset = 50;
+      }
+      if (newSettings.toastApprovedOrderTemplate) {
+        this.config.approvedOrderTemplate = String(newSettings.toastApprovedOrderTemplate);
+      }
+      if (newSettings.toastTelegramTemplate) {
+        this.config.telegramTemplate = String(newSettings.toastTelegramTemplate);
+      }
+      if (newSettings.toastVisitorTemplate) {
+        this.config.visitorTemplate = String(newSettings.toastVisitorTemplate);
+      }
+      if (newSettings.toastCustomMessages && typeof newSettings.toastCustomMessages === 'string') {
+        this.config.customMessages = newSettings.toastCustomMessages.split('\n')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(msg => ({ icon: 'fa-solid fa-bullhorn', msg }));
+      }
+
+      // Approved orders pool from real settings
+      if (Array.isArray(newSettings.recentApproved)) {
+        this.setApprovedOrders(newSettings.recentApproved);
+      }
+
+      // Approved reviews pool from settings
+      if (Array.isArray(newSettings.recentApprovedReviews)) {
+        this.setApprovedReviews(newSettings.recentApprovedReviews);
+      }
+
+      this.start();
+    },
+
+    setApprovedOrders(orders) {
+      if (!Array.isArray(orders)) return;
+      const valid = orders.filter(o => o && (typeof o === 'string' || o.name || o.productName));
+      this.state.approvedOrders = valid.slice(0, 10);
+    },
+
+    setApprovedReviews(reviews) {
+      if (!Array.isArray(reviews)) return;
+      // Keep up to 10 latest approved reviews
+      this.state.approvedReviews = reviews.slice(0, 10);
+    },
+
+    addApprovedOrder(order) {
+      if (!order) return;
+      const orderTitle = (typeof order === 'string' ? order : (order.name || order.productName || order.title || 'VIP Pack')).trim();
+      const orderId = order.id || orderTitle;
+      const filtered = this.state.approvedOrders.filter(o => {
+        const id = o.id || (typeof o === 'string' ? o : o.name);
+        return id !== orderId;
+      });
+      this.state.approvedOrders = [{ id: orderId, name: orderTitle, ...order }, ...filtered].slice(0, 10);
+      // Show immediately if enabled, then continue steady cycling
+      this.showToast({
+        icon: 'fa-solid fa-circle-check',
+        msg: this.config.approvedOrderTemplate.replace('{name}', orderTitle)
+      });
+    },
+
+    addApprovedReview(rev) {
+      if (!rev) return;
+      const list = [rev, ...this.state.approvedReviews.filter(r => (r.id || r) !== (rev.id || rev))];
+      this.state.approvedReviews = list.slice(0, 10);
+      const ratingNum = Math.min(5, Math.max(1, Number(rev.rating) || 5));
+      const stars = '★'.repeat(ratingNum);
+      const author = (rev.name || rev.author || 'Verified Buyer').trim();
+      const prod = (rev.productName || rev.product || '').trim();
+      const rawComment = (rev.comment || rev.text || rev.title || 'Verified 5-star rating').trim();
+      const comment = rawComment.length > 45 ? rawComment.slice(0, 42) + '...' : rawComment;
+      
+      const msg = this.config.approvedReviewTemplate
+        .replace('{stars}', stars)
+        .replace('{rating}', ratingNum)
+        .replace('{name}', author)
+        .replace('{product}', prod ? `on ${prod}` : '')
+        .replace('{comment}', `"${comment}"`);
+
+      this.showToast({
+        icon: 'fa-solid fa-star',
+        msg
+      });
+    },
+
+    setVisitorCount(count) {
+      if (count !== undefined && !isNaN(Number(count))) {
+        this.state.visitorsCount = Number(count);
+      }
+    },
+
+    setTelegramClicks(count) {
+      if (count !== undefined && !isNaN(Number(count))) {
+        this.state.telegramClicks = Number(count);
+      }
+    },
+
+    recordTelegramClick() {
+      this.state.telegramClicks = (Number(this.state.telegramClicks) || 0) + 1;
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const storedKey = `linkadda_tg_clicks_${today}`;
+        const prev = Number(localStorage.getItem(storedKey) || 0);
+        localStorage.setItem(storedKey, String(prev + 1));
+      } catch (_) {}
+    }
+  };
+
+  window.__linkaddaToast = toastEngine;
+
+  // Initial startup after page load
   setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 500);
-  }, 3500);
-}
-setTimeout(() => {
-  showToast();
-  setInterval(showToast, finePointer() ? 7000 : 10000);
-}, 4000);
+    // Initial local storage hydration
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const localTg = Number(localStorage.getItem(`linkadda_tg_clicks_${today}`) || 0);
+      if (localTg > 0) toastEngine.setTelegramClicks(localTg);
+      
+      const cachedSettings = localStorage.getItem('linkadda_settings_cache');
+      if (cachedSettings) {
+        toastEngine.updateConfig(JSON.parse(cachedSettings));
+      }
+    } catch (_) {}
+
+    toastEngine.showToast();
+    toastEngine.start();
+  }, 3800);
+})();
 
 // ===== HERO SPOTLIGHT on mousemove =====
 const heroSection = document.querySelector('.hero');
