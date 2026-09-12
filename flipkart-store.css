@@ -584,29 +584,36 @@ body.linkadda-store {
     gap: 10px !important;
     padding: 10px 0 !important;
   }
+  /* ===== APPLE DESIGN SYSTEM: PRODUCT CARDS & BUTTONS (MOBILE) ===== */
   .fk-card {
     border-radius: 18px !important;
-    background: rgba(18, 17, 28, 0.92) !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45) !important;
+    background: rgba(18, 17, 28, 0.8) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.42) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     position: relative !important;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease !important;
   }
   .fk-card:active {
     transform: scale(0.98) !important;
   }
   [data-theme="light"] .fk-card {
     background: #ffffff !important;
-    border: 1px solid rgba(226, 232, 240, 0.88) !important;
-    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 10px 24px -4px rgba(15, 23, 42, 0.08) !important;
+  }
+  [data-theme="light"] .fk-card:active {
+    transform: scale(0.98) !important;
   }
   .fk-card-media {
-    width: calc(100% - 10px) !important;
-    margin: 5px 5px 0 5px !important;
-    border-radius: 13px !important;
+    width: calc(100% - 12px) !important;
+    margin: 6px 6px 0 6px !important;
+    border-radius: 14px !important;
     aspect-ratio: 1 / 1 !important;
     background: #090a12 !important;
     position: relative !important;
@@ -614,25 +621,30 @@ body.linkadda-store {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  }
+  [data-theme="light"] .fk-card-media {
+    background: #f8fafc !important;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
   }
   .fk-card-media img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
     display: block !important;
-    border-radius: 13px !important;
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    border-radius: 14px !important;
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
   }
   .fk-card-media-gradient {
     position: absolute !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    height: 38% !important;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.48) 100%) !important;
+    height: 35% !important;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.42) 100%) !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    border-radius: 0 0 13px 13px !important;
+    border-radius: 0 0 14px 14px !important;
   }
   .fk-card-quick-view-overlay {
     display: none !important;
@@ -642,23 +654,43 @@ body.linkadda-store {
     top: 8px !important;
     left: 8px !important;
     z-index: 6 !important;
-    max-width: calc(100% - 68px) !important;
+    max-width: calc(100% - 48px) !important;
     overflow: hidden !important;
   }
   .fk-card-badge-vip {
-    padding: 2.5px 7px !important;
+    padding: 3.5px 8.5px !important;
     font-size: 8.5px !important;
-    font-weight: 800 !important;
-    border-radius: 6px !important;
-    background: linear-gradient(135deg, #e11d48, #be123c) !important;
+    font-weight: 750 !important;
+    border-radius: 9999px !important;
+    background: rgba(15, 23, 42, 0.82) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
     color: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(225,29,72,0.3) !important;
-    border: 1px solid rgba(255,255,255,0.25) !important;
-    letter-spacing: 0.3px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    letter-spacing: 0.35px !important;
     text-transform: uppercase !important;
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+  }
+  .fk-card-badge-vip i {
+    color: #fbbf24 !important;
+    font-size: 8px !important;
+  }
+  [data-theme="light"] .fk-card-badge-vip {
+    background: rgba(15, 23, 42, 0.84) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.24) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+  }
+  [data-theme="light"] .fk-card-badge-vip i {
+    color: #fbbf24 !important;
   }
   .fk-card-top-actions {
     position: absolute !important;
@@ -679,42 +711,57 @@ body.linkadda-store {
     bottom: auto !important;
     flex-shrink: 0 !important;
   }
-  .fk-card-action-circle {
-    width: 28px !important;
-    height: 28px !important;
+  .fk-card-action-circle,
+  .fk-card-wishlist-btn {
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
-    background: #14121f !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    background: rgba(18, 16, 26, 0.72) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #ffffff !important;
-    font-size: 11.5px !important;
+    font-size: 12.5px !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
   }
-  .fk-card-action-circle:active {
+  .fk-card-action-circle:active,
+  .fk-card-wishlist-btn:active {
     transform: scale(0.9) !important;
   }
-  [data-theme="light"] .fk-card-action-circle {
-    background: #ffffff !important;
-    border-color: rgba(0, 0, 0, 0.15) !important;
-    color: #334155 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  [data-theme="light"] .fk-card-action-circle,
+  [data-theme="light"] .fk-card-wishlist-btn {
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #64748b !important;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.12), inset 0 1px 0 #ffffff !important;
   }
-  .fk-card-wishlist-btn.active {
+  [data-theme="light"] .fk-card-action-circle:hover,
+  [data-theme="light"] .fk-card-wishlist-btn:hover {
+    color: #f43f5e !important;
+    background: #ffffff !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 16px rgba(244, 63, 94, 0.25) !important;
+  }
+  .fk-card-wishlist-btn.active,
+  [data-theme="light"] .fk-card-wishlist-btn.active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
-    border-color: #f43f5e !important;
-    box-shadow: 0 0 10px rgba(225, 29, 72, 0.4) !important;
+    background: linear-gradient(135deg, #ff2a55, #e1143c) !important;
+    border-color: #e1143c !important;
+    box-shadow: 0 4px 16px rgba(225, 29, 72, 0.45) !important;
   }
   .fk-card-duration-badge {
     display: none !important;
   }
   .fk-card-body {
-    padding: 8px 9px 11px !important;
-    gap: 3.5px !important;
+    padding: 8px 8px 12px !important;
+    gap: 4px !important;
     display: flex !important;
     flex-direction: column !important;
     flex: 1 !important;
@@ -727,50 +774,46 @@ body.linkadda-store {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 3px !important;
+    gap: 4px !important;
     width: 100% !important;
   }
   .fk-card-seller {
-    font-size: 9.5px !important;
+    font-size: 10px !important;
     white-space: nowrap !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 3.5px !important;
+    gap: 4px !important;
     letter-spacing: -0.1px !important;
-    color: var(--la-text-muted) !important;
-    font-weight: 700 !important;
+    color: #cbd5e1 !important;
+    font-weight: 650 !important;
   }
   .fk-card-seller i {
-    font-size: 9px !important;
-    color: #2563eb !important;
+    font-size: 11px !important;
+    color: #38bdf8 !important;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.4)) !important;
   }
   [data-theme="light"] .fk-card-seller {
-    color: #475569 !important;
+    color: #334155 !important;
+  }
+  [data-theme="light"] .fk-card-seller i {
+    color: #0284c7 !important;
+    filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.25)) !important;
+  }
+  .fk-seller-verified-txt {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+  }
+  [data-theme="light"] .fk-seller-verified-txt {
+    color: #0284c7 !important;
+    font-weight: 750 !important;
   }
   .fk-discrete-badge {
-    font-size: 8px !important;
-    padding: 1.5px 5.5px !important;
-    border-radius: 9999px !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 2.5px !important;
-    font-weight: 800 !important;
-    color: #10b981 !important;
-    background: rgba(16, 185, 129, 0.12) !important;
-    border: 1px solid rgba(16, 185, 129, 0.28) !important;
-    flex-shrink: 0 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.3px !important;
-  }
-  [data-theme="light"] .fk-discrete-badge {
-    background: #ecfdf5 !important;
-    color: #059669 !important;
-    border-color: rgba(16, 185, 129, 0.3) !important;
+    display: none !important;
   }
   .fk-card-title {
-    font-size: 12.5px !important;
-    font-weight: 750 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     line-height: 1.34 !important;
     margin: 1px 0 0 !important;
     display: -webkit-box !important;
@@ -778,59 +821,66 @@ body.linkadda-store {
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    min-height: 33px !important;
-    color: var(--la-text) !important;
-    text-transform: capitalize !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    min-height: 35px !important;
+    color: #f8fafc !important;
+    text-transform: none !important;
     letter-spacing: -0.2px !important;
   }
   [data-theme="light"] .fk-card-title {
     color: #0f172a !important;
   }
   .fk-card-rating-row {
-    font-size: 10px !important;
+    font-size: 9.5px !important;
     gap: 3.5px !important;
     display: inline-flex !important;
     align-items: center !important;
     width: fit-content !important;
-    padding: 1.5px 6px !important;
+    padding: 2.5px 7px !important;
     border-radius: 6px !important;
-    background: rgba(245, 158, 11, 0.1) !important;
+    background: rgba(245, 158, 11, 0.09) !important;
     border: 1px solid rgba(245, 158, 11, 0.22) !important;
     margin: 1px 0 !important;
   }
   .fk-rating-star {
-    font-size: 9.5px !important;
+    font-size: 10px !important;
     color: #f59e0b !important;
     display: inline-flex !important;
   }
   .fk-rating-val {
     font-weight: 800 !important;
-    font-size: 10.5px !important;
+    font-size: 11px !important;
     color: #fbbf24 !important;
   }
-  [data-theme="light"] .fk-rating-val {
-    color: #b45309 !important;
+  [data-theme="light"] .fk-card-rating-row {
+    background: #fefce8 !important;
+    border-color: #fef08a !important;
   }
-  .fk-rating-count {
-    font-size: 9px !important;
-    color: #94a3b8 !important;
-    font-weight: 600 !important;
+  [data-theme="light"] .fk-rating-star {
+    color: #f59e0b !important;
+  }
+  [data-theme="light"] .fk-rating-val {
+    color: #854d0e !important;
   }
   [data-theme="light"] .fk-rating-count {
-    color: #64748b !important;
+    color: #713f12 !important;
+    opacity: 0.75 !important;
   }
   .fk-card-price-row {
     display: flex !important;
     align-items: baseline !important;
     justify-content: space-between !important;
-    white-space: nowrap !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
+    row-gap: 3px !important;
+    column-gap: 5px !important;
     width: 100% !important;
     margin-top: 2px !important;
+    box-sizing: border-box !important;
   }
   .fk-dual-price {
-    font-size: 15px !important;
-    font-weight: 900 !important;
+    font-size: 14.5px !important;
+    font-weight: 850 !important;
     white-space: nowrap !important;
     gap: 2px !important;
     display: inline-flex !important;
@@ -840,91 +890,73 @@ body.linkadda-store {
   }
   .fk-price-inr {
     color: #ffffff !important;
-    font-weight: 900 !important;
+    font-weight: 850 !important;
   }
   [data-theme="light"] .fk-price-inr {
     color: #0f172a !important;
   }
   .fk-price-sep {
-    font-size: 11px !important;
-    color: #94a3b8 !important;
-    opacity: 0.7 !important;
-    margin: 0 1px !important;
-    font-weight: 400 !important;
+    display: none !important;
   }
   .fk-price-usd {
-    font-size: 12px !important;
-    font-weight: 800 !important;
-    color: #f43f5e !important;
-    letter-spacing: -0.2px !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    color: #fda4af !important;
+    background: rgba(225, 29, 72, 0.12) !important;
+    border: 1px solid rgba(225, 29, 72, 0.22) !important;
+    border-radius: 4px !important;
+    padding: 1px 4.5px !important;
+    margin-left: 2px !important;
+    letter-spacing: -0.1px !important;
+  }
+  [data-theme="light"] .fk-price-usd {
+    color: #be123c !important;
+    background: rgba(225, 29, 72, 0.08) !important;
+    border-color: rgba(225, 29, 72, 0.18) !important;
   }
   .fk-price-sub-row {
     display: inline-flex !important;
     align-items: baseline !important;
-    gap: 3.5px !important;
-    margin-left: auto !important;
+    gap: 3px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
   .fk-mrp-cut {
-    font-size: 9.5px !important;
+    font-size: 9px !important;
     white-space: nowrap !important;
     color: #94a3b8 !important;
     text-decoration: line-through !important;
-    opacity: 0.75 !important;
+    opacity: 0.7 !important;
     font-weight: 500 !important;
   }
   .fk-discount-tag {
-    font-size: 8.5px !important;
+    font-size: 8px !important;
     font-weight: 800 !important;
-    padding: 1.5px 5.5px !important;
+    padding: 1px 4.5px !important;
     white-space: nowrap !important;
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border: none !important;
+    color: #34d399 !important;
+    background: rgba(16, 185, 129, 0.14) !important;
+    border: 1px solid rgba(16, 185, 129, 0.28) !important;
     border-radius: 4px !important;
-    box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25) !important;
     letter-spacing: 0.1px !important;
-  }
-  .fk-card-meta-perks {
-    font-size: 8.5px !important;
-    gap: 4px !important;
-    white-space: nowrap !important;
-    display: flex !important;
-    align-items: center !important;
-    margin-top: 3px !important;
-    overflow: hidden !important;
-    font-weight: 600 !important;
-  }
-  .fk-card-meta-perks span {
-    white-space: nowrap !important;
-    font-size: 8.5px !important;
+    line-height: 1.3 !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 3.5px !important;
-    padding: 2.5px 6px !important;
-    border-radius: 5px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #94a3b8 !important;
   }
-  .fk-card-meta-perks span i.fa-bolt {
-    color: #f59e0b !important;
+  [data-theme="light"] .fk-discount-tag {
+    color: #059669 !important;
+    background: #ecfdf5 !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
   }
-  .fk-card-meta-perks span i.fa-cloud {
-    color: #0284c7 !important;
-  }
-  [data-theme="light"] .fk-card-meta-perks span {
-    background: #f8fafc !important;
-    border-color: #e2e8f0 !important;
-    color: #475569 !important;
+  .fk-card-meta-perks {
+    display: none !important;
   }
   .fk-card-actions-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
+    gap: 7px !important;
     margin-top: 6px !important;
-    padding-top: 7px !important;
+    padding-top: 8px !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
   [data-theme="light"] .fk-card-actions-row {
@@ -932,58 +964,109 @@ body.linkadda-store {
   }
   .fk-card-btn-cart,
   .fk-card-btn-buy {
-    height: 35px !important;
-    font-size: 11px !important;
+    height: 38px !important;
+    font-size: 12px !important;
     font-weight: 750 !important;
-    padding: 0 4px !important;
-    gap: 4px !important;
-    border-radius: 10px !important;
+    padding: 0 6px !important;
+    gap: 5px !important;
+    border-radius: 12px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     text-decoration: none !important;
     letter-spacing: 0.2px !important;
+    user-select: none !important;
+  }
+  .fk-card-btn-cart i {
+    font-size: 11.5px !important;
+    color: #fda4af !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .fk-card-btn-cart:hover i {
+    transform: scale(1.15) !important;
   }
   .fk-card-btn-cart {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 2px 8px rgba(0, 0, 0, 0.22) !important;
+    color: #f8fafc !important;
+  }
+  .fk-card-btn-cart:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
     color: #ffffff !important;
+    transform: translateY(-1px) !important;
   }
   .fk-card-btn-cart:active {
-    transform: scale(0.95) !important;
-    background: rgba(255, 255, 255, 0.14) !important;
+    transform: scale(0.96) !important;
+    background: rgba(255, 255, 255, 0.16) !important;
   }
   [data-theme="light"] .fk-card-btn-cart {
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07), inset 0 1px 0 #ffffff !important;
+  }
+  [data-theme="light"] .fk-card-btn-cart i {
+    color: #e11d48 !important;
+  }
+  [data-theme="light"] .fk-card-btn-cart:hover {
     background: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    color: #1e293b !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    border-color: #94a3b8 !important;
+    color: #e11d48 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1), inset 0 1px 0 #ffffff !important;
+    transform: translateY(-1px) !important;
   }
   [data-theme="light"] .fk-card-btn-cart:active {
-    transform: scale(0.95) !important;
-    background: #f8fafc !important;
-    border-color: #94a3b8 !important;
+    transform: scale(0.96) !important;
+    background: #e2e8f0 !important;
   }
-  .fk-card-btn-cart.added {
-    background: #10b981 !important;
-    border-color: #10b981 !important;
+  .fk-card-btn-cart.added,
+  [data-theme="light"] .fk-card-btn-cart.added {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+    border-color: #059669 !important;
     color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+    box-shadow: 0 3px 12px rgba(16, 185, 129, 0.4) !important;
   }
-  .fk-card-btn-buy {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%) !important;
-    border: none !important;
+  .fk-card-btn-cart.added i,
+  [data-theme="light"] .fk-card-btn-cart.added i {
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  }
+
+  .fk-card-btn-buy i {
+    font-size: 11.5px !important;
+    color: #ffffff !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .fk-card-btn-buy:hover i {
+    transform: scale(1.18) rotate(-4deg) !important;
+  }
+  .fk-card-btn-buy,
+  [data-theme="light"] .fk-card-btn-buy {
+    background: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%) !important;
+    border: 1px solid rgba(225, 29, 72, 0.85) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
     font-weight: 800 !important;
     letter-spacing: 0.3px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
   }
-  .fk-card-btn-buy:active {
-    transform: scale(0.95) !important;
-    box-shadow: 0 1px 4px rgba(225, 29, 72, 0.3) !important;
+  .fk-card-btn-buy:hover,
+  [data-theme="light"] .fk-card-btn-buy:hover {
+    filter: brightness(1.08) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+  }
+  .fk-card-btn-buy:active,
+  [data-theme="light"] .fk-card-btn-buy:active {
+    transform: scale(0.96) !important;
+    box-shadow: 0 1px 5px rgba(225, 29, 72, 0.32) !important;
   }
 }
 
@@ -993,25 +1076,26 @@ body.linkadda-store {
   }
 }
 
+/* ===== APPLE DESIGN SYSTEM: PRODUCT CARDS & BUTTONS (DESKTOP & BASE) ===== */
 .fk-card {
   position: relative;
-  background: var(--la-bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(18, 17, 28, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
+  border-radius: 22px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease, box-shadow 0.28s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
 .fk-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(244, 63, 94, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(225, 29, 72, 0.18);
+  transform: translateY(-5px);
+  border-color: rgba(225, 29, 72, 0.32);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 24px rgba(225, 29, 72, 0.16);
 }
 
 /* Top Actions Container (Share + Wishlist) */
@@ -1035,18 +1119,18 @@ body.linkadda-store {
   bottom: auto !important;
 }
 
-/* Floating Wishlist Button */
+/* Floating Apple Frosted Glass Wishlist Button */
 .fk-card-wishlist-btn {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 10;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(20, 10, 11, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(14, 15, 24, 0.68);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
@@ -1054,21 +1138,25 @@ body.linkadda-store {
   color: #ffffff;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, color 0.2s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
 }
 
 .fk-card-wishlist-btn:hover {
-  transform: scale(1.12);
-  color: #ff3366;
-  background: rgba(20, 16, 30, 0.85);
+  transform: scale(1.1);
+  color: #f43f5e;
+  background: rgba(20, 16, 30, 0.88);
+}
+
+.fk-card-wishlist-btn:active {
+  transform: scale(0.92);
 }
 
 .fk-card-wishlist-btn.active {
-  color: #f43f5e !important;
-  background: rgba(12, 10, 20, 0.75) !important;
-  border-color: rgba(244, 63, 94, 0.5) !important;
-  box-shadow: 0 0 12px rgba(225, 29, 72, 0.4) !important;
+  color: #ffffff !important;
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.45) !important;
 }
 
 @keyframes heartPulse {
@@ -1082,7 +1170,7 @@ body.linkadda-store {
   animation: heartPulse 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Top Badges Row */
+/* Top Badges Row (Apple Frosted Glass Pill) */
 .fk-card-badges-row {
   position: absolute;
   top: 10px;
@@ -1091,44 +1179,133 @@ body.linkadda-store {
   display: flex;
   align-items: center;
   gap: 5px;
+  max-width: calc(100% - 70px);
+  overflow: hidden;
 }
 
 .fk-card-badge-vip {
-  padding: 2.5px 7px;
-  border-radius: 6px;
-  background: rgba(255, 70, 70, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 3.5px 9px;
+  border-radius: 9999px;
+  background: rgba(18, 16, 26, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  display: flex;
+  letter-spacing: 0.35px;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .fk-card-badge-vip i {
   color: #f59e0b;
-  font-size: 9px;
+  font-size: 8.5px;
 }
 
 .fk-card-badge-hdr {
-  padding: 3px 6px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.75);
+  padding: 3px 7px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.4px;
 }
 
-/* Card Media */
+/* Badge Color Variations (Admin Controlled: Red, White, Gold, Default) */
+.fk-card-badge-vip.badge-color-red,
+.fk-card-badge-vip.badge-red {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.45) !important;
+}
+.fk-card-badge-vip.badge-color-red i,
+.fk-card-badge-vip.badge-red i {
+  color: #ffffff !important;
+}
+
+.fk-card-badge-vip.badge-color-white,
+.fk-card-badge-vip.badge-white {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3), 0 0 12px rgba(255, 255, 255, 0.35) !important;
+}
+.fk-card-badge-vip.badge-color-white i,
+.fk-card-badge-vip.badge-white i {
+  color: #e11d48 !important;
+}
+
+.fk-card-badge-vip.badge-color-gold,
+.fk-card-badge-vip.badge-gold,
+.fk-card-badge-vip.pcard-pill-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.45) !important;
+}
+.fk-card-badge-vip.badge-color-gold i,
+.fk-card-badge-vip.badge-gold i,
+.fk-card-badge-vip.pcard-pill-gold i {
+  color: #ffffff !important;
+}
+
+/* Light Theme Badge Color Variations */
+[data-theme="light"] .fk-card-badge-vip.badge-color-red,
+[data-theme="light"] .fk-card-badge-vip.badge-red {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border: 1px solid rgba(225, 29, 72, 0.3) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35) !important;
+}
+[data-theme="light"] .fk-card-badge-vip.badge-color-red i,
+[data-theme="light"] .fk-card-badge-vip.badge-red i {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .fk-card-badge-vip.badge-color-white,
+[data-theme="light"] .fk-card-badge-vip.badge-white {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+[data-theme="light"] .fk-card-badge-vip.badge-color-white i,
+[data-theme="light"] .fk-card-badge-vip.badge-white i {
+  color: #e11d48 !important;
+}
+
+[data-theme="light"] .fk-card-badge-vip.badge-color-gold,
+[data-theme="light"] .fk-card-badge-vip.badge-gold,
+[data-theme="light"] .fk-card-badge-vip.pcard-pill-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important;
+}
+[data-theme="light"] .fk-card-badge-vip.badge-color-gold i,
+[data-theme="light"] .fk-card-badge-vip.badge-gold i,
+[data-theme="light"] .fk-card-badge-vip.pcard-pill-gold i {
+  color: #ffffff !important;
+}
+
+
+/* Card Media Frame (Apple Hardware Display Frame) */
 .fk-card-media {
-  width: calc(100% - 12px);
+  width: calc(100% - 14px);
   aspect-ratio: 1 / 1;
   background: #090a12;
   position: relative;
@@ -1136,19 +1313,33 @@ body.linkadda-store {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  margin: 6px 6px 0 6px;
+  border-radius: 16px;
+  margin: 7px 7px 0 7px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
 .fk-card-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 16px;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .fk-card:hover .fk-card-media img {
   transform: scale(1.06);
+}
+
+.fk-card-media-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.42) 100%);
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 0 0 16px 16px;
 }
 
 .fk-card-duration-badge {
@@ -1157,24 +1348,26 @@ body.linkadda-store {
 
 .fk-card-quick-view-overlay {
   position: absolute;
-  bottom: 8px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: rgba(10, 11, 18, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(14, 15, 24, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 20px;
+  padding: 5px 14px;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .fk-card:hover .fk-card-quick-view-overlay {
@@ -1192,11 +1385,12 @@ body.linkadda-store {
 
 /* Card Body */
 .fk-card-body {
-  padding: 10px 12px 12px;
+  padding: 10px 12px 14px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 5px;
+  justify-content: space-between;
+  gap: 4px;
 }
 
 .fk-card-seller-row {
@@ -1209,224 +1403,259 @@ body.linkadda-store {
 
 .fk-card-seller {
   color: var(--la-text-muted);
-  font-weight: 600;
+  font-weight: 650;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 10.5px;
+  letter-spacing: -0.1px;
 }
 
 .fk-card-seller i {
-  color: #e11d48;
-  font-size: 10.5px;
+  color: #38bdf8;
+  font-size: 10px;
 }
 
 .fk-discrete-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.14);
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  display: none !important;
 }
 
 .fk-card-title {
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", sans-serif;
+  font-size: 13.5px;
+  font-weight: 650;
+  text-transform: none;
   letter-spacing: -0.2px;
-  color: var(--la-text);
-  line-height: 1.3;
+  color: #f8fafc;
+  line-height: 1.35;
   margin: 2px 0 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 34px;
+  min-height: 36px;
   transition: color 0.2s ease;
 }
 
 .fk-card:hover .fk-card-title {
-  color: var(--la-pink);
+  color: #e11d48;
 }
 
-/* Rating Row */
+/* Rating Row (Apple Minimalist Star Pill) */
 .fk-card-rating-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
+  font-size: 10px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  border-radius: 6px;
+  padding: 2px 7px;
+  width: fit-content;
+  margin: 1px 0;
 }
 
 .fk-rating-star {
   color: #f59e0b;
-  font-size: 11.5px;
+  font-size: 10px;
 }
 
 .fk-rating-val {
   font-weight: 800;
-  color: var(--la-text);
+  font-size: 11px;
+  color: #fbbf24;
 }
 
 .fk-rating-count {
-  font-size: 11px;
-  color: var(--la-text-muted);
+  font-size: 9.5px;
+  color: #94a3b8;
   font-weight: 500;
 }
 
-/* Dual Pricing Row (INR & USD together) */
+/* Dual Pricing Row (Clean Apple Hierarchy) */
 .fk-card-price-row {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  justify-content: space-between;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-top: 1px;
+  row-gap: 3px;
+  margin-top: 2px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .fk-dual-price {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: var(--la-text);
-  display: flex;
+  font-size: 16px;
+  font-weight: 850;
+  color: #ffffff;
+  display: inline-flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 2px;
+  letter-spacing: -0.4px;
+  flex-shrink: 0;
 }
 
 .fk-price-inr {
-  color: var(--la-text);
-  font-weight: 900;
+  color: #ffffff;
+  font-weight: 850;
 }
 
 .fk-price-sep {
-  color: var(--la-text-muted);
-  font-size: 12px;
-  font-weight: 600;
+  display: none !important;
 }
 
 .fk-price-usd {
-  color: #f43f5e;
-  font-weight: 800;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fda4af;
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.22);
+  border-radius: 5px;
+  padding: 1px 5.5px;
+  margin-left: 3px;
+  letter-spacing: -0.1px;
 }
 
 .fk-price-sub-row {
   display: inline-flex;
   align-items: baseline;
-  gap: 5px;
-  margin-left: auto;
+  gap: 4px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .fk-mrp-cut {
-  font-size: 11px;
-  color: var(--la-text-muted);
+  font-size: 10px;
+  color: #94a3b8;
   text-decoration: line-through;
+  opacity: 0.7;
+  font-weight: 500;
 }
 
 .fk-discount-tag {
-  font-size: 10px;
+  font-size: 8.5px;
   font-weight: 800;
-  color: #d97706;
-  background: rgba(245, 158, 11, 0.15);
-  padding: 1.5px 5px;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  padding: 1.5px 5.5px;
   border-radius: 4px;
+  letter-spacing: 0.1px;
 }
 
 .fk-card-meta-perks {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: var(--la-text-muted);
-  margin-top: 1px;
+  display: none !important;
 }
 
-.fk-card-meta-perks span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Real Card Action Buttons Row */
+/* Apple Precision Action Buttons Row */
 .fk-card-actions-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 8px;
   margin-top: 6px;
   padding-top: 8px;
-  border-top: 1px solid var(--la-border);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fk-card-btn-cart i {
+  font-size: 12px;
+  color: #fda4af;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fk-card-btn-cart:hover i {
+  transform: scale(1.15);
 }
 
 .fk-card-btn-cart {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #f1f5f9;
-  border-radius: 10px;
-  height: 35px;
+  color: #f8fafc;
+  border-radius: 12px;
+  height: 38px;
   padding: 0 8px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 2px 8px rgba(0, 0, 0, 0.22);
   user-select: none;
 }
 
 .fk-card-btn-cart:hover {
-  background: rgba(244, 63, 94, 0.14);
-  border-color: rgba(244, 63, 94, 0.55);
-  color: #fda4af;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .fk-card-btn-cart:active {
   transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .fk-card-btn-cart.added {
-  background: rgba(16, 185, 129, 0.2) !important;
-  border-color: #10b981 !important;
-  color: #34d399 !important;
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4) !important;
-  transform: scale(1.02);
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+.fk-card-btn-cart.added i {
+  color: #ffffff !important;
+}
+
+.fk-card-btn-buy i {
+  font-size: 11.5px;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fk-card-btn-buy:hover i {
+  transform: scale(1.18) rotate(-4deg);
 }
 
 .fk-card-btn-buy {
-  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-  border: none;
+  background: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%);
+  border: 1px solid rgba(225, 29, 72, 0.85);
   color: #ffffff;
-  border-radius: 10px;
-  height: 35px;
+  border-radius: 12px;
+  height: 38px;
   padding: 0 8px;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   user-select: none;
 }
 
 .fk-card-btn-buy:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(244, 63, 94, 0.45);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .fk-card-btn-buy:active {
   transform: scale(0.96);
+  box-shadow: 0 1px 5px rgba(225, 29, 72, 0.32);
 }
 
 /* --------------------------------------------------------------------------
@@ -3631,32 +3860,74 @@ body.linkadda-store {
   border-color: #cbd5e1 !important;
 }
 
+/* ===== APPLE DESIGN SYSTEM: LIGHT MODE PRODUCT CARDS & BUTTONS ===== */
 [data-theme="light"] .fk-card {
   background: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.07) !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04), 0 12px 28px -4px rgba(15, 23, 42, 0.07) !important;
 }
 
 [data-theme="light"] .fk-card:hover {
-  border-color: rgba(225, 29, 72, 0.35) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.09) !important;
+  border-color: rgba(225, 29, 72, 0.28) !important;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 20px 36px -4px rgba(15, 23, 42, 0.12) !important;
 }
 
 [data-theme="light"] .fk-card-media {
   background: #f8fafc !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
 }
 
-[data-theme="light"] .fk-card-wishlist-btn {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  color: #374151 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip i {
+  color: #d97706 !important;
+}
+
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-hdr {
+  background: rgba(241, 245, 249, 0.95) !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .fk-card-quick-view-overlay {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .fk-card-wishlist-btn,
+[data-theme="light"] .fk-card-action-circle {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #475569 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .fk-card-wishlist-btn:hover,
+[data-theme="light"] .fk-card-action-circle:hover {
+  color: #f43f5e !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+  background: #ffffff !important;
 }
 
 [data-theme="light"] .fk-card-wishlist-btn.active {
-  background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+  background: #f43f5e !important;
   color: #ffffff !important;
-  border-color: transparent !important;
+  border-color: #f43f5e !important;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.45) !important;
 }
 
 [data-theme="light"] .fk-card-duration-badge {
@@ -3664,52 +3935,157 @@ body.linkadda-store {
   color: #ffffff !important;
 }
 
+[data-theme="light"] .fk-card-body {
+  color: #0f172a !important;
+}
+
 [data-theme="light"] .fk-card-title {
-  color: #111827 !important;
+  color: #0f172a !important;
 }
 
-[data-theme="light"] .fk-rating-val {
-  color: #111827 !important;
-}
-
-[data-theme="light"] .fk-price-inr {
-  color: #111827 !important;
-}
-
-[data-theme="light"] .fk-price-usd {
+[data-theme="light"] .fk-card:hover .fk-card-title {
   color: #e11d48 !important;
 }
 
-[data-theme="light"] .fk-price-sep {
-  color: #9ca3af !important;
+[data-theme="light"] .fk-card-seller {
+  color: #475569 !important;
 }
 
-[data-theme="light"] .fk-mrp-cut {
-  color: #9ca3af !important;
-}
-
-[data-theme="light"] .fk-discount-tag {
-  background: rgba(245, 158, 11, 0.16) !important;
-  color: #d97706 !important;
+[data-theme="light"] .fk-card-seller i {
+  color: #0071e3 !important;
 }
 
 [data-theme="light"] .fk-discrete-badge {
+  display: none !important;
+}
+
+[data-theme="light"] .fk-card-rating-row {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+[data-theme="light"] .fk-rating-star {
+  color: #d97706 !important;
+}
+
+[data-theme="light"] .fk-rating-val {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .fk-rating-count {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .fk-price-inr {
+  color: #0f172a !important;
+  font-weight: 850 !important;
+}
+
+[data-theme="light"] .fk-price-usd {
+  color: #be123c !important;
+  background: #fff1f2 !important;
+  border: 1px solid #fecdd3 !important;
+  font-weight: 750 !important;
+  box-shadow: 0 1px 2px rgba(225, 29, 72, 0.06) !important;
+}
+
+[data-theme="light"] .fk-price-sep {
+  display: none !important;
+}
+
+[data-theme="light"] .fk-mrp-cut {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="light"] .fk-discount-tag {
   background: #ecfdf5 !important;
-  color: #059669 !important;
-  border-color: rgba(16, 185, 129, 0.25) !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 2px rgba(16, 185, 129, 0.08) !important;
+}
+
+[data-theme="light"] .fk-card-meta-perks {
+  display: none !important;
+}
+
+[data-theme="light"] .fk-card-actions-row {
+  border-top: 1px solid #f1f5f9 !important;
 }
 
 [data-theme="light"] .fk-card-btn-cart {
-  background: #ffffff !important;
-  border-color: #e5e7eb !important;
-  color: #1f2937 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07), inset 0 1px 0 #ffffff !important;
+  font-weight: 750 !important;
+}
+
+[data-theme="light"] .fk-card-btn-cart i {
+  color: #e11d48 !important;
+  font-size: 12px !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 [data-theme="light"] .fk-card-btn-cart:hover {
-  background: #f9fafb !important;
-  border-color: #f43f5e !important;
-  color: #f43f5e !important;
+  background: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #e11d48 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1), inset 0 1px 0 #ffffff !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="light"] .fk-card-btn-cart:hover i {
+  transform: scale(1.15) !important;
+}
+
+[data-theme="light"] .fk-card-btn-cart:active {
+  transform: scale(0.96) !important;
+  background: #e2e8f0 !important;
+}
+
+[data-theme="light"] .fk-card-btn-cart.added {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+[data-theme="light"] .fk-card-btn-cart.added i {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .fk-card-btn-buy {
+  background: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%) !important;
+  border: 1px solid rgba(225, 29, 72, 0.85) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="light"] .fk-card-btn-buy i {
+  color: #ffffff !important;
+  font-size: 11.5px !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="light"] .fk-card-btn-buy:hover {
+  filter: brightness(1.08) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+[data-theme="light"] .fk-card-btn-buy:hover i {
+  transform: scale(1.18) rotate(-4deg) !important;
+}
+
+[data-theme="light"] .fk-card-btn-buy:active {
+  transform: scale(0.96) !important;
+  box-shadow: 0 1px 5px rgba(225, 29, 72, 0.32) !important;
 }
 
 /* Light Mode: Product Details Sheet */
@@ -3992,68 +4368,6 @@ body.linkadda-store {
   box-shadow: 0 6px 24px rgba(225, 29, 72, 0.4) !important;
 }
 
-[data-theme="light"] .fk-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
-}
-
-[data-theme="light"] .fk-card:hover {
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1) !important;
-}
-
-[data-theme="light"] .fk-card-body {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .fk-card-title {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .fk-card-seller {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .fk-price-inr {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .fk-rating-count {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .fk-card-meta-perks {
-  color: #475569 !important;
-}
-
-[data-theme="light"] .fk-mrp-cut {
-  color: #94a3b8 !important;
-}
-
-[data-theme="light"] .fk-card-btn-cart {
-  background: #f8fafc !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .fk-card-btn-cart:hover {
-  background: #f1f5f9 !important;
-  border-color: #94a3b8 !important;
-}
-
-[data-theme="light"] .fk-card-wishlist-btn {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: #e2e8f0 !important;
-  color: #64748b !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-}
-
-[data-theme="light"] .fk-card-wishlist-btn.active {
-  background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
-  border-color: transparent !important;
-  color: #ffffff !important;
-}
 
 [data-theme="light"] .fk-pv-product-title {
   color: #0f172a !important;
@@ -4164,73 +4478,6 @@ body.linkadda-store {
   background: var(--la-pink) !important;
 }
 
-/* --------------------------------------------------------------------------
-   10. LIGHT MODE: PRODUCT CARDS & ACTION BUTTONS
-   -------------------------------------------------------------------------- */
-[data-theme="light"] .fk-card-badges-row .fk-card-badge-hdr {
-  background: rgba(241, 245, 249, 0.95) !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
-}
-
-[data-theme="light"] .fk-card-quick-view-overlay {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
-}
-
-[data-theme="light"] .fk-card-seller {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .fk-card-meta-perks {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .fk-card-wishlist-btn {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  color: #64748b !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-}
-
-[data-theme="light"] .fk-card-wishlist-btn:hover {
-  color: #e11d48 !important;
-  border-color: #fda4af !important;
-  background: #ffffff !important;
-}
-
-[data-theme="light"] .fk-card-wishlist-btn.active {
-  background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
-  border-color: #fda4af !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4) !important;
-}
-
-[data-theme="light"] .fk-card-actions-row {
-  border-top-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .fk-card-btn-cart {
-  background: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #1e293b !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
-}
-
-[data-theme="light"] .fk-card-btn-cart:hover {
-  background: #fff1f2 !important;
-  border-color: #fda4af !important;
-  color: #e11d48 !important;
-}
-
-[data-theme="light"] .fk-card-btn-cart.added {
-  background: #ecfdf5 !important;
-  border-color: #34d399 !important;
-  color: #065f46 !important;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
-}
 
 /* Header Wishlist / Liked Button */
 .fk-wishlist-header-btn {

@@ -2986,6 +2986,30 @@ button {
   font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.editor-preview-badge.badge-red {
+  background: linear-gradient(135deg, #e11d48, #be123c) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.4) !important;
+}
+
+.editor-preview-badge.badge-white {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+  font-weight: 700 !important;
+}
+
+.editor-preview-badge.badge-gold,
+.editor-preview-badge.pcard-pill-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4) !important;
 }
 
 .editor-preview-list {

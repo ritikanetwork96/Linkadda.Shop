@@ -172,7 +172,7 @@ const collectionSchemas = {
       { key: 'priceINR', label: 'Price INR', type: 'text' },
       { key: 'priceUSD', label: 'Price USD', type: 'text' },
       { key: 'badge', label: 'Badge', type: 'text' },
-      { key: 'badgeStyle', label: 'Badge Style', type: 'text' },
+      { key: 'badgeStyle', label: 'Badge Color', type: 'text' },
       { key: 'badgeIcon', label: 'Badge Icon', type: 'text' },
       { key: 'image', label: 'Main Image', type: 'text', hint: 'Paste a URL or use the file picker below.' },
       { key: 'video', label: 'Main Video', type: 'text' },
@@ -624,8 +624,10 @@ function renderRecordPreview(record = {}) {
 }
 
 const PRODUCT_BADGE_STYLE_OPTIONS = [
-  { label: 'Default', value: '' },
-  { label: 'Gold', value: 'pcard-pill-gold' },
+  { label: 'Red (Crimson Luxury)', value: 'badge-red' },
+  { label: 'White (Frosted White)', value: 'badge-white' },
+  { label: 'Gold (Luxury Gold)', value: 'pcard-pill-gold' },
+  { label: 'Default (Obsidian Glass)', value: '' },
 ];
 
 function normalizeEditorList(value) {
@@ -914,7 +916,7 @@ function renderProductPreview(record = {}, activeIndex = 0) {
         ${mediaHtml}
       </div>
       <div class="editor-preview-body">
-        <div class="editor-preview-badge">${escapeHtml(record.badge || record.category || 'Product')}</div>
+        <div class="editor-preview-badge ${escapeHtml(record.badgeStyle || '')}">${escapeHtml(record.badge || record.category || 'Product')}</div>
         <h3>${escapeHtml(record.title || 'Untitled product')}</h3>
         <p>${escapeHtml(record.description || 'Add details, pricing and media to preview the live product card.')}</p>
         <div class="preview-tags">
@@ -1177,11 +1179,11 @@ function renderProductEditor(record = {}, schema = null) {
               </div>
 
               <div class="field">
-                <label for="badgeStyle">Badge Style</label>
+                <label for="badgeStyle">Badge Color</label>
                 <select class="select" name="badgeStyle" id="badgeStyle">
                   ${badgeStyles.map((option) => `<option value="${escapeHtml(option.value)}" ${String(option.value) === currentBadgeStyle ? 'selected' : ''}>${escapeHtml(option.label)}</option>`).join('')}
                 </select>
-                <small class="field-hint">Badge color and visual theme.</small>
+                <small class="field-hint">Choose badge color (Red, White, Gold, or Frosted Glass).</small>
               </div>
             </div>
 

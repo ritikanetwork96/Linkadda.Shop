@@ -2498,8 +2498,18 @@
     });
     const isLiked = isWishlisted(id);
 
-    const customBadge = (cat.badge || cat.tag || cat.customBadge || '').trim();
-    const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip"><i class="fa-solid fa-sparkles"></i> ${esc(customBadge)}</span></div>` : '';
+    const customBadge = (cat.badge || cat.customBadge || cat.tag || '').trim();
+    const badgeStyleRaw = String(cat.badgeStyle || cat.badgeColor || cat.badge_style || cat.badge_color || '').trim().toLowerCase();
+    let badgeColorClass = '';
+    if (badgeStyleRaw === 'badge-red' || badgeStyleRaw === 'red' || badgeStyleRaw.includes('red')) {
+      badgeColorClass = ' badge-color-red';
+    } else if (badgeStyleRaw === 'badge-white' || badgeStyleRaw === 'white' || badgeStyleRaw.includes('white')) {
+      badgeColorClass = ' badge-color-white';
+    } else if (badgeStyleRaw === 'pcard-pill-gold' || badgeStyleRaw === 'badge-gold' || badgeStyleRaw === 'gold' || badgeStyleRaw.includes('gold')) {
+      badgeColorClass = ' badge-color-gold';
+    }
+
+    const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip${badgeColorClass}"><i class="fa-solid fa-sparkles"></i> ${esc(customBadge)}</span></div>` : '';
 
     return `<div class="fk-card" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
       ${badgeHtml}
@@ -2516,7 +2526,6 @@
       <div class="fk-card-body">
         <div class="fk-card-seller-row">
           <span class="fk-card-seller"><i class="fa-solid fa-circle-check"></i> LinkAdda<span class="fk-seller-verified-txt"> Verified</span></span>
-          <span class="fk-discrete-badge"><i class="fa-solid fa-shield-halved"></i> Discrete</span>
         </div>
         <h3 class="fk-card-title" onclick="window.openFkProductPage('${esc(id)}')">${esc(baseTitle)}</h3>
         <div class="fk-card-rating-row">
@@ -2534,10 +2543,6 @@
             <span class="fk-mrp-cut">₹${mrpINR}</span>
             <span class="fk-discount-tag">${discountPercent}% OFF</span>
           </div>
-        </div>
-        <div class="fk-card-meta-perks">
-          <span><i class="fa-solid fa-bolt"></i> Instant Link</span>
-          <span><i class="fa-solid fa-cloud"></i> Mega &amp; Drive</span>
         </div>
         <div class="fk-card-actions-row">
           <button type="button" class="fk-card-btn-cart btn-add-cart" 
