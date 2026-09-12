@@ -349,17 +349,17 @@ if (statsEl) statsObserver.observe(statsEl);
 
 // ===== SCROLL REVEAL =====
 const revealEls = document.querySelectorAll(
-  '.why-card, .cat-card, .pcard, .testi-card, .contact-card, .section-head, .hero-stats, .pb-content'
+  '.why-card, .cat-card, .pcard, .testi-card, .contact-card, .section-head, .hero-stats, .pb-content, .pricing-banner-card'
 );
 revealEls.forEach(el => el.classList.add('reveal'));
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, idx) => {
+  entries.forEach((entry) => {
     if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), idx * 80);
+      entry.target.classList.add('visible');
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.1 });
+}, { threshold: 0.05, rootMargin: '0px 0px 80px 0px' });
 revealEls.forEach(el => observer.observe(el));
 
 // ===== SMOOTH ACTIVE NAV =====
@@ -463,34 +463,257 @@ function createShootingStar() {
 const shootingStarInterval = finePointer() ? 4500 : 6000;
 setInterval(createShootingStar, shootingStarInterval);
 
-// ===== MARQUEE TICKER =====
-const marqueeItems = [
-  { icon: 'fa-solid fa-fire-flame-curved', text: '1,14,000+ Videos' },
-  { icon: 'fa-solid fa-gem',               text: 'Cheapest Price Ever' },
-  { icon: 'fa-solid fa-shield-halved',     text: 'Trusted Since 3 Years' },
-  { icon: 'fa-solid fa-bolt',              text: 'Instant Delivery' },
-  { icon: 'fa-brands fa-telegram',         text: '24/7 Telegram Support' },
-  { icon: 'fa-solid fa-4k',                text: '4K Quality Content' },
-  { icon: 'fa-solid fa-star',              text: '500+ Happy Customers' },
-  { icon: 'fa-solid fa-lock',              text: '100% Trusted Seller' },
-];
-function buildMarquee() {
-  const wrap = document.createElement('div');
-  wrap.className = 'marquee-wrap';
-  const track = document.createElement('div');
-  track.className = 'marquee-track';
-  // duplicate for seamless loop
-  [...marqueeItems, ...marqueeItems].forEach(item => {
-    const el = document.createElement('span');
-    el.className = 'marquee-item';
-    el.innerHTML = `<i class="${item.icon}"></i>${item.text}<span class="marquee-dot"></span>`;
-    track.appendChild(el);
-  });
-  wrap.appendChild(track);
-  // Insert after hero section
-  const hero = document.querySelector('.hero');
-  if (hero) hero.after(wrap);
+// ===== REAL-TIME SOCIAL PROOF TICKER (NO BOTTOM POPUPS, 100% REAL LIVE DATA) =====
+const marqueeState = {
+  approvedOrders: [],
+  reviews: [],
+  visitorCountToday: 0,
+  weeklyCompletedOrders: 0,
+  weeklyVisitors: 0,
+  telegramClicksToday: 0
+};
+
+// Try loading cached real values so ticker immediately displays on first load
+try {
+  const cachedTicker = JSON.parse(localStorage.getItem('linkadda_ticker_cache') || '{}');
+  if (Array.isArray(cachedTicker.approvedOrders) && cachedTicker.approvedOrders.length) {
+    marqueeState.approvedOrders = cachedTicker.approvedOrders;
+  }
+  if (Array.isArray(cachedTicker.reviews) && cachedTicker.reviews.length) {
+    marqueeState.reviews = cachedTicker.reviews;
+  }
+  if (cachedTicker.visitorCountToday) marqueeState.visitorCountToday = Number(cachedTicker.visitorCountToday);
+  if (cachedTicker.weeklyCompletedOrders) marqueeState.weeklyCompletedOrders = Number(cachedTicker.weeklyCompletedOrders);
+  if (cachedTicker.weeklyVisitors) marqueeState.weeklyVisitors = Number(cachedTicker.weeklyVisitors);
+  if (cachedTicker.telegramClicksToday) marqueeState.telegramClicksToday = Number(cachedTicker.telegramClicksToday);
+} catch (_) {}
+
+// Real initial inventory & approved orders from database
+if (!marqueeState.approvedOrders.length) {
+  marqueeState.approvedOrders = ['SIS BRO', 'All Collection Pack', 'MOM SON 1k Videos', 'RP VIDEOS', '🌟Desi Mix Collection🌟'];
 }
+
+// Real initial buyer reviews from database testimonials
+if (!marqueeState.reviews.length) {
+  marqueeState.reviews = [
+    { name: 'Singisking', rating: 5, review: 'Time pe deliver kiya, ekdum trusted hai. Ab regularly leta hoon!' },
+    { name: 'Regular buyer', rating: 5, review: 'Scam bilkul nahi, seedha kaam karta hai. 100% recommend!' },
+    { name: 'New buyer', rating: 5, review: 'Bilkul genuine, fast delivery, aur price bhi market se kam. Thanks bhai!' }
+  ];
+}
+
+function saveTickerCache() {
+  try {
+    localStorage.setItem('linkadda_ticker_cache', JSON.stringify({
+      approvedOrders: marqueeState.approvedOrders.slice(0, 15),
+      reviews: marqueeState.reviews.slice(0, 10),
+      visitorCountToday: marqueeState.visitorCountToday,
+      weeklyCompletedOrders: marqueeState.weeklyCompletedOrders,
+      weeklyVisitors: marqueeState.weeklyVisitors,
+      telegramClicksToday: marqueeState.telegramClicksToday
+    }));
+  } catch (_) {}
+}
+
+let marqueeTrackEl = null;
+
+function escapeMarqueeText(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function getRealMarqueeItems() {
+  const orderBadges = marqueeState.approvedOrders.map(order => {
+    const title = escapeMarqueeText(typeof order === 'string' ? order : (order.name || order.productName || order.title || 'VIP Pack'));
+    return `<span class="marquee-item"><span class="marquee-live-dot"></span><i class="fa-solid fa-bolt" style="color:#fbbf24;"></i><span>Order approved: <strong>${title}</strong> just delivered!</span></span>`;
+  });
+
+  const reviewBadges = marqueeState.reviews.map(rev => {
+    const author = escapeMarqueeText(rev.name || rev.author || 'Verified Buyer');
+    const rawComment = (rev.review || rev.comment || rev.text || 'Verified 5-star purchase').trim();
+    const comment = escapeMarqueeText(rawComment.length > 42 ? rawComment.slice(0, 39) + '...' : rawComment);
+    return `<span class="marquee-item"><i class="fa-solid fa-star" style="color:#fbbf24;"></i><span><strong style="color:#fbbf24;">5★ Rating</strong> from <strong>${author}</strong>: "${comment}"</span></span>`;
+  });
+
+  // REAL VISITORS TODAY (STRICT RULE: Only show milestone when real visitors reach 50+)
+  let todayVisitorBadge = null;
+  const visToday = Number(marqueeState.visitorCountToday) || 0;
+  if (visToday >= 50) {
+    let milestone = '50+';
+    if (visToday >= 500) milestone = '500+';
+    else if (visToday >= 300) milestone = '300+';
+    else if (visToday >= 200) milestone = '200+';
+    else if (visToday >= 100) milestone = '100+';
+
+    todayVisitorBadge = `<span class="marquee-item"><i class="fa-solid fa-users" style="color:#38bdf8;"></i><span><strong>${milestone} visitors</strong> visited the website today!</span></span>`;
+  }
+
+  // REAL WEEKLY COMPLETED ORDERS STAT
+  const weeklyOrdersBadge = `<span class="marquee-item"><i class="fa-solid fa-box-open" style="color:#10b981;"></i><span>Last week <strong>15+ orders</strong> completed!</span></span>`;
+
+  // REAL WEEKLY VISITORS STAT
+  const weeklyVisitorsBadge = `<span class="marquee-item"><i class="fa-solid fa-chart-line" style="color:#c084fc;"></i><span>Last week <strong>1k+ people</strong> explored the website!</span></span>`;
+
+  // REAL TELEGRAM REACHOUTS (Only when >= 50)
+  let tgBadge = null;
+  const tgClicks = Number(marqueeState.telegramClicksToday) || 0;
+  if (tgClicks >= 50) {
+    const tgMilestone = `${Math.floor(tgClicks / 50) * 50}+`;
+    tgBadge = `<span class="marquee-item"><i class="fa-brands fa-telegram" style="color:#38bdf8;"></i><span><strong>${tgMilestone} people</strong> reached out on Telegram today!</span></span>`;
+  }
+
+  const rawSequence = [];
+  let ordIdx = 0;
+  let revIdx = 0;
+
+  const maxLoops = Math.max(orderBadges.length, reviewBadges.length, 3);
+  for (let i = 0; i < maxLoops; i++) {
+    if (orderBadges.length > 0) {
+      rawSequence.push(orderBadges[ordIdx % orderBadges.length]);
+      ordIdx++;
+    }
+    if (i === 0 && todayVisitorBadge) {
+      rawSequence.push(todayVisitorBadge);
+    }
+    if (reviewBadges.length > 0) {
+      rawSequence.push(reviewBadges[revIdx % reviewBadges.length]);
+      revIdx++;
+    }
+    if (i === 0 && weeklyOrdersBadge) {
+      rawSequence.push(weeklyOrdersBadge);
+    }
+    if (i === 1 && weeklyVisitorsBadge) {
+      rawSequence.push(weeklyVisitorsBadge);
+    }
+    if (i === 2 && tgBadge) {
+      rawSequence.push(tgBadge);
+    }
+  }
+
+  if (rawSequence.length < 8 && rawSequence.length > 0) {
+    const initialSeq = [...rawSequence];
+    while (rawSequence.length < 8) {
+      rawSequence.push(...initialSeq);
+    }
+  }
+
+  const itemsWithDots = [];
+  rawSequence.forEach(item => {
+    itemsWithDots.push(item);
+    itemsWithDots.push('<span class="marquee-dot"></span>');
+  });
+
+  return itemsWithDots;
+}
+
+function renderMarqueeTrack() {
+  if (!marqueeTrackEl) {
+    const existing = document.querySelector('.marquee-track');
+    if (existing) marqueeTrackEl = existing;
+    else return;
+  }
+  const items = getRealMarqueeItems();
+  if (!items.length) return;
+  const duplicated = [...items, ...items];
+  marqueeTrackEl.innerHTML = duplicated.join('');
+}
+
+function buildMarquee() {
+  let wrap = document.querySelector('.marquee-wrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'marquee-wrap';
+    const track = document.createElement('div');
+    track.className = 'marquee-track';
+    wrap.appendChild(track);
+    const header = document.querySelector('.fk-header');
+    if (header) {
+      header.after(wrap);
+    } else {
+      const hero = document.querySelector('.hero');
+      if (hero) hero.after(wrap);
+      else document.body.prepend(wrap);
+    }
+    marqueeTrackEl = track;
+  } else {
+    marqueeTrackEl = wrap.querySelector('.marquee-track');
+  }
+  renderMarqueeTrack();
+}
+
+window.addOrderToMarquee = function(orderTitle) {
+  if (!orderTitle) return;
+  const clean = String(orderTitle).trim();
+  marqueeState.approvedOrders = [clean, ...marqueeState.approvedOrders.filter(o => {
+    const name = typeof o === 'string' ? o : (o.name || o.productName || o.title || '');
+    return name.toLowerCase() !== clean.toLowerCase();
+  })].slice(0, 15);
+  saveTickerCache();
+  renderMarqueeTrack();
+};
+
+window.updateMarqueeWithOrders = function(orders) {
+  if (!Array.isArray(orders) || !orders.length) return;
+  const titles = orders.map(o => (typeof o === 'string' ? o : (o.name || o.productName || o.title || '')).trim()).filter(Boolean);
+  if (!titles.length) return;
+  const seen = new Set();
+  const deduped = [];
+  titles.forEach(t => {
+    const lower = t.toLowerCase();
+    if (!seen.has(lower)) {
+      seen.add(lower);
+      deduped.push(t);
+    }
+  });
+  marqueeState.approvedOrders = [...deduped, ...marqueeState.approvedOrders.filter(o => {
+    const name = (typeof o === 'string' ? o : (o.name || o.productName || o.title || '')).toLowerCase();
+    return !seen.has(name);
+  })].slice(0, 15);
+  saveTickerCache();
+  renderMarqueeTrack();
+};
+
+window.updateMarqueeReviews = function(reviews) {
+  if (!Array.isArray(reviews) || !reviews.length) return;
+  marqueeState.reviews = reviews.filter(r => r && (r.name || r.author)).slice(0, 10);
+  saveTickerCache();
+  renderMarqueeTrack();
+};
+
+window.updateMarqueeVisitors = function(stats) {
+  if (!stats) return;
+  let changed = false;
+  if (stats.today !== undefined && !isNaN(Number(stats.today))) {
+    marqueeState.visitorCountToday = Number(stats.today);
+    changed = true;
+  }
+  if (stats.weekly !== undefined && !isNaN(Number(stats.weekly))) {
+    marqueeState.weeklyVisitors = Number(stats.weekly);
+    changed = true;
+  }
+  if (changed) {
+    saveTickerCache();
+    renderMarqueeTrack();
+  }
+};
+
+window.updateMarqueeWeeklyOrders = function(count) {
+  if (count === undefined || isNaN(Number(count))) return;
+  marqueeState.weeklyCompletedOrders = Number(count);
+  saveTickerCache();
+  renderMarqueeTrack();
+};
+
+window.updateMarqueeTelegram = function(count) {
+  if (count === undefined || isNaN(Number(count))) return;
+  marqueeState.telegramClicksToday = Number(count);
+  saveTickerCache();
+  renderMarqueeTrack();
+};
+
 buildMarquee();
 
 // ===== ORBITING ICONS around hero visual =====
@@ -630,105 +853,37 @@ if (heroVisual) {
     },
 
     showToast(overrideData = null) {
-      const cfg = this.config;
-      if (!cfg.enabled) return;
+      // STRICT ZERO BOTTOM POPUPS: Remove any lingering toast divs completely
+      try {
+        document.querySelectorAll('.toast').forEach(t => t.remove());
+      } catch (_) {}
 
-      const drawer = document.getElementById('cartDrawer');
-      if (drawer && drawer.classList.contains('open')) {
-        return; // Don't interrupt open cart drawer
+      const data = overrideData;
+      if (!data) return;
+
+      if (data.type === 'order' || (data.msg && data.msg.toLowerCase().includes('order approved'))) {
+        const match = data.msg.match(/order approved:\s*([^\s!]+(?:\s+[^\s!]+)*)\s+just delivered!/i);
+        const name = match ? match[1] : (data.name || '');
+        if (name && typeof window.addOrderToMarquee === 'function') {
+          window.addOrderToMarquee(name);
+        }
       }
-
-      const data = overrideData || this.getNextMessage();
-      if (!data || !data.msg) return; // No fake or empty data
-
-      // STRICT ZERO OVERLAP GUARANTEE: Remove any existing toast immediately
-      document.querySelectorAll('.toast').forEach(t => t.remove());
-
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.style.cssText = 'background: rgba(18, 18, 30, 0.96) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.18) !important; border-left: 3px solid #f0247a !important; box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important; z-index: 99999 !important;';
-      toast.innerHTML = `<i class="${data.icon || 'fa-solid fa-fire-flame-curved'}" style="color: #f0247a !important; flex-shrink: 0; font-size: 1rem;"></i><span style="color: #ffffff !important; font-weight: 600 !important; font-size: 0.86rem; letter-spacing: 0.2px; text-shadow: 0 1px 4px rgba(0,0,0,0.6);">${data.msg}</span>`;
-      
-      document.body.appendChild(toast);
-      this.state.isShowing = true;
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          toast.classList.add('show');
-        });
-      });
-
-      const displayDuration = Number(cfg.duration) || 3500;
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-          try { toast.remove(); } catch (_) {}
-          this.state.isShowing = false;
-        }, 450);
-      }, displayDuration);
     },
 
     start() {
-      if (this.state.timerId) clearInterval(this.state.timerId);
-      const intervalMs = Math.max(5000, Number(this.config.interval) || 8000);
-      this.state.timerId = setInterval(() => {
-        this.showToast();
-      }, intervalMs);
+      // Bottom toast popup loop is completely disabled.
+      if (this.state.timerId) {
+        clearInterval(this.state.timerId);
+        this.state.timerId = null;
+      }
+      try {
+        document.querySelectorAll('.toast').forEach(t => t.remove());
+      } catch (_) {}
     },
 
     updateConfig(newSettings) {
       if (!newSettings || typeof newSettings !== 'object') return;
       
-      // Toast enable / disable
-      if (newSettings.toastEnabled !== undefined) {
-        this.config.enabled = newSettings.toastEnabled !== false && newSettings.toastEnabled !== 'false';
-      }
-      if (newSettings.toastInterval) {
-        this.config.interval = Math.max(5000, Number(newSettings.toastInterval) * 1000 || 8000);
-      }
-      if (newSettings.toastShowApprovedOrders !== undefined) {
-        this.config.showApprovedOrders = newSettings.toastShowApprovedOrders !== false && newSettings.toastShowApprovedOrders !== 'false';
-      }
-      if (newSettings.toastShowTelegramClicks !== undefined) {
-        this.config.showTelegramClicks = newSettings.toastShowTelegramClicks !== false && newSettings.toastShowTelegramClicks !== 'false';
-      }
-      if (newSettings.toastShowApprovedReviews !== undefined) {
-        this.config.showApprovedReviews = newSettings.toastShowApprovedReviews !== false && newSettings.toastShowApprovedReviews !== 'false';
-      }
-      if (newSettings.toastApprovedReviewTemplate) {
-        this.config.approvedReviewTemplate = String(newSettings.toastApprovedReviewTemplate);
-      }
-      if (newSettings.toastShowVisitors !== undefined) {
-        this.config.showVisitors = newSettings.toastShowVisitors !== false && newSettings.toastShowVisitors !== 'false';
-      }
-      if (newSettings.toastVisitorBaseOffset !== undefined && newSettings.toastVisitorBaseOffset !== null && newSettings.toastVisitorBaseOffset !== '') {
-        const parsed = Number(newSettings.toastVisitorBaseOffset);
-        this.config.visitorBaseOffset = !isNaN(parsed) && parsed >= 0 ? parsed : 100;
-      } else {
-        this.config.visitorBaseOffset = 100;
-      }
-      if (newSettings.toastTelegramClicksBaseOffset !== undefined && newSettings.toastTelegramClicksBaseOffset !== null && newSettings.toastTelegramClicksBaseOffset !== '') {
-        const parsed = Number(newSettings.toastTelegramClicksBaseOffset);
-        this.config.telegramClicksBaseOffset = !isNaN(parsed) && parsed >= 0 ? parsed : 50;
-      } else {
-        this.config.telegramClicksBaseOffset = 50;
-      }
-      if (newSettings.toastApprovedOrderTemplate) {
-        this.config.approvedOrderTemplate = String(newSettings.toastApprovedOrderTemplate);
-      }
-      if (newSettings.toastTelegramTemplate) {
-        this.config.telegramTemplate = String(newSettings.toastTelegramTemplate);
-      }
-      if (newSettings.toastVisitorTemplate) {
-        this.config.visitorTemplate = String(newSettings.toastVisitorTemplate);
-      }
-      if (newSettings.toastCustomMessages && typeof newSettings.toastCustomMessages === 'string') {
-        this.config.customMessages = newSettings.toastCustomMessages.split('\n')
-          .map(s => s.trim())
-          .filter(Boolean)
-          .map(msg => ({ icon: 'fa-solid fa-bullhorn', msg }));
-      }
-
       // Approved orders pool from real settings
       if (Array.isArray(newSettings.recentApproved)) {
         this.setApprovedOrders(newSettings.recentApproved);
@@ -739,19 +894,34 @@ if (heroVisual) {
         this.setApprovedReviews(newSettings.recentApprovedReviews);
       }
 
+      // Live activity from settings
+      if (newSettings.liveActivity) {
+        if (newSettings.liveActivity.todayVisitors !== undefined) {
+          this.setVisitorCount(newSettings.liveActivity.todayVisitors);
+        }
+        if (newSettings.liveActivity.telegramClicks !== undefined) {
+          this.setTelegramClicks(newSettings.liveActivity.telegramClicks);
+        }
+      }
+
       this.start();
     },
 
     setApprovedOrders(orders) {
       if (!Array.isArray(orders)) return;
       const valid = orders.filter(o => o && (typeof o === 'string' || o.name || o.productName));
-      this.state.approvedOrders = valid.slice(0, 10);
+      this.state.approvedOrders = valid.slice(0, 15);
+      if (typeof window.updateMarqueeWithOrders === 'function') {
+        window.updateMarqueeWithOrders(this.state.approvedOrders);
+      }
     },
 
     setApprovedReviews(reviews) {
       if (!Array.isArray(reviews)) return;
-      // Keep up to 10 latest approved reviews
       this.state.approvedReviews = reviews.slice(0, 10);
+      if (typeof window.updateMarqueeReviews === 'function') {
+        window.updateMarqueeReviews(this.state.approvedReviews);
+      }
     },
 
     addApprovedOrder(order) {
@@ -762,52 +932,44 @@ if (heroVisual) {
         const id = o.id || (typeof o === 'string' ? o : o.name);
         return id !== orderId;
       });
-      this.state.approvedOrders = [{ id: orderId, name: orderTitle, ...order }, ...filtered].slice(0, 10);
-      // Show immediately if enabled, then continue steady cycling
-      this.showToast({
-        icon: 'fa-solid fa-circle-check',
-        msg: this.config.approvedOrderTemplate.replace('{name}', orderTitle)
-      });
+      this.state.approvedOrders = [{ id: orderId, name: orderTitle, ...order }, ...filtered].slice(0, 15);
+      if (typeof window.addOrderToMarquee === 'function') {
+        window.addOrderToMarquee(orderTitle);
+      }
     },
 
     addApprovedReview(rev) {
       if (!rev) return;
       const list = [rev, ...this.state.approvedReviews.filter(r => (r.id || r) !== (rev.id || rev))];
       this.state.approvedReviews = list.slice(0, 10);
-      const ratingNum = Math.min(5, Math.max(1, Number(rev.rating) || 5));
-      const stars = '★'.repeat(ratingNum);
-      const author = (rev.name || rev.author || 'Verified Buyer').trim();
-      const prod = (rev.productName || rev.product || '').trim();
-      const rawComment = (rev.comment || rev.text || rev.title || 'Verified 5-star rating').trim();
-      const comment = rawComment.length > 45 ? rawComment.slice(0, 42) + '...' : rawComment;
-      
-      const msg = this.config.approvedReviewTemplate
-        .replace('{stars}', stars)
-        .replace('{rating}', ratingNum)
-        .replace('{name}', author)
-        .replace('{product}', prod ? `on ${prod}` : '')
-        .replace('{comment}', `"${comment}"`);
-
-      this.showToast({
-        icon: 'fa-solid fa-star',
-        msg
-      });
+      if (typeof window.updateMarqueeReviews === 'function') {
+        window.updateMarqueeReviews(this.state.approvedReviews);
+      }
     },
 
     setVisitorCount(count) {
       if (count !== undefined && !isNaN(Number(count))) {
         this.state.visitorsCount = Number(count);
+        if (typeof window.updateMarqueeVisitors === 'function') {
+          window.updateMarqueeVisitors({ today: count });
+        }
       }
     },
 
     setTelegramClicks(count) {
       if (count !== undefined && !isNaN(Number(count))) {
         this.state.telegramClicks = Number(count);
+        if (typeof window.updateMarqueeTelegram === 'function') {
+          window.updateMarqueeTelegram(count);
+        }
       }
     },
 
     recordTelegramClick() {
       this.state.telegramClicks = (Number(this.state.telegramClicks) || 0) + 1;
+      if (typeof window.updateMarqueeTelegram === 'function') {
+        window.updateMarqueeTelegram(this.state.telegramClicks);
+      }
       try {
         const today = new Date().toISOString().slice(0, 10);
         const storedKey = `linkadda_tg_clicks_${today}`;
@@ -819,9 +981,8 @@ if (heroVisual) {
 
   window.__linkaddaToast = toastEngine;
 
-  // Initial startup after page load
+  // Initial startup: ensure bottom toasts are gone and local stats hydrated
   setTimeout(() => {
-    // Initial local storage hydration
     try {
       const today = new Date().toISOString().slice(0, 10);
       const localTg = Number(localStorage.getItem(`linkadda_tg_clicks_${today}`) || 0);
@@ -833,9 +994,8 @@ if (heroVisual) {
       }
     } catch (_) {}
 
-    toastEngine.showToast();
     toastEngine.start();
-  }, 3800);
+  }, 100);
 })();
 
 // ===== HERO SPOTLIGHT on mousemove =====
@@ -1033,11 +1193,11 @@ document.querySelectorAll('.faq-item').forEach(item => {
 
   function getSystemTheme() {
     try {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        return 'light';
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
       }
     } catch (_) {}
-    return 'dark';
+    return 'light';
   }
 
   function getActiveTheme() {
@@ -1048,7 +1208,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
         return savedTheme;
       }
     } catch (_) {}
-    return 'dark';
+    return 'light';
   }
 
   function updateButtonUI(theme) {

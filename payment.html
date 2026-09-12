@@ -17,6 +17,16 @@
         window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
       }
     })();
+    // Theme Bootstrap — sync with index.html & script.js
+    (function() {
+      try {
+        var manual = localStorage.getItem('linkadda_theme_manual');
+        var saved = localStorage.getItem('linkadda_theme');
+        var theme = 'light';
+        if (manual && saved) { theme = saved; }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {}
+    })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Secure Payment — Linkadda</title>  <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -39,6 +49,15 @@
       justify-content: center;
       gap: 24px;
       transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    [data-theme="light"] #gatewayLoader {
+      background: radial-gradient(circle at 50% 30%, #ffffff 0%, #f1f5f9 100%) !important;
+    }
+    [data-theme="light"] .gl-text-main {
+      color: #0f172a !important;
+    }
+    [data-theme="light"] .gl-text-sub {
+      color: #64748b !important;
     }
     #gatewayLoader.hide {
       opacity: 0;
@@ -669,6 +688,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      width: 100%;
       padding: 16px 0 10px;
     }
     .qr-frame {
@@ -677,7 +698,12 @@
       background: #ffffff;
       border-radius: 20px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      margin-bottom: 14px;
+      margin: 0 auto 14px auto;
+      width: fit-content;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.3s ease;
     }
     .qr-frame::before {
@@ -693,11 +719,28 @@
       box-shadow: 0 12px 50px rgba(240, 36, 122, 0.35);
       transform: scale(1.02);
     }
-    .qr-frame canvas, .qr-frame img { display: block; border-radius: 8px; }
+    .qr-frame canvas, .qr-frame img, .qr-frame > div {
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
     .qr-frame img {
+      width: 180px;
+      height: 180px;
       max-width: 180px;
       max-height: 180px;
       object-fit: contain;
+    }
+    #customQR {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      height: 180px;
+    }
+    #customQR canvas, #customQR img {
+      display: block;
+      margin: 0 auto;
     }
     .qr-empty {
       width: 180px;
@@ -2126,7 +2169,16 @@ function describeLoadError(error, fallback = 'Unable to load order details.') {
 
 async function loadPaymentConfigFromFirebase() {
   try {
+    if (!window.__linkaddaDb) {
+      await new Promise((resolve) => {
+        if (window.__linkaddaDb) return resolve();
+        const done = () => resolve();
+        window.addEventListener('linkadda-firebase-ready', done, { once: true });
+        setTimeout(done, 2500);
+      });
+    }
     if (!window.__linkaddaDb) return CONFIG;
+
     const applyConfig = () => {
       const settings = window.__paymentSettings || {};
       const payment = window.__paymentPayment || {};
@@ -2142,29 +2194,29 @@ async function loadPaymentConfigFromFirebase() {
       Object.assign(CONFIG, {
         recommendedMethod: payment.recommendedMethod || settings.recommendedMethod || CONFIG.recommendedMethod || 'binancepay',
         upiId,
-        qrImage: payment.qrImage || settings.qrImage || CONFIG.qrImage,
+        qrImage: payment.qrImage || payment.upiQr || settings.qrImage || CONFIG.qrImage,
         telegramUrl,
         bep20Address: payment.bep20Address || CONFIG.bep20Address,
+        bep20Qr: payment.bep20Qr || CONFIG.bep20Qr || '',
+        bep20Logo: payment.bep20Logo || CONFIG.bep20Logo || '',
         ethAddress: payment.ethAddress || CONFIG.ethAddress,
+        ethQr: payment.ethQr || CONFIG.ethQr || '',
+        ethLogo: payment.ethLogo || CONFIG.ethLogo || '',
         binanceId: payment.binanceId || CONFIG.binanceId,
+        binanceQr: payment.binanceQr || CONFIG.binanceQr || '',
+        binanceLogo: payment.binanceLogo || CONFIG.binanceLogo || '',
         binanceGiftCardUrl: payment.binanceGiftCardUrl || CONFIG.binanceGiftCardUrl,
+        giftcardQr: payment.giftcardQr || CONFIG.giftcardQr || '',
+        giftcardLogo: payment.giftcardLogo || CONFIG.giftcardLogo || '',
         paypalLink: payment.paypalLink || CONFIG.paypalLink,
+        paypalQr: payment.paypalQr || CONFIG.paypalQr || '',
+        paypalLogo: payment.paypalLogo || CONFIG.paypalLogo || '',
       });
 
       try {
         localStorage.setItem('linkadda_payment_settings', JSON.stringify(settings));
         localStorage.setItem('linkadda_payment_payment', JSON.stringify(payment));
-        localStorage.setItem('linkadda_payment_config', JSON.stringify({
-          recommendedMethod: CONFIG.recommendedMethod,
-          upiId: CONFIG.upiId,
-          qrImage: CONFIG.qrImage,
-          telegramUrl: CONFIG.telegramUrl,
-          bep20Address: CONFIG.bep20Address,
-          ethAddress: CONFIG.ethAddress,
-          binanceId: CONFIG.binanceId,
-          binanceGiftCardUrl: CONFIG.binanceGiftCardUrl,
-          paypalLink: CONFIG.paypalLink
-        }));
+        localStorage.setItem('linkadda_payment_config', JSON.stringify(CONFIG));
       } catch (_) {}
 
       applyPaymentConfigToUI();
@@ -2173,25 +2225,31 @@ async function loadPaymentConfigFromFirebase() {
       }
     };
 
-    if (!paymentConfigSubscribed) {
+    const fbRef = window._fbRef || window.ref;
+    const fbOnValue = window._fbOnValue || window.onValue;
+    const fbGet = window._fbGet || window.get;
+
+    if (!paymentConfigSubscribed && fbRef && fbOnValue) {
       paymentConfigSubscribed = true;
-      onValue(ref(window.__linkaddaDb, 'settings'), (snap) => {
+      fbOnValue(fbRef(window.__linkaddaDb, 'settings'), (snap) => {
         window.__paymentSettings = snap.val() || {};
         applyConfig();
       });
-      onValue(ref(window.__linkaddaDb, 'payment'), (snap) => {
+      fbOnValue(fbRef(window.__linkaddaDb, 'payment'), (snap) => {
         window.__paymentPayment = snap.val() || {};
         applyConfig();
       });
     }
 
-    const [settingsSnap, paymentSnap] = await Promise.all([
-      get(ref(window.__linkaddaDb, 'settings')),
-      get(ref(window.__linkaddaDb, 'payment')),
-    ]);
-    window.__paymentSettings = settingsSnap.val() || {};
-    window.__paymentPayment = paymentSnap.val() || {};
-    applyConfig();
+    if (fbRef && fbGet) {
+      const [settingsSnap, paymentSnap] = await Promise.all([
+        fbGet(fbRef(window.__linkaddaDb, 'settings')),
+        fbGet(fbRef(window.__linkaddaDb, 'payment')),
+      ]);
+      window.__paymentSettings = settingsSnap.val() || {};
+      window.__paymentPayment = paymentSnap.val() || {};
+      applyConfig();
+    }
   } catch (error) {
     console.warn('Payment config load failed:', error);
     if (typeof window.exitGatewayLoader === 'function') {
@@ -2218,62 +2276,62 @@ function renderDynamicPaymentMethods() {
   const builtInMethods = [
     {
       id: 'binancepay',
-      name: 'Binance Pay',
-      sub: 'Direct ID Transfer',
-      tag: 'USDT',
+      name: payment.binancepayName || payment.binanceName || 'Binance Pay',
+      sub: payment.binancepaySub || payment.binanceSub || 'Direct ID Transfer',
+      tag: payment.binancepayTag || payment.binanceTag || 'USDT',
       tagClass: 'tag-usdt',
       iconStyle: 'background:linear-gradient(135deg,#f0b90b,#f59e0b);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.binanceLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
+      logo: payment.binanceLogo || CONFIG.binanceLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
       alt: 'Binance Pay',
     },
     {
       id: 'upi',
-      name: 'UPI',
-      sub: 'GPay · PhonePe · Paytm',
-      tag: '₹ INR',
+      name: payment.upiName || 'UPI',
+      sub: payment.upiSub || 'GPay · PhonePe · Paytm',
+      tag: payment.upiTag || '₹ INR',
       tagClass: 'tag-inr',
       iconStyle: 'background:linear-gradient(135deg,#6b21a8,#4f46e5);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
+      logo: payment.upiLogo || CONFIG.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
       alt: 'UPI',
     },
     {
       id: 'bep20',
-      name: 'USDT BEP-20',
-      sub: 'Binance Smart Chain',
-      tag: 'USDT',
+      name: payment.bep20Name || 'USDT BEP-20',
+      sub: payment.bep20Sub || 'Binance Smart Chain',
+      tag: payment.bep20Tag || 'USDT',
       tagClass: 'tag-usdt',
       iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.bep20Logo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png',
+      logo: payment.bep20Logo || CONFIG.bep20Logo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png',
       alt: 'BEP20',
     },
     {
       id: 'eth',
-      name: 'USDT ERC-20',
-      sub: 'Ethereum Network',
-      tag: 'USDT',
+      name: payment.ethName || 'USDT ERC-20',
+      sub: payment.ethSub || 'Ethereum Network',
+      tag: payment.ethTag || 'USDT',
       tagClass: 'tag-usdt',
       iconStyle: 'background:rgba(255,255,255,0.05);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.ethLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png',
+      logo: payment.ethLogo || CONFIG.ethLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png',
       alt: 'ERC20',
     },
     {
       id: 'paypal',
-      name: 'PayPal',
-      sub: 'Secure Transfer',
-      tag: 'INTL',
+      name: payment.paypalName || 'PayPal',
+      sub: payment.paypalSub || 'Secure Transfer',
+      tag: payment.paypalTag || 'INTL',
       tagClass: 'tag-intl',
       iconStyle: 'background:linear-gradient(135deg,#003087,#0079c1);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.paypalLogo || 'images/paypal.svg',
+      logo: payment.paypalLogo || CONFIG.paypalLogo || 'images/paypal.svg',
       alt: 'PayPal',
     },
     {
       id: 'giftcard',
-      name: 'Binance Gift Card',
-      sub: 'Digital Voucher / G2A Key',
-      tag: 'VOUCHER',
+      name: payment.giftcardName || 'Binance Gift Card',
+      sub: payment.giftcardSub || 'Digital Voucher / G2A Key',
+      tag: payment.giftcardTag || 'VOUCHER',
       tagClass: 'tag-intl',
       iconStyle: 'background:linear-gradient(135deg,#f59e0b,#e11d48);overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center;',
-      logo: payment.giftcardLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
+      logo: payment.giftcardLogo || CONFIG.giftcardLogo || 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
       alt: 'Gift Card',
     },
   ];
@@ -2358,7 +2416,7 @@ function applyPaymentConfigToUI() {
 }
 
 function ensurePaymentConfigLoaded() {
-  if (!paymentConfigPromise) {
+  if (!paymentConfigPromise || !paymentConfigSubscribed) {
     paymentConfigPromise = loadPaymentConfigFromFirebase();
   }
   return paymentConfigPromise;
@@ -2394,8 +2452,9 @@ const DEFAULT_PRODUCTS_CATALOG = [
   { id: '20-mix-videos', slug: '20-mix-videos', name: '20 Mix Videos', title: '20 Mix Videos', inr: '₹499', usd: '$16', rawINR: 499, rawUSD: 16, amountINRValue: 499, amountUSDValue: 16 },
   { id: 'all-tango-combo', slug: 'all-tango-combo', name: 'All Tango Combo', title: 'All Tango Combo', inr: '₹599', usd: '$18', rawINR: 599, rawUSD: 18, amountINRValue: 599, amountUSDValue: 18 },
   { id: 'bhabhi-hot-pack', slug: 'bhabhi-hot-pack', name: 'Bhabhi Hot Pack', title: 'Bhabhi Hot Pack', inr: '₹499', usd: '$19', rawINR: 499, rawUSD: 19, amountINRValue: 499, amountUSDValue: 19 },
-  { id: 'english-videos-unlimited-pack', slug: 'english-videos-unlimited-pack', name: 'English Videos Unlimited Pack', title: 'English Videos Unlimited Pack', inr: '₹499', usd: '$19', rawINR: 499, rawUSD: 19, amountINRValue: 499, amountUSDValue: 19 },
   { id: 'all-in-one', slug: 'all-in-one', name: 'All in One (Special Offer)', title: 'All in One (Special Offer)', inr: '₹599', usd: '$26', rawINR: 599, rawUSD: 26, amountINRValue: 599, amountUSDValue: 26 },
+  { id: 'pinned-deal', slug: 'all-collection-pack', name: 'All Collection Pack', title: 'All Collection Pack', inr: '₹4,399', usd: '$109', rawINR: 4399, rawUSD: 109, amountINRValue: 4399, amountUSDValue: 109 },
+  { id: 'all-collection-pack', slug: 'all-collection-pack', name: 'All Collection Pack', title: 'All Collection Pack', inr: '₹4,399', usd: '$109', rawINR: 4399, rawUSD: 109, amountINRValue: 4399, amountUSDValue: 109 },
 ];
 
 let productCatalogPromise = null;
@@ -2424,15 +2483,15 @@ function formatCurrencyValue(value, currency = 'INR') {
 
 let orderData = {
   orderId: requestedCheckout.orderId || '',
-  id: requestedCheckout.productId || '',
-  slug: '',
-  name: 'Loading order details...',
-  inr: '—',
-  usd: '—',
-  rawINR: '',
-  rawUSD: '',
-  amountINRValue: NaN,
-  amountUSDValue: NaN,
+  id: requestedCheckout.productId || 'pinned-deal',
+  slug: 'all-collection-pack',
+  name: 'All Collection Pack',
+  inr: '₹4,399',
+  usd: '$109',
+  rawINR: 4399,
+  rawUSD: 109,
+  amountINRValue: 4399,
+  amountUSDValue: 109,
   paymentStatus: 'pending',
   orderStatus: 'pending',
   paymentMethod: '',
@@ -2486,20 +2545,18 @@ function applyOrderToUI(nextOrder = {}) {
   }
 
   const backBtn = document.getElementById('headerBackBtn');
-  const targetId = orderData.id || requestedCheckout.productId;
-  if (backBtn && targetId) {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-    const ext = isLocal ? '.html' : '';
-    backBtn.href = `index${ext}#product-${encodeURIComponent(targetId)}`;
-  }
-  if (backBtn && !backBtn._hasBackListener) {
-    backBtn._hasBackListener = true;
-    backBtn.addEventListener('click', function(e) {
-      if (window.history.length > 1) {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+  const ext = isLocal ? '.html' : '';
+  const targetShopHref = `index${ext}`;
+  if (backBtn) {
+    backBtn.href = targetShopHref;
+    if (!backBtn._hasBackListener) {
+      backBtn._hasBackListener = true;
+      backBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.history.back();
-      }
-    });
+        window.location.href = targetShopHref;
+      });
+    }
   }
 }
 
@@ -2561,11 +2618,11 @@ function findDefaultCatalogProduct(targetId) {
       prodName = `${prodName} (${pTier})`;
     }
     applyOrderToUI({
-      id: pId || 'product',
+      id: pId || 'pinned-deal',
       name: prodName,
       tier: pTier,
       inr: formatCurrencyValue(inrVal, 'INR'),
-      usd: Number.isFinite(usdVal) ? formatCurrencyValue(usdVal, 'USD') : '—',
+      usd: Number.isFinite(usdVal) ? formatCurrencyValue(usdVal, 'USD') : (pUsd ? `$${pUsd}` : '$109'),
       amountINRValue: inrVal,
       amountUSDValue: usdVal,
       rawINR: inrVal,
@@ -2575,7 +2632,8 @@ function findDefaultCatalogProduct(targetId) {
   }
 
   // Look up in built-in default catalog
-  const matched = findDefaultCatalogProduct(pId || pName);
+  const targetLookup = pId || pName;
+  const matched = targetLookup ? findDefaultCatalogProduct(targetLookup) : findDefaultCatalogProduct('pinned-deal');
   if (matched) {
     applyOrderToUI({
       id: matched.id,
@@ -2592,18 +2650,18 @@ function findDefaultCatalogProduct(targetId) {
   }
 
   if (pName || pId) {
-    const cleanTitle = pName || decodeURIComponent(pId).replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const cleanTitle = pName ? decodeURIComponent(pName) : decodeURIComponent(pId).replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     const inrVal = extractMoneyNumber(pInr);
     const usdVal = extractMoneyNumber(pUsd);
     applyOrderToUI({
-      id: pId,
+      id: pId || 'pinned-deal',
       name: cleanTitle,
-      inr: Number.isFinite(inrVal) ? formatCurrencyValue(inrVal, 'INR') : '—',
-      usd: Number.isFinite(usdVal) ? formatCurrencyValue(usdVal, 'USD') : '—',
-      amountINRValue: inrVal,
-      amountUSDValue: usdVal,
-      rawINR: inrVal,
-      rawUSD: usdVal,
+      inr: Number.isFinite(inrVal) ? formatCurrencyValue(inrVal, 'INR') : '₹4,399',
+      usd: Number.isFinite(usdVal) ? formatCurrencyValue(usdVal, 'USD') : '$109',
+      amountINRValue: Number.isFinite(inrVal) ? inrVal : 4399,
+      amountUSDValue: Number.isFinite(usdVal) ? usdVal : 109,
+      rawINR: Number.isFinite(inrVal) ? inrVal : 4399,
+      rawUSD: Number.isFinite(usdVal) ? usdVal : 109,
     });
   }
 })();
@@ -2856,8 +2914,18 @@ function renderUpiQr() {
     directBtn.style.display = 'inline-flex';
   }
 
-  // Priority 1: ALWAYS generate dynamic QR code with exact pre-filled amount!
-  // This guarantees auto-detection across GPay, PhonePe, Paytm, BHIM, Cred!
+  // Priority 1: If custom uploaded QR image is present, display it
+  const imageSrc = safeUrl(CONFIG.qrImage || (window.__paymentPayment && (window.__paymentPayment.qrImage || window.__paymentPayment.upiQr)), '');
+  if (imageSrc) {
+    qrGeneratedEl.style.display = 'none';
+    qrGeneratedEl.innerHTML = '';
+    qrImage.src = imageSrc;
+    qrImage.style.display = 'block';
+    qrError.style.display = 'none';
+    return;
+  }
+
+  // Priority 2: If dynamic generation is available, generate QR code with exact amount
   if (window.QRCode && upiId) {
     qrImage.style.display = 'none';
     qrError.style.display = 'none';
@@ -2876,17 +2944,6 @@ function renderUpiQr() {
     } catch (_) {
       qrGeneratedEl.style.display = 'none';
     }
-  }
-
-  // Fallback: If dynamic generation fails, show static uploaded image if present
-  const imageSrc = safeUrl(CONFIG.qrImage, '');
-  if (imageSrc) {
-    qrGeneratedEl.style.display = 'none';
-    qrGeneratedEl.innerHTML = '';
-    qrImage.src = imageSrc;
-    qrImage.style.display = 'block';
-    qrError.style.display = 'none';
-    return;
   }
 
   qrGeneratedEl.style.display = 'none';
@@ -2990,6 +3047,52 @@ async function loadProductsCatalog() {
     };
     onValue(ref(window.__linkaddaDb, 'products'), (snap) => {
       updateCatalog(snap.val() || {});
+    });
+    onValue(ref(window.__linkaddaDb, 'banner'), (snap) => {
+      const bVal = snap.val();
+      if (bVal && typeof bVal === 'object') {
+        const bTitle = bVal.title || 'All Collection Pack';
+        const bInr = bVal.priceOfferINR || bVal.inr || '₹4,399';
+        const bUsd = bVal.priceOfferUSD || bVal.usd || '$109';
+        const bInrVal = extractMoneyNumber(bInr) || 4399;
+        const bUsdVal = extractMoneyNumber(bUsd) || 109;
+        const bannerEntry = {
+          key: 'pinned-deal',
+          id: 'pinned-deal',
+          slug: 'all-collection-pack',
+          title: bTitle,
+          name: bTitle,
+          inr: formatCurrencyValue(bInrVal, 'INR'),
+          usd: formatCurrencyValue(bUsdVal, 'USD'),
+          rawINR: bInrVal,
+          rawUSD: bUsdVal,
+          amountINRValue: bInrVal,
+          amountUSDValue: bUsdVal,
+          status: bVal.status || 'active',
+          record: bVal,
+        };
+        productCatalog = productCatalog.filter(p => p.id !== 'pinned-deal' && p.id !== 'all-collection-pack');
+        productCatalog.push(bannerEntry);
+        productCatalog.push({ ...bannerEntry, id: 'all-collection-pack', key: 'all-collection-pack' });
+
+        const currId = normalizeLookupValue(orderData.id || requestedCheckout.productId);
+        const currName = normalizeLookupValue(orderData.name);
+        if (currId === 'pinned-deal' || currId === 'all-collection-pack' || currName.includes('collection') || !orderData.id) {
+          applyOrderToUI({
+            id: 'pinned-deal',
+            slug: 'all-collection-pack',
+            name: bTitle,
+            inr: formatCurrencyValue(bInrVal, 'INR'),
+            usd: formatCurrencyValue(bUsdVal, 'USD'),
+            rawINR: bInrVal,
+            rawUSD: bUsdVal,
+            amountINRValue: bInrVal,
+            amountUSDValue: bUsdVal,
+          });
+        } else {
+          refreshOrderSummaryFromLiveCatalog();
+        }
+      }
     });
   }
 
@@ -3191,32 +3294,29 @@ async function ensureCheckoutOrderLoaded() {
       const customInr = extractMoneyNumber(pInr);
       const customUsd = extractMoneyNumber(pUsd);
       const pTier = params.get('tier') || '';
-      const inrNum = Number.isFinite(customInr) && customInr > 0 ? customInr : (Number.isFinite(matched.amountINRValue) ? matched.amountINRValue : (extractMoneyNumber(matched.rawINR || matched.inr) || 0));
-      const usdNum = Number.isFinite(customUsd) && customUsd > 0 ? customUsd : (Number.isFinite(matched.amountUSDValue) ? matched.amountUSDValue : (extractMoneyNumber(matched.rawUSD || matched.usd) || 0));
-      let orderId = requestedCheckout.orderId || '';
+      const inrNum = Number.isFinite(customInr) && customInr > 0 ? customInr : (Number.isFinite(matched.amountINRValue) ? matched.amountINRValue : (extractMoneyNumber(matched.rawINR || matched.inr) || 4399));
+      const usdNum = Number.isFinite(customUsd) && customUsd > 0 ? customUsd : (Number.isFinite(matched.amountUSDValue) ? matched.amountUSDValue : (extractMoneyNumber(matched.rawUSD || matched.usd) || 109));
+      const orderId = requestedCheckout.orderId || '';
 
-      let prodName = pName ? decodeURIComponent(pName) : (matched.title || matched.name || 'Product');
+      let prodName = pName ? decodeURIComponent(pName) : (matched.title || matched.name || 'All Collection Pack');
       if (pTier && !prodName.includes(pTier)) {
         prodName = `${prodName} (${pTier})`;
       }
 
-      if (!orderId && window._fbPush && window.__linkaddaDb) {
-        orderId = window._fbPush(window._fbRef(window.__linkaddaDb, 'orders')).key;
-      }
-
       const nextOrder = {
         orderId: orderId,
-        id: orderId || matched.id || 'order',
+        id: orderId || matched.id || 'pinned-deal',
         checkoutToken: requestedCheckout.token || '',
-        productId: matched.id || matched.key || requestedCheckout.productId || '',
-        productSlug: matched.slug || '',
+        productId: matched.id || matched.key || requestedCheckout.productId || 'pinned-deal',
+        productSlug: matched.slug || 'all-collection-pack',
         productName: prodName,
+        name: prodName,
         tier: pTier,
-        amount: Number.isFinite(inrNum) ? inrNum : (Number.isFinite(usdNum) ? usdNum : ''),
-        amountINR: Number.isFinite(inrNum) ? inrNum : null,
-        amountUSD: Number.isFinite(usdNum) ? usdNum : null,
-        inr: Number.isFinite(inrNum) ? formatCurrencyValue(inrNum, 'INR') : (matched.inr || '—'),
-        usd: Number.isFinite(usdNum) ? formatCurrencyValue(usdNum, 'USD') : (matched.usd || '—'),
+        amount: Number.isFinite(inrNum) ? inrNum : (Number.isFinite(usdNum) ? usdNum : 4399),
+        amountINR: Number.isFinite(inrNum) ? inrNum : 4399,
+        amountUSD: Number.isFinite(usdNum) ? usdNum : 109,
+        inr: Number.isFinite(inrNum) ? formatCurrencyValue(inrNum, 'INR') : (matched.inr || '₹4,399'),
+        usd: Number.isFinite(usdNum) ? formatCurrencyValue(usdNum, 'USD') : (matched.usd || '$109'),
         rawINR: inrNum,
         rawUSD: usdNum,
         amountINRValue: inrNum,
@@ -3226,22 +3326,9 @@ async function ensureCheckoutOrderLoaded() {
         status: 'pending',
         paymentMethod: '',
         screenshotUrl: '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        source: 'payment-fallback',
         available: true,
         reason: '',
       };
-
-      // Guarantee immediate persistence to Firebase RTDB orders node
-      if (window.__linkaddaDb && orderId) {
-        try {
-          window._fbSet(window._fbRef(window.__linkaddaDb, `orders/${orderId}`), {
-            ...nextOrder,
-            updatedAt: Date.now()
-          });
-        } catch (_) {}
-      }
 
       applyOrderToUI(nextOrder);
       refreshOrderSummaryFromLiveCatalog();
@@ -3249,18 +3336,27 @@ async function ensureCheckoutOrderLoaded() {
       return orderData;
     }
   } catch (error) {
-    console.warn('Product lookup failed:', error);
-    applyOrderToUI({
-      name: 'Unable to load order details.',
-      id: requestedCheckout.productId || orderData.id || '',
-      inr: 'Unavailable',
-      usd: 'Unavailable',
-      available: false,
-      reason: describeLoadError(error, 'Unable to load order details.'),
-    });
-    window.__paymentDataState = 'error';
-    return orderData;
+    console.warn('Product lookup fallback note:', error);
   }
+
+  // Safety guarantee: Ensure orderData is never left blank or Loading
+  if (!orderData.name || orderData.name === 'Loading order details...' || orderData.inr === '—') {
+    const defaultDeal = findDefaultCatalogProduct('pinned-deal') || {
+      id: 'pinned-deal',
+      slug: 'all-collection-pack',
+      name: 'All Collection Pack',
+      inr: '₹4,399',
+      usd: '$109',
+      amountINRValue: 4399,
+      amountUSDValue: 109,
+      rawINR: 4399,
+      rawUSD: 109,
+      available: true
+    };
+    applyOrderToUI(defaultDeal);
+  }
+  window.__paymentDataState = 'ready';
+  return orderData;
 }
 
 let screenshotUploaded = false;
@@ -3532,14 +3628,17 @@ async function gotoPayScreen() {
               noteEl.style.display = 'none';
             }
           }
+          const qrWrap = document.getElementById('customQRWrapper');
+          const qrFrame = document.getElementById('customQRFrame');
           if (customMethod.qrImage) {
-            setHtml('customQRFrame', `<img src="${customMethod.qrImage}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="QR" />`);
-            const qrWrap = document.getElementById('customQRWrapper');
-            if (qrWrap) qrWrap.style.display = 'block';
-          } else if (customMethod.type === 'crypto' || customMethod.type === 'upi') {
-            const qrWrap = document.getElementById('customQRWrapper');
-            if (qrWrap) qrWrap.style.display = 'block';
+            if (qrFrame) qrFrame.innerHTML = `<img src="${customMethod.qrImage}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;display:block;margin:0 auto;" alt="QR" />`;
+            if (qrWrap) qrWrap.style.display = 'flex';
+          } else if (customMethod.identifier) {
+            if (qrFrame) qrFrame.innerHTML = '<div id="customQR"></div>';
+            if (qrWrap) qrWrap.style.display = 'flex';
             generateQR('customQR', customMethod.identifier, 180);
+          } else {
+            if (qrWrap) qrWrap.style.display = 'none';
           }
         }
       } else {
@@ -3551,22 +3650,38 @@ async function gotoPayScreen() {
           setupUPIQR();
         } else if (selectedMethod === 'bep20') {
           setText('bep20Addr', CONFIG.bep20Address);
-          generateQR('bep20QR', CONFIG.bep20Address, 180);
+          const bep20Qr = CONFIG.bep20Qr || (window.__paymentPayment && window.__paymentPayment.bep20Qr);
+          if (bep20Qr) {
+            setHtml('bep20QR', `<img src="${bep20Qr}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="BEP20 QR" />`);
+          } else {
+            generateQR('bep20QR', CONFIG.bep20Address, 180);
+          }
         } else if (selectedMethod === 'eth') {
           setText('ethAddr', CONFIG.ethAddress);
-          generateQR('ethQR', CONFIG.ethAddress, 180);
+          const ethQr = CONFIG.ethQr || (window.__paymentPayment && window.__paymentPayment.ethQr);
+          if (ethQr) {
+            setHtml('ethQR', `<img src="${ethQr}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="ETH QR" />`);
+          } else {
+            generateQR('ethQR', CONFIG.ethAddress, 180);
+          }
         } else if (selectedMethod === 'binance' || selectedMethod === 'giftcard') {
           setText('binanceId', CONFIG.binanceId);
         } else if (selectedMethod === 'binancepay') {
           setText('binancepayId', CONFIG.binanceId);
-          generateQR('binancepayQR', 'https://app.binance.com/en/send-crypto-payment?recipientId=' + CONFIG.binanceId, 180);
+          const binanceQr = CONFIG.binanceQr || (window.__paymentPayment && window.__paymentPayment.binanceQr);
+          if (binanceQr) {
+            setHtml('binancepayQR', `<img src="${binanceQr}" style="width:180px;height:180px;object-fit:contain;border-radius:12px;" alt="Binance Pay QR" />`);
+          } else {
+            generateQR('binancepayQR', 'https://app.binance.com/en/send-crypto-payment?recipientId=' + CONFIG.binanceId, 180);
+          }
         } else if (selectedMethod === 'paypal') {
           setText('paypalLink', CONFIG.paypalLink);
           const paypalDirectLink = document.getElementById('paypalDirectLink');
           if (paypalDirectLink && CONFIG.paypalLink) paypalDirectLink.href = CONFIG.paypalLink;
           const paypalQrImg = document.getElementById('paypalQrImg');
-          if (paypalQrImg && (CONFIG.paypalQr || CONFIG.paypalLogo)) {
-            paypalQrImg.src = CONFIG.paypalQr || CONFIG.paypalLogo || 'images/paypal.svg';
+          const paypalQr = CONFIG.paypalQr || (window.__paymentPayment && (window.__paymentPayment.paypalQr || window.__paymentPayment.paypalLogo)) || CONFIG.paypalLogo;
+          if (paypalQrImg && paypalQr) {
+            paypalQrImg.src = paypalQr;
           }
         }
       }
@@ -3980,9 +4095,9 @@ async function saveOrderToFirebase(amountText, methodName) {
       screenshot: finalProof || null,
       paymentProof: finalProof || null,
       proofUrl: finalProof || null,
-      paymentStatus: 'pending',
-      orderStatus: 'pending',
-      status: 'pending',
+      paymentStatus: (orderData.status === 'approved' || orderData.paymentStatus === 'approved' || orderData.status === 'paid' || orderData.paymentStatus === 'paid') ? (orderData.paymentStatus || 'approved') : 'pending',
+      orderStatus: (orderData.status === 'approved' || orderData.orderStatus === 'approved' || orderData.status === 'paid' || orderData.orderStatus === 'paid') ? (orderData.orderStatus || 'approved') : 'pending',
+      status: (orderData.status === 'approved' || orderData.status === 'paid') ? orderData.status : 'pending',
       timestamp: Date.now(),
       date: new Date().toISOString(),
       updatedAt: Date.now()

@@ -2791,9 +2791,25 @@ function getRangeDays(range = ui.dashboardRange) {
   return 1;
 }
 
+function recordTimestamp(item) {
+  if (!item) return 0;
+  if (typeof item === 'number') return item;
+  if (typeof item.timestamp === 'number' && item.timestamp > 0) return item.timestamp;
+  if (typeof item.createdAt === 'number' && item.createdAt > 0) return item.createdAt;
+  if (typeof item.updatedAt === 'number' && item.updatedAt > 0) return item.updatedAt;
+  const raw = item.timestamp || item.createdAt || item.updatedAt || item.date;
+  if (!raw) return 0;
+  if (typeof raw === 'number') return raw;
+  const num = Number(raw);
+  if (Number.isFinite(num) && num > 1000000000) return num;
+  const parsed = new Date(raw).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function isInRange(timestamp, range) {
   const days = getRangeDays(range);
-  return Number(timestamp || 0) >= Date.now() - (days * 86400000);
+  const stamp = typeof timestamp === 'object' ? recordTimestamp(timestamp) : (Number(timestamp) || recordTimestamp({ date: timestamp }));
+  return stamp >= Date.now() - (days * 86400000);
 }
 
 function parseMetricNumber(value) {
@@ -2814,18 +2830,18 @@ function getRangeWindow(range, offset = 0) {
 }
 
 function isInWindow(timestamp, start, end) {
-  const value = Number(timestamp || 0);
+  const value = typeof timestamp === 'object' ? recordTimestamp(timestamp) : Number(timestamp || 0);
   return value >= start && value < end;
 }
 
 function countInWindow(items, start, end, predicate = () => true) {
-  return items.filter((item) => isInWindow(item.timestamp || item.updatedAt || 0, start, end) && predicate(item)).length;
+  return items.filter((item) => isInWindow(recordTimestamp(item), start, end) && predicate(item)).length;
 }
 
 function sumInWindow(items, start, end, valueFn = () => 0, predicate = () => true) {
   return items.reduce((total, item) => {
     if (!predicate(item)) return total;
-    const stamp = item.timestamp || item.updatedAt || 0;
+    const stamp = recordTimestamp(item);
     if (!isInWindow(stamp, start, end)) return total;
     return total + parseMetricNumber(valueFn(item));
   }, 0);
@@ -2853,7 +2869,7 @@ function buildSeries(items, range, predicate = () => true) {
     });
   }
   items.filter((item) => predicate(item)).forEach((item) => {
-    const stamp = Number(item.timestamp || item.updatedAt || 0);
+    const stamp = recordTimestamp(item);
     if (!isInWindow(stamp, start, end)) return;
     const index = Math.floor((stamp - start) / bucketSize);
     const bucket = series[Math.min(series.length - 1, Math.max(0, index))];
@@ -2880,7 +2896,7 @@ function buildValueSeries(items, range, valueFn = () => 0, predicate = () => tru
     });
   }
   items.filter((item) => predicate(item)).forEach((item) => {
-    const stamp = Number(item.timestamp || item.updatedAt || 0);
+    const stamp = recordTimestamp(item);
     if (!isInWindow(stamp, start, end)) return;
     const index = Math.floor((stamp - start) / bucketSize);
     const bucket = series[Math.min(series.length - 1, Math.max(0, index))];
@@ -2890,7 +2906,7 @@ function buildValueSeries(items, range, valueFn = () => 0, predicate = () => tru
 }
 
 function countInRange(items, range, predicate = () => true) {
-  return items.filter((item) => isInRange(item.timestamp || item.updatedAt || 0, range) && predicate(item)).length;
+  return items.filter((item) => isInRange(recordTimestamp(item), range) && predicate(item)).length;
 }
 
 function percentChange(current, previous) {
@@ -2905,7 +2921,11 @@ function summarizeDashboard(range = ui.dashboardRange) {
   const products = listCollection('products');
   const currentWindow = getRangeWindow(range);
   const previousWindow = getRangeWindow(range, 1);
-  const clickPredicate = (item) => String(item.type || '').toLowerCase().includes('click');
+  const clickPredicate = (item) => {
+    const type = String(item.type || '').toLowerCase();
+    if (type === 'telegram_click' || type === 'review_submission' || type === 'visitor') return false;
+    return type.includes('order') || type.includes('click') || Boolean(item.productId || item.package || item.productName);
+  };
   const currentVisitors = countInWindow(visitors, currentWindow.start, currentWindow.end);
   const currentOrders = countInWindow(orders, currentWindow.start, currentWindow.end);
   const currentClicks = countInWindow(events, currentWindow.start, currentWindow.end, clickPredicate);
@@ -2914,15 +2934,8 @@ function summarizeDashboard(range = ui.dashboardRange) {
   const prevOrders = countInWindow(orders, previousWindow.start, previousWindow.end);
   const prevClicks = countInWindow(events, previousWindow.start, previousWindow.end, clickPredicate);
   const prevRevenue = sumInWindow(orders, previousWindow.start, previousWindow.end, (item) => item.amount, isPaidOrder);
-  const productClicks = events
-    .filter((item) => isInRange(item.timestamp || item.updatedAt || 0, range) && clickPredicate(item))
-    .reduce((acc, item) => {
-      const key = item.package || item.title || item.label || 'Unknown';
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-  const topClicked = Object.entries(productClicks).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const top = topClicked[0] || [];
+  const topProducts = buildTopProducts({ range, clicks: currentClicks });
+  const top = topProducts[0] ? [topProducts[0].title || topProducts[0].name, topProducts[0].clicks] : [];
   return {
     range,
     rangeDays: getRangeDays(range),
@@ -2942,7 +2955,7 @@ function summarizeDashboard(range = ui.dashboardRange) {
     clickSeries: buildSeries(events, range, clickPredicate),
     orderSeries: buildSeries(orders, range),
     revenueSeries: buildValueSeries(orders, range, (item) => item.amount, isPaidOrder),
-    topClicked,
+    topClicked: topProducts.map((p) => [p.title || p.name, p.clicks]),
     topProductName: top[0] || 'None',
     topProductClicks: top[1] || 0,
     totals: stats(),
@@ -3138,44 +3151,120 @@ function renderTrafficChart(summary = summarizeDashboard()) {
   `;
 }
 
-function buildTopProducts(summary) {
-  const range = summary.range;
-  const clickCounts = new Map();
-  const orderCounts = new Map();
-  const performanceKey = (value) => slugify(String(value || '').trim());
-  listCollection('events')
-    .filter((item) => isInRange(item.timestamp || item.updatedAt || 0, range) && String(item.type || '').toLowerCase().includes('click'))
-    .forEach((item) => {
-      const key = performanceKey(item.package || item.title || item.label);
-      if (!key) return;
-      clickCounts.set(key, (clickCounts.get(key) || 0) + 1);
+function doesEventMatchProduct(event = {}, prod = {}, allOrders = []) {
+  if (!event || !prod) return false;
+
+  const eventProdId = String(event.productId || event.product_id || '').trim();
+  const prodId = String(prod.id || prod.key || '').trim();
+  if (eventProdId && prodId && eventProdId === prodId) return true;
+
+  if (event.href && prodId) {
+    try {
+      const u = new URL(event.href, 'http://localhost');
+      const pId = u.searchParams.get('productId') || u.searchParams.get('id');
+      if (pId && pId === prodId) return true;
+    } catch (_) {}
+  }
+
+  const norm = (str) => String(str || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const prodHaystacks = [prod.title, prod.name, prod.slug].map(norm).filter((s) => s.length >= 2);
+  const eventNeedles = [event.package, event.productName, event.title, event.name, event.label].map(norm).filter((s) => s.length >= 2);
+
+  for (const needle of eventNeedles) {
+    if (['order', 'product', 'buy', 'click', 'event', 'unknown'].includes(needle)) continue;
+    for (const haystack of prodHaystacks) {
+      if (needle === haystack) return true;
+      if (needle.length > haystack.length && needle.includes(haystack)) return true;
+      if (haystack.length > needle.length && haystack.includes(needle)) return true;
+    }
+  }
+
+  // Correlate with orders by timestamp (within 30 seconds)
+  const evTs = recordTimestamp(event);
+  if (evTs && Array.isArray(allOrders) && allOrders.length) {
+    const matchedOrder = allOrders.find((ord) => {
+      const ordTs = recordTimestamp(ord);
+      return ordTs && Math.abs(ordTs - evTs) <= 30000;
     });
-  listCollection('orders')
-    .filter((item) => isInRange(item.timestamp || item.updatedAt || 0, range))
-    .forEach((item) => {
-      const key = performanceKey(item.package || item.title || item.label);
-      if (!key) return;
-      orderCounts.set(key, (orderCounts.get(key) || 0) + 1);
+    if (matchedOrder) {
+      const ordProdId = String(matchedOrder.productId || matchedOrder.product_id || '').trim();
+      if (ordProdId && prodId && ordProdId === prodId) return true;
+
+      const ordNeedles = [matchedOrder.package, matchedOrder.productName, matchedOrder.title, matchedOrder.name].map(norm).filter((s) => s.length >= 2);
+      for (const needle of ordNeedles) {
+        if (['order', 'product', 'buy', 'click', 'event', 'unknown'].includes(needle)) continue;
+        for (const haystack of prodHaystacks) {
+          if (needle === haystack) return true;
+          if (needle.length > haystack.length && needle.includes(haystack)) return true;
+          if (haystack.length > needle.length && haystack.includes(needle)) return true;
+        }
+      }
+    }
+  }
+
+  // Match by price if event recorded amount
+  const evAmount = String(event.amountINR || event.amount || '').replace(/[^0-9.]/g, '');
+  if (evAmount && Number(evAmount) > 0) {
+    const prodAmount = String(prod.priceINR || prod.price || '').replace(/[^0-9.]/g, '');
+    if (prodAmount && prodAmount === evAmount) return true;
+  }
+
+  return false;
+}
+
+function buildTopProducts(summary = {}) {
+  const range = summary.range || ui.dashboardRange;
+  const isOrderClick = (item) => {
+    const type = String(item.type || '').toLowerCase();
+    if (type === 'telegram_click' || type === 'review_submission' || type === 'visitor') return false;
+    return type.includes('order') || type.includes('click') || Boolean(item.productId || item.package || item.productName);
+  };
+  const events = listCollection('events').filter((item) => isInRange(recordTimestamp(item), range) && isOrderClick(item));
+  const orders = listCollection('orders').filter((item) => isInRange(recordTimestamp(item), range));
+  const allOrders = listCollection('orders');
+  const products = listCollection('products').filter((item) => item.status !== 'deleted');
+
+  const matchedEvents = new Set();
+
+  const productsWithStats = products.map((prod) => {
+    const matchedEvs = events.filter((ev) => {
+      const match = doesEventMatchProduct(ev, prod, allOrders);
+      if (match) matchedEvents.add(ev.id || ev.timestamp || ev);
+      return match;
     });
-  const totalClicks = [...clickCounts.values()].reduce((total, value) => total + value, 0);
-  return listCollection('products')
-    .filter((item) => item.status !== 'deleted')
-    .map((item) => {
-      const keys = [item.title, item.slug, item.category].map(performanceKey).filter(Boolean);
-      const clicks = keys.reduce((best, key) => Math.max(best, clickCounts.get(key) || 0), 0);
-      const orders = keys.reduce((best, key) => Math.max(best, orderCounts.get(key) || 0), 0);
-      return {
-        ...item,
-        image: item.image || (Array.isArray(item.galleryImages) ? item.galleryImages[0] : '') || '',
-        clicks,
-        orders,
-        share: totalClicks ? Math.round((clicks / totalClicks) * 100) : 0,
-        score: (orders * 3) + clicks,
-      };
-    })
-    .filter((item) => item.clicks || item.orders)
-    .sort((a, b) => b.score - a.score || (b.updatedAt || 0) - (a.updatedAt || 0))
-    .slice(0, 5);
+    const orderCount = orders.filter((ord) => doesEventMatchProduct(ord, prod, allOrders)).length;
+    return {
+      ...prod,
+      image: prod.image || (Array.isArray(prod.galleryImages) ? prod.galleryImages[0] : '') || '',
+      clicks: matchedEvs.length,
+      orders: orderCount,
+      score: (orderCount * 3) + matchedEvs.length,
+    };
+  });
+
+  const totalBase = summary.clicks || events.length || 1;
+  const unassignedClicks = Math.max(0, events.length - matchedEvents.size);
+
+  if (unassignedClicks > 0 && productsWithStats.length > 0) {
+    productsWithStats.push({
+      id: 'direct-orders',
+      title: 'Direct Store Orders',
+      name: 'Direct Store Orders',
+      category: 'Store',
+      image: '',
+      clicks: unassignedClicks,
+      orders: 0,
+      score: unassignedClicks,
+    });
+  }
+
+  productsWithStats.forEach((p) => {
+    p.share = totalBase ? Math.min(100, Math.round((p.clicks / totalBase) * 100)) : 0;
+  });
+
+  productsWithStats.sort((a, b) => b.clicks - a.clicks || b.orders - a.orders || (b.updatedAt || 0) - (a.updatedAt || 0));
+
+  return productsWithStats.slice(0, 6);
 }
 
 function buildAnalyticsChartModel(series = []) {
@@ -5461,7 +5550,7 @@ function orderDeliveryInfo(item = {}) {
 }
 
 function orderDateValue(item = {}) {
-  return Number(item.timestamp || item.updatedAt || item.createdAt || 0);
+  return recordTimestamp(item);
 }
 
 function isPaidOrder(item = {}) {
@@ -5507,7 +5596,7 @@ function managementCounts(list = [], predicate = () => true) {
 function managementTotals(list = []) {
   const today = new Date().toISOString().slice(0, 10);
   const monthKey = today.slice(0, 7);
-  const totalReceived = list.filter(isPaidOrder).reduce((total, item) => total + parseAmountValue(item.amount), 0);
+  const totalReceived = list.filter(isPaidOrder).reduce((total, item) => total + parseAmountValue(item.amount || item.inr || item.amountINR), 0);
   const pending = managementCounts(list, isPendingOrder);
   const failed = managementCounts(list, isFailedOrder);
   const todayCount = list.filter((item) => String(item.date || '').slice(0, 10) === today || new Date(orderDateValue(item)).toISOString().slice(0, 10) === today).length;
@@ -5529,10 +5618,12 @@ function filterManagementList(items = [], type = 'orders') {
   const method = String(ui.management.method || 'all');
   const date = String(ui.management.date || 'all');
   return items.filter((item) => {
+    if (type === 'payment' && !orderPaymentProof(item)) return false;
     const searchable = JSON.stringify(item).toLowerCase();
     const itemStatus = orderStatusValue(item);
     const itemMethod = orderMethodLabel(item).toLowerCase();
-    const day = String(item.date || '').slice(0, 10) || new Date(orderDateValue(item)).toISOString().slice(0, 10);
+    const orderDate = orderDateValue(item);
+    const day = String(item.date || '').slice(0, 10) || (orderDate ? new Date(orderDate).toISOString().slice(0, 10) : '');
     if (search && !searchable.includes(search)) return false;
     if (status !== 'all') {
       if (status === 'paid' && !isPaidOrder(item)) return false;
@@ -6405,8 +6496,8 @@ function getStandardPaymentMethods(payment = {}) {
   const defaultList = [
     {
       id: 'binancepay',
-      name: 'Binance Pay',
-      sub: 'Zero-fee instant crypto transfer via Binance App',
+      name: payment.binancepayName || payment.binanceName || 'Binance Pay',
+      sub: payment.binancepaySub || payment.binanceSub || 'Zero-fee instant crypto transfer via Binance App',
       type: 'binance',
       iconClass: 'icon-binance',
       icon: 'sparkles',
@@ -6414,33 +6505,33 @@ function getStandardPaymentMethods(payment = {}) {
       qrImage: payment.binanceQr || '',
       identifierLabel: 'Binance ID / Pay ID',
       identifier: payment.binanceId || '969887942',
-      tag: '0% FEE',
-      instructions: 'Open Binance App → Pay → Enter Binance ID → Transfer exact USD amount.',
+      tag: payment.binancepayTag || payment.binanceTag || '0% FEE',
+      instructions: payment.binancepayInstructions || payment.binanceInstructions || 'Open Binance App → Pay → Enter Binance ID → Transfer exact USD amount.',
       status: disabled.includes('binancepay') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'binancepay',
       isDefault: true,
     },
     {
       id: 'upi',
-      name: 'UPI (GPay / PhonePe / Paytm)',
-      sub: 'Instant Indian UPI transfers & Dynamic QR Code',
+      name: payment.upiName || 'UPI (GPay / PhonePe / Paytm)',
+      sub: payment.upiSub || 'Instant Indian UPI transfers & Dynamic QR Code',
       type: 'upi',
       iconClass: 'icon-upi',
       icon: 'smartphone',
       logo: payment.upiLogo || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/320px-UPI-Logo-vector.svg.png',
-      qrImage: payment.qrImage || '',
+      qrImage: payment.qrImage || payment.upiQr || '',
       identifierLabel: 'UPI VPA Address',
       identifier: payment.upiId || 'Ritikane@ptyes',
-      tag: 'INR FAST',
-      instructions: 'Scan QR with GPay / PhonePe / Paytm or send to UPI ID → Upload screenshot proof.',
+      tag: payment.upiTag || 'INR FAST',
+      instructions: payment.upiInstructions || payment.instructions || 'Scan QR with GPay / PhonePe / Paytm or send to UPI ID → Upload screenshot proof.',
       status: disabled.includes('upi') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'upi',
       isDefault: true,
     },
     {
       id: 'bep20',
-      name: 'USDT BEP-20 (BSC)',
-      sub: 'BNB Smart Chain Low-Fee Network',
+      name: payment.bep20Name || 'USDT BEP-20 (BSC)',
+      sub: payment.bep20Sub || 'BNB Smart Chain Low-Fee Network',
       type: 'crypto',
       iconClass: 'icon-bep20',
       icon: 'coins',
@@ -6448,16 +6539,16 @@ function getStandardPaymentMethods(payment = {}) {
       qrImage: payment.bep20Qr || '',
       identifierLabel: 'BEP-20 Wallet Address',
       identifier: payment.bep20Address || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
-      tag: 'USDT (BSC)',
-      instructions: 'Send exact USDT on Binance Smart Chain (BEP-20) network only.',
+      tag: payment.bep20Tag || 'USDT (BSC)',
+      instructions: payment.bep20Instructions || 'Send exact USDT on Binance Smart Chain (BEP-20) network only.',
       status: disabled.includes('bep20') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'bep20',
       isDefault: true,
     },
     {
       id: 'eth',
-      name: 'USDT ERC-20 (ETH)',
-      sub: 'Ethereum Mainnet Network',
+      name: payment.ethName || 'USDT ERC-20 (ETH)',
+      sub: payment.ethSub || 'Ethereum Mainnet Network',
       type: 'crypto',
       iconClass: 'icon-eth',
       icon: 'wallet',
@@ -6465,16 +6556,16 @@ function getStandardPaymentMethods(payment = {}) {
       qrImage: payment.ethQr || '',
       identifierLabel: 'ERC-20 Wallet Address',
       identifier: payment.ethAddress || '0x7186b11f8fD49fe472Af49Cda490f168e09Fef0a',
-      tag: 'USDT (ETH)',
-      instructions: 'Send exact USDT on Ethereum (ERC-20) network only.',
+      tag: payment.ethTag || 'USDT (ETH)',
+      instructions: payment.ethInstructions || 'Send exact USDT on Ethereum (ERC-20) network only.',
       status: disabled.includes('eth') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'eth',
       isDefault: true,
     },
     {
       id: 'paypal',
-      name: 'PayPal',
-      sub: 'International Debit / Credit Cards',
+      name: payment.paypalName || 'PayPal',
+      sub: payment.paypalSub || 'International Debit / Credit Cards',
       type: 'paypal',
       iconClass: 'icon-paypal',
       icon: 'credit-card',
@@ -6482,16 +6573,16 @@ function getStandardPaymentMethods(payment = {}) {
       qrImage: payment.paypalQr || '',
       identifierLabel: 'PayPal Link',
       identifier: payment.paypalLink || 'https://paypal.me/Johnguzman456',
-      tag: 'GLOBAL',
-      instructions: 'Click PayPal link and send exact USD amount as Friends & Family or Goods.',
+      tag: payment.paypalTag || 'GLOBAL',
+      instructions: payment.paypalInstructions || 'Click PayPal link and send exact USD amount as Friends & Family or Goods.',
       status: disabled.includes('paypal') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'paypal',
       isDefault: true,
     },
     {
       id: 'giftcard',
-      name: 'Binance Gift Card',
-      sub: 'Digital Voucher / G2A Key',
+      name: payment.giftcardName || 'Binance Gift Card',
+      sub: payment.giftcardSub || 'Digital Voucher / G2A Key',
       type: 'giftcard',
       iconClass: 'icon-gift',
       icon: 'gift',
@@ -6499,8 +6590,8 @@ function getStandardPaymentMethods(payment = {}) {
       qrImage: payment.giftcardQr || '',
       identifierLabel: 'Gift Card URL',
       identifier: payment.binanceGiftCardUrl || 'https://www.g2a.com/binance-gift-card-205-usdt-key-i10000337768061',
-      tag: 'VOUCHER',
-      instructions: 'Buy digital voucher key and submit voucher code in payment verification.',
+      tag: payment.giftcardTag || 'VOUCHER',
+      instructions: payment.giftcardInstructions || 'Buy digital voucher key and submit voucher code in payment verification.',
       status: disabled.includes('giftcard') ? 'disabled' : 'active',
       isRecommended: recommendedId === 'giftcard',
       isDefault: true,
@@ -6560,17 +6651,25 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
   const methodsList = getStandardPaymentMethods(payment);
 
   const allOrders = listCollection('orders');
-  const records = sortManagementList(filterManagementList(allOrders, 'payment'));
+  // Payment Hub strictly filters to only orders where screenshot proof was uploaded
+  const paymentOrders = allOrders.filter((item) => Boolean(orderPaymentProof(item)));
+  const records = sortManagementList(filterManagementList(paymentOrders, 'payment'));
   const totals = managementTotals(records);
-  const paidMethods = [...new Set(records.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
+  const paidMethods = [...new Set(paymentOrders.map((item) => orderMethodLabel(item)).filter((value) => value && value !== 'Unknown'))];
+  const totalVolume = records.reduce((total, item) => total + parseAmountValue(item.amount || item.inr), 0);
   const todayReceived = records
     .filter((item) => {
-      const day = new Date(orderDateValue(item)).toISOString().slice(0, 10);
-      return day === new Date().toISOString().slice(0, 10) && isPaidOrder(item);
+      const d = orderDateValue(item);
+      const day = d ? new Date(d).toISOString().slice(0, 10) : '';
+      return day === new Date().toISOString().slice(0, 10);
     })
     .reduce((total, item) => total + parseAmountValue(item.amount || item.inr), 0);
   const monthReceived = records
-    .filter((item) => new Date(orderDateValue(item)).toISOString().slice(0, 7) === new Date().toISOString().slice(0, 7) && isPaidOrder(item))
+    .filter((item) => {
+      const d = orderDateValue(item);
+      const m = d ? new Date(d).toISOString().slice(0, 7) : '';
+      return m === new Date().toISOString().slice(0, 7);
+    })
     .reduce((total, item) => total + parseAmountValue(item.amount || item.inr), 0);
   const tableItems = records;
 
@@ -6590,8 +6689,8 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
           </div>
         </div>
         <div class="management-summary-grid">
-          ${renderManagementSummaryCard('Total Volume', formatCurrencyCompact(totals.totalReceived), 'From paid & verified orders', 'success')}
-          ${renderManagementSummaryCard('Pending Verification', String(totals.pending), 'Awaiting admin review', 'warning')}
+          ${renderManagementSummaryCard('Total Volume', formatCurrencyCompact(totalVolume || totals.totalReceived), `${records.length} screenshot submission${records.length === 1 ? '' : 's'}`, 'success')}
+          ${renderManagementSummaryCard('Pending Verification', String(totals.pending), totals.pending ? 'Awaiting admin review' : 'All clear', 'warning')}
           ${renderManagementSummaryCard('Failed / Rejected', String(totals.failed), 'Rejected or expired payments', 'danger')}
           ${renderManagementSummaryCard('Today Received', formatCurrencyCompact(todayReceived), 'Received today', 'primary')}
           ${renderManagementSummaryCard('This Month', formatCurrencyCompact(monthReceived), 'Total this month', 'accent')}
@@ -6645,7 +6744,7 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
         </div>
       `)}
 
-      ${renderFieldGroup('Live Payment Records', 'Real customer payment submissions pulled from Firebase orders collection.', `
+      ${renderFieldGroup('Live Payment Records (Screenshot Proofs)', 'Real customer payment submissions with uploaded screenshot proof.', `
         <div class="management-filterbar">
           <div class="field">
             <label for="paymentSearch">Search</label>
@@ -6712,7 +6811,7 @@ function renderPaymentManagementView(data = {}, fullData = {}) {
                   </td>
                 </tr>
               `;
-              }).join('') : `<tr><td colspan="7"><div class="empty-state">${allOrders.length ? 'No payment records match the current filters.' : 'No payment records found.'}</div></td></tr>`}
+              }).join('') : `<tr><td colspan="7"><div class="empty-state">${paymentOrders.length ? 'No payment records match the current filters.' : 'No payment screenshot submissions found. Normal checkout orders are listed under Orders.'}</div></td></tr>`}
             </tbody>
           </table>
         </div>
@@ -7466,6 +7565,20 @@ function listAllReviews(reviewsData = {}, productsMap = {}) {
         });
       }
     });
+  } catch (_) {}
+
+  // Cross-reference with settings.recentApprovedReviews to ensure approved status persists
+  try {
+    const settings = (typeof ui !== 'undefined' && ui?.data?.settings) ? ui.data.settings : (typeof STORE !== 'undefined' && STORE?.settings) ? STORE.settings : {};
+    const approvedRevs = Array.isArray(settings?.recentApprovedReviews) ? settings.recentApprovedReviews : [];
+    if (approvedRevs.length > 0) {
+      const approvedIds = new Set(approvedRevs.map(r => String(r.id)));
+      list.forEach(r => {
+        if (approvedIds.has(String(r.id))) {
+          r.status = 'approved';
+        }
+      });
+    }
   } catch (_) {}
 
   return list.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
@@ -8542,7 +8655,8 @@ function renderOrdersView(data) {
 
 function renderAnalyticsView(data) {
   const summary = summarizeDashboard();
-  const topProducts = buildTopProducts(summary).filter((item) => item.clicks > 0);
+  const topProducts = buildTopProducts(summary);
+  const clicksDisplay = summary.clicks;
   return `
     <div class="page active">
       <section class="panel glass analytics-page-shell">
@@ -8583,10 +8697,10 @@ function renderAnalyticsView(data) {
             </div>
             <div class="analytics-products-meta">
               <span class="badge">${escapeHtml(summary.range.toUpperCase())}</span>
-              <span class="section-subtitle">${escapeHtml(formatNumber(summary.clicks))} total clicks</span>
+              <span class="section-subtitle">${escapeHtml(formatNumber(clicksDisplay))} total clicks</span>
             </div>
           </div>
-          ${renderTopProductsAnalytics(topProducts, summary.clicks)}
+          ${renderTopProductsAnalytics(topProducts, clicksDisplay)}
         </div>
       </section>
     </div>
@@ -9199,36 +9313,38 @@ function attachGlobalHandlers() {
       const revId = actionBtn.dataset.id;
       if (!revId) return;
       try {
+        const safeProdId = String(prodId || 'general').replace(/[.#$\[\]\/]/g, '_');
+        const safeRevId = String(revId).replace(/[.#$\[\]\/]/g, '_');
+
         const allRevs = listAllReviews(ui.data?.reviews || {}, ui.data?.products || {});
         const rev = allRevs.find(r => String(r.id) === String(revId)) || {};
         const revName = (rev.name || rev.author || 'Verified Buyer').trim();
         const revComment = (rev.comment || rev.text || rev.title || 'Great content and discrete delivery!').trim();
         const revRating = Number(rev.rating || rev.stars || 5);
-        const prodName = (rev.productName || ui.data?.products?.[prodId]?.name || 'VIP Pack').trim();
+        const prodName = (rev.productName || ui.data?.products?.[prodId]?.name || ui.data?.products?.[safeProdId]?.name || 'VIP Pack').trim();
 
-        const revRef = ref(db, `reviews/${prodId}/${revId}`);
-        await update(revRef, {
-          id: revId,
-          productId: prodId,
-          productName: prodName,
-          name: revName,
-          comment: revComment,
-          text: revComment,
-          rating: revRating,
-          status: 'approved',
-          approvedAt: Date.now()
-        });
-
-        // If it was an event submission from a public user, mark it approved in events too
+        // 1. Authoritative persistence in Firebase events collection (permitted for authenticated read/write)
+        let targetEventId = null;
         try {
           const events = listCollection('events') || [];
           const ev = events.find(e => (e.type === 'review_submission') && (String(e.reviewId || e.id) === String(revId)));
-          if (ev && ev.id) {
-            await update(ref(db, `events/${ev.id}`), { status: 'approved', approvedAt: Date.now() });
+          targetEventId = ev?.id || (ui.data?.events?.[revId] ? revId : null);
+          if (targetEventId) {
+            await update(ref(db, `events/${targetEventId}`), {
+              status: 'approved',
+              approvedAt: Date.now(),
+              updatedAt: Date.now(),
+            });
+            if (ui.data?.events?.[targetEventId]) {
+              ui.data.events[targetEventId].status = 'approved';
+              ui.data.events[targetEventId].approvedAt = Date.now();
+            }
           }
-        } catch (_) {}
+        } catch (evErr) {
+          console.warn('Events review status update notice:', evErr);
+        }
 
-        // Update settings.recentApprovedReviews (up to 10 persistent real approved reviews)
+        // 2. Broadcast live approved review via settings.recentApprovedReviews (syncs live to storefront marquee, toasts, and modals)
         const currentSettings = ui.data?.settings || {};
         const prevApprovedRevs = Array.isArray(currentSettings.recentApprovedReviews) ? [...currentSettings.recentApprovedReviews] : [];
         const newRevEntry = {
@@ -9238,7 +9354,8 @@ function attachGlobalHandlers() {
           name: revName,
           comment: revComment,
           rating: revRating,
-          approvedAt: Date.now()
+          status: 'approved',
+          approvedAt: Date.now(),
         };
         const updatedRevsPool = [newRevEntry, ...prevApprovedRevs.filter(r => String(r.id) !== String(revId))].slice(0, 10);
 
@@ -9248,6 +9365,32 @@ function attachGlobalHandlers() {
           lastReviewApprovedAt: Date.now(),
           lastApprovedReview: newRevEntry,
         });
+
+        // 3. Resilient write to reviews node (wrapped in try-catch so security rules never crash the approval)
+        try {
+          const revRef = ref(db, `reviews/${safeProdId}/${safeRevId}`);
+          await update(revRef, {
+            id: revId,
+            productId: safeProdId,
+            productName: prodName,
+            name: revName,
+            comment: revComment,
+            text: revComment,
+            rating: revRating,
+            status: 'approved',
+            approvedAt: Date.now(),
+          });
+        } catch (rtdbErr) {
+          console.warn('Direct RTDB reviews node write safely bypassed:', rtdbErr?.message || rtdbErr);
+        }
+
+        // 4. Update local reactive state
+        if (!ui.data.reviews) ui.data.reviews = {};
+        if (!ui.data.reviews[safeProdId]) ui.data.reviews[safeProdId] = {};
+        ui.data.reviews[safeProdId][safeRevId] = {
+          ...newRevEntry,
+          text: revComment,
+        };
 
         showToast(`Review by ${revName} approved & synced live to storefront!`, 'success');
         renderView(ui.data || {});
@@ -9261,20 +9404,47 @@ function attachGlobalHandlers() {
       const revId = actionBtn.dataset.id;
       if (!revId) return;
       try {
-        const revRef = ref(db, `reviews/${prodId}/${revId}`);
-        await update(revRef, { status: 'pending' });
+        const safeProdId = String(prodId || 'general').replace(/[.#$\[\]\/]/g, '_');
+        const safeRevId = String(revId).replace(/[.#$\[\]\/]/g, '_');
 
-        // Remove from settings.recentApprovedReviews
+        // 1. Mark pending in events
+        try {
+          const events = listCollection('events') || [];
+          const ev = events.find(e => (e.type === 'review_submission') && (String(e.reviewId || e.id) === String(revId)));
+          const targetEventId = ev?.id || (ui.data?.events?.[revId] ? revId : null);
+          if (targetEventId) {
+            await update(ref(db, `events/${targetEventId}`), {
+              status: 'pending',
+              updatedAt: Date.now(),
+            });
+            if (ui.data?.events?.[targetEventId]) {
+              ui.data.events[targetEventId].status = 'pending';
+            }
+          }
+        } catch (_) {}
+
+        // 2. Remove from settings.recentApprovedReviews
         try {
           const currentSettings = ui.data?.settings || {};
           if (Array.isArray(currentSettings.recentApprovedReviews)) {
             const filteredRevs = currentSettings.recentApprovedReviews.filter(r => String(r.id) !== String(revId));
             await updateRecord('settings', null, {
               ...currentSettings,
-              recentApprovedReviews: filteredRevs
+              recentApprovedReviews: filteredRevs,
             });
           }
         } catch (_) {}
+
+        // 3. Resilient update to reviews node
+        try {
+          const revRef = ref(db, `reviews/${safeProdId}/${safeRevId}`);
+          await update(revRef, { status: 'pending' });
+        } catch (_) {}
+
+        // 4. Update local state
+        if (ui.data?.reviews?.[safeProdId]?.[safeRevId]) {
+          ui.data.reviews[safeProdId][safeRevId].status = 'pending';
+        }
 
         showToast('Review marked back to pending.', 'info');
         renderView(ui.data || {});
@@ -9289,22 +9459,46 @@ function attachGlobalHandlers() {
       if (!revId) return;
       if (confirm('Permanently delete this customer review?')) {
         try {
-          const revRef = ref(db, `reviews/${prodId}/${revId}`);
-          await remove(revRef);
+          const safeProdId = String(prodId || 'general').replace(/[.#$\[\]\/]/g, '_');
+          const safeRevId = String(revId).replace(/[.#$\[\]\/]/g, '_');
 
-          // Remove from settings.recentApprovedReviews
+          // 1. Delete from events
+          try {
+            const events = listCollection('events') || [];
+            const ev = events.find(e => (e.type === 'review_submission') && (String(e.reviewId || e.id) === String(revId)));
+            const targetEventId = ev?.id || (ui.data?.events?.[revId] ? revId : null);
+            if (targetEventId) {
+              await remove(ref(db, `events/${targetEventId}`));
+              if (ui.data?.events?.[targetEventId]) {
+                delete ui.data.events[targetEventId];
+              }
+            }
+          } catch (_) {}
+
+          // 2. Remove from settings.recentApprovedReviews
           try {
             const currentSettings = ui.data?.settings || {};
             if (Array.isArray(currentSettings.recentApprovedReviews)) {
               const filteredRevs = currentSettings.recentApprovedReviews.filter(r => String(r.id) !== String(revId));
               await updateRecord('settings', null, {
                 ...currentSettings,
-                recentApprovedReviews: filteredRevs
+                recentApprovedReviews: filteredRevs,
               });
             }
           } catch (_) {}
 
-          showToast('Review deleted.', 'info');
+          // 3. Resilient remove from reviews node
+          try {
+            const revRef = ref(db, `reviews/${safeProdId}/${safeRevId}`);
+            await remove(revRef);
+          } catch (_) {}
+
+          // 4. Delete from local state
+          if (ui.data?.reviews?.[safeProdId]?.[safeRevId]) {
+            delete ui.data.reviews[safeProdId][safeRevId];
+          }
+
+          showToast('Review permanently deleted.', 'info');
           renderView(ui.data || {});
         } catch (err) {
           showToast('Failed to delete review: ' + (err?.message || err), 'danger');
@@ -9356,11 +9550,10 @@ function attachGlobalHandlers() {
       const prodId = actionBtn.dataset.productId;
       if (!prodId) return;
       try {
-        const reviewsData = ui.data?.reviews || {};
-        const prodReviews = reviewsData[prodId] || {};
-        const approved = Object.values(prodReviews).filter((r) => r && r.status === 'approved');
-        const count = approved.length;
-        const avg = count > 0 ? (approved.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / count).toFixed(1) : '4.9';
+        const allRevs = listAllReviews(ui.data?.reviews || {}, ui.data?.products || {});
+        const prodApproved = allRevs.filter((r) => (String(r.productId) === String(prodId)) && (r.status === 'approved'));
+        const count = prodApproved.length;
+        const avg = count > 0 ? (prodApproved.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / count).toFixed(1) : '4.9';
         await updateRecord('products', prodId, {
           rating: Number(avg),
           reviewsCount: count > 0 ? count : 128,
@@ -9744,26 +9937,54 @@ function attachGlobalHandlers() {
           updatedPayment.binanceId = identifier;
           updatedPayment.binanceLogo = logo;
           updatedPayment.binanceQr = qrImage;
+          if (name) updatedPayment.binancepayName = name;
+          if (sub) updatedPayment.binancepaySub = sub;
+          if (tag) updatedPayment.binancepayTag = tag;
+          if (instructions) updatedPayment.binancepayInstructions = instructions;
         } else if (methodId === 'upi') {
           updatedPayment.upiId = identifier;
           updatedPayment.upiLogo = logo;
           updatedPayment.qrImage = qrImage;
+          updatedPayment.upiQr = qrImage;
+          if (name) updatedPayment.upiName = name;
+          if (sub) updatedPayment.upiSub = sub;
+          if (tag) updatedPayment.upiTag = tag;
+          if (instructions) updatedPayment.upiInstructions = instructions;
+          try {
+            await updateRecord('settings', null, { upiId: identifier, qrImage });
+          } catch (_) {}
         } else if (methodId === 'bep20') {
           updatedPayment.bep20Address = identifier;
           updatedPayment.bep20Logo = logo;
           updatedPayment.bep20Qr = qrImage;
+          if (name) updatedPayment.bep20Name = name;
+          if (sub) updatedPayment.bep20Sub = sub;
+          if (tag) updatedPayment.bep20Tag = tag;
+          if (instructions) updatedPayment.bep20Instructions = instructions;
         } else if (methodId === 'eth') {
           updatedPayment.ethAddress = identifier;
           updatedPayment.ethLogo = logo;
           updatedPayment.ethQr = qrImage;
+          if (name) updatedPayment.ethName = name;
+          if (sub) updatedPayment.ethSub = sub;
+          if (tag) updatedPayment.ethTag = tag;
+          if (instructions) updatedPayment.ethInstructions = instructions;
         } else if (methodId === 'paypal') {
           updatedPayment.paypalLink = identifier;
           updatedPayment.paypalLogo = logo;
           updatedPayment.paypalQr = qrImage;
+          if (name) updatedPayment.paypalName = name;
+          if (sub) updatedPayment.paypalSub = sub;
+          if (tag) updatedPayment.paypalTag = tag;
+          if (instructions) updatedPayment.paypalInstructions = instructions;
         } else if (methodId === 'giftcard') {
           updatedPayment.binanceGiftCardUrl = identifier;
           updatedPayment.giftcardLogo = logo;
           updatedPayment.giftcardQr = qrImage;
+          if (name) updatedPayment.giftcardName = name;
+          if (sub) updatedPayment.giftcardSub = sub;
+          if (tag) updatedPayment.giftcardTag = tag;
+          if (instructions) updatedPayment.giftcardInstructions = instructions;
         }
       }
 
@@ -9772,6 +9993,29 @@ function attachGlobalHandlers() {
         if (ui.data) {
           ui.data.payment = { ...(ui.data.payment || {}), ...updatedPayment };
         }
+        try {
+          localStorage.setItem('linkadda_payment_payment', JSON.stringify(updatedPayment));
+          localStorage.setItem('linkadda_payment_config', JSON.stringify({
+            recommendedMethod: updatedPayment.recommendedMethod || 'binancepay',
+            upiId: updatedPayment.upiId || '',
+            qrImage: updatedPayment.qrImage || '',
+            binanceId: updatedPayment.binanceId || '',
+            binanceQr: updatedPayment.binanceQr || '',
+            binanceLogo: updatedPayment.binanceLogo || '',
+            bep20Address: updatedPayment.bep20Address || '',
+            bep20Qr: updatedPayment.bep20Qr || '',
+            bep20Logo: updatedPayment.bep20Logo || '',
+            ethAddress: updatedPayment.ethAddress || '',
+            ethQr: updatedPayment.ethQr || '',
+            ethLogo: updatedPayment.ethLogo || '',
+            paypalLink: updatedPayment.paypalLink || '',
+            paypalQr: updatedPayment.paypalQr || '',
+            paypalLogo: updatedPayment.paypalLogo || '',
+            binanceGiftCardUrl: updatedPayment.binanceGiftCardUrl || '',
+            giftcardQr: updatedPayment.giftcardQr || '',
+            giftcardLogo: updatedPayment.giftcardLogo || '',
+          }));
+        } catch (_) {}
         showToast(`Payment method "${name}" saved successfully!`, 'success');
         closeModal();
         renderView(ui.data || {});

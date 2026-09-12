@@ -1,0 +1,66 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "products": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "categories": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "testimonials": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "settings": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "hero": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "banner": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "faq": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "events": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "reviews": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "payment": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "orders": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "analytics": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "media": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "visitors": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "admin_sessions": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

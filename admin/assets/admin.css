@@ -6223,26 +6223,46 @@ button {
     border-radius: 16px !important;
   }
   .analytics-product-row {
-    padding: 8px 10px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding: 10px 12px !important;
     gap: 8px !important;
     border-radius: 12px !important;
   }
   .analytics-product-rank {
-    width: 30px !important;
-    height: 30px !important;
+    width: 28px !important;
+    height: 28px !important;
     font-size: 0.78rem !important;
     border-radius: 8px !important;
+    flex-shrink: 0 !important;
   }
   .analytics-product-thumb {
     width: 36px !important;
     height: 36px !important;
     border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .analytics-product-meta {
+    flex: 1 1 calc(100% - 90px) !important;
+    min-width: 0 !important;
   }
   .analytics-product-meta strong {
     font-size: 0.84rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   .analytics-product-meta span {
     font-size: 0.7rem !important;
+  }
+  .analytics-product-stats {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-left: 36px !important;
+    margin-top: 2px !important;
   }
   .analytics-product-stats strong {
     font-size: 0.82rem !important;

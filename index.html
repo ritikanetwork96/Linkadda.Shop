@@ -17,16 +17,14 @@
         window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
       }
     })();
-    // Theme Bootstrap (System Theme Dedicated + Manual Override)
+    // Theme Bootstrap (Light default for new visitors, manual override persists)
     (function() {
       try {
         var manual = localStorage.getItem('linkadda_theme_manual');
         var saved = localStorage.getItem('linkadda_theme');
-        var theme = 'dark';
+        var theme = 'light'; // Default: light for new visitors
         if (manual && saved) {
           theme = saved;
-        } else {
-          theme = 'dark'; // Always default to dark luxury theme
         }
         document.documentElement.setAttribute('data-theme', theme);
       } catch (_) {}
@@ -268,8 +266,7 @@
         <i class="fa-solid fa-cart-shopping"></i> View Cart (<span id="cartBadgeMob">0</span>)
       </button>
       <a href="#home" class="mob-link">Home</a>
-      <a href="#services" class="mob-link">Services</a>
-      <a href="#pricing" class="mob-link">Pricing</a>
+      <a href="#services" class="mob-link">Browse Packs</a>
       <a href="#faq" class="mob-link">FAQ</a>
       <a href="#contact" class="mob-link">Contact</a>
     </div>
@@ -620,101 +617,6 @@
     </button>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero" id="home">
-    <div class="hero-bg"></div>
-    <div class="hero-content">
-      <p class="hero-tag"><i class="fa-solid fa-star"></i> Adult Content Seller </p>
-      <!-- Verified Badge -->
-      <div class="verified-badge">
-        <i class="fa-solid fa-circle-check"></i>
-        <span>Verified Trusted Seller</span>
-        <span class="vb-dot"></span>
-        <span class="vb-since">Since 2022</span>
-      </div>
-      <h1 class="hero-title">TRUSTED BROTHER<br /><span class="gradient-text">CONTENT SELLER</span></h1>
-      <p class="hero-sub">Premium 4K quality videos at the cheapest price in the market. Trusted by thousands &#8212; fast delivery, zero compromise on quality.</p>
-      <div class="hero-btns">
-        <a href="#services" class="btn-primary"><i class="fa-solid fa-layer-group"></i> Browse Services</a>
-        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-ghost"><i class="fa-brands fa-telegram"></i> DM Now</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-num">500+</span>
-          <span class="stat-label">Happy Clients</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">24/7</span>
-          <span class="stat-label">Support</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num">100%</span>
-          <span class="stat-label">Satisfaction</span>
-        </div>
-      </div>
-      <!-- Trust Bar -->
-      <div class="trust-bar">
-        <div class="trust-item">
-          <i class="fa-solid fa-calendar-check"></i>
-          <span>Selling since <strong>2022</strong></span>
-        </div>
-        <div class="trust-sep"></div>
-        <div class="trust-item">
-          <i class="fa-solid fa-circle-check"></i>
-          <span><strong>1,200+</strong> orders done</span>
-        </div>
-        <div class="trust-sep"></div>
-        <div class="trust-item">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span><strong>Zero</strong> scam cases</span>
-        </div>
-        <div class="trust-sep"></div>
-        <div class="trust-item">
-          <i class="fa-brands fa-telegram"></i>
-          <span>Active on <strong>Telegram</strong></span>
-        </div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="glow-ring ring1"></div>
-      <div class="glow-ring ring2"></div>
-      <div class="glow-ring ring3"></div>
-      <div class="center-icon">
-        <i class="fa-solid fa-fire-flame-curved"></i>
-      </div>
-    </div>
-  </section>
-
-  <!-- Why Us -->
-  <section class="why-us">
-    <div class="container">
-      <div class="why-grid">
-        <div class="why-card">
-          <i class="fa-solid fa-bolt why-icon"></i>
-          <h3>Instant Delivery</h3>
-          <p>Most orders processed and delivered within minutes of payment.</p>
-        </div>
-        <div class="why-card">
-          <i class="fa-solid fa-shield-halved why-icon"></i>
-          <h3>Since 3 Years</h3>
-          <p>Trusted by hundreds of customers for over 3 years of premium service.</p>
-        </div>
-        <div class="why-card">
-          <i class="fa-solid fa-headset why-icon"></i>
-          <h3>24/7 Support</h3>
-          <p>Round-the-clock support available via Telegram. Always online for you.</p>
-        </div>
-        <div class="why-card">
-          <i class="fa-solid fa-tags why-icon"></i>
-          <h3>Cheapest Price Ever</h3>
-          <p>Lowest prices in the whole market &#8212; no one beats us. Guaranteed.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Services / Categories -->
   <section class="services" id="services">
     <div class="container">
@@ -748,7 +650,7 @@
                data-usd="109">
               <i class="fa-solid fa-cart-shopping"></i> Add to Cart
             </button>
-            <a href="payment.html" class="btn-primary cpb-btn"
+            <a href="payment.html?productId=pinned-deal&name=All%20Collection%20Pack&inr=4399&usd=109" class="btn-primary cpb-btn fk-btn-buy-action"
                data-product-id="pinned-deal"
                data-name="All Collection Pack"
                data-inr="4399"
@@ -781,19 +683,7 @@
     </div>
   </section>
 
-  <!-- Pricing CTA banner -->
-  <section class="pricing-banner" id="pricing">
-    <div class="container">
-      <div class="pb-content">
-        <i class="fa-solid fa-tags pb-icon"></i>
-        <div>
-          <h2>All Prices in Indian Rupees</h2>
-          <p>No hidden fees. No foreign charges. Pay via UPI, Paytm, GPay, PhonePe & more.</p>
-        </div>
-        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-primary">Place an Order</a>
-      </div>
-    </div>
-  </section>
+
 
   <!-- Testimonials -->
   <section class="testimonials">
@@ -954,74 +844,90 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
-          <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
-          <p>Premium 4K content at the cheapest rate. No one beats our price.</p>
+          <div class="footer-logo-wrap">
+            <i class="fa-solid fa-fire-flame-curved logo-icon"></i>
+            <span class="logo-text">Linkadda <span class="logo-accent">Shop</span></span>
+          </div>
+          <p class="footer-desc">India's trusted digital content store. 1,14,000+ premium 4K videos across 23 categories. Instant Telegram delivery.</p>
+          <div class="footer-trust-tag">
+            <i class="fa-solid fa-shield-check"></i> Trusted Since 2022 • 1,200+ Orders
+          </div>
         </div>
+
         <div class="footer-links">
           <h4>Quick Links</h4>
-          <a href="#home">Home</a>
-          <a href="#services">Services</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#contact">Contact</a>
+          <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a>
+          <a href="#services"><i class="fa-solid fa-layer-group"></i> Browse Packs</a>
+          <a href="#faq"><i class="fa-solid fa-circle-question"></i> FAQ</a>
         </div>
+
         <div class="footer-links">
-          <h4>Connect</h4>
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank"><i class="fa-brands fa-telegram"></i> Telegram</a>
-          <a href="#"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          <h4>Legal & Policies</h4>
+          <a href="legal.html#privacy"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="legal.html#terms"><i class="fa-solid fa-file-contract"></i> Terms of Service</a>
+          <a href="legal.html#disclaimer"><i class="fa-solid fa-triangle-exclamation"></i> Disclaimer</a>
+          <a href="legal.html#refund"><i class="fa-solid fa-rotate-left"></i> Refund Policy</a>
+        </div>
+
+        <div class="footer-links">
+          <h4>Connect & Help</h4>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="footer-tg-link">
+            <i class="fa-brands fa-telegram"></i> Telegram Support
+          </a>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener">
+            <i class="fa-solid fa-headset"></i> 24/7 Order DM
+          </a>
+          <div class="footer-delivery-badge">
+            <i class="fa-solid fa-bolt"></i> Instant 5–15 Min Delivery
+          </div>
         </div>
       </div>
+
       <div class="footer-bottom">
-        <p>&copy; 2026 Linkadda Shop. All rights reserved.</p>
-        <div class="footer-theme-toggle-wrap">
-          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="window.toggleStoreTheme(event)" aria-label="Toggle Light or Dark Theme" title="Toggle Light or Dark Theme">
-            <span class="theme-toggle-track">
-              <i class="fa-solid fa-moon theme-icon-dark"></i>
-              <i class="fa-solid fa-sun theme-icon-light"></i>
-              <span class="theme-toggle-thumb"></span>
-            </span>
-            <span class="theme-toggle-label" id="themeToggleLabel">Light Mode</span>
-          </button>
-          <script>
-            window.toggleStoreTheme = function(e) {
-              if (e && typeof e.preventDefault === 'function') e.preventDefault();
-              var doc = document.documentElement;
-              var cur = doc.getAttribute('data-theme') || document.body.getAttribute('data-theme') || 'dark';
-              var next = cur === 'light' ? 'dark' : 'light';
-              doc.setAttribute('data-theme', next);
-              document.body.setAttribute('data-theme', next);
-              try {
-                localStorage.setItem('theme', next);
-                localStorage.setItem('theme_manual', 'true');
-              } catch(err){}
-              var btn = document.getElementById('themeToggleBtn');
-              var lbl = document.getElementById('themeToggleLabel');
-              if (btn) {
-                if (next === 'light') btn.classList.add('is-light');
-                else btn.classList.remove('is-light');
-              }
-              if (lbl) {
-                lbl.textContent = next === 'light' ? 'Dark Mode' : 'Light Mode';
-              }
-              window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme: next } }));
-            };
-            (function(){
-              try {
-                var s = localStorage.getItem('theme') || 'dark';
-                document.documentElement.setAttribute('data-theme', s);
-                document.body.setAttribute('data-theme', s);
-                var btn = document.getElementById('themeToggleBtn');
-                var lbl = document.getElementById('themeToggleLabel');
-                if (btn && s === 'light') btn.classList.add('is-light');
-                if (lbl && s === 'light') lbl.textContent = 'Dark Mode';
-              } catch(e){}
-            })();
-          </script>
-        </div>
-        <p>Made with <i class="fa-solid fa-heart" style="color:#e84393;"></i> in India</p>
+        <p class="footer-copy">&copy; 2026 Linkadda Shop. All rights reserved.</p>
+        <p class="footer-made">Made with <i class="fa-solid fa-heart" style="color:#e11d48;"></i> in India</p>
       </div>
     </div>
   </footer>
+
+  <script>
+    /* Theme toggle for Header button */
+    window.toggleStoreTheme = function(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      var doc = document.documentElement;
+      var cur = doc.getAttribute('data-theme') || 'light';
+      var next = cur === 'light' ? 'dark' : 'light';
+      doc.setAttribute('data-theme', next);
+      document.body.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('linkadda_theme', next);
+        localStorage.setItem('linkadda_theme_manual', 'true');
+      } catch(err){}
+      var moon = document.getElementById('headerThemeMoon');
+      var sun = document.getElementById('headerThemeSun');
+      if (moon && sun) {
+        if (next === 'light') { moon.style.display = 'inline-block'; sun.style.display = 'none'; }
+        else { moon.style.display = 'none'; sun.style.display = 'inline-block'; }
+      }
+      window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme: next } }));
+    };
+    (function(){
+      try {
+        var manual = localStorage.getItem('linkadda_theme_manual');
+        var saved = localStorage.getItem('linkadda_theme');
+        var s = (manual && saved) ? saved : 'light';
+        document.documentElement.setAttribute('data-theme', s);
+        document.body.setAttribute('data-theme', s);
+        var moon = document.getElementById('headerThemeMoon');
+        var sun = document.getElementById('headerThemeSun');
+        if (moon && sun) {
+          if (s === 'light') { moon.style.display = 'inline-block'; sun.style.display = 'none'; }
+          else { moon.style.display = 'none'; sun.style.display = 'inline-block'; }
+        }
+      } catch(e){}
+    })();
+  </script>
 
   <!-- ===== LIGHTBOX MODAL ===== -->
   <div class="lightbox-overlay" id="lightboxOverlay">
@@ -1110,30 +1016,33 @@
 
   function resolveCheckoutMeta(link) {
     const cleanPrice = (value) => String(value || '').replace(/\s+/g, ' ').replace(/[^\d$₹\/.,-]+/g, '').trim();
-    const card = link.closest('.pcard');
+    const url = new URL(link.href || '', window.location.href);
+    const card = link.closest('.pcard, .fk-product-card, .fk-card');
     const tierList = link.closest('.vid-tier-list');
     const tierItem = link.closest('.vid-tier-item');
     const selectedTier = tierList?.querySelector('.vid-tier-item.vid-tier-selected') || card?.querySelector('.vid-tier-item.vid-tier-selected') || tierItem;
     const inr = cleanPrice(
       selectedTier?.dataset?.inr ||
       link.dataset?.inr ||
-      card?.querySelector('.pcard-price')?.textContent ||
+      url.searchParams.get('inr') ||
+      card?.querySelector('.pcard-price, .fk-card-price-current, .fk-pv-price-current')?.textContent ||
       ''
     );
     const usd = cleanPrice(
       selectedTier?.dataset?.usd ||
       link.dataset?.usd ||
-      card?.querySelector('.pcard-price-usd')?.textContent ||
+      url.searchParams.get('usd') ||
+      card?.querySelector('.pcard-price-usd, .fk-pv-price-usd')?.textContent ||
       ''
     );
-    const tier = selectedTier?.dataset?.vids || link.dataset?.tier || '';
-    const baseTitle = decodeURIComponent(link.dataset.baseTitle || card?.querySelector('.pcard-title')?.textContent?.trim() || '');
-    let title = decodeURIComponent(link.dataset.name || card?.querySelector('.pcard-title')?.textContent?.trim() || link.textContent?.trim() || '');
+    const tier = selectedTier?.dataset?.vids || link.dataset?.tier || url.searchParams.get('tier') || '';
+    const baseTitle = decodeURIComponent(link.dataset.baseTitle || card?.querySelector('.pcard-title, .fk-card-title, .fk-pv-title')?.textContent?.trim() || '');
+    let title = decodeURIComponent(link.dataset.name || url.searchParams.get('name') || card?.querySelector('.pcard-title, .fk-card-title, .fk-pv-title')?.textContent?.trim() || link.textContent?.trim() || '');
     if (tier && baseTitle && !title.includes(tier)) {
       title = `${baseTitle} (${tier})`;
     }
-    const slug = link.dataset.slug || card?.dataset?.slug || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '');
-    const id = link.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || link.dataset.fbId || slug || title || '';
+    const slug = link.dataset.slug || card?.dataset?.slug || url.searchParams.get('slug') || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : '');
+    const id = link.dataset.productId || url.searchParams.get('productId') || url.searchParams.get('id') || card?.dataset?.productId || card?.dataset?.fbId || link.dataset.fbId || slug || title || '';
     return { id, slug, title, inr, usd, tier };
   }
 
@@ -1169,6 +1078,9 @@
     }
     if (window.__linkaddaToast && currentVis > 0) {
       window.__linkaddaToast.setVisitorCount(currentVis);
+    }
+    if (typeof window.updateMarqueeVisitors === 'function' && currentVis > 0) {
+      window.updateMarqueeVisitors({ today: currentVis });
     }
   } catch (_) {}
 
@@ -1454,8 +1366,21 @@
     }
     const btn = sec.querySelector('.btn-primary');
     if (btn) {
-      if (b.buttonText) btn.textContent = b.buttonText;
-      if (b.link) btn.href = safeUrl(b.link, btn.href);
+      if (b.buttonText && b.buttonText.trim()) {
+        btn.textContent = b.buttonText.trim();
+      } else if (!btn.textContent || !btn.textContent.trim()) {
+        btn.innerHTML = '<i class="fa-solid fa-gem"></i> Claim Deal';
+      }
+      const bTitle = b.title || 'All Collection Pack';
+      const bInr = b.priceOfferINR || b.inr || '4399';
+      const bUsd = b.priceOfferUSD || b.usd || '109';
+      const defaultBannerLink = `payment.html?productId=pinned-deal&name=${encodeURIComponent(bTitle)}&inr=${encodeURIComponent(bInr)}&usd=${encodeURIComponent(bUsd)}`;
+      const targetLink = b.buttonLink || b.link || b.buttonHref || defaultBannerLink;
+      btn.href = safeUrl(targetLink, btn.href);
+      btn.dataset.productId = 'pinned-deal';
+      btn.dataset.name = bTitle;
+      btn.dataset.inr = bInr;
+      btn.dataset.usd = bUsd;
     }
     sec.style.backgroundImage = b.image ? `url(${safeUrl(b.image)})` : defaultSiteState.banner.backgroundImage;
   }
@@ -1579,29 +1504,53 @@
     applySiteSettings(val);
     if (window.__linkaddaToast && val) {
       window.__linkaddaToast.updateConfig(val);
-      if (Array.isArray(val.recentApproved)) {
-        window.__linkaddaToast.setApprovedOrders(val.recentApproved);
+      const orderPool = val.recentApproved || val.recentApprovedOrders;
+      if (Array.isArray(orderPool)) {
+        window.__linkaddaToast.setApprovedOrders(orderPool);
+        if (typeof window.updateMarqueeWithOrders === 'function') {
+          window.updateMarqueeWithOrders(orderPool);
+        }
       }
       if (Array.isArray(val.recentApprovedReviews)) {
         window.__linkaddaToast.setApprovedReviews(val.recentApprovedReviews);
+        if (typeof window.updateMarqueeReviews === 'function') {
+          window.updateMarqueeReviews(val.recentApprovedReviews);
+        }
       }
       if (val.liveActivity) {
-        if (val.liveActivity.todayVisitors !== undefined) window.__linkaddaToast.setVisitorCount(val.liveActivity.todayVisitors);
-        if (val.liveActivity.telegramClicks !== undefined) window.__linkaddaToast.setTelegramClicks(val.liveActivity.telegramClicks);
+        if (val.liveActivity.todayVisitors !== undefined) {
+          window.__linkaddaToast.setVisitorCount(val.liveActivity.todayVisitors);
+          if (typeof window.updateMarqueeVisitors === 'function') {
+            window.updateMarqueeVisitors({ today: val.liveActivity.todayVisitors });
+          }
+        }
+        if (val.liveActivity.telegramClicks !== undefined) {
+          window.__linkaddaToast.setTelegramClicks(val.liveActivity.telegramClicks);
+          if (typeof window.updateMarqueeTelegram === 'function') {
+            window.updateMarqueeTelegram(val.liveActivity.telegramClicks);
+          }
+        }
       }
-      // Instant celebration popup when admin just approved an order in real-time
+      // Instant celebration update when admin just approved an order in real-time
       if (val.lastOrderApprovedAt && val.lastOrderApprovedAt > lastHandledApprovedTime && (Date.now() - val.lastOrderApprovedAt < 45000)) {
         lastHandledApprovedTime = val.lastOrderApprovedAt;
+        const newTitle = val.lastApprovedOrderTitle || 'VIP Pack';
         window.__linkaddaToast.addApprovedOrder({
-          name: val.lastApprovedOrderTitle || 'VIP Pack',
+          name: newTitle,
           id: val.lastApprovedOrderId || ''
         });
+        if (typeof window.addOrderToMarquee === 'function') {
+          window.addOrderToMarquee(newTitle);
+        }
       }
-      // Instant celebration popup when admin just approved a customer review in real-time
+      // Instant celebration update when admin just approved a customer review in real-time
       if (val.lastReviewApprovedAt && val.lastReviewApprovedAt > lastHandledReviewTime && (Date.now() - val.lastReviewApprovedAt < 45000)) {
         lastHandledReviewTime = val.lastReviewApprovedAt;
         if (val.lastApprovedReview) {
           window.__linkaddaToast.addApprovedReview(val.lastApprovedReview);
+          if (typeof window.updateMarqueeReviews === 'function') {
+            window.updateMarqueeReviews([val.lastApprovedReview]);
+          }
         }
       }
     }
@@ -1616,22 +1565,101 @@
     scheduleRenderLiveStore();
   });
   onValue(ref(db, 'faq'), snap => { const val = snap.val(); saveSettingsCache('faq', val); applyFaq(val); });
-  onValue(ref(db, 'testimonials'), snap => { const val = snap.val(); saveSettingsCache('testimonials', val); applyTestimonials(val); });
+  onValue(ref(db, 'testimonials'), snap => {
+    const val = snap.val();
+    saveSettingsCache('testimonials', val);
+    applyTestimonials(val);
+    if (val && typeof window.updateMarqueeReviews === 'function') {
+      const revs = Object.values(val)
+        .filter(item => item && (item.status === undefined || item.status === 'active'))
+        .map(item => ({
+          name: item.name || 'Verified Buyer',
+          rating: item.rating || 5,
+          review: item.review || item.comment || ''
+        }));
+      if (revs.length) {
+        window.updateMarqueeReviews(revs);
+      }
+    }
+  });
   onValue(ref(db, 'payment'), snap => { const val = snap.val(); saveSettingsCache('payment', val); applyPaymentLinks(val); });
 
-  function getOrderClickMeta(link) {
-    const url = new URL(link.href, window.location.href);
-    const title = link.dataset.name
-      ? decodeURIComponent(link.dataset.name)
-      : link.closest('.pcard')?.querySelector('.pcard-title')?.textContent?.trim()
-        || url.searchParams.get('name')
-        || 'Order';
+  // -- REAL LIVE STATS: VISITORS (Today & Weekly) --
+  onValue(ref(db, 'visitors'), snap => {
+    const data = snap.val();
+    if (!data) return;
+    const list = Object.values(data);
+    const today = new Date().toISOString().slice(0, 10);
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const todayCount = list.filter(v => String(v.date || '').slice(0, 10) === today).length;
+    const weeklyCount = list.filter(v => {
+      const ts = Number(v.timestamp || 0);
+      if (ts) return ts >= sevenDaysAgo;
+      const d = String(v.date || '');
+      return d && new Date(d).getTime() >= sevenDaysAgo;
+    }).length;
+
+    const localToday = Number(localStorage.getItem(`linkadda_vis_count_${today}`) || 0);
+    const finalToday = Math.max(todayCount, localToday);
+
+    if (typeof window.updateMarqueeVisitors === 'function') {
+      window.updateMarqueeVisitors({
+        today: finalToday,
+        weekly: weeklyCount
+      });
+    }
+  }, () => {});
+
+  // -- REAL LIVE STATS: ORDERS (Weekly Completed & Approved Pool) --
+  onValue(ref(db, 'orders'), snap => {
+    const data = snap.val();
+    if (!data) return;
+    const list = Object.values(data);
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const weeklyCompleted = list.filter(o => {
+      const status = String(o.status || '').toLowerCase();
+      const isCompleted = status === 'approved' || status === 'delivered' || status === 'completed';
+      if (!isCompleted) return false;
+      const ts = Number(o.timestamp || o.createdAt || o.updatedAt || 0);
+      if (ts) return ts >= sevenDaysAgo;
+      const d = String(o.date || '');
+      return d && new Date(d).getTime() >= sevenDaysAgo;
+    }).length;
+
+    if (typeof window.updateMarqueeWeeklyOrders === 'function') {
+      window.updateMarqueeWeeklyOrders(weeklyCompleted);
+    }
+
+    const approvedFromOrders = list
+      .filter(o => {
+        const status = String(o.status || '').toLowerCase();
+        return status === 'approved' || status === 'delivered' || status === 'completed';
+      })
+      .map(o => o.package || o.title || o.productName || o.name || '')
+      .filter(Boolean);
+
+    if (approvedFromOrders.length > 0 && typeof window.updateMarqueeWithOrders === 'function') {
+      window.updateMarqueeWithOrders(approvedFromOrders);
+    }
+  }, () => {});
+
+  function getOrderClickMeta(link, checkoutMeta = null) {
+    const meta = checkoutMeta || resolveCheckoutMeta(link);
+    const url = new URL(link?.href || '', window.location.href);
+    const title = meta?.title || 'Product';
+    const inr = meta?.inr || '';
+    const usd = meta?.usd || '';
+    const productId = meta?.id || '';
     return {
       type: 'order_click',
       title,
       package: title,
-      amountINR: '',
-      amountUSD: '',
+      productId,
+      amountINR: inr,
+      amountUSD: usd,
+      amount: inr || usd || '',
       href: url.href,
       page: 'index',
       source: 'public-site',
@@ -1640,15 +1668,15 @@
     };
   }
 
-  document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a.btn-card, a.btn-order-now, a.cpb-btn, a.vid-tier-btn');
+  async function triggerCheckoutTracking(link, targetHref) {
     if (!link) return;
-
-    const href = link.getAttribute('href') || '';
+    const href = targetHref || link.getAttribute('href') || '';
     const isCustomLink = href && !/\/payment(?:\.html)?/i.test(href) && !href.startsWith('payment');
-    if (isCustomLink) return;
+    if (isCustomLink) {
+      if (targetHref) window.location.href = targetHref;
+      return;
+    }
 
-    event.preventDefault();
     if (!link.dataset.originalHtml) {
       link.dataset.originalHtml = link.innerHTML;
     }
@@ -1661,51 +1689,52 @@
 
     try {
       const checkoutMeta = resolveCheckoutMeta(link);
-      const orderRef = push(ref(db, 'orders'));
-      const checkoutToken = createCheckoutToken();
-      const payload = {
-        orderId: orderRef.key,
-        id: orderRef.key,
-        productId: checkoutMeta.id || null,
-        productSlug: checkoutMeta.slug || null,
-        productName: checkoutMeta.title || 'Product',
-        amount: checkoutMeta.inr || checkoutMeta.usd || '',
-        amountINR: checkoutMeta.inr || '',
-        amountUSD: checkoutMeta.usd || '',
-        lockedAmountINR: checkoutMeta.inr || '',
-        lockedAmountUSD: checkoutMeta.usd || '',
-        checkoutToken,
-        currency: 'INR',
-        paymentStatus: 'pending',
-        orderStatus: 'pending',
-        status: 'pending',
-        paymentMethod: '',
-        screenshotUrl: '',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        source: 'public-site',
-      };
-
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
       const ext = isLocal ? '.html' : '';
-      const targetUrl = `payment${ext}?orderId=${encodeURIComponent(orderRef.key)}&productId=${encodeURIComponent(checkoutMeta.id || '')}&token=${encodeURIComponent(checkoutToken)}&name=${encodeURIComponent(checkoutMeta.title || '')}&inr=${encodeURIComponent(checkoutMeta.inr || '')}&usd=${encodeURIComponent(checkoutMeta.usd || '')}`;
+      const fallbackUrl = normalizeCheckoutUrl(href || `payment${ext}`, checkoutMeta);
+      const targetUrl = targetHref || fallbackUrl;
 
-      // Write to Firebase with safe 350ms race timeout so redirection is instantaneous and never hangs
-      const writePromise = Promise.all([
-        set(orderRef, payload),
-        set(push(ref(db, 'events')), getOrderClickMeta(link)).catch(() => {})
-      ]);
+      // Safe asynchronous click event logging without creating premature fake orders
+      const eventPromise = set(push(ref(db, 'events')), getOrderClickMeta(link, checkoutMeta)).catch(() => {});
 
       await Promise.race([
-        writePromise,
-        new Promise(r => setTimeout(r, 350))
+        eventPromise,
+        new Promise(r => setTimeout(r, 220))
       ]);
+
+      if (typeof window.closeFkProductPage === 'function') {
+        window.closeFkProductPage();
+      }
 
       window.location.href = targetUrl;
     } catch (error) {
       console.warn('Order click tracking failed', error);
-      window.location.href = link.href || 'payment.html';
+      if (typeof window.closeFkProductPage === 'function') {
+        window.closeFkProductPage();
+      }
+      window.location.href = targetHref || link.href || 'payment.html';
     }
+  }
+  window.__triggerCheckoutTracking = triggerCheckoutTracking;
+
+  // Restore buttons and guarantee overlay stays closed on browser back / pageshow
+  window.addEventListener('pageshow', function () {
+    if (typeof window.closeFkProductPage === 'function') {
+      window.closeFkProductPage();
+    }
+    document.querySelectorAll('.btn-progress-active').forEach(function (btn) {
+      btn.classList.remove('btn-progress-active');
+      if (btn.dataset.originalHtml) {
+        btn.innerHTML = btn.dataset.originalHtml;
+      }
+    });
+  });
+
+  document.addEventListener('click', async (event) => {
+    const link = event.target.closest('a.btn-card, a.btn-order-now, a.cpb-btn, a.vid-tier-btn, a.fk-btn-buy-action');
+    if (!link) return;
+    event.preventDefault();
+    await triggerCheckoutTracking(link);
   });
 
   // -- BUILD SLIDESHOW --
@@ -2383,9 +2412,14 @@
   window.handleCardBuyNow = function(e, btn, link) {
     if (e) {
       e.stopPropagation();
+      e.preventDefault();
     }
     const targetUrl = link || btn.getAttribute('href') || 'payment.html';
-    window.location.href = targetUrl;
+    if (typeof window.__triggerCheckoutTracking === 'function') {
+      window.__triggerCheckoutTracking(btn, targetUrl);
+    } else {
+      window.location.href = targetUrl;
+    }
   };
 
   window.scrollToCategories = function() {
@@ -2615,7 +2649,7 @@
             <div class="cpb-offer">&#8377;4,399 <span class="cpb-usd">/ $109</span></div>
           </div>
           <div class="cpb-actions-wrap">
-            <a href="payment.html" class="btn-primary cpb-btn"
+            <a href="payment.html?productId=pinned-deal&name=All%20Collection%20Pack&inr=4399&usd=109" class="btn-primary cpb-btn fk-btn-buy-action"
                data-product-id="pinned-deal"
                data-name="All Collection Pack"
                data-inr="4399"
@@ -2640,6 +2674,12 @@
       return;
     }
 
+    const bTitle = data.title || 'All Collection Pack';
+    const bInr = data.priceOfferINR || '4399';
+    const bUsd = data.priceOfferUSD || '109';
+    const defaultDealLink = `payment.html?productId=pinned-deal&name=${encodeURIComponent(bTitle)}&inr=${encodeURIComponent(bInr)}&usd=${encodeURIComponent(bUsd)}`;
+    const finalDealLink = data.buttonLink || defaultDealLink;
+
     wrapper.style.display = 'block';
     wrapper.innerHTML = `
       <div class="collection-pack-banner">
@@ -2647,20 +2687,20 @@
         <div class="cpb-left">
           <div class="cpb-icon"><i class="fa-solid fa-gem"></i></div>
           <div>
-            <h3 class="cpb-title">${esc(data.title || 'All Collection Pack')}</h3>
+            <h3 class="cpb-title">${esc(bTitle)}</h3>
             <p class="cpb-desc">${esc(data.description || '')}</p>
           </div>
         </div>
         <div class="cpb-prices">
           ${data.priceOriginal ? `<div class="cpb-original">${esc(data.priceOriginal)}</div>` : ''}
-          <div class="cpb-offer">${esc(data.priceOfferINR || '')} ${data.priceOfferUSD ? `<span class="cpb-usd">/ ${esc(data.priceOfferUSD)}</span>` : ''}</div>
+          <div class="cpb-offer">${esc(bInr.startsWith('₹') ? bInr : `₹${bInr}`)} ${bUsd ? `<span class="cpb-usd">/ ${esc(bUsd.startsWith('$') ? bUsd : `$${bUsd}`)}</span>` : ''}</div>
         </div>
         <div class="cpb-actions-wrap">
-          <a href="${esc(data.buttonLink || 'payment.html')}" class="btn-primary cpb-btn"
+          <a href="${esc(finalDealLink)}" class="btn-primary cpb-btn fk-btn-buy-action"
              data-product-id="pinned-deal"
-             data-name="${esc(data.title || 'All Collection Pack')}"
-             data-inr="${esc(data.priceOfferINR || '')}"
-             data-usd="${esc(data.priceOfferUSD || '')}">
+             data-name="${esc(bTitle)}"
+             data-inr="${esc(bInr)}"
+             data-usd="${esc(bUsd)}">
             <i class="fa-solid fa-gem"></i> ${esc(data.buttonText || 'Claim Deal')}
           </a>
           <button type="button" class="cpb-btn-cart btn-add-cart"
@@ -3280,12 +3320,8 @@
       }
     }
 
-    // 4. Auto-open product details sheet on share navigation
-    if (foundProdId && typeof window.openFkProductPage === 'function') {
-      setTimeout(() => {
-        window.openFkProductPage(foundProdId);
-      }, 400);
-    }
+    // 4. Do not auto-open modal overlay on navigation
+    // Product details sheet will only open when customer explicitly clicks the card media/title
   }
 
   let sharedCategoryDone = false;

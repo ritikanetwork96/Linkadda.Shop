@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script>
+    (function() {
+      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      if (isLocal) return;
+      var path = window.location.pathname;
+      var cleanPath = null;
+      if (path.endsWith('/index.html')) {
+        cleanPath = path.substring(0, path.length - 10) || '/';
+      } else if (path.endsWith('.html')) {
+        cleanPath = path.substring(0, path.length - 5);
+      }
+      if (cleanPath !== null) {
+        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+    // Theme Bootstrap — sync with index.html & script.js
+    (function() {
+      try {
+        var manual = localStorage.getItem('linkadda_theme_manual');
+        var saved = localStorage.getItem('linkadda_theme');
+        var theme = 'light';
+        if (manual && saved) { theme = saved; }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {}
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legal — Privacy Policy, Terms, Disclaimer & Refund | LinkAdda Shop</title>
+  <meta name="description" content="LinkAdda Shop legal policies — Privacy Policy, Terms of Service, Disclaimer, and Refund Policy. Read our complete legal information." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <style>
+    :root {
+      --lg-bg: #f8fafc;
+      --lg-bg2: #ffffff;
+      --lg-card: #ffffff;
+      --lg-border: #e2e8f0;
+      --lg-border-glow: rgba(225, 29, 72, 0.18);
+      --lg-text: #0f172a;
+      --lg-text2: #334155;
+      --lg-muted: #64748b;
+      --lg-pink: #e11d48;
+      --lg-pink-soft: rgba(225, 29, 72, 0.08);
+      --lg-gradient: linear-gradient(135deg, #e11d48, #7c3aed);
+      --lg-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      --lg-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --lg-font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+    [data-theme="dark"] {
+      --lg-bg: #07080c;
+      --lg-bg2: #0e0f18;
+      --lg-card: rgba(18, 17, 28, 0.88);
+      --lg-border: rgba(255, 255, 255, 0.08);
+      --lg-border-glow: rgba(225, 29, 72, 0.35);
+      --lg-text: #f1f1f8;
+      --lg-text2: #b5b4cb;
+      --lg-muted: #737289;
+      --lg-pink: #f43f5e;
+      --lg-pink-soft: rgba(244, 63, 94, 0.12);
+      --lg-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--lg-font);
+      background: var(--lg-bg);
+      color: var(--lg-text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* NAV */
+    .lg-nav {
+      position: sticky; top: 0; z-index: 999;
+      background: var(--lg-bg2);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--lg-border);
+      padding: 12px 0;
+    }
+    .lg-nav-inner {
+      max-width: 900px; margin: 0 auto; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .lg-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: inherit;
+    }
+    .lg-brand-name {
+      font-family: var(--lg-font-display);
+      font-size: 1.3rem; font-weight: 800;
+      background: var(--lg-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .lg-nav-btns { display: flex; gap: 10px; }
+    .lg-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 10px;
+      background: var(--lg-pink-soft); border: 1px solid var(--lg-border);
+      color: var(--lg-text); text-decoration: none;
+      font-size: 0.82rem; font-weight: 600; transition: all 0.2s;
+    }
+    .lg-btn:hover { border-color: var(--lg-border-glow); color: var(--lg-pink); }
+    .lg-btn-back { font-weight: 700; cursor: pointer; }
+    .lg-btn-back:hover {
+      background: var(--lg-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateX(-2px);
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+    }
+    .lg-btn-back:hover i { transform: translateX(-3px); }
+    .lg-btn-back i { transition: transform 0.2s ease; }
+    .lg-theme-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      border: 1px solid var(--lg-border); background: transparent;
+      color: var(--lg-text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: all 0.2s;
+    }
+    .lg-theme-btn:hover { background: var(--lg-pink-soft); color: var(--lg-pink); }
+    .lg-theme-btn .fa-sun { display: none; }
+    .lg-theme-btn .fa-moon { display: inline; }
+    [data-theme="dark"] .lg-theme-btn .fa-sun { display: inline; }
+    [data-theme="dark"] .lg-theme-btn .fa-moon { display: none; }
+
+    /* HERO */
+    .lg-hero {
+      max-width: 900px; margin: 0 auto;
+      padding: 48px 20px 32px; text-align: center;
+    }
+    .lg-hero h1 {
+      font-family: var(--lg-font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900; letter-spacing: -1px;
+      margin: 0 0 12px;
+    }
+    .lg-hero p {
+      color: var(--lg-muted); font-size: 0.95rem;
+      max-width: 600px; margin: 0 auto 24px;
+    }
+    .lg-gradient-text {
+      background: var(--lg-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* TOC NAV */
+    .lg-toc {
+      max-width: 900px; margin: 0 auto 36px; padding: 0 20px;
+    }
+    .lg-toc-grid {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    }
+    .lg-toc-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; border-radius: 12px;
+      background: var(--lg-card); border: 1px solid var(--lg-border);
+      color: var(--lg-text); text-decoration: none;
+      font-size: 0.84rem; font-weight: 600;
+      box-shadow: var(--lg-shadow); transition: all 0.2s;
+    }
+    .lg-toc-item:hover {
+      border-color: var(--lg-border-glow); color: var(--lg-pink);
+      transform: translateY(-1px);
+    }
+    .lg-toc-item i { color: var(--lg-pink); font-size: 0.9rem; }
+
+    /* SECTIONS */
+    .lg-content {
+      max-width: 900px; margin: 0 auto; padding: 0 20px 60px;
+    }
+    .lg-section {
+      background: var(--lg-card); border: 1px solid var(--lg-border);
+      border-radius: 20px; padding: 36px 32px;
+      margin-bottom: 28px; box-shadow: var(--lg-shadow);
+      scroll-margin-top: 80px;
+    }
+    .lg-section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--lg-border);
+    }
+    .lg-section-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; flex-shrink: 0;
+    }
+    .lg-si-privacy { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .lg-si-terms { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+    .lg-si-disclaimer { background: rgba(251, 191, 36, 0.1); color: #f59e0b; }
+    .lg-si-refund { background: rgba(225, 29, 72, 0.1); color: #e11d48; }
+
+    .lg-section-title {
+      font-family: var(--lg-font-display);
+      font-size: 1.4rem; font-weight: 800; margin: 0;
+    }
+    .lg-section-date {
+      font-size: 0.75rem; color: var(--lg-muted);
+      font-weight: 600; margin-top: 2px;
+    }
+
+    .lg-section h3 {
+      font-size: 1.05rem; font-weight: 700;
+      margin: 22px 0 10px; color: var(--lg-text);
+    }
+    .lg-section p {
+      color: var(--lg-text2); font-size: 0.92rem;
+      line-height: 1.75; margin: 0 0 14px;
+    }
+    .lg-section ul {
+      color: var(--lg-text2); font-size: 0.92rem;
+      padding-left: 22px; margin: 0 0 14px;
+    }
+    .lg-section ul li { margin-bottom: 6px; line-height: 1.65; }
+    .lg-section strong { color: var(--lg-text); }
+
+    .lg-highlight {
+      background: var(--lg-pink-soft);
+      border-left: 3px solid var(--lg-pink);
+      padding: 14px 18px; border-radius: 0 10px 10px 0;
+      margin: 16px 0; font-size: 0.9rem;
+      color: var(--lg-text2);
+    }
+
+    /* FOOTER */
+    .lg-footer {
+      border-top: 1px solid var(--lg-border);
+      padding: 30px 20px; text-align: center;
+    }
+    .lg-footer-links {
+      display: flex; align-items: center; justify-content: center;
+      gap: 20px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .lg-footer-links a {
+      color: var(--lg-text2); text-decoration: none;
+      font-weight: 600; font-size: 0.85rem; transition: color 0.2s;
+    }
+    .lg-footer-links a:hover { color: var(--lg-pink); }
+    .lg-footer p { color: var(--lg-muted); font-size: 0.8rem; }
+
+    @media (max-width: 768px) {
+      .lg-section { padding: 24px 18px; }
+      .lg-nav-inner { padding: 0 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="lg-nav">
+    <div class="lg-nav-inner">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="index.html" class="lg-btn lg-btn-back" id="lgBackBtn" title="Back to Store" aria-label="Back to Store" onclick="if(window.history.length>1&&document.referrer&&document.referrer.indexOf(window.location.host)!==-1){window.history.back();return false;}">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back</span>
+        </a>
+        <a href="index.html" class="lg-brand">
+          <span class="lg-brand-name">LinkAdda</span>
+        </a>
+      </div>
+      <div class="lg-nav-btns">
+        <button class="lg-theme-btn" id="lgThemeToggle" type="button" title="Toggle Theme">
+          <i class="fa-solid fa-moon"></i>
+          <i class="fa-solid fa-sun"></i>
+        </button>
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="lg-btn" style="background:linear-gradient(135deg,#0088cc,#00a2ed);color:#fff;border:none;font-weight:700;"><i class="fa-brands fa-telegram"></i> DM</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="lg-hero">
+    <h1><span class="lg-gradient-text">Legal</span> Information</h1>
+    <p>Our complete legal policies including Privacy, Terms, Disclaimer, and Refund. Please read carefully before using our services.</p>
+  </header>
+
+  <!-- TOC -->
+  <nav class="lg-toc" aria-label="Table of Contents">
+    <div class="lg-toc-grid">
+      <a href="#privacy" class="lg-toc-item"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+      <a href="#terms" class="lg-toc-item"><i class="fa-solid fa-file-contract"></i> Terms of Service</a>
+      <a href="#disclaimer" class="lg-toc-item"><i class="fa-solid fa-triangle-exclamation"></i> Disclaimer</a>
+      <a href="#refund" class="lg-toc-item"><i class="fa-solid fa-rotate-left"></i> Refund Policy</a>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="lg-content">
+
+    <!-- PRIVACY POLICY -->
+    <section class="lg-section" id="privacy">
+      <div class="lg-section-header">
+        <div class="lg-section-icon lg-si-privacy"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <h2 class="lg-section-title">Privacy Policy</h2>
+          <div class="lg-section-date">Last Updated: September 2026</div>
+        </div>
+      </div>
+
+      <p>LinkAdda Shop ("we," "us," or "our") operates the website <strong>linkadda.shop</strong>. This Privacy Policy describes how we collect, use, and protect your personal information when you visit our website or make a purchase.</p>
+
+      <h3>1. Information We Collect</h3>
+      <p>We collect minimal information necessary to process your orders:</p>
+      <ul>
+        <li><strong>Telegram Username</strong> — Used solely for order delivery and support communication.</li>
+        <li><strong>Payment Transaction Details</strong> — UPI transaction ID, bank reference number, or crypto transaction hash for order verification only.</li>
+        <li><strong>Device & Browser Data</strong> — Anonymized analytics data (page views, device type, browser) for website improvement. No personally identifiable information is tracked.</li>
+      </ul>
+
+      <h3>2. What We Do NOT Collect</h3>
+      <ul>
+        <li>We do <strong>NOT</strong> collect your real name, email address, phone number, or physical address.</li>
+        <li>We do <strong>NOT</strong> store any payment card numbers, bank account details, or financial credentials.</li>
+        <li>We do <strong>NOT</strong> use cookies for advertising or tracking purposes.</li>
+      </ul>
+
+      <h3>3. How We Use Your Information</h3>
+      <ul>
+        <li>To process and deliver your orders via Telegram.</li>
+        <li>To verify payment transactions.</li>
+        <li>To provide customer support via Telegram DM.</li>
+        <li>To improve our website performance and user experience.</li>
+      </ul>
+
+      <h3>4. Data Storage & Security</h3>
+      <p>Your transaction records are stored securely and are <strong>never shared with third parties</strong>. We use encrypted connections (HTTPS) for all website communications. Order records are retained for a reasonable period for support purposes and then permanently deleted.</p>
+
+      <h3>5. Third-Party Services</h3>
+      <p>Our website uses the following third-party services:</p>
+      <ul>
+        <li><strong>Firebase/Firestore</strong> — for product catalog and order management (secured with access rules).</li>
+        <li><strong>Google Fonts</strong> — for typography (no personal data shared).</li>
+        <li><strong>Telegram</strong> — for order delivery and customer support.</li>
+      </ul>
+      <p>We do not sell, trade, or transfer your information to outside parties for marketing or advertising.</p>
+
+      <h3>6. Your Rights</h3>
+      <p>You may request deletion of any data we hold about you by contacting us on Telegram <strong>@TRUSTED_BROTHER1234</strong>. We will process your request within 48 hours.</p>
+
+      <div class="lg-highlight">
+        <strong><i class="fa-solid fa-lock"></i> Discrete & Private:</strong> All transactions and communications are handled with complete discretion. Your purchase history is never shared with anyone.
+      </div>
+    </section>
+
+    <!-- TERMS OF SERVICE -->
+    <section class="lg-section" id="terms">
+      <div class="lg-section-header">
+        <div class="lg-section-icon lg-si-terms"><i class="fa-solid fa-file-contract"></i></div>
+        <div>
+          <h2 class="lg-section-title">Terms of Service</h2>
+          <div class="lg-section-date">Last Updated: September 2026</div>
+        </div>
+      </div>
+
+      <p>By accessing and using LinkAdda Shop (linkadda.shop), you agree to be bound by the following terms and conditions. If you do not agree, please do not use our services.</p>
+
+      <h3>1. Eligibility</h3>
+      <p>You must be <strong>18 years of age or older</strong> to use this website and purchase any content. By making a purchase, you confirm that you meet this age requirement and are legally permitted to access such content in your jurisdiction.</p>
+
+      <h3>2. Products & Services</h3>
+      <ul>
+        <li>LinkAdda Shop provides access to curated digital content collections delivered via Telegram channels and groups.</li>
+        <li>All content is delivered as <strong>lifetime access</strong> — there is no subscription or recurring charge.</li>
+        <li>Content descriptions and video counts on our website are approximate and may vary slightly as collections are updated.</li>
+      </ul>
+
+      <h3>3. Pricing & Payment</h3>
+      <ul>
+        <li>All prices are listed in <strong>Indian Rupees (INR)</strong> and <strong>US Dollars (USD)</strong>.</li>
+        <li>Accepted payment methods include UPI (GPay, PhonePe, Paytm), QR Code, Bank Transfer, and Cryptocurrency (BTC, USDT).</li>
+        <li>Payment must be completed before delivery. No credit or pay-later options are available.</li>
+        <li>Prices are subject to change without prior notice. The price at the time of purchase is final.</li>
+      </ul>
+
+      <h3>4. Delivery</h3>
+      <ul>
+        <li>Orders are delivered via <strong>Telegram</strong> within <strong>5–15 minutes</strong> of payment verification in most cases.</li>
+        <li>During high-volume periods, delivery may take up to <strong>1 hour</strong>.</li>
+        <li>If you do not receive your order within 2 hours, contact us on Telegram at <strong>@TRUSTED_BROTHER1234</strong> for immediate resolution.</li>
+      </ul>
+
+      <h3>5. Account & Access</h3>
+      <ul>
+        <li>Purchased content is for <strong>personal use only</strong>. Redistribution, resale, or public sharing of purchased content is strictly prohibited.</li>
+        <li>If a Telegram channel link expires or is removed, contact us for a free replacement link.</li>
+      </ul>
+
+      <h3>6. Prohibited Activities</h3>
+      <ul>
+        <li>Attempting to reverse-engineer, copy, or redistribute our content.</li>
+        <li>Filing false chargebacks or payment disputes after receiving delivery.</li>
+        <li>Using our services for any illegal purpose in your jurisdiction.</li>
+        <li>Sharing purchased access links publicly or with unauthorized users.</li>
+      </ul>
+
+      <h3>7. Limitation of Liability</h3>
+      <p>LinkAdda Shop provides digital content "as is" without warranties of any kind. We are not liable for any damages arising from the use of our content. Our total liability shall not exceed the amount paid for the specific order in question.</p>
+
+      <h3>8. Modification of Terms</h3>
+      <p>We reserve the right to modify these terms at any time. Continued use of the website after changes constitutes acceptance of the updated terms.</p>
+    </section>
+
+    <!-- DISCLAIMER -->
+    <section class="lg-section" id="disclaimer">
+      <div class="lg-section-header">
+        <div class="lg-section-icon lg-si-disclaimer"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div>
+          <h2 class="lg-section-title">Disclaimer</h2>
+          <div class="lg-section-date">Last Updated: September 2026</div>
+        </div>
+      </div>
+
+      <h3>1. Content Disclaimer</h3>
+      <p>All digital content available on LinkAdda Shop is curated from publicly available sources on the internet. We do not create, produce, or host any original content. We act solely as an aggregator and curator providing organized access to existing digital media collections.</p>
+
+      <h3>2. Age Restriction</h3>
+      <p>This website and its content are intended exclusively for users who are <strong>18 years of age or older</strong>. By using this website, you confirm that you are of legal age to access such content in your country or region. We take no responsibility for underage access — it is the user's responsibility to comply with local laws.</p>
+
+      <h3>3. Accuracy of Information</h3>
+      <p>While we strive to keep all product descriptions, pricing, and video counts accurate, we do not guarantee the absolute accuracy of all information displayed. Content collections are regularly updated, and counts may fluctuate as new content is added or removed.</p>
+
+      <h3>4. External Links</h3>
+      <p>Our website may contain links to external platforms (Telegram, payment gateways). We are not responsible for the content, privacy policies, or practices of any third-party websites or platforms.</p>
+
+      <h3>5. No Legal Advice</h3>
+      <p>Nothing on this website constitutes legal advice. Users are responsible for ensuring their use of our services complies with applicable laws in their jurisdiction.</p>
+
+      <div class="lg-highlight">
+        <strong><i class="fa-solid fa-gavel"></i> User Responsibility:</strong> By purchasing from LinkAdda, you acknowledge that you are solely responsible for how you access and use the purchased content. You agree to use all content in compliance with your local laws and regulations.
+      </div>
+    </section>
+
+    <!-- REFUND POLICY -->
+    <section class="lg-section" id="refund">
+      <div class="lg-section-header">
+        <div class="lg-section-icon lg-si-refund"><i class="fa-solid fa-rotate-left"></i></div>
+        <div>
+          <h2 class="lg-section-title">Refund Policy</h2>
+          <div class="lg-section-date">Last Updated: September 2026</div>
+        </div>
+      </div>
+
+      <p>At LinkAdda Shop, customer satisfaction is our top priority. Please read our refund policy carefully before making a purchase.</p>
+
+      <h3>1. Digital Product Nature</h3>
+      <p>Since all our products are <strong>digital content delivered instantly</strong> via Telegram, refunds are generally <strong>not available</strong> once delivery has been completed. Once you receive access to the content (Telegram channel links/files), the transaction is considered fulfilled.</p>
+
+      <h3>2. When Refunds ARE Applicable</h3>
+      <p>We will issue a <strong>full refund</strong> in the following situations:</p>
+      <ul>
+        <li><strong>Non-Delivery:</strong> If you paid but did not receive your content within 24 hours and we are unable to resolve the delivery issue.</li>
+        <li><strong>Duplicate Payment:</strong> If you accidentally paid twice for the same order, the duplicate amount will be refunded in full.</li>
+        <li><strong>Wrong Product:</strong> If you received a completely different product than what you ordered (not the correct category/pack).</li>
+        <li><strong>Technical Failure:</strong> If all delivered links are non-functional and we cannot provide replacement links within 48 hours.</li>
+      </ul>
+
+      <h3>3. When Refunds Are NOT Applicable</h3>
+      <ul>
+        <li>After you have accessed and viewed the content.</li>
+        <li>If you simply changed your mind after purchase.</li>
+        <li>If your Telegram account is banned/deleted and you cannot access the channels (we can provide alternative delivery).</li>
+        <li>Partial refunds for content that "doesn't match expectations" when the delivered content matches the product description.</li>
+      </ul>
+
+      <h3>4. How to Request a Refund</h3>
+      <p>To request a refund, contact us directly on Telegram:</p>
+      <ul>
+        <li>DM <strong>@TRUSTED_BROTHER1234</strong> with your payment proof (screenshot/transaction ID) and order details.</li>
+        <li>Include a clear description of the issue.</li>
+        <li>Refund requests must be made within <strong>48 hours</strong> of purchase.</li>
+      </ul>
+
+      <h3>5. Refund Processing</h3>
+      <ul>
+        <li>Approved refunds are processed within <strong>24–72 hours</strong>.</li>
+        <li>Refunds are sent to the original payment method (UPI, bank account, or crypto wallet).</li>
+        <li>You will be notified on Telegram when the refund is processed.</li>
+      </ul>
+
+      <h3>6. Link Replacement Guarantee</h3>
+      <p>If any delivered Telegram channel link expires or gets removed, we offer <strong>free lifetime link replacement</strong>. Simply contact us on Telegram and we will provide a fresh link at no extra cost. This is not a refund scenario — it is our standard service guarantee.</p>
+
+      <div class="lg-highlight">
+        <strong><i class="fa-solid fa-headset"></i> Need Help?</strong> For any refund-related queries, reach out on Telegram at <strong>@TRUSTED_BROTHER1234</strong>. We respond within minutes and resolve all issues promptly.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="lg-footer">
+    <div class="lg-footer-links">
+      <a href="index.html">Store Home</a>
+      <a href="about.html">About Us</a>
+      <a href="index.html#services">All Categories</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener">Telegram Support</a>
+    </div>
+    <p>&copy; 2026 LinkAdda Shop. All rights reserved.</p>
+  </footer>
+
+  <script>
+    /* Theme toggle — same keys as main site */
+    (function() {
+      var btn = document.getElementById('lgThemeToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var cur = document.documentElement.getAttribute('data-theme') || 'light';
+        var next = cur === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        try {
+          localStorage.setItem('linkadda_theme', next);
+          localStorage.setItem('linkadda_theme_manual', 'true');
+        } catch (_) {}
+      });
+    })();
+  </script>
+
+</body>
+</html>

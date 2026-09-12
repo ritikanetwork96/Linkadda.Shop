@@ -53,6 +53,12 @@ function syncWebsiteCache() {
       timestamp: Date.now(),
     };
     localStorage.setItem('linkadda_cached_live_data', JSON.stringify(liveCache));
+    if (STORE.payment) {
+      localStorage.setItem('linkadda_payment_payment', JSON.stringify(STORE.payment));
+    }
+    if (STORE.settings) {
+      localStorage.setItem('linkadda_payment_settings', JSON.stringify(STORE.settings));
+    }
   } catch (_) {}
 }
 
@@ -70,6 +76,10 @@ function saveStoreCache() {
         testimonials: STORE.testimonials || {},
         categories: STORE.categories || {},
         products: STORE.products || {},
+        orders: STORE.orders || {},
+        events: STORE.events || {},
+        visitors: STORE.visitors || {},
+        analytics: STORE.analytics || {},
         timestamp: Date.now(),
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
@@ -120,6 +130,15 @@ function attachNode(key, mode = 'collection') {
   }
 
   try {
+    get(ref(db, nodeName))
+      .then((snap) => {
+        if (snap.exists()) {
+          STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
+          emit();
+        }
+      })
+      .catch(() => {});
+
     const unsub = onValue(
       ref(db, nodeName),
       (snap) => {
@@ -140,8 +159,8 @@ function attachNode(key, mode = 'collection') {
 }
 
 let isRealtimeStarted = false;
-export function startRealtime() {
-  if (isRealtimeStarted) return;
+export function startRealtime(force = false) {
+  if (isRealtimeStarted && !force) return;
   isRealtimeStarted = true;
   attachNode('hero', 'singleton');
   attachNode('categories');
@@ -161,7 +180,9 @@ export function startRealtime() {
 
 // Automatically bind listeners to auth state transitions
 onAuthStateChanged(auth, (user) => {
-  startRealtime();
+  if (user) {
+    startRealtime(true);
+  }
 });
 
 function isSingleton(node) {
@@ -297,9 +318,14 @@ export function stats() {
   const visitors = listCollection('visitors');
   const events = listCollection('events');
   const today = new Date().toISOString().slice(0, 10);
+  const isOrderClick = (item) => {
+    const t = String(item.type || '').toLowerCase();
+    if (t === 'telegram_click' || t === 'review_submission' || t === 'visitor') return false;
+    return t.includes('order') || t.includes('click') || Boolean(item.productId || item.package || item.productName);
+  };
   const todaysOrders = orders.filter((item) => String(item.date || '').slice(0, 10) === today).length;
   const todaysVisitors = visitors.filter((item) => String(item.date || '').slice(0, 10) === today).length;
-  const todaysClicks = events.filter((item) => String(item.date || '').slice(0, 10) === today && String(item.type || '').includes('click')).length;
+  const todaysClicks = events.filter((item) => String(item.date || '').slice(0, 10) === today && isOrderClick(item)).length;
   return {
     products,
     categories,
@@ -307,7 +333,7 @@ export function stats() {
     todaysOrders,
     visitors: visitors.length,
     todaysVisitors,
-    clicks: events.filter((item) => String(item.type || '').includes('click')).length,
+    clicks: events.filter(isOrderClick).length,
     todaysClicks,
   };
 }

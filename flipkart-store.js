@@ -365,9 +365,9 @@
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
 
-    // Browser history state
+    // Browser history state (replaceState avoids polluting back button history stack)
     try {
-      window.history.pushState({ fkProductOpen: true, productId: id }, '', `#product-${id}`);
+      window.history.replaceState({ fkProductOpen: true, productId: id }, '', `#product-${id}`);
     } catch (_) {}
   };
 
@@ -392,6 +392,11 @@
     if (overlay && overlay.classList.contains('active')) {
       closeFkProductPage();
     }
+  });
+
+  // Pageshow cleanup: Ensure overlay is closed when navigating back
+  window.addEventListener('pageshow', function () {
+    closeFkProductPage();
   });
 
   // --- GALLERY SHOWCASE (VIDEO & IMAGES) ---
@@ -922,7 +927,20 @@
       };
     }).filter(Boolean);
 
-    const all = [...saved, ...authenticReviews];
+    // 3. Live approved customer reviews from Firebase settings
+    const settingsApproved = Array.isArray(window.liveCollections?.settings?.recentApprovedReviews)
+      ? window.liveCollections.settings.recentApprovedReviews
+          .filter(r => r && (!r.productId || r.productId === productId || r.productId === 'general'))
+          .map(r => ({
+            name: r.name || 'Verified Buyer',
+            rating: Number(r.rating) || 5,
+            title: r.title || 'Verified VIP Purchase',
+            text: r.comment || r.text || 'Real delivered pack. 100% genuine and fast service!',
+            date: r.approvedAt ? new Date(r.approvedAt).toLocaleDateString() : 'Verified Buyer'
+          }))
+      : [];
+
+    const all = [...saved, ...settingsApproved, ...authenticReviews];
 
     if (!all.length) {
       listEl.innerHTML = '<div style="color:var(--la-text-secondary);font-size:13px;padding:12px 0;">No reviews yet. Be the first to rate this pack!</div>';
@@ -1062,27 +1080,28 @@
     }
   });
 
-  // Check URL hash for direct product link on page load
+  // Do not auto-open overlay on page load or back-navigation
+  // The product details modal will open only when the user explicitly clicks a card media or title
   window.addEventListener('DOMContentLoaded', function () {
+    // Only scroll to the card if hash is provided, without opening modal
     const hash = window.location.hash;
     if (hash && hash.startsWith('#product-')) {
       const pid = hash.replace('#product-', '');
-      setTimeout(() => openFkProductPage(pid), 350);
+      const el = document.getElementById(`product-${pid}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
 
   // --- BULLETPROOF THEME TOGGLE (STANDALONE ENGINE) ---
   window.toggleStoreTheme = function (e) {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    const currentTheme = document.documentElement.getAttribute('data-theme') || document.body.getAttribute('data-theme') || 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || document.body.getAttribute('data-theme') || 'light';
     const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
 
     document.documentElement.setAttribute('data-theme', nextTheme);
     document.body.setAttribute('data-theme', nextTheme);
 
     try {
-      localStorage.setItem('theme', nextTheme);
-      localStorage.setItem('theme_manual', 'true');
       localStorage.setItem('linkadda_theme', nextTheme);
       localStorage.setItem('linkadda_theme_manual', 'true');
     } catch (_) {}
@@ -1102,10 +1121,10 @@
 
   // Sync theme immediately on script load
   (function syncStoreTheme() {
-    let saved = 'dark';
+    let saved = 'light';
     try {
-      const isManual = localStorage.getItem('theme_manual') || localStorage.getItem('linkadda_theme_manual');
-      const val = localStorage.getItem('theme') || localStorage.getItem('linkadda_theme');
+      const isManual = localStorage.getItem('linkadda_theme_manual');
+      const val = localStorage.getItem('linkadda_theme');
       if (isManual && val) saved = val;
     } catch (_) {}
 

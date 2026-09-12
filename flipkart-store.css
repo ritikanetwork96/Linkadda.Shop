@@ -309,6 +309,7 @@ body.linkadda-store {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 0 2px;
@@ -474,6 +475,7 @@ body.linkadda-store {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
   scrollbar-width: none;
   position: relative;
   z-index: 90;
@@ -4752,3 +4754,21 @@ body.linkadda-store {
   background: #f8fafc !important;
   border-top-color: #e2e8f0 !important;
 }
+
+/* ===== SCROLL PERFORMANCE ===== */
+.fk-grid {
+  contain: none;
+}
+.fk-card {
+  contain: none;
+}
+/* Reduce backdrop-filter on mobile for product overlays */
+@media (max-width: 768px) {
+  .fk-overlay-product,
+  .fk-modal-backdrop,
+  .fk-product-detail-overlay {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+}
+
