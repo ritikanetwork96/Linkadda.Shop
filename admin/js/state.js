@@ -59,6 +59,9 @@ function syncWebsiteCache() {
     if (STORE.settings) {
       localStorage.setItem('linkadda_payment_settings', JSON.stringify(STORE.settings));
     }
+    if (STORE.faq) {
+      localStorage.setItem('linkadda_cached_faq', JSON.stringify(STORE.faq));
+    }
   } catch (_) {}
 }
 

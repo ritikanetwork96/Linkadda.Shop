@@ -496,9 +496,9 @@ if (!marqueeState.approvedOrders.length) {
 // Real initial buyer reviews from database testimonials
 if (!marqueeState.reviews.length) {
   marqueeState.reviews = [
-    { name: 'Singisking', rating: 5, review: 'Time pe deliver kiya, ekdum trusted hai. Ab regularly leta hoon!' },
-    { name: 'Regular buyer', rating: 5, review: 'Scam bilkul nahi, seedha kaam karta hai. 100% recommend!' },
-    { name: 'New buyer', rating: 5, review: 'Bilkul genuine, fast delivery, aur price bhi market se kam. Thanks bhai!' }
+    { name: 'Singisking', rating: 5, review: 'Delivered right on time, totally trusted and genuine. Now a regular buyer!' },
+    { name: 'Regular buyer', rating: 5, review: 'Absolutely authentic service with zero delays. 100% recommend!' },
+    { name: 'New buyer', rating: 5, review: 'Completely genuine, fast delivery, and lowest price. Truly grateful!' }
   ];
 }
 

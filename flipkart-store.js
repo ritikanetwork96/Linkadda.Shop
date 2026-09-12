@@ -157,7 +157,17 @@
     const specialTag = document.getElementById('fkPvSpecialTag');
     const badgeTxt = (prod.badge || prod.category || prod.tag || 'VIP Collection').trim();
     if (specialTag) {
-      specialTag.innerHTML = `<i class="fa-solid fa-crown" style="font-size:10px;"></i> ${badgeTxt} (UPI & USDT Crypto)`;
+      const bStyle = String(prod.badgeStyle || prod.badgeColor || prod.badge_style || prod.badge_color || '').trim().toLowerCase();
+      if (bStyle === 'badge-red' || bStyle.includes('red') || bStyle.includes('crimson')) {
+        specialTag.style.cssText = 'background: linear-gradient(135deg, #e11d48, #be123c) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.35) !important; box-shadow: 0 2px 10px rgba(225,29,72,0.35) !important;';
+      } else if (bStyle === 'pcard-pill-gold' || bStyle.includes('gold')) {
+        specialTag.style.cssText = 'background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.35) !important; box-shadow: 0 2px 10px rgba(245,158,11,0.35) !important;';
+      } else if (bStyle === 'badge-white' || bStyle.includes('white')) {
+        specialTag.style.cssText = 'background: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; font-weight: 800 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;';
+      } else {
+        specialTag.style.cssText = '';
+      }
+      specialTag.innerHTML = `<i class="fa-solid fa-crown" style="font-size:10px;"></i> ${escapeHtml(badgeTxt)} (UPI & USDT Crypto)`;
     }
 
     // 3. Real Product Description (Direct from Admin record)

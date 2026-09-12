@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css?v=20260912d" />
-  <link rel="stylesheet" href="flipkart-store.css?v=20260912c" />
+  <link rel="stylesheet" href="flipkart-store.css?v=20260913a" />
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
     .hero-title,
@@ -183,6 +183,389 @@
       border: 1px solid #e2e8f0 !important;
       color: #475569 !important;
     }
+
+    /* ━━ LUXURY GET IN TOUCH / PLACE YOUR ORDER ━━ */
+    .contact {
+      padding: 60px 0 30px;
+      position: relative;
+      z-index: 1;
+    }
+    .contact-lux-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+    }
+    .contact-lux-card {
+      width: 100%;
+      max-width: 620px;
+      background: linear-gradient(145deg, rgba(24, 22, 40, 0.88) 0%, rgba(13, 11, 24, 0.96) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      padding: 42px 32px 36px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .contact-lux-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 136, 204, 0.4);
+      box-shadow: 0 24px 70px rgba(0, 136, 204, 0.2);
+    }
+    [data-theme="light"] .contact-lux-card {
+      background: #ffffff;
+      border: 1.5px solid rgba(0, 136, 204, 0.2);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+    }
+    [data-theme="light"] .contact-lux-card:hover {
+      border-color: #0088cc;
+      box-shadow: 0 24px 60px rgba(0, 136, 204, 0.15);
+    }
+
+    /* Live status badge */
+    .contact-lux-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      color: #10b981;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+      letter-spacing: 0.2px;
+    }
+    .contact-lux-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: contactPulseAnim 1.8s infinite;
+    }
+    @keyframes contactPulseAnim {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Avatar with Verified check */
+    .contact-lux-avatar {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 16px;
+    }
+    .contact-lux-icon-box {
+      width: 76px;
+      height: 76px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #0088cc 0%, #00b4d8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 2.3rem;
+      box-shadow: 0 10px 28px rgba(0, 136, 204, 0.45);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .contact-lux-card:hover .contact-lux-icon-box {
+      transform: scale(1.06) rotate(-4deg);
+    }
+    .contact-lux-check {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      font-size: 0.72rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--bg, #0b0a16);
+    }
+    [data-theme="light"] .contact-lux-check {
+      border-color: #ffffff;
+    }
+
+    .contact-lux-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text, #ffffff);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    [data-theme="light"] .contact-lux-title {
+      color: #0f172a;
+    }
+
+    .contact-lux-handle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0088cc;
+      background: rgba(0, 136, 204, 0.1);
+      border: 1px solid rgba(0, 136, 204, 0.25);
+      margin-bottom: 14px;
+    }
+
+    .contact-lux-desc {
+      font-size: 0.92rem;
+      color: var(--text-muted, #94a3b8);
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto 24px;
+    }
+    [data-theme="light"] .contact-lux-desc {
+      color: #64748b;
+    }
+
+    /* Features 3-item list */
+    .contact-lux-features {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .contact-lux-feat {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+      font-weight: 650;
+      color: var(--text, #e2e8f0);
+    }
+    .contact-lux-feat i {
+      color: #0088cc;
+      font-size: 0.85rem;
+    }
+    [data-theme="light"] .contact-lux-feat {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      color: #334155;
+    }
+
+    /* Big Action Button */
+    .contact-lux-actions {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .btn-contact-telegram {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 34px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0088cc 0%, #00a2ed 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 750;
+      box-shadow: 0 6px 24px rgba(0, 136, 204, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-contact-telegram:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(0, 136, 204, 0.55);
+      filter: brightness(1.06);
+    }
+    .btn-contact-telegram:active {
+      transform: scale(0.97);
+    }
+    .contact-ext-icon {
+      font-size: 0.82rem;
+      opacity: 0.8;
+      transition: transform 0.2s;
+    }
+    .btn-contact-telegram:hover .contact-ext-icon {
+      transform: translate(2px, -2px);
+    }
+
+    .contact-lux-note {
+      font-size: 0.78rem;
+      color: var(--text-muted, #94a3b8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    [data-theme="light"] .contact-lux-note {
+      color: #94a3b8;
+    }
+
+    /* ━━ ABOUT LINKADDA TEASER SECTION ━━ */
+    .about-teaser-section {
+      padding: 30px 0 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .about-teaser-card {
+      max-width: 860px;
+      margin: 0 auto;
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(26, 20, 38, 0.85) 0%, rgba(14, 12, 24, 0.95) 100%);
+      border: 1px solid rgba(240, 36, 122, 0.25);
+      padding: 44px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    [data-theme="light"] .about-teaser-card {
+      background: linear-gradient(145deg, #ffffff 0%, #fff5f8 100%);
+      border: 1.5px solid rgba(240, 36, 122, 0.2);
+      box-shadow: 0 18px 50px rgba(240, 36, 122, 0.08);
+    }
+    .about-teaser-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 16px;
+      border-radius: 9999px;
+      background: rgba(240, 36, 122, 0.12);
+      border: 1px solid rgba(240, 36, 122, 0.28);
+      color: #f0247a;
+      font-size: 0.82rem;
+      font-weight: 750;
+      margin-bottom: 14px;
+      letter-spacing: 0.3px;
+    }
+    .about-teaser-title {
+      font-size: 1.85rem;
+      font-weight: 850;
+      letter-spacing: -0.5px;
+      color: var(--text, #ffffff);
+      margin-bottom: 12px;
+    }
+    [data-theme="light"] .about-teaser-title {
+      color: #0f172a;
+    }
+    .about-teaser-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted, #94a3b8);
+      line-height: 1.65;
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    [data-theme="light"] .about-teaser-desc {
+      color: #64748b;
+    }
+
+    .about-teaser-stats {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 16px 28px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 28px;
+    }
+    [data-theme="light"] .about-teaser-stats {
+      background: #ffffff;
+      border-color: rgba(240, 36, 122, 0.15);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+    .about-teaser-stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .about-teaser-stat-item .stat-num {
+      font-size: 1.35rem;
+      font-weight: 850;
+      background: linear-gradient(135deg, #f0247a 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+    .about-teaser-stat-item .stat-lbl {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted, #94a3b8);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    [data-theme="light"] .about-teaser-stat-item .stat-lbl {
+      color: #64748b;
+    }
+    .about-teaser-stat-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="light"] .about-teaser-stat-divider {
+      background: #e2e8f0;
+    }
+
+    .about-teaser-btn-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .btn-about-page {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 32px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 750;
+      box-shadow: 0 6px 24px rgba(225, 29, 72, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-about-page:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(225, 29, 72, 0.55);
+      filter: brightness(1.06);
+    }
+    .btn-about-page:active {
+      transform: scale(0.97);
+    }
+    .btn-about-page i.fa-arrow-right {
+      transition: transform 0.2s;
+    }
+    .btn-about-page:hover i.fa-arrow-right {
+      transform: translateX(3px);
+    }
+
+    @media (max-width: 650px) {
+      .contact-lux-card { padding: 32px 20px; border-radius: 20px; }
+      .contact-lux-features { flex-direction: column; gap: 8px; }
+      .contact-lux-feat { justify-content: center; width: 100%; }
+      .btn-contact-telegram { width: 100%; }
+      .about-teaser-card { padding: 32px 20px; border-radius: 20px; }
+      .about-teaser-stats { gap: 14px; padding: 12px 16px; width: 100%; justify-content: space-around; }
+      .about-teaser-stat-item .stat-num { font-size: 1.15rem; }
+      .btn-about-page { width: 100%; justify-content: center; }
+    }
   </style>
 </head>
 <body class="fk-mode">
@@ -267,7 +650,8 @@
       </button>
       <a href="#home" class="mob-link">Home</a>
       <a href="#services" class="mob-link">Browse Packs</a>
-      <a href="#faq" class="mob-link">FAQ</a>
+      <a href="about.html" class="mob-link">About Us</a>
+      <a href="about.html#faq" class="mob-link">FAQ</a>
       <a href="#contact" class="mob-link">Contact</a>
     </div>
 
@@ -685,156 +1069,113 @@
 
 
 
-  <!-- Testimonials -->
-  <section class="testimonials">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag"><i class="fa-solid fa-quote-left"></i> Client Love</p>
-        <h2 class="section-title">What Our <span class="gradient-text">Clients Say</span></h2>
-      </div>
-      <div class="testi-grid">
-        <div class="testi-card">
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p>"Pehle bahut dar lag raha tha, socha tha yeh bhi scam kar lega baaki logo ki tarah. But bhai ne time pe deliver kiya, ekdum trusted hai. Ab regularly leta hoon!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar-wrap">
-              <span class="testi-avatar-initial">S</span>
-            </div>
-            <div class="testi-author-info">
-              <span class="testi-author-name">Singisking</span>
-              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
-            </div>
-          </div>
-        </div>
-        <div class="testi-card">
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p>"Sach mein pehle bahut doubt tha, itne saste mein kaisa hoga. But yeh bhai real deal hai &#8212; scam bilkul nahi, seedha kaam karta hai. 100% recommend!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar-wrap">
-              <span class="testi-avatar-initial">A</span>
-            </div>
-            <div class="testi-author-info">
-              <span class="testi-author-name">Aman Verma</span>
-              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
-            </div>
-          </div>
-        </div>
-        <div class="testi-card">
-          <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          <p>"Maine pehle dusre sellers se scam khaya tha toh trust nahi tha. Iss bhai ko try kiya toh maan gaya &#8212; bilkul genuine, fast delivery, aur price bhi market se kam. Thanks bhai!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar-wrap">
-              <span class="testi-avatar-initial">R</span>
-            </div>
-            <div class="testi-author-info">
-              <span class="testi-author-name">Rahul Singh</span>
-              <span class="testi-verified"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Contact -->
+
+  <!-- Contact / Get In Touch -->
   <section class="contact" id="contact">
     <div class="container">
       <div class="section-head">
         <p class="section-tag"><i class="fa-solid fa-paper-plane"></i> Get In Touch</p>
         <h2 class="section-title">Place Your <span class="gradient-text">Order</span></h2>
-        <p class="section-sub">Reach out via any channel below &#8212; we respond fast!</p>
+        <p class="section-sub">Direct support & instant delivery &#8212; we respond within 5–15 minutes!</p>
       </div>
-      <div class="contact-grid">
-        <div class="contact-card">
-          <i class="fa-brands fa-telegram contact-icon"></i>
-          <h3>Telegram</h3>
-          <p>Join our Telegram channel or DM us for exclusive deals.</p>
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-contact">Open Telegram</a>
+
+      <div class="contact-lux-wrap">
+        <div class="contact-lux-card">
+          <!-- Top Online Status Pill -->
+          <div class="contact-lux-badge">
+            <span class="contact-lux-pulse"></span>
+            <span>Admin Active 24/7 • Instant Response</span>
+          </div>
+
+          <!-- Telegram Main Icon with Glow -->
+          <div class="contact-lux-avatar">
+            <div class="contact-lux-icon-box">
+              <i class="fa-brands fa-telegram"></i>
+            </div>
+            <div class="contact-lux-check" title="Verified Telegram Support"><i class="fa-solid fa-check"></i></div>
+          </div>
+
+          <!-- Heading & Username Handle -->
+          <h3 class="contact-lux-title">Official Telegram Support</h3>
+          <div class="contact-lux-handle">
+            <i class="fa-solid fa-at"></i> TRUSTED_BROTHER1234
+          </div>
+          <p class="contact-lux-desc">
+            Direct chat for instant pack delivery, custom bundle requests, payment verification, and 24/7 customer assistance.
+          </p>
+
+          <!-- 3 Value Chips -->
+          <div class="contact-lux-features">
+            <div class="contact-lux-feat">
+              <i class="fa-solid fa-bolt"></i>
+              <span>5–15 Min Delivery</span>
+            </div>
+            <div class="contact-lux-feat">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>100% Discrete Billing</span>
+            </div>
+            <div class="contact-lux-feat">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Link Replacement Guarantee</span>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <div class="contact-lux-actions">
+            <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="btn-contact-telegram">
+              <i class="fa-brands fa-telegram"></i>
+              <span>Message on Telegram</span>
+              <i class="fa-solid fa-arrow-up-right-from-square contact-ext-icon"></i>
+            </a>
+          </div>
+
+          <div class="contact-lux-note">
+            <i class="fa-solid fa-lock"></i> End-to-end encrypted Telegram DM • Zero data logs
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section class="faq-section" id="faq">
+  <!-- About Teaser (Replaces Old FAQ Section) -->
+  <section class="about-teaser-section" id="about">
     <div class="container">
-      <div class="section-head">
-        <p class="section-tag"><i class="fa-solid fa-circle-question"></i> Got Questions?</p>
-        <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
-        <p class="section-sub">Sab kuch clear kar lo order karne se pehle.</p>
-      </div>
-      <div class="faq-list">
+      <div class="about-teaser-card">
+        <div class="about-teaser-tag">
+          <i class="fa-solid fa-crown"></i> Who We Are
+        </div>
+        <h2 class="about-teaser-title">
+          About <span class="gradient-text">LinkAdda Shop</span>
+        </h2>
+        <p class="about-teaser-desc">
+          India's premier verified digital content store since 2022. Serving 1,200+ satisfied buyers with 1,14,000+ hand-curated 4K videos across 23 exclusive categories. Instant delivery, discrete billing, zero scams.
+        </p>
 
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Kya yeh safe hai? Scam toh nahi?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>Bilkul safe hai bhai. Main 2022 se sell kar raha hoon, 1,200+ orders complete ho chuke hain. Ek bhi scam case nahi. Tum pehle review dekh sakte ho, phir order karo.</p>
+        <div class="about-teaser-stats">
+          <div class="about-teaser-stat-item">
+            <span class="stat-num">1,14,000+</span>
+            <span class="stat-lbl">4K Videos</span>
+          </div>
+          <div class="about-teaser-stat-divider"></div>
+          <div class="about-teaser-stat-item">
+            <span class="stat-num">1,200+</span>
+            <span class="stat-lbl">Happy Buyers</span>
+          </div>
+          <div class="about-teaser-stat-divider"></div>
+          <div class="about-teaser-stat-item">
+            <span class="stat-num">3+ Years</span>
+            <span class="stat-lbl">Trusted Since 2022</span>
           </div>
         </div>
 
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Order karne ke baad kitne time mein milega?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>Payment ke baad mostly 5&#8211;15 minutes ke andar Telegram pe deliver ho jaata hai. Kabhi kabhi zyada load ho toh max 1 ghanta lag sakta hai.</p>
-          </div>
+        <div class="about-teaser-btn-wrap">
+          <a href="about.html" class="btn-about-page">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Read Full Story & Why Us</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
         </div>
-
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Payment kaise karni hai?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>UPI, Paytm, GPay, PhonePe &#8212; sab accept karta hoon. International ke liye crypto ya other methods bhi available hain. Telegram pe DM karo, sab bata dunga.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Content ki quality kaisi hogi?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>Premium 4K quality videos hain. Koi low-quality ya blurry content nahi. Jo dikhaya wahi milega &#8212; full HD aur 4K resolution mein.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Ek baar kharida toh lifetime access milega?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>Haan, jo content kharidoge woh tumhara permanently rahega. Koi expiry nahi, koi renewal nahi. Ek baar pay karo, hamesha ke liye apna.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>All Collection Pack mein kya kya milega?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>Sabhi 23 categories ka full content ek saath milega &#8212; total 1,14,000+ videos. Yeh sabse best value deal hai. Alag alag kharido toh &#8377;10,900 lagenge, pack mein sirf &#8377;4,399.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q">
-            <span>Support kaise milega order ke baad?</span>
-            <i class="fa-solid fa-chevron-down faq-icon"></i>
-          </button>
-          <div class="faq-a">
-            <p>24/7 Telegram pe available hoon. Koi bhi problem ho &#8212; delivery issue, quality concern &#8212; seedha DM karo, resolve kar dunga.</p>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
@@ -859,7 +1200,7 @@
           <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
           <a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a>
           <a href="#services"><i class="fa-solid fa-layer-group"></i> Browse Packs</a>
-          <a href="#faq"><i class="fa-solid fa-circle-question"></i> FAQ</a>
+          <a href="about.html#faq"><i class="fa-solid fa-circle-question"></i> FAQ</a>
         </div>
 
         <div class="footer-links">
@@ -2498,18 +2839,33 @@
     });
     const isLiked = isWishlisted(id);
 
-    const customBadge = (cat.badge || cat.customBadge || cat.tag || '').trim();
+    const customBadge = (cat.badge || cat.customBadge || cat.tag || cat.category || '').trim();
     const badgeStyleRaw = String(cat.badgeStyle || cat.badgeColor || cat.badge_style || cat.badge_color || '').trim().toLowerCase();
     let badgeColorClass = '';
-    if (badgeStyleRaw === 'badge-red' || badgeStyleRaw === 'red' || badgeStyleRaw.includes('red')) {
-      badgeColorClass = ' badge-color-red';
-    } else if (badgeStyleRaw === 'badge-white' || badgeStyleRaw === 'white' || badgeStyleRaw.includes('white')) {
-      badgeColorClass = ' badge-color-white';
-    } else if (badgeStyleRaw === 'pcard-pill-gold' || badgeStyleRaw === 'badge-gold' || badgeStyleRaw === 'gold' || badgeStyleRaw.includes('gold')) {
-      badgeColorClass = ' badge-color-gold';
+    let badgeInlineStyle = '';
+    let badgeIconStyle = '';
+
+    const isRed = badgeStyleRaw === 'badge-red' || badgeStyleRaw === 'red' || badgeStyleRaw.includes('red') || badgeStyleRaw.includes('crimson');
+    const isGold = badgeStyleRaw === 'pcard-pill-gold' || badgeStyleRaw === 'badge-gold' || badgeStyleRaw === 'gold' || badgeStyleRaw.includes('gold');
+    const isWhite = badgeStyleRaw === 'badge-white' || badgeStyleRaw === 'white' || badgeStyleRaw.includes('white');
+
+    if (isRed) {
+      badgeColorClass = ' badge-color-red badge-red';
+      badgeInlineStyle = 'style="background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important; color: #ffffff !important; box-shadow: 0 3px 10px rgba(225, 29, 72, 0.45) !important;"';
+      badgeIconStyle = 'style="color: #ffffff !important;"';
+    } else if (isGold) {
+      badgeColorClass = ' badge-color-gold badge-gold pcard-pill-gold';
+      badgeInlineStyle = 'style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; border: 1px solid rgba(255, 255, 255, 0.4) !important; color: #ffffff !important; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.45) !important;"';
+      badgeIconStyle = 'style="color: #ffffff !important;"';
+    } else if (isWhite) {
+      badgeColorClass = ' badge-color-white badge-white';
+      badgeInlineStyle = 'style="background: #ffffff !important; border: 1.5px solid #cbd5e1 !important; color: #0f172a !important; font-weight: 800 !important; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15) !important;"';
+      badgeIconStyle = 'style="color: #e11d48 !important;"';
     }
 
-    const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip${badgeColorClass}"><i class="fa-solid fa-sparkles"></i> ${esc(customBadge)}</span></div>` : '';
+    const badgeIconClass = (cat.badgeIcon || '').trim() || 'fa-sparkles';
+    const badgeIconHtml = `<i class="fa-solid ${esc(badgeIconClass)}" ${badgeIconStyle}></i>`;
+    const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip${badgeColorClass}" ${badgeInlineStyle}>${badgeIconHtml} ${esc(customBadge)}</span></div>` : '';
 
     return `<div class="fk-card" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
       ${badgeHtml}
@@ -3130,10 +3486,22 @@
   }
 
   // -- INSTANT LOCAL CACHED CATALOG (0ms initial load) --
-  // Priority: 1) localStorage cache  2) Pre-embedded catalog snapshot  3) Wait for Firebase
+  // Priority: 1) localStorage cache (admin or v4)  2) Pre-embedded catalog snapshot  3) Wait for Firebase
   try {
-    const cachedLive = localStorage.getItem('linkadda_cached_live_data_v4');
-    const source = cachedLive ? JSON.parse(cachedLive) : (window.__preloadedCatalog || null);
+    const rawAdmin = localStorage.getItem('linkadda_cached_live_data');
+    const rawV4 = localStorage.getItem('linkadda_cached_live_data_v4');
+    let source = null;
+    try {
+      const pAdmin = rawAdmin ? JSON.parse(rawAdmin) : null;
+      const pV4 = rawV4 ? JSON.parse(rawV4) : null;
+      if (pAdmin && pV4) {
+        source = (Number(pAdmin.timestamp || 0) >= Number(pV4.timestamp || 0)) ? pAdmin : pV4;
+      } else {
+        source = pAdmin || pV4 || (window.__preloadedCatalog || null);
+      }
+    } catch (_) {
+      source = window.__preloadedCatalog || null;
+    }
     if (source) {
       if (source.categories && Object.keys(source.categories).length) liveCollections.categories = source.categories;
       if (source.products && Object.keys(source.products).length) liveCollections.products = source.products;
@@ -3146,12 +3514,14 @@
 
   function saveCachedLiveData() {
     try {
-      localStorage.setItem('linkadda_cached_live_data_v4', JSON.stringify({
+      const payload = JSON.stringify({
         categories: liveCollections.categories,
         products: liveCollections.products,
         banner: liveCollections.banner,
         timestamp: Date.now()
-      }));
+      });
+      localStorage.setItem('linkadda_cached_live_data_v4', payload);
+      localStorage.setItem('linkadda_cached_live_data', payload);
     } catch (_) {}
   }
 
@@ -3172,19 +3542,20 @@
 
   // Instant cross-tab sync: updates storefront in 0ms when admin saves changes in another tab
   window.addEventListener('storage', (e) => {
-    if (e.key === 'linkadda_cached_live_data' && e.newValue) {
+    if ((e.key === 'linkadda_cached_live_data' || e.key === 'linkadda_cached_live_data_v4') && e.newValue) {
       try {
         const parsed = JSON.parse(e.newValue);
         if (parsed.categories && Object.keys(parsed.categories).length) liveCollections.categories = parsed.categories;
         if (parsed.products && Object.keys(parsed.products).length) liveCollections.products = parsed.products;
         if (parsed.banner && Object.keys(parsed.banner).length) liveCollections.banner = parsed.banner;
+        saveCachedLiveData();
         scheduleRenderLiveStore();
       } catch (_) {}
     }
   });
 
   // Fast parallel REST fetch to ensure instant fresh data even before WebSocket handshakes
-  fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/products.json')
+  fetch(`https://linkadda-cd1da-default-rtdb.firebaseio.com/products.json?_t=${Date.now()}`, { cache: 'no-store' })
     .then(r => r.json())
     .then(data => {
       if (data && typeof data === 'object' && Object.keys(data).length) {
@@ -3195,7 +3566,7 @@
     })
     .catch(() => {});
 
-  fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/categories.json')
+  fetch(`https://linkadda-cd1da-default-rtdb.firebaseio.com/categories.json?_t=${Date.now()}`, { cache: 'no-store' })
     .then(r => r.json())
     .then(data => {
       if (data && typeof data === 'object' && Object.keys(data).length) {
@@ -3439,12 +3810,15 @@
 
     if (scrollY && !isNaN(Number(scrollY)) && Number(scrollY) > 0) {
       returnPositionRestored = true;
+      const targetScroll = Number(scrollY);
       const performWinScroll = () => {
-        window.scrollTo({ top: Number(scrollY), behavior: 'smooth' });
+        window.scrollTo({ top: targetScroll, behavior: 'instant' });
       };
       performWinScroll();
-      setTimeout(performWinScroll, 120);
-      setTimeout(performWinScroll, 350);
+      requestAnimationFrame(performWinScroll);
+      setTimeout(performWinScroll, 60);
+      setTimeout(performWinScroll, 180);
+      setTimeout(performWinScroll, 400);
       setTimeout(() => {
         sessionStorage.removeItem('last_ordered_product_id');
         sessionStorage.removeItem('last_ordered_scroll_y');
@@ -3453,12 +3827,12 @@
     }
   }
 
-  // Save product and scroll position whenever any checkout button is clicked
+  // Save product and scroll position whenever any checkout, about, legal, or subpage link is clicked
   document.addEventListener('click', function(e) {
-    const btn = e.target.closest('a.btn-order-now, a.vid-tier-btn, a.btn-card, a.cpb-btn, a[href*="payment"]');
-    if (btn) {
-      const card = btn.closest('.pcard');
-      const prodId = btn.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || card?.dataset?.slug || '';
+    const outgoing = e.target.closest('a[href*="about"], a[href*="legal"], a.btn-order-now, a.vid-tier-btn, a.btn-card, a.cpb-btn, a[href*="payment"]');
+    if (outgoing) {
+      const card = outgoing.closest('.pcard');
+      const prodId = outgoing.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || card?.dataset?.slug || '';
       if (prodId) {
         sessionStorage.setItem('last_ordered_product_id', prodId);
       }
@@ -3468,6 +3842,12 @@
       }
     }
   }, { capture: true });
+
+  window.addEventListener('pagehide', function() {
+    if (window.scrollY > 0) {
+      sessionStorage.setItem('last_ordered_scroll_y', String(window.scrollY));
+    }
+  });
 
   function resetOrderButtons() {
     document.querySelectorAll('a.btn-order-now, a.vid-tier-btn, a.cpb-btn, a.btn-card').forEach(btn => {
@@ -4409,6 +4789,6 @@
   </script>
 
   <script type="module" src="media-resolver.js"></script>
-  <script src="flipkart-store.js?v=11"></script>
+  <script src="flipkart-store.js?v=12"></script>
 </body>
 </html>

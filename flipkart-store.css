@@ -681,7 +681,7 @@ body.linkadda-store {
     color: #fbbf24 !important;
     font-size: 8px !important;
   }
-  [data-theme="light"] .fk-card-badge-vip {
+  [data-theme="light"] .fk-card-badge-vip:not(.badge-color-red):not(.badge-red):not(.badge-color-gold):not(.badge-gold):not(.pcard-pill-gold):not(.badge-color-white):not(.badge-white) {
     background: rgba(15, 23, 42, 0.84) !important;
     backdrop-filter: blur(14px) !important;
     -webkit-backdrop-filter: blur(14px) !important;
@@ -689,7 +689,7 @@ body.linkadda-store {
     color: #ffffff !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
   }
-  [data-theme="light"] .fk-card-badge-vip i {
+  [data-theme="light"] .fk-card-badge-vip:not(.badge-color-red):not(.badge-red):not(.badge-color-gold):not(.badge-gold):not(.pcard-pill-gold):not(.badge-color-white):not(.badge-white) i {
     color: #fbbf24 !important;
   }
   .fk-card-top-actions {
@@ -1223,79 +1223,88 @@ body.linkadda-store {
 }
 
 /* Badge Color Variations (Admin Controlled: Red, White, Gold, Default) */
+.fk-card-badges-row .fk-card-badge-vip.badge-color-red,
+.fk-card-badges-row .fk-card-badge-vip.badge-red,
 .fk-card-badge-vip.badge-color-red,
-.fk-card-badge-vip.badge-red {
+.fk-card-badge-vip.badge-red,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-red,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-red,
+[data-theme="light"] .fk-card-badge-vip.badge-color-red,
+[data-theme="light"] .fk-card-badge-vip.badge-red,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-color-red,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-red {
   background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
   box-shadow: 0 3px 10px rgba(225, 29, 72, 0.45) !important;
 }
+.fk-card-badges-row .fk-card-badge-vip.badge-color-red i,
+.fk-card-badges-row .fk-card-badge-vip.badge-red i,
 .fk-card-badge-vip.badge-color-red i,
-.fk-card-badge-vip.badge-red i {
-  color: #ffffff !important;
-}
-
-.fk-card-badge-vip.badge-color-white,
-.fk-card-badge-vip.badge-white {
-  background: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  color: #0f172a !important;
-  font-weight: 800 !important;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3), 0 0 12px rgba(255, 255, 255, 0.35) !important;
-}
-.fk-card-badge-vip.badge-color-white i,
-.fk-card-badge-vip.badge-white i {
-  color: #e11d48 !important;
-}
-
-.fk-card-badge-vip.badge-color-gold,
-.fk-card-badge-vip.badge-gold,
-.fk-card-badge-vip.pcard-pill-gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  color: #ffffff !important;
-  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.45) !important;
-}
-.fk-card-badge-vip.badge-color-gold i,
-.fk-card-badge-vip.badge-gold i,
-.fk-card-badge-vip.pcard-pill-gold i {
-  color: #ffffff !important;
-}
-
-/* Light Theme Badge Color Variations */
-[data-theme="light"] .fk-card-badge-vip.badge-color-red,
-[data-theme="light"] .fk-card-badge-vip.badge-red {
-  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
-  border: 1px solid rgba(225, 29, 72, 0.3) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35) !important;
-}
+.fk-card-badge-vip.badge-red i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-red i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-red i,
 [data-theme="light"] .fk-card-badge-vip.badge-color-red i,
 [data-theme="light"] .fk-card-badge-vip.badge-red i {
   color: #ffffff !important;
 }
 
+.fk-card-badges-row .fk-card-badge-vip.badge-color-white,
+.fk-card-badges-row .fk-card-badge-vip.badge-white,
+.fk-card-badge-vip.badge-color-white,
+.fk-card-badge-vip.badge-white,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-white,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-white,
 [data-theme="light"] .fk-card-badge-vip.badge-color-white,
-[data-theme="light"] .fk-card-badge-vip.badge-white {
+[data-theme="light"] .fk-card-badge-vip.badge-white,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-color-white,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-white {
   background: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
   color: #0f172a !important;
   font-weight: 800 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15) !important;
 }
+.fk-card-badges-row .fk-card-badge-vip.badge-color-white i,
+.fk-card-badges-row .fk-card-badge-vip.badge-white i,
+.fk-card-badge-vip.badge-color-white i,
+.fk-card-badge-vip.badge-white i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-white i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-white i,
 [data-theme="light"] .fk-card-badge-vip.badge-color-white i,
 [data-theme="light"] .fk-card-badge-vip.badge-white i {
   color: #e11d48 !important;
 }
 
+.fk-card-badges-row .fk-card-badge-vip.badge-color-gold,
+.fk-card-badges-row .fk-card-badge-vip.badge-gold,
+.fk-card-badges-row .fk-card-badge-vip.pcard-pill-gold,
+.fk-card-badge-vip.badge-color-gold,
+.fk-card-badge-vip.badge-gold,
+.fk-card-badge-vip.pcard-pill-gold,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-gold,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-gold,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.pcard-pill-gold,
 [data-theme="light"] .fk-card-badge-vip.badge-color-gold,
 [data-theme="light"] .fk-card-badge-vip.badge-gold,
-[data-theme="light"] .fk-card-badge-vip.pcard-pill-gold {
+[data-theme="light"] .fk-card-badge-vip.pcard-pill-gold,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-color-gold,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.badge-gold,
+[data-theme="dark"] .fk-card-badges-row .fk-card-badge-vip.pcard-pill-gold {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.45) !important;
 }
+.fk-card-badges-row .fk-card-badge-vip.badge-color-gold i,
+.fk-card-badges-row .fk-card-badge-vip.badge-gold i,
+.fk-card-badges-row .fk-card-badge-vip.pcard-pill-gold i,
+.fk-card-badge-vip.badge-color-gold i,
+.fk-card-badge-vip.badge-gold i,
+.fk-card-badge-vip.pcard-pill-gold i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-color-gold i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.badge-gold i,
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip.pcard-pill-gold i,
 [data-theme="light"] .fk-card-badge-vip.badge-color-gold i,
 [data-theme="light"] .fk-card-badge-vip.badge-gold i,
 [data-theme="light"] .fk-card-badge-vip.pcard-pill-gold i {
@@ -3878,7 +3887,7 @@ body.linkadda-store {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
 }
 
-[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip {
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip:not(.badge-color-red):not(.badge-red):not(.badge-color-gold):not(.badge-gold):not(.pcard-pill-gold):not(.badge-color-white):not(.badge-white) {
   background: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
@@ -3887,7 +3896,7 @@ body.linkadda-store {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
 }
 
-[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip i {
+[data-theme="light"] .fk-card-badges-row .fk-card-badge-vip:not(.badge-color-red):not(.badge-red):not(.badge-color-gold):not(.badge-gold):not(.pcard-pill-gold):not(.badge-color-white):not(.badge-white) i {
   color: #d97706 !important;
 }
 

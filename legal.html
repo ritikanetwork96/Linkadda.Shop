@@ -29,89 +29,133 @@
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legal — Privacy Policy, Terms, Disclaimer & Refund | LinkAdda Shop</title>
-  <meta name="description" content="LinkAdda Shop legal policies — Privacy Policy, Terms of Service, Disclaimer, and Refund Policy. Read our complete legal information." />
+  <title>Legal Policies — Privacy, Terms, DMCA & Refund | LinkAdda Shop</title>
+  <meta name="description" content="LinkAdda Shop official legal policies — Privacy Policy, Terms of Service, DMCA Disclaimer, and Lifetime Link Replacement & Refund Guarantee. Transparency since 2022." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
   <style>
+    /* ━━ LEGAL LUXURY DESIGN SYSTEM ━━ */
     :root {
       --lg-bg: #f8fafc;
       --lg-bg2: #ffffff;
       --lg-card: #ffffff;
       --lg-border: #e2e8f0;
-      --lg-border-glow: rgba(225, 29, 72, 0.18);
+      --lg-border-glow: rgba(225, 29, 72, 0.2);
       --lg-text: #0f172a;
       --lg-text2: #334155;
       --lg-muted: #64748b;
       --lg-pink: #e11d48;
       --lg-pink-soft: rgba(225, 29, 72, 0.08);
-      --lg-gradient: linear-gradient(135deg, #e11d48, #7c3aed);
-      --lg-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-      --lg-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --lg-font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      --lg-purple: #7c3aed;
+      --lg-gradient: linear-gradient(135deg, #ff2a55 0%, #e1143c 50%, #7c3aed 100%);
+      --lg-btn-primary: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%);
+      --lg-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+      --lg-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+      --lg-shadow-lg: 0 14px 40px -4px rgba(15, 23, 42, 0.12);
+      --lg-radius: 20px;
+      --lg-font: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --lg-font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
+
     [data-theme="dark"] {
       --lg-bg: #07080c;
       --lg-bg2: #0e0f18;
-      --lg-card: rgba(18, 17, 28, 0.88);
-      --lg-border: rgba(255, 255, 255, 0.08);
-      --lg-border-glow: rgba(225, 29, 72, 0.35);
-      --lg-text: #f1f1f8;
-      --lg-text2: #b5b4cb;
-      --lg-muted: #737289;
+      --lg-card: rgba(18, 17, 28, 0.85);
+      --lg-border: rgba(255, 255, 255, 0.09);
+      --lg-border-glow: rgba(225, 29, 72, 0.4);
+      --lg-text: #f8fafc;
+      --lg-text2: #cbd5e1;
+      --lg-muted: #84829a;
       --lg-pink: #f43f5e;
-      --lg-pink-soft: rgba(244, 63, 94, 0.12);
-      --lg-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --lg-pink-soft: rgba(244, 63, 94, 0.14);
+      --lg-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+      --lg-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+      --lg-shadow-lg: 0 14px 42px rgba(0, 0, 0, 0.65);
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 110px;
+      -webkit-overflow-scrolling: touch;
+    }
+
     body {
       font-family: var(--lg-font);
       background: var(--lg-bg);
       color: var(--lg-text);
-      line-height: 1.7;
+      overflow-x: clip;
+      line-height: 1.75;
       -webkit-font-smoothing: antialiased;
-      transition: background 0.3s, color 0.3s;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
-    /* NAV */
+    /* ━━ NAVBAR ━━ */
     .lg-nav {
-      position: sticky; top: 0; z-index: 999;
-      background: var(--lg-bg2);
-      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--lg-border);
       padding: 12px 0;
+      transition: all 0.25s ease;
+    }
+    [data-theme="dark"] .lg-nav {
+      background: rgba(18, 17, 28, 0.85);
     }
     .lg-nav-inner {
-      max-width: 900px; margin: 0 auto; padding: 0 20px;
-      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .lg-brand {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none; color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
     }
     .lg-brand-name {
       font-family: var(--lg-font-display);
-      font-size: 1.3rem; font-weight: 800;
+      font-size: 1.35rem;
+      font-weight: 850;
+      letter-spacing: -0.5px;
       background: var(--lg-gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    .lg-nav-btns { display: flex; gap: 10px; }
-    .lg-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-radius: 10px;
-      background: var(--lg-pink-soft); border: 1px solid var(--lg-border);
-      color: var(--lg-text); text-decoration: none;
-      font-size: 0.82rem; font-weight: 600; transition: all 0.2s;
+    .lg-nav-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .lg-btn:hover { border-color: var(--lg-border-glow); color: var(--lg-pink); }
-    .lg-btn-back { font-weight: 700; cursor: pointer; }
+    .lg-btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: var(--lg-card);
+      border: 1px solid var(--lg-border);
+      color: var(--lg-text);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 750;
+      box-shadow: var(--lg-shadow-sm);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
     .lg-btn-back:hover {
       background: var(--lg-gradient);
       color: #ffffff;
@@ -119,148 +163,376 @@
       transform: translateX(-2px);
       box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
     }
-    .lg-btn-back:hover i { transform: translateX(-3px); }
     .lg-btn-back i { transition: transform 0.2s ease; }
-    .lg-theme-btn {
-      width: 36px; height: 36px; border-radius: 10px;
-      border: 1px solid var(--lg-border); background: transparent;
-      color: var(--lg-text); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; transition: all 0.2s;
+    .lg-btn-back:hover i { transform: translateX(-3px); }
+
+    .lg-btn-tg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0088cc 0%, #00a2ed 100%);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 750;
+      box-shadow: 0 4px 14px rgba(0, 136, 204, 0.35);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .lg-theme-btn:hover { background: var(--lg-pink-soft); color: var(--lg-pink); }
+    .lg-btn-tg:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 136, 204, 0.45);
+      filter: brightness(1.05);
+    }
+    .lg-btn-tg:active { transform: scale(0.96); }
+
+    .lg-theme-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid var(--lg-border);
+      background: var(--lg-card);
+      color: var(--lg-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      box-shadow: var(--lg-shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .lg-theme-btn:hover {
+      border-color: var(--lg-border-glow);
+      color: var(--lg-pink);
+      transform: scale(1.05);
+    }
     .lg-theme-btn .fa-sun { display: none; }
     .lg-theme-btn .fa-moon { display: inline; }
     [data-theme="dark"] .lg-theme-btn .fa-sun { display: inline; }
     [data-theme="dark"] .lg-theme-btn .fa-moon { display: none; }
 
-    /* HERO */
+    /* ━━ QUICK-JUMP STICKY TOC BAR ━━ */
+    .lg-quick-nav {
+      position: sticky;
+      top: 61px;
+      z-index: 990;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--lg-border);
+      padding: 8px 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    [data-theme="dark"] .lg-quick-nav {
+      background: rgba(18, 17, 28, 0.85);
+    }
+    .lg-quick-nav::-webkit-scrollbar { display: none; }
+    .lg-quick-nav-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .lg-qlink {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--lg-text2);
+      text-decoration: none;
+      background: var(--lg-card);
+      border: 1px solid var(--lg-border);
+      box-shadow: var(--lg-shadow-sm);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .lg-qlink i { font-size: 0.75rem; color: var(--lg-muted); transition: color 0.2s; }
+    .lg-qlink:hover {
+      color: var(--lg-pink);
+      border-color: var(--lg-border-glow);
+      background: var(--lg-pink-soft);
+      transform: translateY(-1px);
+    }
+    .lg-qlink:hover i { color: var(--lg-pink); }
+    .lg-qlink.active {
+      background: var(--lg-btn-primary);
+      color: #ffffff !important;
+      border-color: transparent;
+      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.35);
+    }
+    .lg-qlink.active i { color: #ffffff !important; }
+
+    /* ━━ HERO ━━ */
     .lg-hero {
-      max-width: 900px; margin: 0 auto;
-      padding: 48px 20px 32px; text-align: center;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 48px 20px 28px;
+      text-align: center;
+    }
+    .lg-verified-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      background: var(--lg-pink-soft);
+      border: 1px solid var(--lg-border-glow);
+      color: var(--lg-pink);
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.3px;
+      margin-bottom: 14px;
     }
     .lg-hero h1 {
       font-family: var(--lg-font-display);
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      font-weight: 900; letter-spacing: -1px;
-      margin: 0 0 12px;
-    }
-    .lg-hero p {
-      color: var(--lg-muted); font-size: 0.95rem;
-      max-width: 600px; margin: 0 auto 24px;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 12px;
     }
     .lg-gradient-text {
       background: var(--lg-gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .lg-hero p {
+      color: var(--lg-muted);
+      font-size: 1rem;
+      max-width: 620px;
+      margin: 0 auto 20px;
     }
 
-    /* TOC NAV */
-    .lg-toc {
-      max-width: 900px; margin: 0 auto 36px; padding: 0 20px;
-    }
-    .lg-toc-grid {
-      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
-    }
-    .lg-toc-item {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 10px 18px; border-radius: 12px;
-      background: var(--lg-card); border: 1px solid var(--lg-border);
-      color: var(--lg-text); text-decoration: none;
-      font-size: 0.84rem; font-weight: 600;
-      box-shadow: var(--lg-shadow); transition: all 0.2s;
-    }
-    .lg-toc-item:hover {
-      border-color: var(--lg-border-glow); color: var(--lg-pink);
-      transform: translateY(-1px);
-    }
-    .lg-toc-item i { color: var(--lg-pink); font-size: 0.9rem; }
-
-    /* SECTIONS */
+    /* ━━ CONTENT SECTIONS ━━ */
     .lg-content {
-      max-width: 900px; margin: 0 auto; padding: 0 20px 60px;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
     }
     .lg-section {
-      background: var(--lg-card); border: 1px solid var(--lg-border);
-      border-radius: 20px; padding: 36px 32px;
-      margin-bottom: 28px; box-shadow: var(--lg-shadow);
-      scroll-margin-top: 80px;
+      background: var(--lg-card);
+      border: 1px solid var(--lg-border);
+      border-radius: var(--lg-radius);
+      padding: 38px 34px;
+      margin-bottom: 28px;
+      box-shadow: var(--lg-shadow);
+      scroll-margin-top: 110px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .lg-section:hover {
+      border-color: var(--lg-border-glow);
+      box-shadow: var(--lg-shadow-lg);
     }
     .lg-section-header {
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 24px; padding-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--lg-border);
     }
     .lg-section-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.15rem; flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
-    .lg-si-privacy { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .lg-si-terms { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
-    .lg-si-disclaimer { background: rgba(251, 191, 36, 0.1); color: #f59e0b; }
-    .lg-si-refund { background: rgba(225, 29, 72, 0.1); color: #e11d48; }
+    .lg-si-privacy { background: rgba(16, 185, 129, 0.14); color: #10b981; }
+    .lg-si-terms { background: rgba(124, 58, 237, 0.14); color: #7c3aed; }
+    .lg-si-disclaimer { background: rgba(245, 158, 11, 0.14); color: #f59e0b; }
+    .lg-si-refund { background: rgba(225, 29, 72, 0.14); color: #e11d48; }
+    .lg-si-support { background: rgba(2, 132, 199, 0.14); color: #0284c7; }
 
     .lg-section-title {
       font-family: var(--lg-font-display);
-      font-size: 1.4rem; font-weight: 800; margin: 0;
+      font-size: 1.5rem;
+      font-weight: 850;
+      letter-spacing: -0.4px;
+      margin: 0;
     }
     .lg-section-date {
-      font-size: 0.75rem; color: var(--lg-muted);
-      font-weight: 600; margin-top: 2px;
+      font-size: 0.76rem;
+      color: var(--lg-muted);
+      font-weight: 650;
+      margin-top: 2px;
     }
 
     .lg-section h3 {
-      font-size: 1.05rem; font-weight: 700;
-      margin: 22px 0 10px; color: var(--lg-text);
+      font-family: var(--lg-font-display);
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin: 24px 0 10px;
+      color: var(--lg-text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lg-section h3 i {
+      font-size: 0.95rem;
+      color: var(--lg-pink);
     }
     .lg-section p {
-      color: var(--lg-text2); font-size: 0.92rem;
-      line-height: 1.75; margin: 0 0 14px;
+      color: var(--lg-text2);
+      font-size: 0.93rem;
+      line-height: 1.75;
+      margin-bottom: 14px;
     }
     .lg-section ul {
-      color: var(--lg-text2); font-size: 0.92rem;
-      padding-left: 22px; margin: 0 0 14px;
+      color: var(--lg-text2);
+      font-size: 0.93rem;
+      padding-left: 22px;
+      margin-bottom: 16px;
     }
-    .lg-section ul li { margin-bottom: 6px; line-height: 1.65; }
-    .lg-section strong { color: var(--lg-text); }
+    .lg-section ul li {
+      margin-bottom: 8px;
+      line-height: 1.7;
+    }
+    .lg-section strong {
+      color: var(--lg-text);
+      font-weight: 750;
+    }
 
+    /* Highlight Notice Box */
     .lg-highlight {
       background: var(--lg-pink-soft);
-      border-left: 3px solid var(--lg-pink);
-      padding: 14px 18px; border-radius: 0 10px 10px 0;
-      margin: 16px 0; font-size: 0.9rem;
+      border-left: 4px solid var(--lg-pink);
+      border-radius: 0 14px 14px 0;
+      padding: 16px 20px;
+      margin: 18px 0;
+      font-size: 0.92rem;
       color: var(--lg-text2);
     }
+    .lg-highlight strong { color: var(--lg-pink); }
 
-    /* FOOTER */
+    /* Green Trust Notice Box */
+    .lg-trust-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid #10b981;
+      border-radius: 0 14px 14px 0;
+      padding: 16px 20px;
+      margin: 18px 0;
+      font-size: 0.92rem;
+      color: var(--lg-text2);
+    }
+    .lg-trust-box strong { color: #10b981; }
+
+    /* Action CTA inside Section */
+    .lg-contact-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--lg-border);
+    }
+    .lg-btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 12px;
+      background: var(--lg-btn-primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 750;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+      transition: all 0.2s ease;
+    }
+    .lg-btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45);
+      filter: brightness(1.06);
+    }
+
+    /* ━━ FOOTER ━━ */
     .lg-footer {
       border-top: 1px solid var(--lg-border);
-      padding: 30px 20px; text-align: center;
+      padding: 36px 20px;
+      text-align: center;
     }
     .lg-footer-links {
-      display: flex; align-items: center; justify-content: center;
-      gap: 20px; margin-bottom: 12px; flex-wrap: wrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
     }
     .lg-footer-links a {
-      color: var(--lg-text2); text-decoration: none;
-      font-weight: 600; font-size: 0.85rem; transition: color 0.2s;
+      color: var(--lg-text2);
+      text-decoration: none;
+      font-weight: 650;
+      font-size: 0.85rem;
+      transition: color 0.2s;
     }
     .lg-footer-links a:hover { color: var(--lg-pink); }
-    .lg-footer p { color: var(--lg-muted); font-size: 0.8rem; }
+    .lg-footer p {
+      color: var(--lg-muted);
+      font-size: 0.8rem;
+    }
+
+    /* ━━ FLOATING BACK TO TOP ━━ */
+    .lg-scroll-top-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 995;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--lg-btn-primary);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(225, 29, 72, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .lg-scroll-top-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .lg-scroll-top-btn:hover {
+      transform: translateY(-2px) scale(1.06);
+      box-shadow: 0 6px 22px rgba(225, 29, 72, 0.6);
+    }
 
     @media (max-width: 768px) {
-      .lg-section { padding: 24px 18px; }
-      .lg-nav-inner { padding: 0 14px; }
+      .lg-section { padding: 26px 20px; border-radius: 16px; }
+      .lg-section-header { gap: 12px; }
+      .lg-section-title { font-size: 1.3rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
+  <!-- NAVBAR -->
   <nav class="lg-nav">
     <div class="lg-nav-inner">
       <div style="display:flex; align-items:center; gap:12px;">
-        <a href="index.html" class="lg-btn lg-btn-back" id="lgBackBtn" title="Back to Store" aria-label="Back to Store" onclick="if(window.history.length>1&&document.referrer&&document.referrer.indexOf(window.location.host)!==-1){window.history.back();return false;}">
+        <a href="index.html" class="lg-btn-back" id="lgBackBtn" title="Back to Store" aria-label="Back to Store">
           <i class="fa-solid fa-arrow-left"></i>
           <span>Back</span>
         </a>
@@ -269,229 +541,172 @@
         </a>
       </div>
       <div class="lg-nav-btns">
-        <button class="lg-theme-btn" id="lgThemeToggle" type="button" title="Toggle Theme">
+        <button class="lg-theme-btn" id="lgThemeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
           <i class="fa-solid fa-moon"></i>
           <i class="fa-solid fa-sun"></i>
         </button>
-        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="lg-btn" style="background:linear-gradient(135deg,#0088cc,#00a2ed);color:#fff;border:none;font-weight:700;"><i class="fa-brands fa-telegram"></i> DM</a>
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="lg-btn-tg"><i class="fa-brands fa-telegram"></i> DM Admin</a>
       </div>
     </div>
   </nav>
 
+  <!-- QUICK-JUMP TOC BAR -->
+  <div class="lg-quick-nav" id="legalQuickNav">
+    <div class="lg-quick-nav-inner">
+      <a href="#privacy" class="lg-qlink active"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+      <a href="#terms" class="lg-qlink"><i class="fa-solid fa-file-contract"></i> Terms of Service</a>
+      <a href="#disclaimer" class="lg-qlink"><i class="fa-solid fa-triangle-exclamation"></i> DMCA & Disclaimer</a>
+      <a href="#refund" class="lg-qlink"><i class="fa-solid fa-rotate-left"></i> Refund Guarantee</a>
+      <a href="#support" class="lg-qlink"><i class="fa-solid fa-headset"></i> Support</a>
+    </div>
+  </div>
+
   <!-- HERO -->
   <header class="lg-hero">
-    <h1><span class="lg-gradient-text">Legal</span> Information</h1>
-    <p>Our complete legal policies including Privacy, Terms, Disclaimer, and Refund. Please read carefully before using our services.</p>
+    <div class="lg-verified-tag"><i class="fa-solid fa-scale-balanced"></i> Official Store Documentation</div>
+    <h1><span class="lg-gradient-text">Legal</span> & Compliance</h1>
+    <p>Complete policies regarding your privacy, terms of digital access, DMCA compliance, and our Lifetime Link Replacement Guarantee.</p>
   </header>
 
-  <!-- TOC -->
-  <nav class="lg-toc" aria-label="Table of Contents">
-    <div class="lg-toc-grid">
-      <a href="#privacy" class="lg-toc-item"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
-      <a href="#terms" class="lg-toc-item"><i class="fa-solid fa-file-contract"></i> Terms of Service</a>
-      <a href="#disclaimer" class="lg-toc-item"><i class="fa-solid fa-triangle-exclamation"></i> Disclaimer</a>
-      <a href="#refund" class="lg-toc-item"><i class="fa-solid fa-rotate-left"></i> Refund Policy</a>
-    </div>
-  </nav>
-
-  <!-- CONTENT -->
+  <!-- MAIN LEGAL CONTENT -->
   <main class="lg-content">
 
-    <!-- PRIVACY POLICY -->
+    <!-- 1. PRIVACY POLICY -->
     <section class="lg-section" id="privacy">
       <div class="lg-section-header">
         <div class="lg-section-icon lg-si-privacy"><i class="fa-solid fa-shield-halved"></i></div>
         <div>
           <h2 class="lg-section-title">Privacy Policy</h2>
-          <div class="lg-section-date">Last Updated: September 2026</div>
+          <div class="lg-section-date">Last Updated: September 2026 • Strict Zero-Logs Policy</div>
         </div>
       </div>
 
-      <p>LinkAdda Shop ("we," "us," or "our") operates the website <strong>linkadda.shop</strong>. This Privacy Policy describes how we collect, use, and protect your personal information when you visit our website or make a purchase.</p>
+      <p>At <strong>LinkAdda Shop</strong> ("LinkAdda", "we", "our"), your confidentiality is our highest priority. We operate on a strict <strong>Data Minimization and Zero-Logs Architecture</strong>. We collect only what is strictly necessary to deliver your digital purchases.</p>
 
-      <h3>1. Information We Collect</h3>
-      <p>We collect minimal information necessary to process your orders:</p>
+      <h3><i class="fa-solid fa-circle-check"></i> 1. Information We Collect</h3>
       <ul>
-        <li><strong>Telegram Username</strong> — Used solely for order delivery and support communication.</li>
-        <li><strong>Payment Transaction Details</strong> — UPI transaction ID, bank reference number, or crypto transaction hash for order verification only.</li>
-        <li><strong>Device & Browser Data</strong> — Anonymized analytics data (page views, device type, browser) for website improvement. No personally identifiable information is tracked.</li>
+        <li><strong>Payment Reference / Transaction ID:</strong> Used exclusively to verify UPI, QR, or Crypto transactions and deliver the corresponding cloud links.</li>
+        <li><strong>Telegram Username / ID:</strong> Used strictly to dispatch your digital purchase links and answer support questions.</li>
+        <li><strong>Device Preferences:</strong> We store your UI theme preference (Light/Dark mode) in your local browser storage (`localStorage`). No tracking identifiers are stored.</li>
       </ul>
 
-      <h3>2. What We Do NOT Collect</h3>
-      <ul>
-        <li>We do <strong>NOT</strong> collect your real name, email address, phone number, or physical address.</li>
-        <li>We do <strong>NOT</strong> store any payment card numbers, bank account details, or financial credentials.</li>
-        <li>We do <strong>NOT</strong> use cookies for advertising or tracking purposes.</li>
-      </ul>
-
-      <h3>3. How We Use Your Information</h3>
-      <ul>
-        <li>To process and deliver your orders via Telegram.</li>
-        <li>To verify payment transactions.</li>
-        <li>To provide customer support via Telegram DM.</li>
-        <li>To improve our website performance and user experience.</li>
-      </ul>
-
-      <h3>4. Data Storage & Security</h3>
-      <p>Your transaction records are stored securely and are <strong>never shared with third parties</strong>. We use encrypted connections (HTTPS) for all website communications. Order records are retained for a reasonable period for support purposes and then permanently deleted.</p>
-
-      <h3>5. Third-Party Services</h3>
-      <p>Our website uses the following third-party services:</p>
-      <ul>
-        <li><strong>Firebase/Firestore</strong> — for product catalog and order management (secured with access rules).</li>
-        <li><strong>Google Fonts</strong> — for typography (no personal data shared).</li>
-        <li><strong>Telegram</strong> — for order delivery and customer support.</li>
-      </ul>
-      <p>We do not sell, trade, or transfer your information to outside parties for marketing or advertising.</p>
-
-      <h3>6. Your Rights</h3>
-      <p>You may request deletion of any data we hold about you by contacting us on Telegram <strong>@TRUSTED_BROTHER1234</strong>. We will process your request within 48 hours.</p>
-
-      <div class="lg-highlight">
-        <strong><i class="fa-solid fa-lock"></i> Discrete & Private:</strong> All transactions and communications are handled with complete discretion. Your purchase history is never shared with anyone.
+      <div class="lg-trust-box">
+        <strong><i class="fa-solid fa-lock"></i> Financial Confidentiality Guarantee:</strong> We never collect, process, or store credit card numbers, bank PINs, or confidential banking passwords. All payments occur through secure external third-party UPI apps or blockchain networks.
       </div>
+
+      <h3><i class="fa-solid fa-user-shield"></i> 2. Confidential Telegram Delivery</h3>
+      <p>All purchased digital content links are delivered directly through encrypted Telegram messages. We never share, sell, rent, or disclose your contact details to advertisers or third-party data brokers.</p>
+
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> 3. Data Retention & Deletion</h3>
+      <p>Customer communication and payment receipts are periodically expunged from our Telegram logs to maintain peak privacy. You may request immediate deletion of your chat history at any time by messaging our admin @TRUSTED_BROTHER1234.</p>
     </section>
 
-    <!-- TERMS OF SERVICE -->
+    <!-- 2. TERMS OF SERVICE -->
     <section class="lg-section" id="terms">
       <div class="lg-section-header">
         <div class="lg-section-icon lg-si-terms"><i class="fa-solid fa-file-contract"></i></div>
         <div>
           <h2 class="lg-section-title">Terms of Service</h2>
-          <div class="lg-section-date">Last Updated: September 2026</div>
+          <div class="lg-section-date">Effective: Since 2022 • Digital Content License Agreement</div>
         </div>
       </div>
 
-      <p>By accessing and using LinkAdda Shop (linkadda.shop), you agree to be bound by the following terms and conditions. If you do not agree, please do not use our services.</p>
+      <p>By browsing LinkAdda Shop or completing a purchase, you agree to comply with the following legally binding terms:</p>
 
-      <h3>1. Eligibility</h3>
-      <p>You must be <strong>18 years of age or older</strong> to use this website and purchase any content. By making a purchase, you confirm that you meet this age requirement and are legally permitted to access such content in your jurisdiction.</p>
+      <div class="lg-highlight">
+        <strong><i class="fa-solid fa-id-card"></i> 18+ Age Requirement:</strong> You explicitly affirm that you are at least 18 years of age (or the age of majority in your jurisdiction) and legally authorized to view adult digital content.
+      </div>
 
-      <h3>2. Products & Services</h3>
+      <h3><i class="fa-solid fa-key"></i> 1. Digital License & Personal Use</h3>
       <ul>
-        <li>LinkAdda Shop provides access to curated digital content collections delivered via Telegram channels and groups.</li>
-        <li>All content is delivered as <strong>lifetime access</strong> — there is no subscription or recurring charge.</li>
-        <li>Content descriptions and video counts on our website are approximate and may vary slightly as collections are updated.</li>
+        <li>All digital cloud links and video collections purchased from LinkAdda are provided solely for <strong>personal, private viewing</strong>.</li>
+        <li>Commercial resale, unauthorized public broadcasting, mass re-distribution, or repackaging of links is strictly prohibited.</li>
       </ul>
 
-      <h3>3. Pricing & Payment</h3>
-      <ul>
-        <li>All prices are listed in <strong>Indian Rupees (INR)</strong> and <strong>US Dollars (USD)</strong>.</li>
-        <li>Accepted payment methods include UPI (GPay, PhonePe, Paytm), QR Code, Bank Transfer, and Cryptocurrency (BTC, USDT).</li>
-        <li>Payment must be completed before delivery. No credit or pay-later options are available.</li>
-        <li>Prices are subject to change without prior notice. The price at the time of purchase is final.</li>
-      </ul>
+      <h3><i class="fa-solid fa-truck-fast"></i> 2. Delivery SLA (Service Level Agreement)</h3>
+      <p>Upon receipt and verification of valid payment, digital cloud links are typically dispatched to the buyer's Telegram within <strong>5 to 15 minutes</strong>. In rare instances of network or Telegram API downtime, delivery will be completed within a maximum window of 2 hours.</p>
 
-      <h3>4. Delivery</h3>
-      <ul>
-        <li>Orders are delivered via <strong>Telegram</strong> within <strong>5–15 minutes</strong> of payment verification in most cases.</li>
-        <li>During high-volume periods, delivery may take up to <strong>1 hour</strong>.</li>
-        <li>If you do not receive your order within 2 hours, contact us on Telegram at <strong>@TRUSTED_BROTHER1234</strong> for immediate resolution.</li>
-      </ul>
-
-      <h3>5. Account & Access</h3>
-      <ul>
-        <li>Purchased content is for <strong>personal use only</strong>. Redistribution, resale, or public sharing of purchased content is strictly prohibited.</li>
-        <li>If a Telegram channel link expires or is removed, contact us for a free replacement link.</li>
-      </ul>
-
-      <h3>6. Prohibited Activities</h3>
-      <ul>
-        <li>Attempting to reverse-engineer, copy, or redistribute our content.</li>
-        <li>Filing false chargebacks or payment disputes after receiving delivery.</li>
-        <li>Using our services for any illegal purpose in your jurisdiction.</li>
-        <li>Sharing purchased access links publicly or with unauthorized users.</li>
-      </ul>
-
-      <h3>7. Limitation of Liability</h3>
-      <p>LinkAdda Shop provides digital content "as is" without warranties of any kind. We are not liable for any damages arising from the use of our content. Our total liability shall not exceed the amount paid for the specific order in question.</p>
-
-      <h3>8. Modification of Terms</h3>
-      <p>We reserve the right to modify these terms at any time. Continued use of the website after changes constitutes acceptance of the updated terms.</p>
+      <h3><i class="fa-solid fa-ban"></i> 3. Anti-Fraud & Chargeback Policy</h3>
+      <p>Due to the irreversible nature of digital content delivery, fraudulent chargebacks, fake payment receipts, or abusive dispute claims will result in immediate termination of cloud access and permanent blacklisting across our Telegram networks.</p>
     </section>
 
-    <!-- DISCLAIMER -->
+    <!-- 3. DMCA & DISCLAIMER -->
     <section class="lg-section" id="disclaimer">
       <div class="lg-section-header">
         <div class="lg-section-icon lg-si-disclaimer"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <div>
-          <h2 class="lg-section-title">Disclaimer</h2>
-          <div class="lg-section-date">Last Updated: September 2026</div>
+          <h2 class="lg-section-title">DMCA Notice & Content Disclaimer</h2>
+          <div class="lg-section-date">Intellectual Property & Cloud Indexing Disclosures</div>
         </div>
       </div>
 
-      <h3>1. Content Disclaimer</h3>
-      <p>All digital content available on LinkAdda Shop is curated from publicly available sources on the internet. We do not create, produce, or host any original content. We act solely as an aggregator and curator providing organized access to existing digital media collections.</p>
+      <p>LinkAdda operates as a digital indexing service providing direct high-speed cloud access links. We take copyright and intellectual property rights seriously and operate in compliance with DMCA guidelines.</p>
 
-      <h3>2. Age Restriction</h3>
-      <p>This website and its content are intended exclusively for users who are <strong>18 years of age or older</strong>. By using this website, you confirm that you are of legal age to access such content in your country or region. We take no responsibility for underage access — it is the user's responsibility to comply with local laws.</p>
+      <h3><i class="fa-solid fa-cloud"></i> 1. Third-Party Cloud Storage Notice</h3>
+      <p>All video files and collections referenced on this website are hosted on independent third-party cloud platforms (including Mega.nz and Google Drive). LinkAdda does not host copyrighted media files directly on its web server.</p>
 
-      <h3>3. Accuracy of Information</h3>
-      <p>While we strive to keep all product descriptions, pricing, and video counts accurate, we do not guarantee the absolute accuracy of all information displayed. Content collections are regularly updated, and counts may fluctuate as new content is added or removed.</p>
-
-      <h3>4. External Links</h3>
-      <p>Our website may contain links to external platforms (Telegram, payment gateways). We are not responsible for the content, privacy policies, or practices of any third-party websites or platforms.</p>
-
-      <h3>5. No Legal Advice</h3>
-      <p>Nothing on this website constitutes legal advice. Users are responsible for ensuring their use of our services complies with applicable laws in their jurisdiction.</p>
+      <h3><i class="fa-solid fa-envelope-open-text"></i> 2. DMCA Takedown Process</h3>
+      <p>If you are a verified copyright owner or legal representative and believe that any content indexed on our store infringes your intellectual property, please contact our designated agent immediately with:</p>
+      <ul>
+        <li>Identification of the copyrighted work claimed to have been infringed.</li>
+        <li>Specific URLs or collection pack names claimed to be infringing.</li>
+        <li>Proof of your authority to represent the copyright holder.</li>
+      </ul>
 
       <div class="lg-highlight">
-        <strong><i class="fa-solid fa-gavel"></i> User Responsibility:</strong> By purchasing from LinkAdda, you acknowledge that you are solely responsible for how you access and use the purchased content. You agree to use all content in compliance with your local laws and regulations.
+        <strong><i class="fa-solid fa-bolt"></i> 24-Hour Takedown Guarantee:</strong> Upon receipt of a valid and verified infringement notice, the disputed cloud links will be permanently disabled within 24 hours. Contact our copyright desk via Telegram @TRUSTED_BROTHER1234.
       </div>
     </section>
 
-    <!-- REFUND POLICY -->
+    <!-- 4. REFUND & REPLACEMENT POLICY -->
     <section class="lg-section" id="refund">
       <div class="lg-section-header">
         <div class="lg-section-icon lg-si-refund"><i class="fa-solid fa-rotate-left"></i></div>
         <div>
-          <h2 class="lg-section-title">Refund Policy</h2>
-          <div class="lg-section-date">Last Updated: September 2026</div>
+          <h2 class="lg-section-title">Refund & Link Replacement Guarantee</h2>
+          <div class="lg-section-date">Customer Protection • 100% Satisfaction Guarantee</div>
         </div>
       </div>
 
-      <p>At LinkAdda Shop, customer satisfaction is our top priority. Please read our refund policy carefully before making a purchase.</p>
+      <p>Because digital products are delivered instantly via cloud storage links, standard cash returns are generally not applicable once files have been accessed. However, we provide an industry-leading <strong>Lifetime Protection Guarantee</strong> to protect our buyers:</p>
 
-      <h3>1. Digital Product Nature</h3>
-      <p>Since all our products are <strong>digital content delivered instantly</strong> via Telegram, refunds are generally <strong>not available</strong> once delivery has been completed. Once you receive access to the content (Telegram channel links/files), the transaction is considered fulfilled.</p>
+      <div class="lg-trust-box">
+        <strong><i class="fa-solid fa-circle-check"></i> Lifetime Link Replacement Guarantee:</strong> If any Mega or Google Drive link provided by LinkAdda ever becomes inactive, broken, or restricted, simply message our Telegram admin @TRUSTED_BROTHER1234 with your original payment receipt. We will replace your link free of charge within 24 hours.
+      </div>
 
-      <h3>2. When Refunds ARE Applicable</h3>
-      <p>We will issue a <strong>full refund</strong> in the following situations:</p>
+      <h3><i class="fa-solid fa-hand-holding-dollar"></i> Eligible Refund Situations:</h3>
       <ul>
-        <li><strong>Non-Delivery:</strong> If you paid but did not receive your content within 24 hours and we are unable to resolve the delivery issue.</li>
-        <li><strong>Duplicate Payment:</strong> If you accidentally paid twice for the same order, the duplicate amount will be refunded in full.</li>
-        <li><strong>Wrong Product:</strong> If you received a completely different product than what you ordered (not the correct category/pack).</li>
-        <li><strong>Technical Failure:</strong> If all delivered links are non-functional and we cannot provide replacement links within 48 hours.</li>
+        <li><strong>Duplicate Payment:</strong> If you were accidentally charged twice for the same pack due to gateway lag, the surplus amount will be refunded immediately via UPI.</li>
+        <li><strong>Non-Delivery:</strong> If we fail to deliver your purchased content within 12 hours of verified payment, you are entitled to a full 100% refund upon request.</li>
+        <li><strong>Permanent Catalog Unavailability:</strong> If a specific requested collection cannot be fulfilled due to cloud removal and a replacement is unavailable, an immediate alternative pack or full refund will be issued.</li>
       </ul>
+    </section>
 
-      <h3>3. When Refunds Are NOT Applicable</h3>
+    <!-- 5. SUPPORT & CONTACT -->
+    <section class="lg-section" id="support">
+      <div class="lg-section-header">
+        <div class="lg-section-icon lg-si-support"><i class="fa-solid fa-headset"></i></div>
+        <div>
+          <h2 class="lg-section-title">Support & Official Verification</h2>
+          <div class="lg-section-date">Direct Admin Communication • Beware of Impersonators</div>
+        </div>
+      </div>
+
+      <p>For any legal inquiries, policy questions, link replacement requests, or general buyer assistance, reach out directly to our authorized support channels:</p>
+
       <ul>
-        <li>After you have accessed and viewed the content.</li>
-        <li>If you simply changed your mind after purchase.</li>
-        <li>If your Telegram account is banned/deleted and you cannot access the channels (we can provide alternative delivery).</li>
-        <li>Partial refunds for content that "doesn't match expectations" when the delivered content matches the product description.</li>
+        <li><strong>Official Telegram Admin:</strong> <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" style="color:var(--lg-pink);font-weight:750;">@TRUSTED_BROTHER1234</a></li>
+        <li><strong>Support Availability:</strong> 24 Hours a Day / 7 Days a Week</li>
+        <li><strong>Average Response Time:</strong> 5 to 15 Minutes</li>
       </ul>
-
-      <h3>4. How to Request a Refund</h3>
-      <p>To request a refund, contact us directly on Telegram:</p>
-      <ul>
-        <li>DM <strong>@TRUSTED_BROTHER1234</strong> with your payment proof (screenshot/transaction ID) and order details.</li>
-        <li>Include a clear description of the issue.</li>
-        <li>Refund requests must be made within <strong>48 hours</strong> of purchase.</li>
-      </ul>
-
-      <h3>5. Refund Processing</h3>
-      <ul>
-        <li>Approved refunds are processed within <strong>24–72 hours</strong>.</li>
-        <li>Refunds are sent to the original payment method (UPI, bank account, or crypto wallet).</li>
-        <li>You will be notified on Telegram when the refund is processed.</li>
-      </ul>
-
-      <h3>6. Link Replacement Guarantee</h3>
-      <p>If any delivered Telegram channel link expires or gets removed, we offer <strong>free lifetime link replacement</strong>. Simply contact us on Telegram and we will provide a fresh link at no extra cost. This is not a refund scenario — it is our standard service guarantee.</p>
 
       <div class="lg-highlight">
-        <strong><i class="fa-solid fa-headset"></i> Need Help?</strong> For any refund-related queries, reach out on Telegram at <strong>@TRUSTED_BROTHER1234</strong>. We respond within minutes and resolve all issues promptly.
+        <strong><i class="fa-solid fa-triangle-exclamation"></i> Security Warning:</strong> We never contact you from alternative usernames asking for passwords, OTPs, or private banking details. Always verify that you are communicating directly with <code>@TRUSTED_BROTHER1234</code>.
+      </div>
+
+      <div class="lg-contact-action">
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="lg-btn-action"><i class="fa-brands fa-telegram"></i> Message Admin on Telegram</a>
+        <a href="index.html" class="lg-btn-back"><i class="fa-solid fa-store"></i> Return to Storefront</a>
       </div>
     </section>
 
@@ -502,15 +717,22 @@
     <div class="lg-footer-links">
       <a href="index.html">Store Home</a>
       <a href="about.html">About Us</a>
-      <a href="index.html#services">All Categories</a>
-      <a href="index.html#faq">FAQ</a>
+      <a href="legal.html#privacy">Privacy Policy</a>
+      <a href="legal.html#terms">Terms of Service</a>
+      <a href="legal.html#disclaimer">DMCA & Disclaimer</a>
+      <a href="legal.html#refund">Refund Guarantee</a>
       <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener">Telegram Support</a>
     </div>
-    <p>&copy; 2026 LinkAdda Shop. All rights reserved.</p>
+    <p>&copy; 2026 LinkAdda Shop. All rights reserved. Discreet & Trusted Service Since 2022.</p>
   </footer>
 
+  <!-- FLOATING BACK TO TOP BUTTON -->
+  <button class="lg-scroll-top-btn" id="scrollTopBtn" type="button" title="Back to Top" aria-label="Back to Top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
   <script>
-    /* Theme toggle — same keys as main site */
+    /* Theme toggle for legal page — syncs with index.html */
     (function() {
       var btn = document.getElementById('lgThemeToggle');
       if (!btn) return;
@@ -523,6 +745,135 @@
           localStorage.setItem('linkadda_theme', next);
           localStorage.setItem('linkadda_theme_manual', 'true');
         } catch (_) {}
+      });
+    })();
+
+    /* Quick-Jump ScrollSpy & Smooth Scrolling without History Pollution */
+    (function() {
+      var links = document.querySelectorAll('.lg-qlink');
+      var quickNav = document.getElementById('legalQuickNav');
+      var sections = [];
+
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          var sec = document.querySelector(href);
+          if (sec) sections.push({ el: sec, link: link });
+        }
+      });
+
+      // Smooth scroll on click WITHOUT history pollution or URL hash jump
+      links.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          var href = this.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            var target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              var navOffset = 115;
+              var targetPos = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+              window.scrollTo({
+                top: Math.max(0, targetPos),
+                behavior: 'smooth'
+              });
+
+              // Mark active immediately
+              links.forEach(function(l) { l.classList.remove('active'); });
+              this.classList.add('active');
+
+              // Gently center the clicked tab in the horizontal bar
+              if (quickNav) {
+                var linkLeft = this.offsetLeft;
+                var linkWidth = this.offsetWidth;
+                var navWidth = quickNav.offsetWidth;
+                quickNav.scrollTo({
+                  left: linkLeft - (navWidth / 2) + (linkWidth / 2),
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+      });
+
+      // Also intercept footer internal hash links so they don't pollute history
+      document.querySelectorAll('.lg-footer-links a[href*="#"]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          var href = this.getAttribute('href');
+          var hash = href.substring(href.indexOf('#'));
+          if (hash && hash.length > 1) {
+            var target = document.querySelector(hash);
+            if (target) {
+              e.preventDefault();
+              var navOffset = 115;
+              var targetPos = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+              window.scrollTo({
+                top: Math.max(0, targetPos),
+                behavior: 'smooth'
+              });
+              links.forEach(function(l) {
+                if (l.getAttribute('href') === hash) l.classList.add('active');
+                else l.classList.remove('active');
+              });
+            }
+          }
+        });
+      });
+
+      // ScrollSpy: ONLY update active pill class, NEVER call scrollIntoView to avoid fighting user scrolling
+      var ticking = false;
+      function updateActive() {
+        var scrollPos = window.scrollY + 130;
+        var curSection = null;
+        for (var i = 0; i < sections.length; i++) {
+          var top = sections[i].el.offsetTop;
+          var height = sections[i].el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            curSection = sections[i];
+            break;
+          }
+        }
+        if (curSection) {
+          links.forEach(function(l) { l.classList.remove('active'); });
+          curSection.link.classList.add('active');
+        }
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(updateActive);
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
+
+    /* Floating Back to Top Button */
+    (function() {
+      var topBtn = document.getElementById('scrollTopBtn');
+      if (!topBtn) return;
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 350) {
+          topBtn.classList.add('visible');
+        } else {
+          topBtn.classList.remove('visible');
+        }
+      }, { passive: true });
+
+      topBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    /* Smart Back Navigation: Returns to exact previous scroll position on storefront */
+    (function() {
+      document.querySelectorAll('.lg-btn-back').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          if (document.referrer && document.referrer.indexOf(window.location.host) !== -1 && window.history.length > 1) {
+            e.preventDefault();
+            window.history.back();
+          }
+        });
       });
     })();
   </script>
