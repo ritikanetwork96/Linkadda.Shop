@@ -37,7 +37,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260912d" />
+  <link rel="stylesheet" href="style.css?v=20260915f" />
   <link rel="stylesheet" href="flipkart-store.css?v=20260913a" />
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
@@ -3082,7 +3082,7 @@
     const parentWrapper = pillsWrapper.parentElement; // category-filter-wrapper
 
     const categories = normalizeRecords(liveCollections.categories);
-    const maxVisible = window.innerWidth < 600 ? 3 : (window.innerWidth < 1024 ? 5 : 8);
+    const maxVisible = window.innerWidth < 600 ? 3 : (window.innerWidth < 1024 ? 5 : (window.innerWidth < 1360 ? 6 : 8));
     
     const visibleCats = categories.slice(0, maxVisible);
     const hiddenCats = categories.slice(maxVisible);
@@ -3153,6 +3153,21 @@
         renderLiveGrid();
       });
     });
+
+    if (activeCategoryFilter === 'all') {
+      pillsWrapper.scrollLeft = 0;
+    }
+
+    // Enable smooth mousewheel horizontal scrolling on PC
+    if (!pillsWrapper._wheelAttached) {
+      pillsWrapper._wheelAttached = true;
+      pillsWrapper.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0 && pillsWrapper.scrollWidth > pillsWrapper.clientWidth) {
+          pillsWrapper.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
   }
 
   // Handle resize to re-render filters layout dynamically

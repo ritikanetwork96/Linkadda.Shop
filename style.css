@@ -3118,7 +3118,8 @@ body {
 
 .category-filter-pills {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
   gap: 10px;
   overflow-x: auto;
   padding: 4px 8px;
@@ -3126,6 +3127,8 @@ body {
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
   min-width: 0; /* Prevents flex from squeezing container and cutting off pills */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 @media (max-width: 768px) {
@@ -3140,6 +3143,7 @@ body {
 }
 
 .category-pill {
+  flex-shrink: 0;
   white-space: nowrap;
   padding: 10px 20px;
   font-size: 13px;
