@@ -1058,7 +1058,7 @@ document.head.appendChild(burstStyle);
         <i class="fa-solid fa-gem" style="background:linear-gradient(135deg,#f59e0b,#e84393);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
       </span>
       <h2>Wait! Don't <span class="gradient-text">Miss This</span></h2>
-      <p>You're leaving without grabbing the best deal in the market. Mega Pack — 1,14,000+ videos at an unbeatable price. Only for today!</p>
+      <p>You're leaving without grabbing the best deal in the market. Mega Pack — 3 Lac+ videos at an unbeatable price. Only for today!</p>
       <div class="exit-discount-box">
         <div class="old-price">Original Price: ₹10,900 / $392</div>
         <div class="new-price">₹4,399 <span style="font-size:1.1rem;opacity:0.8;">/ $109</span></div>
@@ -1074,6 +1074,27 @@ document.head.appendChild(burstStyle);
 
   function showExitPopup() {
     if (sessionStorage.getItem('exitShown')) return;
+    try {
+      let b = window.liveCollections?.banner;
+      if (!b) {
+        const cached = localStorage.getItem('linkadda_cached_live_data_v4') || localStorage.getItem('linkadda_cached_live_data');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.banner) b = parsed.banner;
+        }
+      }
+      if (b && (b.priceOfferINR || b.priceOriginal)) {
+        const oldEl = overlay.querySelector('.old-price');
+        const newEl = overlay.querySelector('.new-price');
+        const saveEl = overlay.querySelector('.save-tag');
+        const inr = b.priceOfferINR ? (String(b.priceOfferINR).startsWith('₹') ? b.priceOfferINR : '₹' + b.priceOfferINR) : '';
+        const usd = b.priceOfferUSD ? (String(b.priceOfferUSD).startsWith('$') ? b.priceOfferUSD : '$' + b.priceOfferUSD) : '';
+        const orig = b.priceOriginal ? (String(b.priceOriginal).startsWith('₹') ? b.priceOriginal : '₹' + b.priceOriginal) : '';
+        if (orig && oldEl) oldEl.textContent = `Original Price: ${orig}`;
+        if (inr && newEl) newEl.innerHTML = `${inr} ${usd ? `<span style="font-size:1.1rem;opacity:0.8;">/ ${usd}</span>` : ''}`;
+        if (saveEl) saveEl.textContent = 'Special Mega Pack Deal — Cheapest in the market!';
+      }
+    } catch (_) {}
     overlay.classList.add('active');
     sessionStorage.setItem('exitShown', '1');
   }

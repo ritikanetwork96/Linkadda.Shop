@@ -5226,7 +5226,7 @@ function renderSingleEditorPage(node, schema, data = {}) {
                 </h3>
                 
                 <p style="font-size: 13px; color: var(--muted); margin: 0 0 18px 0; line-height: 1.5;">
-                  ${escapeHtml(record.description || 'Mega Pack — 1,14,000+ Videos | Every category bundled together — the ultimate deal.')}
+                  ${escapeHtml(record.description || 'Mega Pack — 3 Lac+ Videos | Every category bundled together — the ultimate deal.')}
                 </p>
 
                 <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; padding: 12px 16px; background: rgba(0,0,0,0.25); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
