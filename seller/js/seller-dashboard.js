@@ -1781,14 +1781,14 @@ function setupEventListeners() {
 
         if (!editingProductId) {
           productPayload.createdAt = Date.now();
-          productPayload.likes = Math.floor(Math.random() * 4) + 3; // 3 to 6 baseline
-          productPayload.views = Math.floor(Math.random() * 15) + 18; // 18 to 32 baseline
+          productPayload.likes = 0; // Starts with 0 real likes
+          productPayload.views = 0; // Starts with 0 real views
         } else {
           // Preserve existing product's likes and views
           const existingPack = sellerProducts.find(p => p.id === editingProductId);
           if (existingPack) {
             productPayload.likes = Number(existingPack.likes !== undefined ? existingPack.likes : 0);
-            productPayload.views = Number(existingPack.views !== undefined ? existingPack.views : 1);
+            productPayload.views = Number(existingPack.views !== undefined ? existingPack.views : 0);
             productPayload.createdAt = existingPack.createdAt || Date.now();
           }
         }

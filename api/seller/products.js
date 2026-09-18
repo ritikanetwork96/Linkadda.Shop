@@ -217,11 +217,11 @@ export default async function handler(req, res) {
 
       const finalLikes = isEditing 
         ? Number(product.likes !== undefined ? product.likes : existingLikes)
-        : Number(product.likes !== undefined ? product.likes : (Math.floor(Math.random() * 4) + 3));
+        : Number(product.likes !== undefined ? product.likes : 0);
 
       const finalViews = isEditing
         ? Number(product.views !== undefined ? product.views : existingViews)
-        : Number(product.views !== undefined ? product.views : (Math.floor(Math.random() * 15) + 18));
+        : Number(product.views !== undefined ? product.views : 0);
 
       const payload = {
         ...product,
@@ -233,7 +233,7 @@ export default async function handler(req, res) {
         verified: true,
         creatorBadge: 'Verified Creator',
         likes: Math.max(0, finalLikes),
-        views: Math.max(1, finalViews),
+        views: Math.max(0, finalViews),
         createdAt: product.createdAt || Date.now(),
         updatedAt: Date.now(),
       };

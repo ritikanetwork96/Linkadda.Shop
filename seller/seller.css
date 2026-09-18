@@ -3388,53 +3388,35 @@ body.seller-body {
   align-items: center;
   gap: 16px;
   padding: 16px 24px;
-  background: linear-gradient(135deg, rgba(255, 42, 141, 0.18), rgba(99, 102, 241, 0.2));
-  border-bottom: 2px solid rgba(255, 42, 141, 0.45);
-  z-index: 20;
+  background: #fff0f5;
+  border-bottom: 2px solid #f43f5e;
+  box-shadow: 0 4px 18px rgba(244, 63, 94, 0.12);
+  z-index: 50;
   flex-shrink: 0;
-  min-height: 64px;
+  min-height: 68px;
   box-sizing: border-box;
 }
 
-[data-theme="light"] .product-publishing-banner {
-  background: linear-gradient(135deg, #fff0f5 0%, #fdf2f8 100%) !important;
-  border-bottom: 2px solid #f43f5e !important;
-  box-shadow: 0 4px 18px rgba(244, 63, 94, 0.12) !important;
-}
-
 .pub-banner-pulse {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 42, 141, 0.22);
-  border: 1.5px solid rgba(255, 42, 141, 0.5);
+  background: #ffe4e6;
+  border: 1.5px solid #f43f5e;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff2a8d;
-  font-size: 1.15rem;
+  color: #e11d48;
+  font-size: 1.2rem;
   flex-shrink: 0;
-  box-shadow: 0 0 14px rgba(255, 42, 141, 0.3);
-}
-
-[data-theme="light"] .pub-banner-pulse {
-  background: #ffe4e6 !important;
-  border-color: #f43f5e !important;
-  color: #e11d48 !important;
-  box-shadow: 0 0 14px rgba(225, 29, 72, 0.2) !important;
+  box-shadow: 0 0 14px rgba(225, 29, 72, 0.2);
 }
 
 .pub-banner-pulse.pub-success {
-  background: rgba(16, 185, 129, 0.22);
-  border-color: rgba(16, 185, 129, 0.5);
-  color: #10b981;
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #059669;
   box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
-}
-
-[data-theme="light"] .pub-banner-pulse.pub-success {
-  background: #d1fae5 !important;
-  border-color: #10b981 !important;
-  color: #059669 !important;
 }
 
 .pub-banner-info {
@@ -3446,26 +3428,47 @@ body.seller-body {
 
 .pub-banner-title {
   font-weight: 850;
-  font-size: 0.96rem;
-  color: #ffffff;
+  font-size: 0.98rem;
+  color: #881337;
   display: flex;
   align-items: center;
   gap: 8px;
   letter-spacing: 0.2px;
 }
 
-[data-theme="light"] .pub-banner-title {
-  color: #881337 !important;
-}
-
 .pub-banner-sub {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.82);
-  font-weight: 500;
+  font-size: 0.84rem;
+  color: #9f1239;
+  font-weight: 600;
 }
 
-[data-theme="light"] .pub-banner-sub {
-  color: #9f1239 !important;
+/* Obsidian Dark Mode Override */
+[data-theme="dark"] .product-publishing-banner {
+  background: linear-gradient(135deg, #1f1227 0%, #170d22 100%) !important;
+  border-bottom: 2px solid #ff2a8d !important;
+  box-shadow: 0 4px 20px rgba(255, 42, 141, 0.25) !important;
+}
+
+[data-theme="dark"] .pub-banner-pulse {
+  background: rgba(255, 42, 141, 0.22) !important;
+  border-color: rgba(255, 42, 141, 0.5) !important;
+  color: #ff2a8d !important;
+  box-shadow: 0 0 14px rgba(255, 42, 141, 0.3) !important;
+}
+
+[data-theme="dark"] .pub-banner-pulse.pub-success {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #10b981 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35) !important;
+}
+
+[data-theme="dark"] .pub-banner-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .pub-banner-sub {
+  color: #cbd5e1 !important;
 }
 
 .pub-banner-shimmer {
