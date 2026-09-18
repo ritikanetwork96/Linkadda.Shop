@@ -27,6 +27,8 @@
     { "source": "/seller/dashboard.html", "destination": "/seller/dashboard", "statusCode": 301 }
   ],
   "rewrites": [
+    { "source": "/seller.css", "destination": "/seller/seller.css" },
+    { "source": "/assets/(.*)", "destination": "/admin/assets/$1" },
     { "source": "/about", "destination": "/about.html" },
     { "source": "/payment", "destination": "/payment.html" },
     { "source": "/login", "destination": "/login.html" },

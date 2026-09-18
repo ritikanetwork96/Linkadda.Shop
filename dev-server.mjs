@@ -182,6 +182,8 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/seller/login' || pathname === '/seller/login/') filePath = path.join(__dirname, 'seller', 'login.html');
   if (pathname === '/seller/apply' || pathname === '/seller/apply/') filePath = path.join(__dirname, 'seller', 'apply.html');
   if (pathname === '/seller/dashboard' || pathname === '/seller/dashboard/') filePath = path.join(__dirname, 'seller', 'dashboard.html');
+  if (pathname === '/seller.css') filePath = path.join(__dirname, 'seller', 'seller.css');
+  if (pathname.startsWith('/assets/')) filePath = path.join(__dirname, 'admin', pathname);
 
   if (!path.extname(pathname) && !fs.existsSync(filePath)) {
     const candidateHtml = path.join(__dirname, `${pathname}.html`);

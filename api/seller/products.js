@@ -179,6 +179,9 @@ export default async function handler(req, res) {
         productId = slug ? `prod_${slug}_${Date.now().toString(36)}` : `prod_${Date.now().toString(36)}_${crypto.randomBytes(3).toString('hex')}`;
       }
 
+      let sellerStoreName = String(body.sellerStoreName || product.sellerStoreName || product.sellerName || '').trim();
+      const preTasks = [];
+
       // If store name is still empty, fetch from database in parallel
       if (!sellerStoreName) {
         preTasks.push(
