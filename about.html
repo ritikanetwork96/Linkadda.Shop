@@ -29,8 +29,8 @@
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About Us — LinkAdda Shop | India's Most Trusted Digital Content Store</title>
-  <meta name="description" content="LinkAdda — Trusted since 2022, 1,200+ orders delivered, 3 Lac+ (3,00,000+) premium 4K videos across 40+ categories. Instant cloud delivery, 24/7 Telegram support, cheapest price guaranteed." />
+  <title>About Us — LinkAdda Shop | India's Premier Digital Content Marketplace</title>
+  <meta name="description" content="LinkAdda — India's leading curated digital content marketplace. Instant cloud delivery, verified creator packs, 100% discrete transactions, and 24/7 support." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,7 +39,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 
   <style>
-    /* ━━ LUXURY DESIGN TOKENS ━━ */
+    /* ━━ LUXURY DESIGN SYSTEM ━━ */
     :root {
       --ab-bg: #f8fafc;
       --ab-bg2: #ffffff;
@@ -58,22 +58,24 @@
       --ab-gradient: linear-gradient(135deg, #ff2a55 0%, #e1143c 50%, #7c3aed 100%);
       --ab-btn-primary: linear-gradient(180deg, #ff2a55 0%, #e1143c 52%, #be0e32 100%);
       --ab-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
-      --ab-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 10px 24px -4px rgba(15, 23, 42, 0.08);
-      --ab-shadow-lg: 0 12px 36px -4px rgba(15, 23, 42, 0.12);
+      --ab-shadow: 0 4px 12px rgba(15, 23, 42, 0.05), 0 12px 28px -4px rgba(15, 23, 42, 0.08);
+      --ab-shadow-lg: 0 16px 36px -4px rgba(15, 23, 42, 0.12);
       --ab-radius: 18px;
+      --ab-radius-sm: 12px;
       --ab-font: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
       --ab-font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --ab-nav-height: 60px;
     }
 
     [data-theme="dark"] {
       --ab-bg: #07080c;
       --ab-bg2: #0e0f18;
-      --ab-card: rgba(18, 17, 28, 0.82);
+      --ab-card: rgba(18, 17, 28, 0.85);
       --ab-card-hover: rgba(26, 24, 40, 0.95);
-      --ab-glass: rgba(18, 17, 28, 0.8);
+      --ab-glass: rgba(18, 17, 28, 0.85);
       --ab-glass-border: rgba(255, 255, 255, 0.1);
       --ab-border: rgba(255, 255, 255, 0.09);
-      --ab-border-glow: rgba(225, 29, 72, 0.4);
+      --ab-border-glow: rgba(225, 29, 72, 0.35);
       --ab-text: #f8fafc;
       --ab-text2: #cbd5e1;
       --ab-muted: #84829a;
@@ -81,14 +83,14 @@
       --ab-pink-soft: rgba(244, 63, 94, 0.14);
       --ab-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
       --ab-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
-      --ab-shadow-lg: 0 14px 42px rgba(0, 0, 0, 0.65);
+      --ab-shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.65);
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html {
       scroll-behavior: smooth;
-      scroll-padding-top: 110px;
+      scroll-padding-top: 115px;
       -webkit-overflow-scrolling: touch;
     }
 
@@ -97,7 +99,7 @@
       background: var(--ab-bg);
       color: var(--ab-text);
       overflow-x: clip;
-      line-height: 1.65;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       transition: background 0.3s ease, color 0.3s ease;
     }
@@ -111,11 +113,14 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--ab-border);
-      padding: 12px 0;
+      height: var(--ab-nav-height);
+      padding: 0;
+      display: flex;
+      align-items: center;
       transition: all 0.25s ease;
     }
     .ab-nav-inner {
-      max-width: 1200px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 20px;
       display: flex;
@@ -139,15 +144,15 @@
       -webkit-text-fill-color: transparent;
     }
     .ab-brand-tag {
-      font-size: 0.68rem;
-      font-weight: 750;
+      font-size: 0.65rem;
+      font-weight: 800;
       background: var(--ab-pink-soft);
       color: var(--ab-pink);
       border: 1px solid var(--ab-border-glow);
       padding: 2px 8px;
       border-radius: 999px;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.8px;
     }
     .ab-nav-btns {
       display: flex;
@@ -158,79 +163,69 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 8px 16px;
-      border-radius: 12px;
-      background: var(--ab-card);
+      padding: 7px 14px;
+      border-radius: 10px;
       border: 1px solid var(--ab-border);
-      color: var(--ab-text);
-      text-decoration: none;
+      background: var(--ab-card);
+      color: var(--ab-text2);
       font-size: 0.85rem;
-      font-weight: 750;
-      box-shadow: var(--ab-shadow-sm);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-weight: 650;
+      text-decoration: none;
+      transition: all 0.2s ease;
       cursor: pointer;
     }
     .ab-btn-back:hover {
-      background: var(--ab-gradient);
-      color: #ffffff;
-      border-color: transparent;
-      transform: translateX(-2px);
-      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3);
+      border-color: var(--ab-pink);
+      color: var(--ab-pink);
+      transform: translateY(-1px);
     }
-    .ab-btn-back i { transition: transform 0.2s ease; }
-    .ab-btn-back:hover i { transform: translateX(-3px); }
+    .ab-theme-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--ab-border);
+      background: var(--ab-card);
+      color: var(--ab-text2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    .ab-theme-btn:hover {
+      border-color: var(--ab-pink);
+      color: var(--ab-pink);
+    }
+    [data-theme="dark"] .ab-theme-btn .fa-moon { display: none; }
+    [data-theme="dark"] .ab-theme-btn .fa-sun { display: inline-block; color: #fbbf24; }
+    [data-theme="light"] .ab-theme-btn .fa-sun { display: none; }
+    [data-theme="light"] .ab-theme-btn .fa-moon { display: inline-block; }
 
     .ab-btn-tg {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 18px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0088cc 0%, #00a2ed 100%);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      text-decoration: none;
+      gap: 7px;
+      padding: 7px 16px;
+      border-radius: 10px;
+      background: #0088cc;
+      color: #ffffff !important;
       font-size: 0.85rem;
-      font-weight: 750;
-      box-shadow: 0 4px 14px rgba(0, 136, 204, 0.35);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .ab-btn-tg:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 136, 204, 0.45);
-      filter: brightness(1.05);
-    }
-    .ab-btn-tg:active { transform: scale(0.96); }
-
-    .ab-theme-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      border: 1px solid var(--ab-border);
-      background: var(--ab-card);
-      color: var(--ab-text);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.95rem;
-      box-shadow: var(--ab-shadow-sm);
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(0, 136, 204, 0.3);
       transition: all 0.2s ease;
     }
-    .ab-theme-btn:hover {
-      border-color: var(--ab-border-glow);
-      color: var(--ab-pink);
-      transform: scale(1.05);
+    .ab-btn-tg:hover {
+      background: #0077b5;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 136, 204, 0.45);
     }
-    .ab-theme-btn .fa-sun { display: none; }
-    .ab-theme-btn .fa-moon { display: inline; }
-    [data-theme="dark"] .ab-theme-btn .fa-sun { display: inline; }
-    [data-theme="dark"] .ab-theme-btn .fa-moon { display: none; }
 
-    /* ━━ QUICK-JUMP SCROLL NAV BAR ━━ */
+    /* ━━ QUICK NAV BAR ━━ */
     .ab-quick-nav {
       position: sticky;
-      top: 61px;
+      top: var(--ab-nav-height);
       z-index: 990;
       background: var(--ab-glass);
       backdrop-filter: blur(16px);
@@ -242,87 +237,81 @@
     }
     .ab-quick-nav::-webkit-scrollbar { display: none; }
     .ab-quick-nav-inner {
-      max-width: 1200px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 20px;
       display: flex;
       align-items: center;
       gap: 8px;
-      white-space: nowrap;
     }
     .ab-qlink {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 6px 14px;
-      border-radius: 9999px;
+      border-radius: 999px;
       font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--ab-text2);
+      font-weight: 650;
       text-decoration: none;
-      background: var(--ab-card);
-      border: 1px solid var(--ab-border);
-      box-shadow: var(--ab-shadow-sm);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      color: var(--ab-muted);
+      white-space: nowrap;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
     }
-    .ab-qlink i { font-size: 0.75rem; color: var(--ab-muted); transition: color 0.2s; }
     .ab-qlink:hover {
-      color: var(--ab-pink);
-      border-color: var(--ab-border-glow);
-      background: var(--ab-pink-soft);
-      transform: translateY(-1px);
+      color: var(--ab-text);
+      background: var(--ab-card-hover);
     }
-    .ab-qlink:hover i { color: var(--ab-pink); }
     .ab-qlink.active {
+      color: #ffffff;
       background: var(--ab-btn-primary);
-      color: #ffffff !important;
-      border-color: transparent;
-      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.35);
+      box-shadow: 0 2px 10px rgba(225, 29, 72, 0.3);
     }
-    .ab-qlink.active i { color: #ffffff !important; }
 
-    /* ━━ HERO ━━ */
+    /* ━━ HERO SECTION ━━ */
     .ab-hero {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 60px 20px 40px;
+      padding: 56px 20px 40px;
       text-align: center;
     }
     .ab-verified-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 16px;
-      border-radius: 9999px;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 999px;
       background: var(--ab-pink-soft);
       border: 1px solid var(--ab-border-glow);
       color: var(--ab-pink);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 750;
-      letter-spacing: 0.2px;
-      margin-bottom: 20px;
-      box-shadow: var(--ab-shadow-sm);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
     }
-    .ab-verified-badge i { font-size: 0.9rem; }
     .ab-hero-title {
       font-family: var(--ab-font-display);
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-size: clamp(2.1rem, 4.8vw, 3.4rem);
       font-weight: 900;
-      letter-spacing: -1.2px;
       line-height: 1.15;
-      margin-bottom: 18px;
+      letter-spacing: -1.2px;
+      color: var(--ab-text);
+      margin-bottom: 16px;
     }
     .ab-gradient-text {
       background: var(--ab-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
     .ab-hero-desc {
+      font-size: clamp(1rem, 2vw, 1.12rem);
       color: var(--ab-text2);
-      font-size: 1.05rem;
+      max-width: 720px;
+      margin: 0 auto 28px;
       line-height: 1.7;
-      max-width: 680px;
-      margin: 0 auto 32px;
     }
     .ab-hero-btns {
       display: flex;
@@ -335,54 +324,48 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 13px 28px;
-      border-radius: 14px;
+      padding: 12px 24px;
+      border-radius: var(--ab-radius-sm);
       background: var(--ab-btn-primary);
-      border: 1px solid rgba(225, 29, 72, 0.85);
-      color: #ffffff;
+      color: #ffffff !important;
+      font-size: 0.92rem;
+      font-weight: 750;
       text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      box-shadow: 0 4px 16px rgba(225, 29, 72, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35);
+      transition: all 0.25s ease;
       cursor: pointer;
     }
     .ab-btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(225, 29, 72, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.55);
-      filter: brightness(1.06);
+      box-shadow: 0 8px 24px rgba(225, 29, 72, 0.5);
     }
-    .ab-btn-primary:active { transform: scale(0.97); }
-
     .ab-btn-secondary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 13px 26px;
-      border-radius: 14px;
+      padding: 12px 22px;
+      border-radius: var(--ab-radius-sm);
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
       color: var(--ab-text);
+      font-size: 0.92rem;
+      font-weight: 700;
       text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 750;
       box-shadow: var(--ab-shadow-sm);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s ease;
+      cursor: pointer;
     }
     .ab-btn-secondary:hover {
-      background: var(--ab-card-hover);
-      border-color: #cbd5e1;
+      border-color: var(--ab-pink);
+      color: var(--ab-pink);
       transform: translateY(-2px);
       box-shadow: var(--ab-shadow);
-      color: var(--ab-pink);
     }
-    .ab-btn-secondary:active { transform: scale(0.97); }
 
-    /* ━━ STATS CARDS ━━ */
+    /* ━━ STATS GRID ━━ */
     .ab-stats {
       max-width: 1100px;
-      margin: 0 auto 50px;
+      margin: 0 auto 52px;
       padding: 0 20px;
     }
     .ab-stats-grid {
@@ -394,327 +377,401 @@
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
       border-radius: var(--ab-radius);
-      padding: 24px 18px;
+      padding: 22px 18px;
       text-align: center;
-      box-shadow: var(--ab-shadow);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--ab-shadow-sm);
+      transition: all 0.25s ease;
     }
     .ab-stat:hover {
-      transform: translateY(-3px);
       border-color: var(--ab-border-glow);
-      box-shadow: var(--ab-shadow-lg);
+      transform: translateY(-3px);
+      box-shadow: var(--ab-shadow);
     }
     .ab-stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: inline-flex;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 1.15rem;
+      margin: 0 auto 12px;
     }
-    .ab-si-video { background: rgba(225, 29, 72, 0.12); color: #e11d48; }
-    .ab-si-orders { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-    .ab-si-years { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
-    .ab-si-cats { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
-
+    .ab-si-video { background: rgba(225, 29, 72, 0.1); color: var(--ab-pink); }
+    .ab-si-orders { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .ab-si-cats { background: rgba(124, 58, 237, 0.1); color: var(--ab-purple); }
+    .ab-si-years { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
     .ab-stat-num {
       font-family: var(--ab-font-display);
-      font-size: 1.85rem;
-      font-weight: 900;
+      font-size: 1.7rem;
+      font-weight: 850;
       letter-spacing: -0.5px;
-      line-height: 1.1;
-      margin-bottom: 4px;
       color: var(--ab-text);
+      line-height: 1.2;
     }
     .ab-stat-label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: var(--ab-muted);
+      margin-top: 4px;
     }
 
-    /* ━━ SECTION HEADERS ━━ */
+    /* ━━ SECTION HEADINGS ━━ */
     .ab-section-head {
       text-align: center;
-      max-width: 650px;
+      max-width: 700px;
       margin: 0 auto 36px;
-      padding: 0 20px;
     }
     .ab-section-tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 750;
-      color: var(--ab-pink);
+      font-size: 0.75rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 8px;
+      letter-spacing: 0.8px;
+      color: var(--ab-pink);
+      background: var(--ab-pink-soft);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
     }
     .ab-section-title {
       font-family: var(--ab-font-display);
-      font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+      font-size: clamp(1.6rem, 3.2vw, 2.3rem);
       font-weight: 850;
       letter-spacing: -0.6px;
-      margin-bottom: 10px;
+      color: var(--ab-text);
       line-height: 1.25;
+      margin-bottom: 10px;
     }
     .ab-section-desc {
-      color: var(--ab-muted);
       font-size: 0.95rem;
-      line-height: 1.6;
+      color: var(--ab-muted);
+      line-height: 1.65;
     }
 
-    /* ━━ PILLARS / WHY CHOOSE US ━━ */
-    .ab-pillars {
+    /* ━━ MARKETPLACE ARCHITECTURE (2 CARDS) ━━ */
+    .ab-marketplace {
       max-width: 1100px;
-      margin: 0 auto 60px;
+      margin: 0 auto 56px;
       padding: 0 20px;
     }
-    .ab-pillars-grid {
+    .ab-marketplace-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
+      gap: 20px;
     }
-    .ab-pillar {
+    .ab-market-card {
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
       border-radius: var(--ab-radius);
       padding: 28px 24px;
-      box-shadow: var(--ab-shadow);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .ab-pillar:hover {
-      transform: translateY(-3px);
-      border-color: var(--ab-border-glow);
-      box-shadow: var(--ab-shadow-lg);
-    }
-    .ab-pillar-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      margin-bottom: 16px;
-    }
-    .ab-pi-bolt { background: rgba(245, 158, 11, 0.14); color: #f59e0b; }
-    .ab-pi-shield { background: rgba(16, 185, 129, 0.14); color: #10b981; }
-    .ab-pi-headset { background: rgba(14, 165, 233, 0.14); color: #0ea5e9; }
-    .ab-pi-tag { background: rgba(225, 29, 72, 0.14); color: #e11d48; }
-    .ab-pillar-title {
-      font-family: var(--ab-font-display);
-      font-size: 1.15rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-      color: var(--ab-text);
-    }
-    .ab-pillar-text {
-      color: var(--ab-text2);
-      font-size: 0.9rem;
-      line-height: 1.65;
-    }
-
-    /* ━━ OUR STORY ━━ */
-    .ab-story {
-      max-width: 1000px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-    }
-    .ab-story-box {
-      background: var(--ab-card);
-      border: 1px solid var(--ab-border);
-      border-radius: 24px;
-      padding: 38px 36px;
-      box-shadow: var(--ab-shadow);
+      box-shadow: var(--ab-shadow-sm);
+      display: flex;
+      flex-direction: column;
       position: relative;
       overflow: hidden;
+      transition: all 0.25s ease;
     }
-    .ab-story-box::before {
+    .ab-market-card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 4px;
+    }
+    .ab-market-card.official::before {
       background: var(--ab-gradient);
     }
-    .ab-story-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-weight: 750;
-      color: var(--ab-pink);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 12px;
+    .ab-market-card.creator::before {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     }
-    .ab-story-title {
-      font-family: var(--ab-font-display);
-      font-size: 1.6rem;
-      font-weight: 850;
-      margin-bottom: 16px;
-      line-height: 1.3;
+    .ab-market-card:hover {
+      border-color: var(--ab-border-glow);
+      transform: translateY(-3px);
+      box-shadow: var(--ab-shadow);
     }
-    .ab-story-text {
-      color: var(--ab-text2);
-      font-size: 0.95rem;
-      line-height: 1.8;
-      margin-bottom: 16px;
-    }
-    .ab-trust-checklist {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px solid var(--ab-border);
-    }
-    .ab-check-item {
+    .market-badge-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      font-weight: 650;
-      color: var(--ab-text);
+      justify-content: space-between;
+      margin-bottom: 14px;
     }
-    .ab-check-item i { color: #10b981; font-size: 1rem; }
+    .market-type-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .market-type-tag.pink {
+      background: var(--ab-pink-soft);
+      color: var(--ab-pink);
+      border: 1px solid var(--ab-border-glow);
+    }
+    .market-type-tag.green {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .market-kpi-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--ab-muted);
+    }
+    .ab-market-card h3 {
+      font-family: var(--ab-font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--ab-text);
+      margin-bottom: 8px;
+    }
+    .ab-market-card .market-lead {
+      font-size: 0.9rem;
+      color: var(--ab-text2);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .market-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-grow: 1;
+    }
+    .market-features-list li {
+      font-size: 0.85rem;
+      color: var(--ab-text2);
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      line-height: 1.5;
+    }
+    .market-features-list li i {
+      color: #10b981;
+      margin-top: 3px;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
 
-    /* ━━ 3 STEPS PROCESS ━━ */
+    /* ━━ HOW IT WORKS (3 STEPS) ━━ */
     .ab-process {
       max-width: 1100px;
-      margin: 0 auto 60px;
+      margin: 0 auto 56px;
       padding: 0 20px;
     }
     .ab-process-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 18px;
     }
     .ab-step {
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
       border-radius: var(--ab-radius);
-      padding: 30px 22px;
-      box-shadow: var(--ab-shadow);
+      padding: 26px 20px;
+      box-shadow: var(--ab-shadow-sm);
+      transition: all 0.25s ease;
       position: relative;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .ab-step:hover {
-      transform: translateY(-3px);
       border-color: var(--ab-border-glow);
-      box-shadow: var(--ab-shadow-lg);
+      transform: translateY(-3px);
+      box-shadow: var(--ab-shadow);
     }
     .ab-step-num {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: var(--ab-btn-primary);
       color: #ffffff;
+      font-family: var(--ab-font-display);
+      font-size: 1.05rem;
+      font-weight: 850;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--ab-font-display);
-      font-weight: 850;
-      font-size: 1.15rem;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
     }
     .ab-step-title {
       font-family: var(--ab-font-display);
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 800;
-      margin-bottom: 8px;
       color: var(--ab-text);
+      margin-bottom: 6px;
     }
     .ab-step-text {
-      color: var(--ab-text2);
-      font-size: 0.88rem;
-      line-height: 1.65;
+      font-size: 0.85rem;
+      color: var(--ab-muted);
+      line-height: 1.6;
     }
 
-    /* ━━ VERIFIED REVIEWS ━━ */
-    .ab-reviews {
+    /* ━━ BUYER PROTECTION & SUPPORT ━━ */
+    .ab-support {
       max-width: 1100px;
-      margin: 0 auto 60px;
+      margin: 0 auto 56px;
       padding: 0 20px;
     }
-    .ab-reviews-grid {
+    .ab-support-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
+      margin-bottom: 20px;
     }
-    .ab-rev {
+    .ab-support-card {
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
       border-radius: var(--ab-radius);
       padding: 26px 22px;
-      box-shadow: var(--ab-shadow);
+      box-shadow: var(--ab-shadow-sm);
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s ease;
     }
-    .ab-rev:hover {
-      transform: translateY(-3px);
+    .ab-support-card:hover {
       border-color: var(--ab-border-glow);
-      box-shadow: var(--ab-shadow-lg);
+      transform: translateY(-2px);
+      box-shadow: var(--ab-shadow);
     }
-    .ab-rev-stars {
-      color: #f59e0b;
-      font-size: 0.88rem;
-      display: flex;
-      gap: 3px;
-      margin-bottom: 12px;
-    }
-    .ab-rev-quote {
-      color: var(--ab-text2);
-      font-size: 0.9rem;
-      line-height: 1.7;
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-    .ab-rev-author {
+    .support-card-head {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding-top: 14px;
-      border-top: 1px solid var(--ab-border);
+      gap: 14px;
+      margin-bottom: 12px;
     }
-    .ab-rev-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--ab-gradient);
-      color: #ffffff;
+    .support-channel-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 0.95rem;
+      font-size: 1.3rem;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
-    .ab-rev-name {
-      font-weight: 750;
-      font-size: 0.9rem;
+    .support-channel-icon.tg { background: rgba(0, 136, 204, 0.12); color: #0088cc; }
+    .support-channel-icon.email { background: rgba(234, 67, 53, 0.12); color: #ea4335; }
+    .support-channel-info h4 {
+      font-family: var(--ab-font-display);
+      font-size: 1.05rem;
+      font-weight: 800;
       color: var(--ab-text);
+      line-height: 1.2;
     }
-    .ab-rev-verified {
+    .support-channel-info span {
+      font-size: 0.75rem;
+      font-weight: 650;
+      color: #10b981;
+    }
+    .ab-support-card p {
+      font-size: 0.85rem;
+      color: var(--ab-text2);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .support-contact-chip {
+      background: var(--ab-bg);
+      border: 1px solid var(--ab-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      color: #0284c7;
-      font-weight: 700;
+      justify-content: space-between;
+      margin-bottom: 8px;
     }
 
-    /* ━━ INTERACTIVE FAQ ACCORDION ━━ */
+    /* ━━ GUARANTEE BANNER ━━ */
+    .ab-guarantee-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--ab-radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .ab-guarantee-banner i {
+      font-size: 2rem;
+      color: #10b981;
+      flex-shrink: 0;
+    }
+    .ab-guarantee-text h4 {
+      font-family: var(--ab-font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--ab-text);
+      margin-bottom: 3px;
+    }
+    .ab-guarantee-text p {
+      font-size: 0.82rem;
+      color: var(--ab-text2);
+      line-height: 1.5;
+    }
+
+    /* ━━ SELLER BANNER (Strictly Hidden for Unauthenticated Guests) ━━ */
+    .ab-seller-banner-wrap {
+      max-width: 1100px;
+      margin: 0 auto 56px;
+      padding: 0 20px;
+    }
+    .ab-seller-banner-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(225, 29, 72, 0.08) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 22px;
+      padding: 34px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      box-shadow: var(--ab-shadow-sm);
+    }
+    .ab-seller-banner-info { max-width: 640px; }
+    .ab-seller-banner-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.14);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .ab-seller-banner-title {
+      font-family: var(--ab-font-display);
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      font-weight: 850;
+      color: var(--ab-text);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+    .ab-seller-banner-desc {
+      font-size: 0.88rem;
+      color: var(--ab-text2);
+      line-height: 1.6;
+    }
+    .ab-seller-banner-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ━━ FAQS ACCORDION ━━ */
     .ab-faq {
       max-width: 900px;
-      margin: 0 auto 60px;
+      margin: 0 auto 56px;
       padding: 0 20px;
     }
     .ab-faq-list {
@@ -725,133 +782,57 @@
     .ab-faq-item {
       background: var(--ab-card);
       border: 1px solid var(--ab-border);
-      border-radius: 16px;
-      box-shadow: var(--ab-shadow-sm);
+      border-radius: 14px;
       overflow: hidden;
-      transition: all 0.2s ease;
+      box-shadow: var(--ab-shadow-sm);
+      transition: all 0.25s ease;
     }
-    .ab-faq-item:hover { border-color: var(--ab-border-glow); }
+    .ab-faq-item:hover {
+      border-color: var(--ab-border-glow);
+    }
     .ab-faq-question {
       width: 100%;
-      padding: 18px 22px;
+      padding: 16px 20px;
+      text-align: left;
       background: transparent;
       border: none;
-      outline: none;
       color: var(--ab-text);
       font-family: var(--ab-font-display);
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 750;
-      text-align: left;
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      user-select: none;
+      cursor: pointer;
     }
     .ab-faq-icon {
       font-size: 0.85rem;
       color: var(--ab-muted);
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .ab-faq-answer {
+      display: none;
+      padding: 0 20px 18px;
+      font-size: 0.86rem;
+      color: var(--ab-text2);
+      line-height: 1.65;
+      border-top: 1px solid var(--ab-border);
+      padding-top: 12px;
+    }
+    .ab-faq-item.open .ab-faq-answer {
+      display: block;
     }
     .ab-faq-item.open .ab-faq-icon {
       transform: rotate(180deg);
       color: var(--ab-pink);
     }
-    .ab-faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
-      padding: 0 22px;
-      color: var(--ab-text2);
-      font-size: 0.92rem;
-      line-height: 1.7;
-    }
-    .ab-faq-item.open .ab-faq-answer {
-      max-height: 1000px;
-      padding: 0 22px 20px 22px;
-    }
-
-    /* ━━ ACCEPTED PAYMENTS ━━ */
-    .ab-payments {
-      max-width: 1100px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-    }
-    .ab-pay-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .ab-pay-item {
-      background: var(--ab-card);
-      border: 1px solid var(--ab-border);
-      border-radius: var(--ab-radius);
-      padding: 22px 16px;
-      text-align: center;
-      box-shadow: var(--ab-shadow);
-      transition: all 0.2s ease;
-    }
-    .ab-pay-item:hover {
-      transform: translateY(-2px);
-      border-color: var(--ab-border-glow);
-      box-shadow: var(--ab-shadow-lg);
-    }
-    .ab-pay-icon {
-      font-size: 1.8rem;
-      margin-bottom: 8px;
-    }
-    .ab-pay-name {
-      font-family: var(--ab-font-display);
-      font-size: 0.9rem;
-      font-weight: 750;
-      color: var(--ab-text);
-    }
-    .ab-pay-sub {
-      font-size: 0.75rem;
-      color: var(--ab-muted);
-      margin-top: 2px;
-    }
-
-    /* ━━ BOTTOM CTA ━━ */
-    .ab-cta {
-      max-width: 1000px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-    }
-    .ab-cta-box {
-      background: linear-gradient(135deg, rgba(225, 29, 72, 0.08) 0%, rgba(124, 58, 237, 0.08) 100%);
-      border: 1px solid var(--ab-border-glow);
-      border-radius: 24px;
-      padding: 44px 32px;
-      text-align: center;
-      box-shadow: var(--ab-shadow);
-    }
-    .ab-cta-box h2 {
-      font-family: var(--ab-font-display);
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      font-weight: 850;
-      letter-spacing: -0.6px;
-      margin-bottom: 12px;
-    }
-    .ab-cta-box p {
-      color: var(--ab-text2);
-      font-size: 1rem;
-      max-width: 600px;
-      margin: 0 auto 28px;
-      line-height: 1.65;
-    }
-    .ab-cta-btns {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
 
     /* ━━ FOOTER ━━ */
     .ab-footer {
       border-top: 1px solid var(--ab-border);
+      background: var(--ab-bg2);
       padding: 36px 20px;
       text-align: center;
     }
@@ -859,21 +840,23 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 14px;
+      gap: 16px;
       flex-wrap: wrap;
+      margin-bottom: 14px;
     }
     .ab-footer-links a {
-      color: var(--ab-text2);
+      color: var(--ab-muted);
       text-decoration: none;
-      font-weight: 650;
-      font-size: 0.85rem;
-      transition: color 0.2s;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: color 0.2s ease;
     }
-    .ab-footer-links a:hover { color: var(--ab-pink); }
+    .ab-footer-links a:hover {
+      color: var(--ab-pink);
+    }
     .ab-footer p {
       color: var(--ab-muted);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
     }
 
     /* ━━ BACK TO TOP BUTTON ━━ */
@@ -910,18 +893,115 @@
     }
     .ab-scroll-top-btn:active { transform: scale(0.94); }
 
-    /* ━━ RESPONSIVE ━━ */
+    /* ━━ RESPONSIVE BREAKPOINTS ━━ */
     @media (max-width: 900px) {
       .ab-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .ab-marketplace-grid { grid-template-columns: 1fr; }
       .ab-process-grid { grid-template-columns: 1fr; }
-      .ab-reviews-grid { grid-template-columns: 1fr; }
-      .ab-pay-grid { grid-template-columns: repeat(2, 1fr); }
+      .ab-support-grid { grid-template-columns: 1fr; }
+      .ab-seller-banner-card { flex-direction: column; align-items: stretch; text-align: left; }
+      .ab-seller-banner-actions { flex-direction: row; flex-wrap: wrap; }
     }
-    @media (max-width: 650px) {
-      .ab-pillars-grid { grid-template-columns: 1fr; }
-      .ab-trust-checklist { grid-template-columns: 1fr; }
-      .ab-story-box { padding: 26px 20px; }
-      .ab-cta-box { padding: 32px 20px; }
+    @media (max-width: 640px) {
+      :root {
+        --ab-nav-height: 52px;
+      }
+      .ab-nav {
+        height: 52px !important;
+        padding: 0 !important;
+      }
+      .ab-nav-inner {
+        padding: 0 10px !important;
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        height: 52px !important;
+      }
+      .ab-quick-nav {
+        top: 52px !important;
+        padding: 6px 0 !important;
+      }
+      .ab-brand-name { font-size: 1.15rem; }
+      /* Hide long MARKETPLACE tag on small screens to prevent pushing right icons off-screen */
+      .ab-brand-tag { display: none !important; }
+      .ab-nav-btns { gap: 5px !important; flex-shrink: 0 !important; }
+
+      /* Back button: Icon only on mobile */
+      .ab-btn-back#abBackBtn span { display: none !important; }
+      .ab-btn-back#abBackBtn {
+        width: 34px !important;
+        height: 34px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 10px !important;
+        font-size: 0.95rem !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Compact Partner Hub Pill on mobile */
+      #aboutNavSellerBtn {
+        padding: 6px 10px !important;
+        font-size: 0.78rem !important;
+        font-weight: 750 !important;
+        border-radius: 10px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Telegram Desk: Icon only on mobile */
+      .ab-btn-tg span { display: none !important; }
+      .ab-btn-tg {
+        width: 34px !important;
+        height: 34px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 10px !important;
+        font-size: 1rem !important;
+        flex-shrink: 0 !important;
+      }
+
+      .ab-theme-btn {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.85rem !important;
+        border-radius: 10px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .ab-hero { padding: 22px 14px 18px; max-width: 100vw; box-sizing: border-box; overflow-x: clip; }
+      .ab-verified-badge { font-size: 0.7rem; padding: 5px 12px; margin-bottom: 12px; max-width: 100%; white-space: normal; text-align: center; }
+      .ab-hero-title { font-size: 1.6rem; line-height: 1.25; letter-spacing: -0.5px; margin-bottom: 12px; word-break: break-word; }
+      .ab-hero-desc { font-size: 0.86rem; line-height: 1.55; margin-bottom: 18px; padding: 0 4px; }
+      .ab-hero-btns { flex-direction: column; width: 100%; gap: 8px; }
+      .ab-hero-btns a { width: 100%; justify-content: center; padding: 12px 18px; font-size: 0.92rem; border-radius: 12px; }
+
+      .ab-stats { padding: 0 12px; margin-bottom: 24px; }
+      .ab-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+      .ab-stat { padding: 14px 10px; border-radius: 14px; }
+      .ab-stat-icon { width: 36px; height: 36px; font-size: 1rem; border-radius: 10px; margin-bottom: 6px; }
+      .ab-stat-num { font-size: 1.35rem; margin-bottom: 2px; }
+      .ab-stat-label { font-size: 0.72rem; }
+
+      .ab-marketplace, .ab-process, .ab-support, .ab-faq { padding: 0 12px; margin-bottom: 28px; }
+      .ab-section-title { font-size: 1.45rem; letter-spacing: -0.4px; }
+      .ab-section-desc { font-size: 0.82rem; }
+
+      .ab-market-card { padding: 18px 14px; border-radius: 16px; }
+      .ab-process-step { padding: 16px 14px; border-radius: 14px; }
+      .ab-guarantee-banner { flex-direction: column; text-align: left; align-items: flex-start; padding: 16px 14px; border-radius: 14px; gap: 10px; }
+      .ab-seller-banner-card { padding: 22px 14px; border-radius: 16px; }
+      .ab-seller-banner-title { font-size: 1.4rem; }
+      .ab-seller-banner-desc { font-size: 0.82rem; }
+      .ab-seller-banner-actions { flex-direction: column; width: 100%; }
+      .ab-seller-banner-actions a { width: 100%; justify-content: center; }
+
+      .ab-footer { padding: 24px 12px 28px; }
+      .ab-footer-links { gap: 12px; }
+      .ab-footer-links a { font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -930,400 +1010,341 @@
   <!-- NAVBAR -->
   <nav class="ab-nav" id="aboutNav">
     <div class="ab-nav-inner">
-      <div style="display:flex; align-items:center; gap:12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
         <a href="index.html" class="ab-btn-back" id="abBackBtn" title="Back to Store" aria-label="Back to Store">
           <i class="fa-solid fa-arrow-left"></i>
-          <span>Back</span>
+          <span>Store</span>
         </a>
         <a href="index.html" class="ab-brand">
           <span class="ab-brand-name">LinkAdda</span>
-          <span class="ab-brand-tag">Since 2022</span>
+          <span class="ab-brand-tag">MARKETPLACE</span>
         </a>
       </div>
       <div class="ab-nav-btns">
+        <!-- Partner Hub button visible to all visitors -->
+        <a href="./seller/index.html" id="aboutNavSellerBtn" class="ab-btn-back" style="border-color: var(--ab-border-glow); color: var(--ab-pink);">
+          <i class="fa-solid fa-crown" style="color: #f59e0b;"></i>
+          <span>Partner Hub</span>
+        </a>
         <button class="ab-theme-btn" id="abThemeToggle" type="button" title="Toggle Theme" aria-label="Toggle Theme">
           <i class="fa-solid fa-moon"></i>
           <i class="fa-solid fa-sun"></i>
         </button>
-        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-tg"><i class="fa-brands fa-telegram"></i> DM Admin</a>
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-tg">
+          <i class="fa-brands fa-telegram"></i>
+          <span>24/7 Support</span>
+        </a>
       </div>
     </div>
   </nav>
 
-  <!-- QUICK-JUMP SCROLL NAV BAR -->
+  <!-- QUICK NAV BAR -->
   <div class="ab-quick-nav" id="aboutQuickNav">
     <div class="ab-quick-nav-inner">
       <a href="#stats" class="ab-qlink active"><i class="fa-solid fa-chart-simple"></i> Highlights</a>
-      <a href="#why-us" class="ab-qlink"><i class="fa-solid fa-gem"></i> Why Us</a>
-      <a href="#story" class="ab-qlink"><i class="fa-solid fa-book-open"></i> Story</a>
+      <a href="#marketplace" class="ab-qlink"><i class="fa-solid fa-store"></i> Marketplace System</a>
       <a href="#process" class="ab-qlink"><i class="fa-solid fa-bolt"></i> How It Works</a>
-      <a href="#reviews" class="ab-qlink"><i class="fa-solid fa-star"></i> Reviews</a>
+      <a href="#seller-banner" class="ab-qlink"><i class="fa-solid fa-crown"></i> Creator Hub</a>
+      <a href="#support" class="ab-qlink"><i class="fa-solid fa-shield-heart"></i> Buyer Support</a>
       <a href="#faq" class="ab-qlink"><i class="fa-solid fa-circle-question"></i> FAQs</a>
-      <a href="#payments" class="ab-qlink"><i class="fa-solid fa-credit-card"></i> Payments</a>
-      <a href="#cta" class="ab-qlink"><i class="fa-solid fa-fire"></i> Get Deals</a>
     </div>
   </div>
 
   <!-- HERO -->
   <header class="ab-hero" id="about-top">
-    <div class="ab-verified-badge"><i class="fa-solid fa-shield-check"></i> Verified & Trusted Since 2022 • 0 Scams</div>
-    <h1 class="ab-hero-title">Premium Content,<br><span class="ab-gradient-text">Delivered Instantly.</span></h1>
+    <div class="ab-verified-badge"><i class="fa-solid fa-shield-halved"></i> India's Premier Digital Marketplace • Active Since 2022</div>
+    <h1 class="ab-hero-title">Curated Master Vaults &<br><span class="ab-gradient-text">Verified Digital Drops.</span></h1>
     <p class="ab-hero-desc">
-      LinkAdda is India's most trusted digital content marketplace — proudly serving 1,200+ happy buyers with 3 Lac+ hand-curated 4K videos across 40+ exclusive categories. Instant delivery, discrete billing, zero scams.
+      LinkAdda is India's dedicated digital content marketplace — combining official LinkAdda 4K master collections with verified independent creator packs. Instant private cloud delivery, 100% discrete transactions, and lifetime mirror replacement warranty.
     </p>
     <div class="ab-hero-btns">
       <a href="index.html#categoriesGrid" class="ab-btn-primary"><i class="fa-solid fa-layer-group"></i> Browse Store Packs</a>
-      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-secondary"><i class="fa-brands fa-telegram"></i> Telegram Admin DM</a>
+      <a href="./seller/apply.html" class="ab-btn-secondary" style="border-color: rgba(225, 29, 72, 0.4); color: var(--ab-pink);"><i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Become a Seller</a>
+      <a href="#support" class="ab-btn-secondary"><i class="fa-solid fa-shield-heart" style="color: #10b981;"></i> Buyer Protection</a>
+      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-secondary"><i class="fa-brands fa-telegram" style="color: #0088cc;"></i> 24/7 Telegram Desk</a>
     </div>
   </header>
 
-  <!-- REAL STATS -->
+  <!-- STATS -->
   <section class="ab-stats" id="stats">
     <div class="ab-stats-grid">
       <div class="ab-stat">
         <div class="ab-stat-icon ab-si-video"><i class="fa-solid fa-play"></i></div>
         <div class="ab-stat-num">3 Lac+</div>
-        <div class="ab-stat-label">Ultra HD 4K Videos</div>
+        <div class="ab-stat-label">Ultra HD 4K Files</div>
       </div>
       <div class="ab-stat">
         <div class="ab-stat-icon ab-si-orders"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="ab-stat-num">1200+</div>
+        <div class="ab-stat-num">1,200+</div>
         <div class="ab-stat-label">Delivered Orders</div>
-      </div>
-      <div class="ab-stat">
-        <div class="ab-stat-icon ab-si-years"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="ab-stat-num">3+ Years</div>
-        <div class="ab-stat-label">Active Since 2022</div>
       </div>
       <div class="ab-stat">
         <div class="ab-stat-icon ab-si-cats"><i class="fa-solid fa-boxes-stacked"></i></div>
         <div class="ab-stat-num">40+</div>
-        <div class="ab-stat-label">Exclusive Categories</div>
+        <div class="ab-stat-label">Curated Categories</div>
+      </div>
+      <div class="ab-stat">
+        <div class="ab-stat-icon ab-si-years"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="ab-stat-num">100%</div>
+        <div class="ab-stat-label">Discrete & Private Billing</div>
       </div>
     </div>
   </section>
 
-  <!-- WHY CHOOSE US -->
-  <section class="ab-pillars" id="why-us">
+  <!-- MARKETPLACE ARCHITECTURE -->
+  <section class="ab-marketplace" id="marketplace">
     <div class="ab-section-head">
-      <div class="ab-section-tag"><i class="fa-solid fa-gem"></i> Why LinkAdda</div>
-      <h2 class="ab-section-title">Built Around <span class="ab-gradient-text">Absolute Trust</span></h2>
-      <p class="ab-section-desc">Every purchase is backed by lightning speed, zero fake files, and direct personal Telegram support.</p>
+      <div class="ab-section-tag"><i class="fa-solid fa-network-wired"></i> Marketplace Architecture</div>
+      <h2 class="ab-section-title">How LinkAdda Works: <span class="ab-gradient-text">A Dual System</span></h2>
+      <p class="ab-section-desc">LinkAdda brings together first-party master vaults with verified independent creators under one unified, protected platform.</p>
     </div>
-    <div class="ab-pillars-grid">
-      <div class="ab-pillar">
-        <div class="ab-pillar-icon ab-pi-bolt"><i class="fa-solid fa-bolt-lightning"></i></div>
-        <h3 class="ab-pillar-title">5–15 Mins Instant Delivery</h3>
-        <p class="ab-pillar-text">Direct cloud streaming links (Mega & Google Drive) are sent right to your Telegram within minutes of payment. No waiting, no hassle.</p>
+
+    <div class="ab-marketplace-grid">
+      <!-- Card 1: Official Store -->
+      <div class="ab-market-card official">
+        <div class="market-badge-row">
+          <span class="market-type-tag pink"><i class="fa-solid fa-crown"></i> Official Store</span>
+          <span class="market-kpi-chip">Direct by LinkAdda</span>
+        </div>
+        <h3>LinkAdda Master Vaults</h3>
+        <p class="market-lead">Hand-curated, verified, and hosted directly on LinkAdda's high-speed private cloud servers since 2022.</p>
+        
+        <ul class="market-features-list">
+          <li><i class="fa-solid fa-circle-check"></i> <strong>3,00,000+ Master 4K Files</strong> across VIP, Snap, Desi, and Telegram archives.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>5–15 Mins Cloud Delivery</strong> direct to Telegram via Mega.nz & Google Drive.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>Free Lifetime Link Warranty</strong> — dead links replaced within minutes at zero cost.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>All-Collection Mega Bundle</strong> pass for full lifetime access across 40+ categories.</li>
+        </ul>
+
+        <div style="margin-top: auto; padding-top: 10px;">
+          <a href="index.html#categoriesGrid" class="ab-btn-primary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>Browse Official Packs</span>
+          </a>
+        </div>
       </div>
-      <div class="ab-pillar">
-        <div class="ab-pillar-icon ab-pi-shield"><i class="fa-solid fa-shield-halved"></i></div>
-        <h3 class="ab-pillar-title">3+ Years Scam-Free Record</h3>
-        <p class="ab-pillar-text">Serving satisfied buyers since 2022 with over 1,200+ completed orders. Every buyer receives their authentic content — 100% guaranteed.</p>
-      </div>
-      <div class="ab-pillar">
-        <div class="ab-pillar-icon ab-pi-headset"><i class="fa-solid fa-headset"></i></div>
-        <h3 class="ab-pillar-title">24/7 Human Telegram Support</h3>
-        <p class="ab-pillar-text">Real humans available round-the-clock on Telegram @TRUSTED_BROTHER1234. Quick resolution for link renewals or custom inquiries.</p>
-      </div>
-      <div class="ab-pillar">
-        <div class="ab-pillar-icon ab-pi-tag"><i class="fa-solid fa-tags"></i></div>
-        <h3 class="ab-pillar-title">Cheapest Market Price Guaranteed</h3>
-        <p class="ab-pillar-text">Direct pricing with no middlemen markups. Grab individual packs from <strong id="abMinPackPrice" style="color:var(--ab-pink);font-weight:700;">₹199</strong> or get the complete All Collection deal at just <strong id="abAllCollectionPrice" style="color:var(--ab-pink);font-weight:700;">₹27,000</strong>.</p>
+
+      <!-- Card 2: Creator & Multi-Vendor Hub -->
+      <div class="ab-market-card creator">
+        <div class="market-badge-row">
+          <span class="market-type-tag green"><i class="fa-solid fa-boxes-stacked"></i> Multi-Vendor Hub</span>
+          <span class="market-kpi-chip">Verified Creators</span>
+        </div>
+        <h3>Independent Creator Archives</h3>
+        <p class="market-lead">Verified channel admins and private vault collectors bring exclusive, rare digital drops directly to buyers.</p>
+        
+        <ul class="market-features-list">
+          <li><i class="fa-solid fa-circle-check"></i> <strong>Strict Quality Verification</strong> before any creator pack is approved and published.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>Authentic 4K Source Files</strong> with high-speed streaming on Mega & Google Drive.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>Clean & Malware-Free</strong> private cloud folders tested on dedicated servers.</li>
+          <li><i class="fa-solid fa-circle-check"></i> <strong>Permanent Cloud Mirrors</strong> backed by LinkAdda's lifetime replacement warranty.</li>
+        </ul>
+
+        <div style="margin-top: auto; padding-top: 10px;">
+          <a href="index.html#categoriesGrid" class="ab-btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Explore Creator Packs</span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- OUR STORY -->
-  <section class="ab-story" id="story">
-    <div class="ab-story-box">
-      <div class="ab-story-tag"><i class="fa-solid fa-award"></i> The LinkAdda Origin</div>
-      <h3 class="ab-story-title">How We Built India's Most Reliable Content Hub</h3>
-      <p class="ab-story-text">
-        Back in 2022, the digital content landscape was plagued by scammers — fake demo clips, dead Mega links, unverified sellers, and zero accountability. Buyers were constantly getting duped.
-      </p>
-      <p class="ab-story-text">
-        We launched LinkAdda with one steadfast pledge: <strong>Deliver genuine high-definition content fast, keep prices honest, and always respect customer privacy.</strong> What started as an exclusive Telegram channel rapidly expanded by word-of-mouth recommendations into a premier marketplace.
-      </p>
-      <p class="ab-story-text">
-        Today, after 1,200+ successful deliveries across India, our reputation speaks for itself: 100% delivery rate, zero scam complaints, and a community of loyal regular buyers.
-      </p>
-      <div class="ab-trust-checklist">
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> 100% Genuine 4K Content</div>
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> 100% Discrete Billing (No adult labels)</div>
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> High-Speed Mega & Drive Cloud Links</div>
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> Lifetime Access with Link Replacement</div>
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> Zero Logs & Strict Data Minimization</div>
-        <div class="ab-check-item"><i class="fa-solid fa-circle-check"></i> Direct Admin Verification on Telegram</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
+  <!-- HOW IT WORKS (3 STEPS) -->
   <section class="ab-process" id="process">
     <div class="ab-section-head">
-      <div class="ab-section-tag"><i class="fa-solid fa-rocket"></i> Fast & Effortless</div>
-      <h2 class="ab-section-title">3 Steps to <span class="ab-gradient-text">Instant Access</span></h2>
-      <p class="ab-section-desc">Quick, confidential, and completely seamless from catalog selection to cloud access.</p>
+      <div class="ab-section-tag"><i class="fa-solid fa-rocket"></i> Fast & Discrete</div>
+      <h2 class="ab-section-title">Simple 3-Step <span class="ab-gradient-text">Delivery Flow</span></h2>
+      <p class="ab-section-desc">Fast, transparent, and completely private from order selection to streaming.</p>
     </div>
+
     <div class="ab-process-grid">
       <div class="ab-step">
         <div class="ab-step-num">1</div>
-        <h3 class="ab-step-title">Choose Your Pack</h3>
-        <p class="ab-step-text">Explore 40+ categories on our storefront. Select individual collections or pick the mega All Collection Pack (3 Lac+ files).</p>
+        <h3 class="ab-step-title">Select Your Pack</h3>
+        <p class="ab-step-text">Explore 40+ categories on our storefront. Choose official LinkAdda master archives or verified creator drops.</p>
       </div>
       <div class="ab-step">
         <div class="ab-step-num">2</div>
-        <h3 class="ab-step-title">Pay Discretely</h3>
-        <p class="ab-step-text">Pay securely via UPI (GPay, PhonePe, Paytm), QR Code, Bank Transfer, or Crypto USDT. No sensitive data is ever stored.</p>
+        <h3 class="ab-step-title">Discrete Payment</h3>
+        <p class="ab-step-text">Pay securely via UPI (GPay, PhonePe, Paytm), QR Scan, Bank Transfer, or Crypto USDT. 100% clean statement with zero adult tags.</p>
       </div>
       <div class="ab-step">
         <div class="ab-step-num">3</div>
-        <h3 class="ab-step-title">Get Instant Cloud Links</h3>
-        <p class="ab-step-text">Share the payment confirmation on Telegram @TRUSTED_BROTHER1234. Within 5–15 minutes, receive your direct cloud links with lifetime validity.</p>
+        <h3 class="ab-step-title">Instant Cloud Access</h3>
+        <p class="ab-step-text">Receive your private high-speed cloud streaming links (Mega.nz & Google Drive) within 5–15 minutes with permanent validity.</p>
       </div>
     </div>
   </section>
 
-  <!-- VERIFIED REVIEWS -->
-  <section class="ab-reviews" id="reviews">
+  <!-- BUYER PROTECTION & SUPPORT -->
+  <section class="ab-support" id="support">
     <div class="ab-section-head">
-      <div class="ab-section-tag"><i class="fa-solid fa-star"></i> Real Buyer Experience</div>
-      <h2 class="ab-section-title">What Our <span class="ab-gradient-text">Clients Say</span></h2>
-      <p class="ab-section-desc">Unfiltered feedback from regular Telegram buyers across India.</p>
+      <div class="ab-section-tag"><i class="fa-solid fa-shield-heart"></i> Buyer Protection Shield</div>
+      <h2 class="ab-section-title">24/7 Support & <span class="ab-gradient-text">Buyer Redressal</span></h2>
+      <p class="ab-section-desc">Every purchase is protected by LinkAdda escrow. For link assistance, order verification, or dispute resolution, contact our team directly.</p>
     </div>
-    <div class="ab-reviews-grid">
-      <div class="ab-rev">
-        <div>
-          <div class="ab-rev-stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+
+    <div class="ab-support-grid">
+      <!-- Channel 1: Telegram -->
+      <div class="ab-support-card">
+        <div class="support-card-head">
+          <div class="support-channel-icon tg"><i class="fa-brands fa-telegram"></i></div>
+          <div class="support-channel-info">
+            <h4>Live Telegram Desk</h4>
+            <span>⚡ Typical Response: 5–10 Minutes</span>
           </div>
-          <p class="ab-rev-quote">"Sent payment screenshot on Telegram and got the Mega cloud link in about 8 minutes. Folders are properly organised and streaming works smooth without buffering. Genuine seller."</p>
         </div>
-        <div class="ab-rev-author">
-          <div class="ab-rev-avatar">V</div>
-          <div>
-            <div class="ab-rev-name">Vikram R.</div>
-            <div class="ab-rev-verified"><i class="fa-solid fa-circle-check"></i> Verified Telegram Buyer</div>
-          </div>
+        <p>Best for rapid link renewals, screenshot verification, instant delivery confirmations, and custom requests.</p>
+        
+        <div class="support-contact-chip">
+          <span><i class="fa-brands fa-telegram" style="color:#0088cc; margin-right:6px;"></i> Official Support Desk:</span>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink); text-decoration:none; font-weight:800;">@TRUSTED_BROTHER1234</a>
+        </div>
+        <div class="support-contact-chip">
+          <span><i class="fa-brands fa-telegram" style="color:#0088cc; margin-right:6px;"></i> Alternate Link Desk:</span>
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink); text-decoration:none; font-weight:800;">@TRUSTED_BROTHER1234</a>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 10px;">
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-tg" style="width: 100%; justify-content: center;">
+            <i class="fa-brands fa-telegram"></i>
+            <span>Chat on Telegram</span>
+          </a>
         </div>
       </div>
 
-      <div class="ab-rev">
-        <div>
-          <div class="ab-rev-stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+      <!-- Channel 2: Email -->
+      <div class="ab-support-card">
+        <div class="support-card-head">
+          <div class="support-channel-icon email"><i class="fa-solid fa-envelope"></i></div>
+          <div class="support-channel-info">
+            <h4>Official Dispute & Grievance Email</h4>
+            <span>📬 Monitored 24/7 by Admin Team</span>
           </div>
-          <p class="ab-rev-quote">"Was doubtful at first because of so many Telegram frauds. But admin replied right away. A month later when one drive link stopped opening, he replaced it within 15 minutes without charging anything. Truly lifetime replacement."</p>
         </div>
-        <div class="ab-rev-author">
-          <div class="ab-rev-avatar">K</div>
-          <div>
-            <div class="ab-rev-name">Karan M.</div>
-            <div class="ab-rev-verified"><i class="fa-solid fa-circle-check"></i> Verified Telegram Buyer</div>
-          </div>
+        <p>For official inquiries, transaction receipts, reporting creator link issues, or formal escalation tickets.</p>
+        
+        <div class="support-contact-chip">
+          <span><i class="fa-solid fa-at" style="color:#ea4335; margin-right:6px;"></i> Official Email:</span>
+          <span style="color:var(--ab-text); font-weight:800;">ritikanetwork96@gmail.com</span>
+        </div>
+        <div class="support-contact-chip">
+          <span><i class="fa-solid fa-clock-rotate-left" style="color:var(--ab-muted); margin-right:6px;"></i> Response Time:</span>
+          <span style="color:#10b981; font-weight:750;">Within 12–24 Hours Guaranteed</span>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 10px;">
+          <a href="mailto:ritikanetwork96@gmail.com?subject=LinkAdda%20Order%20Support%20Request" class="ab-btn-secondary" style="width: 100%; justify-content: center; border-color: rgba(225, 29, 72, 0.4); color: var(--ab-pink);">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Email ritikanetwork96@gmail.com</span>
+          </a>
         </div>
       </div>
+    </div>
 
-      <div class="ab-rev">
-        <div>
-          <div class="ab-rev-stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-          </div>
-          <p class="ab-rev-quote">"Best part is privacy — UPI transaction on PhonePe shows a completely normal merchant entry, zero weird keywords. Took the All Collection pack, massive 3 Lac+ library and actual HD/4K quality."</p>
-        </div>
-        <div class="ab-rev-author">
-          <div class="ab-rev-avatar">R</div>
-          <div>
-            <div class="ab-rev-name">Rohit S.</div>
-            <div class="ab-rev-verified"><i class="fa-solid fa-circle-check"></i> Verified Telegram Buyer</div>
-          </div>
-        </div>
+    <!-- 1-Hour Guarantee Banner -->
+    <div class="ab-guarantee-banner">
+      <i class="fa-solid fa-shield-halved"></i>
+      <div class="ab-guarantee-text">
+        <h4>100% Scam-Free Escrow & 1-Hour Dead Link Resolution</h4>
+        <p>Your purchase is backed by LinkAdda buyer protection. If any cloud link stops working and cannot be refreshed or replaced within 1 hour, you receive an immediate alternate collection or a <strong>100% discrete refund</strong>. Zero risk.</p>
       </div>
     </div>
   </section>
 
-  <!-- INTERACTIVE FAQ ACCORDION -->
+  <!-- CONTENT PARTNER PROGRAM (Publicly Visible to All Visitors) -->
+  <section class="ab-seller-banner-wrap" id="seller-banner">
+    <div class="ab-seller-banner-card">
+      <div class="ab-seller-banner-info">
+        <span class="ab-seller-banner-tag"><i class="fa-solid fa-crown"></i> Content Partner Program</span>
+        <h2 class="ab-seller-banner-title">Monetize Your Digital Collections on LinkAdda</h2>
+        <p class="ab-seller-banner-desc">
+          Are you a creator, collector, or channel owner? Monetize your Mega and Google Drive collections with 100% revenue share settled directly to your UPI within 7 days.
+        </p>
+      </div>
+      <div class="ab-seller-banner-actions">
+        <a href="./seller/apply.html" class="ab-btn-primary">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Apply to Sell</span>
+        </a>
+        <a href="./seller/index.html" class="ab-btn-secondary">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Seller Hub</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQS ACCORDION -->
   <section class="ab-faq" id="faq">
     <div class="ab-section-head">
-      <div class="ab-section-tag"><i class="fa-solid fa-circle-question"></i> Clarifications</div>
+      <div class="ab-section-tag"><i class="fa-solid fa-circle-question"></i> Questions & Answers</div>
       <h2 class="ab-section-title">Frequently Asked <span class="ab-gradient-text">Questions</span></h2>
-      <p class="ab-section-desc">Got questions? Everything you need to know before grabbing a pack.</p>
+      <p class="ab-section-desc">Key details regarding order delivery, discrete billing, link replacements, and payment methods.</p>
     </div>
+
     <div class="ab-faq-list" id="faqList">
-      <!-- FAQ 1: Delivery Time & Process -->
       <div class="ab-faq-item open">
         <button class="ab-faq-question" type="button">
           <span>How fast do I get my pack and where is it delivered?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          Usually within <strong>5 to 15 minutes</strong> after you share your payment screenshot on Telegram. We send direct private cloud links (Mega.nz and Google Drive) straight to your Telegram chat — fast and hassle-free.
+          Usually within <strong>5 to 15 minutes</strong> after sharing your payment confirmation on Telegram. Direct private cloud links (Mega.nz and Google Drive) are sent directly to your Telegram chat.
         </div>
       </div>
 
-      <!-- FAQ 2: Discrete Statement & Privacy -->
       <div class="ab-faq-item">
         <button class="ab-faq-question" type="button">
           <span>Will my bank or UPI statement show any sensitive name or tag?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          <strong>No, 100% clean and private.</strong> Your bank statement or UPI app (PhonePe, Google Pay, Paytm) will only show a standard, generic merchant entry. There is zero mention of the website name or any sensitive keywords anywhere.
+          <strong>No, 100% clean and private.</strong> Your bank statement or UPI app (PhonePe, Google Pay, Paytm) only reflects a standard generic merchant entry with zero sensitive keywords.
         </div>
       </div>
 
-      <!-- FAQ 3: Lifetime Link Replacement Guarantee -->
       <div class="ab-faq-item">
         <button class="ab-faq-question" type="button">
           <span>What if a cloud link stops working or gets blocked later?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          You get a <strong>Lifetime Free Link Replacement</strong>. If any Mega or Drive folder ever stops opening, just message us on Telegram <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink);font-weight:700;text-decoration:underline;">@TRUSTED_BROTHER1234</a> with your payment screenshot. We send a fresh, active replacement link within 10 to 15 minutes at zero cost.
+          You receive a <strong>Lifetime Free Link Replacement</strong>. If any Mega or Drive folder ever stops opening, message us on Telegram <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink);font-weight:700;text-decoration:underline;">@TRUSTED_BROTHER1234</a> with your order details for a fresh active link.
         </div>
       </div>
 
-      <!-- FAQ 4: Online Streaming vs Downloading -->
       <div class="ab-faq-item">
         <button class="ab-faq-question" type="button">
-          <span>Can I watch videos online directly, or do I have to download them?</span>
+          <span>Can I stream videos online directly or download them?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          You can do both! All folders support online streaming on Mega and Google Drive in <strong>Full HD or 4K</strong> without eating up your phone or laptop storage. If you prefer keeping them offline, you can also download them with one click.
+          Both options are fully supported! All folders allow high-speed online streaming on Mega and Google Drive in <strong>Full HD / 4K</strong> without filling phone storage, or direct offline downloading.
         </div>
       </div>
 
-      <!-- FAQ 5: Payment Methods -->
       <div class="ab-faq-item">
         <button class="ab-faq-question" type="button">
-          <span>Which payment modes do you accept? Can international buyers pay?</span>
+          <span>Which payment modes are accepted?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          For India: All UPI apps (Google Pay, PhonePe, Paytm, BHIM, QR scan) and direct IMPS Bank Transfer. For international buyers: <strong>Crypto USDT (TRC-20 / BEP-20)</strong> and Binance Pay are fully supported.
+          For India: All UPI apps (Google Pay, PhonePe, Paytm, BHIM, QR scan) and direct IMPS Bank Transfer. For international buyers: <strong>Crypto USDT (TRC-20 / BEP-20)</strong> and Binance Pay are accepted.
         </div>
       </div>
 
-      <!-- FAQ 6: Legitimacy & Scam Protection -->
       <div class="ab-faq-item">
         <button class="ab-faq-question" type="button">
-          <span>How do I know this is genuine and not a scam?</span>
+          <span>How do I report an issue or contact support?</span>
           <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
         </button>
         <div class="ab-faq-answer">
-          LinkAdda has been active since 2022 with over 1,200+ orders safely delivered. You can check sample previews, read verified buyer reviews, or message our admin directly on Telegram before paying. Once payment is confirmed, immediate link delivery is our personal commitment.
+          You can reach our dedicated support desk across two official channels:<br>
+          1. <strong>Telegram Live Support</strong>: Message <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink);font-weight:700;text-decoration:underline;">@TRUSTED_BROTHER1234</a> for rapid 5–10 minute assistance.<br>
+          2. <strong>Official Email Desk</strong>: Mail <a href="mailto:ritikanetwork96@gmail.com" style="color:var(--ab-pink);font-weight:700;text-decoration:underline;">ritikanetwork96@gmail.com</a> for formal dispute tickets or order verification. All queries are resolved within 12–24 hours guaranteed.
         </div>
-      </div>
-
-      <!-- FAQ 7: Video Quality & Resolution -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>What is the actual video quality and clarity?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          All videos are genuine high-clarity <strong>Full HD (1080p) and 4K</strong> source files. No annoying watermark spam, no compressed low-resolution screen captures, and clear original audio.
-        </div>
-      </div>
-
-      <!-- FAQ 8: Future Updates & New Videos -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>Do I get new videos and future updates after purchasing?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          Yes! Our All Collection Mega Pack and VIP packs come with regular cloud updates. Newly added content is synced directly into your cloud folders automatically, without asking you for any extra fees or monthly subscriptions.
-        </div>
-      </div>
-
-      <!-- FAQ 9: All Collection Pack Details -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>What is included in the "All Collection Pack"?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          The All Collection Pack is our ultimate bundle giving you full access to all <strong>40+ categories (3 Lac+ videos and 850+ top creators)</strong> under a single lifetime pass. Buying individual categories separately costs over ₹70,000+, so this deal gives you the biggest savings with lifetime updates included.
-        </div>
-      </div>
-
-      <!-- FAQ 10: Device Compatibility -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>Will this work on my phone (Android/iPhone) and PC?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          Yes, works smoothly on everything — Android phones, iPhone, iPad, Windows PC, Mac, and web browsers. Both Mega and Google Drive work directly in your browser or through their official free apps without needing any special software.
-        </div>
-      </div>
-
-      <!-- FAQ 11: Dedicated Support -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>How do I contact support if I have any question or need help?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          Message our official Telegram support (<a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" style="color:var(--ab-pink);font-weight:700;text-decoration:underline;">@TRUSTED_BROTHER1234</a>). We are online 24/7 and usually reply within 5 to 10 minutes to help with links, payment, or pack selection.
-        </div>
-      </div>
-
-      <!-- FAQ 12: Technical Guarantee & Refund Policy -->
-      <div class="ab-faq-item">
-        <button class="ab-faq-question" type="button">
-          <span>What if a link doesn't open at all? Do you offer refunds?</span>
-          <i class="fa-solid fa-chevron-down ab-faq-icon"></i>
-        </button>
-        <div class="ab-faq-answer">
-          If a link encounters any technical problem and we can't get it working or replaced within 1 hour, we will give you an immediate alternative pack of your choice or a <strong>100% discrete refund</strong>. Your money is completely safe.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ACCEPTED PAYMENTS -->
-  <section class="ab-payments" id="payments">
-    <div class="ab-section-head">
-      <div class="ab-section-tag"><i class="fa-solid fa-lock"></i> Confidential</div>
-      <h2 class="ab-section-title">Accepted <span class="ab-gradient-text">Payment Gateways</span></h2>
-      <p class="ab-section-desc">Private and encrypted transactions across popular payment channels.</p>
-    </div>
-    <div class="ab-pay-grid">
-      <div class="ab-pay-item">
-        <div class="ab-pay-icon">📱</div>
-        <div class="ab-pay-name">UPI / Instant QR</div>
-        <div class="ab-pay-sub">GPay, PhonePe, Paytm</div>
-      </div>
-      <div class="ab-pay-item">
-        <div class="ab-pay-icon">🏦</div>
-        <div class="ab-pay-name">Bank Transfer</div>
-        <div class="ab-pay-sub">IMPS / NEFT 24/7</div>
-      </div>
-      <div class="ab-pay-item">
-        <div class="ab-pay-icon">₮</div>
-        <div class="ab-pay-name">USDT (Crypto)</div>
-        <div class="ab-pay-sub">TRC20 / BEP20</div>
-      </div>
-      <div class="ab-pay-item">
-        <div class="ab-pay-icon">⚡</div>
-        <div class="ab-pay-name">Fast Telegram Pay</div>
-        <div class="ab-pay-sub">Direct DM Confirmation</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="ab-cta" id="cta">
-    <div class="ab-cta-box">
-      <h2>Ready to Explore <span class="ab-gradient-text">Our Packs?</span></h2>
-      <p>Browse 40+ exclusive categories featuring 3 Lac+ premium 4K videos. Lifetime access, instant delivery, lowest prices guaranteed.</p>
-      <div class="ab-cta-btns">
-        <a href="index.html#categoriesGrid" class="ab-btn-primary"><i class="fa-solid fa-fire"></i> Go to Storefront</a>
-        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="ab-btn-secondary"><i class="fa-brands fa-telegram"></i> Chat on Telegram</a>
       </div>
     </div>
   </section>
@@ -1332,14 +1353,19 @@
   <footer class="ab-footer">
     <div class="ab-footer-links">
       <a href="index.html">Store Home</a>
-      <a href="about.html">About Us</a>
+      <a href="about.html">About LinkAdda</a>
+      <span id="aboutFooterSellerLinks" style="display: inline-flex; gap: 16px;">
+        <a href="./seller/index.html">Seller Hub</a>
+        <a href="./seller/apply.html">Become a Seller</a>
+        <a href="./seller/login.html">Seller Login</a>
+      </span>
       <a href="legal.html#privacy">Privacy Policy</a>
       <a href="legal.html#terms">Terms of Service</a>
-      <a href="legal.html#disclaimer">DMCA & Disclaimer</a>
       <a href="legal.html#refund">Refund Policy</a>
       <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener">Telegram Support</a>
+      <a href="mailto:ritikanetwork96@gmail.com">Official Email: ritikanetwork96@gmail.com</a>
     </div>
-    <p>&copy; 2026 LinkAdda Shop. All rights reserved. Discreet & Trusted Service Since 2022.</p>
+    <p>&copy; 2026 LinkAdda Shop. India's Premier Digital Content Marketplace. Official Support: ritikanetwork96@gmail.com</p>
   </footer>
 
   <!-- FLOATING BACK TO TOP BUTTON -->
@@ -1364,7 +1390,21 @@
       });
     })();
 
-    /* Interactive FAQ Accordion (Event Delegation for Dynamic & Static Items) */
+    /* Active Session Indicator for Partner Links */
+    (function() {
+      try {
+        var userRaw = localStorage.getItem('linkadda_customer_session');
+        if (userRaw) {
+          var user = JSON.parse(userRaw);
+          if (user && user.uid) {
+            var navPartner = document.getElementById('aboutNavSellerBtn');
+            if (navPartner) navPartner.setAttribute('title', 'Access Partner Hub (Logged in)');
+          }
+        }
+      } catch (_) {}
+    })();
+
+    /* Interactive FAQ Accordion */
     (function() {
       var container = document.getElementById('faqList') || document.querySelector('.ab-faq-list');
       if (!container) return;
@@ -1381,6 +1421,107 @@
         if (!isOpen) {
           item.classList.add('open');
         }
+      });
+    })();
+
+    /* Quick-Jump ScrollSpy & Smooth Scrolling */
+    (function() {
+      var links = document.querySelectorAll('.ab-qlink');
+      var quickNav = document.getElementById('aboutQuickNav');
+      var sections = [];
+
+      links.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          var sec = document.querySelector(href);
+          if (sec) sections.push({ el: sec, link: link });
+        }
+      });
+
+      links.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          var href = this.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            var target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              var navOffset = 115;
+              var targetPos = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+              window.scrollTo({
+                top: Math.max(0, targetPos),
+                behavior: 'smooth'
+              });
+
+              links.forEach(function(l) { l.classList.remove('active'); });
+              this.classList.add('active');
+
+              if (quickNav) {
+                var linkLeft = this.offsetLeft;
+                var linkWidth = this.offsetWidth;
+                var navWidth = quickNav.offsetWidth;
+                quickNav.scrollTo({
+                  left: linkLeft - (navWidth / 2) + (linkWidth / 2),
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+      });
+
+      var ticking = false;
+      function updateActive() {
+        var scrollPos = window.scrollY + 130;
+        var curSection = null;
+        for (var i = 0; i < sections.length; i++) {
+          var top = sections[i].el.offsetTop;
+          var height = sections[i].el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            curSection = sections[i];
+            break;
+          }
+        }
+        if (curSection) {
+          links.forEach(function(l) { l.classList.remove('active'); });
+          curSection.link.classList.add('active');
+        }
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(updateActive);
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
+
+    /* Floating Back to Top Button */
+    (function() {
+      var topBtn = document.getElementById('scrollTopBtn');
+      if (!topBtn) return;
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 350) {
+          topBtn.classList.add('visible');
+        } else {
+          topBtn.classList.remove('visible');
+        }
+      }, { passive: true });
+
+      topBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    /* Smart Back Navigation */
+    (function() {
+      document.querySelectorAll('.ab-btn-back').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          if (document.referrer && document.referrer.indexOf(window.location.host) !== -1 && window.history.length > 1) {
+            e.preventDefault();
+            window.history.back();
+          }
+        });
       });
     })();
   </script>
@@ -1450,7 +1591,6 @@
       });
     }
 
-    // 1. Instant 0ms cache load
     try {
       const cached = localStorage.getItem('linkadda_cached_faq');
       if (cached) {
@@ -1461,7 +1601,6 @@
       }
     } catch (_) {}
 
-    // 2. Realtime RTDB listener (Admin Panel sync)
     try {
       onValue(ref(db, 'faq'), (snap) => {
         const val = snap.val();
@@ -1477,210 +1616,6 @@
     } catch (e) {
       console.warn('Firebase RTDB init notice:', e);
     }
-
-    // 3. Fast REST fallback
-    fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/faq.json?_t=' + Date.now())
-      .then(res => res.json())
-      .then(val => {
-        if (val && typeof val === 'object') {
-          try {
-            localStorage.setItem('linkadda_cached_faq', JSON.stringify(val));
-          } catch (_) {}
-          renderDynamicFaqs(val);
-        }
-      })
-      .catch(() => {});
-
-    // 4. Cross-tab storage sync from Admin Panel
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'linkadda_cached_faq' && e.newValue) {
-        try {
-          renderDynamicFaqs(JSON.parse(e.newValue));
-        } catch (_) {}
-      }
-    });
-
-    // 5. Dynamic Pricing Sync with Firebase RTDB & Storefront Cache
-    function formatMoneyINR(val) {
-      if (!val) return '';
-      let num = parseInt(String(val).replace(/[^\d]/g, ''), 10);
-      if (isNaN(num)) return String(val).startsWith('₹') ? String(val) : '₹' + val;
-      return '₹' + num.toLocaleString('en-IN');
-    }
-
-    function updatePillarPrices(minPrice, bannerPrice) {
-      const minEl = document.getElementById('abMinPackPrice');
-      const allEl = document.getElementById('abAllCollectionPrice');
-      if (minEl && minPrice) minEl.textContent = formatMoneyINR(minPrice);
-      if (allEl && bannerPrice) allEl.textContent = formatMoneyINR(bannerPrice);
-    }
-
-    function calcMinPackPrice(productsObj) {
-      if (!productsObj || typeof productsObj !== 'object') return null;
-      let min = Infinity;
-      Object.values(productsObj).forEach(p => {
-        if (p && p.status !== 'inactive' && p.status !== 'hidden') {
-          const num = parseInt(String(p.priceINR || '').replace(/[^\d]/g, ''), 10);
-          if (!isNaN(num) && num > 0 && num < min) min = num;
-        }
-      });
-      return min !== Infinity ? min : null;
-    }
-
-    // 0ms instant cache load from storefront localStorage
-    try {
-      const liveDataRaw = localStorage.getItem('linkadda_cached_live_data_v4') || localStorage.getItem('linkadda_cached_live_data');
-      if (liveDataRaw) {
-        const parsed = JSON.parse(liveDataRaw);
-        if (parsed) {
-          const bPrice = parsed.banner?.priceOfferINR;
-          const minP = calcMinPackPrice(parsed.products);
-          updatePillarPrices(minP, bPrice);
-        }
-      }
-    } catch (_) {}
-
-    // Realtime listeners for banner and products catalog
-    try {
-      onValue(ref(db, 'banner'), (snap) => {
-        const val = snap.val();
-        if (val && val.priceOfferINR) {
-          updatePillarPrices(null, val.priceOfferINR);
-        }
-      }, (err) => {
-        console.warn('Banner price realtime listener:', err);
-      });
-
-      onValue(ref(db, 'products'), (snap) => {
-        const val = snap.val();
-        if (val) {
-          const minP = calcMinPackPrice(val);
-          if (minP) updatePillarPrices(minP, null);
-        }
-      }, (err) => {
-        console.warn('Products price realtime listener:', err);
-      });
-    } catch (e) {
-      console.warn('Pricing RTDB notice:', e);
-    }
-
-    // Fast REST fallback for banner
-    fetch('https://linkadda-cd1da-default-rtdb.firebaseio.com/banner.json?_t=' + Date.now())
-      .then(res => res.json())
-      .then(val => {
-        if (val && val.priceOfferINR) {
-          updatePillarPrices(null, val.priceOfferINR);
-        }
-      })
-      .catch(() => {});
-  </script>
-
-  <script>
-
-    /* Quick-Jump ScrollSpy & Smooth Scrolling without History Pollution */
-    (function() {
-      var links = document.querySelectorAll('.ab-qlink');
-      var quickNav = document.getElementById('aboutQuickNav');
-      var sections = [];
-
-      links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        if (href && href.startsWith('#')) {
-          var sec = document.querySelector(href);
-          if (sec) sections.push({ el: sec, link: link });
-        }
-      });
-
-      // Smooth scroll on click WITHOUT history pollution or URL hash jump
-      links.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-          var href = this.getAttribute('href');
-          if (href && href.startsWith('#')) {
-            var target = document.querySelector(href);
-            if (target) {
-              e.preventDefault();
-              var navOffset = 115;
-              var targetPos = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
-              window.scrollTo({
-                top: Math.max(0, targetPos),
-                behavior: 'smooth'
-              });
-
-              // Mark active immediately
-              links.forEach(function(l) { l.classList.remove('active'); });
-              this.classList.add('active');
-
-              // Gently center the clicked tab in the horizontal bar
-              if (quickNav) {
-                var linkLeft = this.offsetLeft;
-                var linkWidth = this.offsetWidth;
-                var navWidth = quickNav.offsetWidth;
-                quickNav.scrollTo({
-                  left: linkLeft - (navWidth / 2) + (linkWidth / 2),
-                  behavior: 'smooth'
-                });
-              }
-            }
-          }
-        });
-      });
-
-      // ScrollSpy: ONLY update active pill class, NEVER call scrollIntoView to avoid fighting user scrolling
-      var ticking = false;
-      function updateActive() {
-        var scrollPos = window.scrollY + 130;
-        var curSection = null;
-        for (var i = 0; i < sections.length; i++) {
-          var top = sections[i].el.offsetTop;
-          var height = sections[i].el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            curSection = sections[i];
-            break;
-          }
-        }
-        if (curSection) {
-          links.forEach(function(l) { l.classList.remove('active'); });
-          curSection.link.classList.add('active');
-        }
-        ticking = false;
-      }
-
-      window.addEventListener('scroll', function() {
-        if (!ticking) {
-          window.requestAnimationFrame(updateActive);
-          ticking = true;
-        }
-      }, { passive: true });
-    })();
-
-    /* Floating Back to Top Button */
-    (function() {
-      var topBtn = document.getElementById('scrollTopBtn');
-      if (!topBtn) return;
-      window.addEventListener('scroll', function() {
-        if (window.scrollY > 350) {
-          topBtn.classList.add('visible');
-        } else {
-          topBtn.classList.remove('visible');
-        }
-      }, { passive: true });
-
-      topBtn.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    })();
-
-    /* Smart Back Navigation: Returns to exact previous scroll position on storefront */
-    (function() {
-      document.querySelectorAll('.ab-btn-back').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          if (document.referrer && document.referrer.indexOf(window.location.host) !== -1 && window.history.length > 1) {
-            e.preventDefault();
-            window.history.back();
-          }
-        });
-      });
-    })();
   </script>
 
 </body>

@@ -188,6 +188,7 @@ export async function terminateAllOtherAdminSessions() {
 
 export function mountLoginPage(root) {
   if (!root) return;
+  const rememberedEmail = localStorage.getItem('linkadda_remember_admin_email') || 'ritikanetwork96@gmail.com';
   root.innerHTML = `
     <div class="auth-shell">
       <div class="auth-card glass">
@@ -195,21 +196,33 @@ export function mountLoginPage(root) {
           <div class="auth-mark">L</div>
           <div>
             <h1>${escapeHtml(APP_CONFIG.appName)}</h1>
-            <p>Secure admin access</p>
+            <p>Master Administrator Access</p>
           </div>
         </div>
         <form id="loginForm" class="auth-form">
           <label>
-            <span>Email</span>
-            <input type="email" id="adminEmail" placeholder="admin@example.com" autocomplete="username" required />
+            <span>Admin Email</span>
+            <input type="email" id="adminEmail" value="${escapeHtml(rememberedEmail)}" placeholder="ritikanetwork96@gmail.com" autocomplete="username" required />
           </label>
           <label>
-            <span>Password</span>
-            <input type="password" id="adminPassword" placeholder="Enter password" autocomplete="current-password" required />
+            <span>Admin Password</span>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" id="adminPassword" placeholder="Enter confidential password" autocomplete="current-password" required style="width: 100%; padding-right: 42px;" />
+              <button type="button" id="toggleAdminPass" aria-label="Toggle password visibility" style="position: absolute; right: 10px; background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                <i data-lucide="eye" style="width: 18px; height: 18px;"></i>
+              </button>
+            </div>
           </label>
-          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          <button type="submit" class="btn btn-primary btn-block" style="font-weight: 700;">Sign In as Administrator</button>
           <button type="button" id="forgotBtn" class="btn btn-ghost btn-block">Forgot Password</button>
-          <p class="auth-note" id="authNote">Use your Firebase Auth admin account.</p>
+          <p class="auth-note" id="authNote">Authorized personnel only &bull; LinkAdda Root Control</p>
+
+          <div style="margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); font-size: 12px; color: #a5b4fc; text-align: center;">
+            Are you an authorized creator / seller partner?<br>
+            <a href="/seller/login" style="color: #ec4899; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <span>Go to Seller Hub</span> &rarr;
+            </a>
+          </div>
         </form>
       </div>
     </div>
@@ -218,6 +231,19 @@ export function mountLoginPage(root) {
   const form = root.querySelector('#loginForm');
   const forgotBtn = root.querySelector('#forgotBtn');
   const note = root.querySelector('#authNote');
+  const togglePassBtn = root.querySelector('#toggleAdminPass');
+  const passInput = root.querySelector('#adminPassword');
+
+  togglePassBtn?.addEventListener('click', () => {
+    if (passInput) {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      togglePassBtn.innerHTML = isPass
+        ? '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>'
+        : '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>';
+      if (window.lucide) lucide.createIcons();
+    }
+  });
 
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -226,19 +252,19 @@ export function mountLoginPage(root) {
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Signing in...';
+      submitBtn.textContent = 'Verifying root admin credentials...';
     }
     note.textContent = 'Authenticating admin credentials...';
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem('linkadda_remember_admin_email', email);
       await registerAdminSession(userCredential.user);
       note.textContent = 'Success! Opening admin center...';
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-      window.location.href = isLocal ? '/admin/index.html' : '/admin';
+      window.location.href = '/admin';
     } catch (error) {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
+        submitBtn.textContent = 'Sign In as Administrator';
       }
       note.textContent = error?.message || 'Login failed';
     }
@@ -264,8 +290,7 @@ export function protectRoute(onReady) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       if (!/\/login(?:\.html)?\/?$/i.test(window.location.pathname)) {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-        window.location.href = isLocal ? '/admin/login.html' : '/admin/login';
+        window.location.href = '/admin/login';
       }
       return;
     }
@@ -288,8 +313,7 @@ export async function logout() {
     localStorage.removeItem('linkadda_admin_session_id');
   }
   await signOut(auth);
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-  window.location.href = isLocal ? '/admin/login.html' : '/admin/login';
+  window.location.href = '/admin/login';
 }
 
 export function whenAuthenticated(callback) {

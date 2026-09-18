@@ -30,7 +30,11 @@
       } catch (_) {}
     })();
   </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Linkadda Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,7 +42,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css?v=20260915f" />
-  <link rel="stylesheet" href="flipkart-store.css?v=20260913a" />
+  <link rel="stylesheet" href="linkadda-store.css?v=20260917a" />
+  <link rel="stylesheet" href="auth-modal.css?v=20260916a" />
+  <link rel="stylesheet" href="mobile-app.css?v=20260916m" />
+  <script src="preload.js"></script>
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
     .hero-title,
@@ -598,15 +605,19 @@
   <header class="fk-header" id="fkHeader">
     <div class="fk-header-inner">
       <div class="fk-header-top-row">
-        <a href="#services" class="fk-brand-col">
+        <a href="#home" class="fk-brand-col">
           <span class="fk-logo-text">LinkAdda <i class="fa-solid fa-crown fk-brand-crown"></i></span>
           <span class="fk-brand-sub">Premium Content Marketplace</span>
         </a>
 
         <div class="fk-header-actions">
-          <button type="button" class="theme-toggle-header-btn" id="headerThemeToggleBtn" onclick="window.toggleStoreTheme(event)" title="Toggle Light / Dark Mode" aria-label="Toggle Light or Dark Theme">
-            <i class="fa-solid fa-moon" id="headerThemeMoon"></i>
-            <i class="fa-solid fa-sun" id="headerThemeSun" style="display:none; color:#f59e0b;"></i>
+          <button type="button" class="fk-notif-btn-wrap" id="headerNotifBtn" title="Notifications" onclick="window.showNotificationsPage ? window.showNotificationsPage('store') : (window.location.hash = '#notifications')">
+            <i class="fa-solid fa-bell"></i>
+            <span class="fk-notif-badge-dot" id="headerNotifDot"></span>
+          </button>
+          <button type="button" class="fk-user-btn-wrap" id="headerUserBtn" title="Account / Profile" onclick="window.showProfilePage ? window.showProfilePage() : (window.location.hash = '#profile')">
+            <i class="fa-solid fa-user"></i>
+            <span class="fk-user-btn-text" id="headerUserBtnText">Login</span>
           </button>
           <button type="button" class="fk-cart-btn-wrap" id="headerCartBtn" title="Shopping Cart">
             <i class="fa-solid fa-cart-shopping"></i>
@@ -636,25 +647,10 @@
       </div>
     </div>
   </header>
+  <!-- Fixed Header Height Spacer (Prevents content jump, guarantees smooth scroll) -->
+  <div class="fk-header-spacer" id="fkHeaderSpacer"></div>
 
-    <!-- Mobile nav -->
-    <div class="mobile-nav" id="mobileNav">
-      <button class="header-currency-toggle" id="mobCurrencyToggle" type="button" style="margin: 0 auto 10px; width: fit-content;">
-        <i class="fa-solid fa-coins"></i> <span id="mobCurrencyToggleText">Currency: ₹ INR</span>
-      </button>
-      <button class="mob-search-btn" id="mobSearchBtn">
-        <i class="fa-solid fa-magnifying-glass"></i> Search Products & FAQs
-      </button>
-      <button class="mob-cart-btn" id="mobCartBtn">
-        <i class="fa-solid fa-cart-shopping"></i> View Cart (<span id="cartBadgeMob">0</span>)
-      </button>
-      <a href="#home" class="mob-link">Home</a>
-      <a href="#services" class="mob-link">Browse Packs</a>
-      <a href="about.html" class="mob-link">About Us</a>
-      <a href="about.html#faq" class="mob-link">FAQ</a>
-      <a href="#contact" class="mob-link">Contact</a>
-    </div>
-
+  <!-- ===== GLOBAL APPLICATION DRAWERS, OVERLAYS & MODALS (ACCESSIBLE FROM STOREFRONT, PROFILE & SEARCH) ===== -->
   <!-- Floating Left Cart Dock -->
   <button class="floating-cart-left" id="leftFloatingCart" aria-label="Shopping Cart" title="View Cart">
     <span class="floating-cart-icon">
@@ -667,6 +663,7 @@
   <!-- Cart Drawer & Backdrop -->
   <div class="cart-backdrop" id="cartBackdrop"></div>
   <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping Cart">
+    <div class="sheet-drag-handle"></div>
     <div class="cart-drawer-header">
       <div class="cart-drawer-title">
         <i class="fa-solid fa-cart-shopping"></i>
@@ -702,6 +699,7 @@
   <!-- Wishlist Drawer & Backdrop -->
   <div class="wishlist-backdrop" id="wishlistBackdrop" onclick="closeWishlistDrawer()"></div>
   <aside class="wishlist-drawer" id="wishlistDrawer" aria-label="Liked Packs">
+    <div class="sheet-drag-handle"></div>
     <div class="wishlist-drawer-header">
       <div class="wishlist-drawer-title">
         <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
@@ -794,6 +792,11 @@
           <!-- Title & Rating Card -->
           <section class="fk-info-section">
             <h1 class="fk-pv-product-title" id="fkPvProductTitle">Product Title</h1>
+            <div id="fkPvSellerRow" style="display:none; align-items:center; gap:8px; margin: 6px 0 10px; font-size:0.84rem; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); padding:5px 12px; border-radius:8px; width:fit-content;">
+              <i class="fa-solid fa-circle-check" style="color:#10b981;"></i>
+              <span style="color:var(--la-text-secondary, #334155);">Sold by: <strong id="fkPvSellerName" style="color:var(--la-text, #0f172a); font-weight:800;">Creator Store</strong></span>
+              <span style="font-size:0.72rem; font-weight:800; color:#059669; background:rgba(16,185,129,0.2); padding:2px 6px; border-radius:4px;">✓ Verified Partner</span>
+            </div>
             <div class="fk-pv-rating-bar">
               <span class="fk-pv-rating-badge"><span id="fkPvRatingScore">4.9</span> <i class="fa-solid fa-star" style="color:var(--la-gold);font-size:11px;"></i></span>
               <span class="fk-pv-rating-text" id="fkPvRatingText">Verified VIP Access · 100% Genuine Media</span>
@@ -880,8 +883,8 @@
                 <i class="fa-solid fa-store"></i>
               </div>
               <div>
-                <div class="fk-seller-sub">OFFICIAL CREATOR / SELLER</div>
-                <div class="fk-seller-name" id="fkPvSellerName">LinkAdda Verified Studio</div>
+                <div class="fk-seller-sub">OFFICIAL VERIFIED CREATOR</div>
+                <div class="fk-seller-name" id="fkPvSellerCardName">LinkAdda Verified Studio</div>
               </div>
             </div>
             <div class="fk-seller-rating" id="fkPvSellerRating">4.9 <i class="fa-solid fa-star"></i></div>
@@ -974,42 +977,45 @@
     </div>
   </div>
 
-  <!-- ===== FLIPKART MOBILE STICKY APP BAR ===== -->
-  <nav class="fk-mobile-appbar" aria-label="Mobile Navigation">
-    <a href="#home" class="fk-appbar-item active">
-      <i class="fa-solid fa-house"></i>
-      <span>Home</span>
-    </a>
-    <a href="#services" class="fk-appbar-item">
-      <i class="fa-solid fa-layer-group"></i>
-      <span>Categories</span>
-    </a>
-    <button type="button" class="fk-appbar-item" id="fkAppbarWishlistBtn" onclick="openWishlistDrawer()" aria-label="Liked Items">
-      <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
-      <span class="fk-appbar-badge" id="fkAppbarWishlistBadge" style="display:none;background:#e11d48;">0</span>
-      <span>Liked</span>
-    </button>
-    <button type="button" class="fk-appbar-item" id="fkAppbarCartBtn" onclick="openCartDrawer()" aria-label="Shopping Cart">
-      <i class="fa-solid fa-cart-shopping"></i>
-      <span class="fk-appbar-badge" id="fkAppbarCartBadge" style="display:none;">0</span>
-      <span>Cart</span>
-    </button>
-    <button type="button" class="fk-appbar-item" id="fkAppbarOrdersBtn" onclick="openOrdersDrawer()" aria-label="My Orders">
-      <i class="fa-solid fa-receipt" style="color:#10b981;"></i>
-      <span class="fk-appbar-badge" id="fkAppbarOrdersBadge" style="display:none;background:#10b981;">0</span>
-      <span>Orders</span>
-    </button>
-  </nav>
-
-  <!-- Services / Categories -->
-  <section class="services" id="services">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag"><i class="fa-solid fa-grid-2"></i> What We Offer</p>
-        <h2 class="section-title">Our <span class="gradient-text">Services</span></h2>
-        <p class="section-sub">Choose our services and get instant delivery at the cheapest price in the market.</p>
+  <!-- ===== APP STOREFRONT VIEW (NATIVE DOCUMENT FLOW) ===== -->
+  <main id="appStorefrontView">
+    <!-- ===== LIVE ACTIVITY NOTIFICATION BAR (SCROLLS WITH STORE - NOT FIXED) ===== -->
+    <div class="live-activity-bar marquee-wrap" id="liveActivityMarquee">
+      <div class="live-activity-badge">
+        <span class="live-pulse-dot"></span>
+        <span class="live-badge-text"><i class="fa-solid fa-bolt"></i> LIVE</span>
       </div>
+      <div class="live-marquee-container">
+        <div class="marquee-track" id="liveMarqueeTrack">
+          <!-- Injected dynamically with Realtime Orders, Reviews & Traffic -->
+        </div>
+      </div>
+    </div>
 
+    <!-- Mobile nav -->
+    <div class="mobile-nav" id="mobileNav">
+      <button class="mob-user-btn" id="mobUserBtn" type="button" onclick="window.showProfilePage ? window.showProfilePage() : (window.location.hash = '#profile')" style="width: 100%; margin: 0 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 9999px; background: rgba(255, 42, 141, 0.14); border: 1.5px solid rgba(255, 42, 141, 0.35); color: #ff65a3; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+        <i class="fa-solid fa-circle-user"></i> <span id="mobUserBtnText">Sign In / Account</span>
+      </button>
+      <button class="header-currency-toggle" id="mobCurrencyToggle" type="button" style="margin: 0 auto 10px; width: fit-content;">
+        <i class="fa-solid fa-coins"></i> <span id="mobCurrencyToggleText">Currency: ₹ INR</span>
+      </button>
+      <button class="mob-search-btn" id="mobSearchBtn">
+        <i class="fa-solid fa-magnifying-glass"></i> Search Products & FAQs
+      </button>
+      <button class="mob-cart-btn" id="mobCartBtn">
+        <i class="fa-solid fa-cart-shopping"></i> View Cart (<span id="cartBadgeMob">0</span>)
+      </button>
+      <a href="#home" class="mob-link">Home</a>
+      <a href="#pinnedDealWrapper" class="mob-link">Browse Packs</a>
+      <a href="about.html" class="mob-link">About Us</a>
+      <a href="about.html#faq" class="mob-link">FAQ</a>
+      <a href="#contact" class="mob-link">Contact</a>
+    </div>
+
+    <!-- Storefront Catalog / Packs -->
+    <section class="services" id="services">
+    <div class="container">
       <!-- Pinned Deal Wrapper -->
       <div id="pinnedDealWrapper">
         <!-- ------ ALL COLLECTION PACK — PINNED TOP ------ -->
@@ -1199,7 +1205,9 @@
           <h4>Quick Links</h4>
           <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
           <a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a>
-          <a href="#services"><i class="fa-solid fa-layer-group"></i> Browse Packs</a>
+          <a href="#pinnedDealWrapper"><i class="fa-solid fa-layer-group"></i> Browse Packs</a>
+          <a href="./seller/apply.html"><i class="fa-solid fa-store"></i> Become a Seller</a>
+          <a href="./seller/index.html"><i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Seller Hub</a>
           <a href="about.html#faq"><i class="fa-solid fa-circle-question"></i> FAQ</a>
         </div>
 
@@ -1550,6 +1558,8 @@
       return timeB - timeA;
     });
   }
+  window.getLiveRecords = getLiveRecords;
+  window.liveCollections = liveCollections;
 
   function applySiteSettings(s) {
     if (!s) {
@@ -2021,6 +2031,26 @@
     if (!link.dataset.originalHtml) {
       link.dataset.originalHtml = link.innerHTML;
     }
+
+    // REQUIRE LOGIN BEFORE BUYING (User can add to cart freely, but buying requires login)
+    const userSession = window.getCustomerSession ? window.getCustomerSession() : null;
+    if (!userSession) {
+      const checkoutMeta = resolveCheckoutMeta(link);
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+      const ext = isLocal ? '.html' : '';
+      const fallbackUrl = normalizeCheckoutUrl(href || `payment${ext}`, checkoutMeta);
+      const targetUrl = targetHref || fallbackUrl;
+
+      sessionStorage.setItem('pending_checkout_url', targetUrl);
+      if (typeof window.openAuthModal === 'function') {
+        window.openAuthModal('input');
+        if (typeof window.showAuthToast === 'function') {
+          window.showAuthToast('Please sign in to complete your purchase');
+        }
+      }
+      return;
+    }
+
     link.classList.add('btn-progress-active');
     link.innerHTML = `
       <span class="btn-progress-bar" style="animation: btnFillProgress 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;"></span>
@@ -2118,10 +2148,42 @@
     </div>`;
   }
 
+  function extractArrayFromMixed(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.filter(Boolean);
+    if (typeof val === 'object') {
+      return Object.values(val).filter(v => typeof v === 'string' && v.trim());
+    }
+    if (typeof val === 'string') {
+      const trimmed = val.trim();
+      if (!trimmed) return [];
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed.filter(Boolean);
+        } catch (_) {}
+      }
+      if (trimmed.includes(',')) {
+        return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [trimmed];
+    }
+    return [];
+  }
+
   function resolveMediaList(cat) {
-    let primary = Array.isArray(cat.images) ? cat.images.filter(Boolean) : [];
-    let gallery = Array.isArray(cat.galleryImages) ? cat.galleryImages.filter(Boolean) : [];
-    let fallback = [cat.image, cat.imageUrl, cat.thumbnail, cat.cover, cat.photo, ...gallery].filter(Boolean);
+    let primary = extractArrayFromMixed(cat.images);
+    let gallery = extractArrayFromMixed(cat.galleryImages);
+    let mediaArr = [];
+    if (cat.media) {
+      extractArrayFromMixed(cat.media).forEach(m => {
+        const val = typeof m === 'string' ? m : (m && m.url ? m.url : '');
+        if (val && !/\.(mp4|webm|mov|m4v)$/i.test(val) && (!m.type || m.type !== 'video')) {
+          mediaArr.push(val);
+        }
+      });
+    }
+    let fallback = [cat.image, cat.imageUrl, cat.thumbnail, cat.cover, cat.photo, ...gallery, ...mediaArr].filter(Boolean);
 
     let rawList = [...new Set([...primary, ...fallback].map(u => String(u || '').trim()).filter(Boolean))];
 
@@ -2165,6 +2227,7 @@
     const videos = [...new Set([...videoList, ...videoFallback].map(u => String(u || '').trim()).filter(Boolean))];
     return { images, videos };
   }
+  window.resolveMediaList = resolveMediaList;
 
   function normalizeFeatureList(value) {
     if (Array.isArray(value)) {
@@ -2651,6 +2714,9 @@
   }
 
   function openOrdersDrawer() {
+    if (typeof window.syncUserOrdersWithFirebase === 'function') {
+      window.syncUserOrdersWithFirebase().catch(() => {});
+    }
     renderOrdersDrawer();
     const drawer = document.getElementById('ordersDrawer');
     const backdrop = document.getElementById('ordersBackdrop');
@@ -2689,32 +2755,94 @@
       return;
     }
 
-    body.innerHTML = orders.map(ord => `
-      <div class="order-item-card">
-        <div class="order-card-header">
-          <div class="order-card-id-block">
-            <span class="order-id-label">ORDER #</span>
-            <span class="order-id-num">${esc(String(ord.orderId || 'VIP-ORDER').slice(-10))}</span>
+    body.innerHTML = orders.map(ord => {
+      const isConfirmed = ord.status === 'confirmed' || ord.status === 'completed' || ord.status === 'paid' || ord.status === 'approved';
+      const orderId = esc(String(ord.orderId || 'VIP-ORDER').slice(-10).toUpperCase());
+      const accessLink = ord.downloadLink || ord.fileUrl || ord.orderLink || '';
+      const tgMsg = `Hi Admin, I have placed order #${orderId} (${ord.productName || 'VIP Content Pack'}). Please verify and approve my payment.`;
+      const tgUrl = `https://t.me/TRUSTED_BROTHER1234?text=${encodeURIComponent(tgMsg)}`;
+
+      return `
+        <div class="order-item-card ${isConfirmed ? 'confirmed' : 'pending'}">
+          <div class="order-card-header">
+            <div class="order-card-id-block">
+              <span class="order-id-label">ORDER #</span>
+              <span class="order-id-num">${orderId}</span>
+            </div>
+            <span class="order-status-pill ${isConfirmed ? 'done' : 'pending'}">
+              <i class="fa-solid ${isConfirmed ? 'fa-circle-check' : 'fa-clock'}"></i>
+              ${isConfirmed ? 'Confirmed' : 'Pending Approval'}
+            </span>
           </div>
-          <span class="order-status-pill ${ord.status === 'completed' ? 'done' : 'pending'}">
-            <i class="fa-solid ${ord.status === 'completed' ? 'fa-check' : 'fa-clock'}"></i>
-            ${ord.status === 'completed' ? 'Delivered' : 'Processing'}
-          </span>
+          <div class="order-card-title">${esc(ord.productName || 'VIP Content Pack')}</div>
+          <div class="order-card-meta-row">
+            <span class="order-meta-item"><i class="fa-solid fa-wallet"></i> ${esc(ord.paymentMethod || 'UPI / Crypto')}</span>
+            <span class="order-meta-sep">•</span>
+            <span class="order-meta-item"><i class="fa-regular fa-clock"></i> ${esc(ord.date || 'Recent')}</span>
+          </div>
+          <div class="user-order-note ${isConfirmed ? 'confirmed' : 'pending'}" style="font-size:11.5px;padding:6px 10px;border-radius:8px;display:flex;align-items:center;gap:6px;margin-top:2px;${isConfirmed ? 'background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.3);' : ''}">
+            <i class="fa-solid ${isConfirmed ? 'fa-circle-check' : 'fa-hourglass-half'}"></i>
+            <span>${isConfirmed 
+              ? (accessLink ? 'Order Approved! Aapka Telegram VIP link ready hai.' : 'Order Approved! Telegram VIP link syncing...') 
+              : 'Admin verification in progress. Approve hote hi link unlock hoga.'}</span>
+          </div>
+          <div class="order-card-footer" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <span class="order-paid-amount">${esc(ord.amountDisplay || '₹399')}</span>
+            ${isConfirmed ? `
+              <div style="display:flex;gap:6px;align-items:center;">
+                ${accessLink ? `
+                  <a href="${esc(accessLink)}" target="_blank" rel="noopener" class="order-track-btn confirmed" style="background:#0088cc;color:#fff;border-color:#0088cc;">
+                    <i class="fa-brands fa-telegram"></i> Open Telegram Link
+                  </a>
+                  <button type="button" onclick="window.copyOrderLink && window.copyOrderLink('${esc(accessLink)}', this)" class="order-copy-btn" title="Copy Telegram Link">
+                    <i class="fa-regular fa-clone"></i> Copy
+                  </button>
+                ` : `
+                  <a href="https://t.me/TRUSTED_BROTHER1234?text=${encodeURIComponent('Hi Admin, my order #' + orderId + ' is approved. Please provide Telegram link.')}" target="_blank" rel="noopener" class="order-track-btn confirmed">
+                    <i class="fa-brands fa-telegram"></i> Telegram Support
+                  </a>
+                `}
+              </div>
+            ` : `
+              <a href="${tgUrl}" target="_blank" rel="noopener" class="order-track-btn">
+                <i class="fa-brands fa-telegram"></i> Order Pending · TG
+              </a>
+            `}
+          </div>
         </div>
-        <div class="order-card-title">${esc(ord.productName || 'VIP Content Pack')}</div>
-        <div class="order-card-meta-row">
-          <span class="order-meta-item"><i class="fa-solid fa-wallet"></i> ${esc(ord.paymentMethod || 'UPI / Crypto')}</span>
-          <span class="order-meta-sep">•</span>
-          <span class="order-meta-item"><i class="fa-regular fa-clock"></i> ${esc(ord.date || 'Recent')}</span>
-        </div>
-        <div class="order-card-footer">
-          <span class="order-paid-amount">${esc(ord.amountDisplay || '₹399')}</span>
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="order-track-btn">
-            <i class="fa-brands fa-telegram"></i> Get Access
-          </a>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+  }
+
+  if (!window.copyOrderLink) {
+    window.copyOrderLink = function(url, btn) {
+      if (!url) return;
+      const notify = () => {
+        if (btn) {
+          const orig = btn.innerHTML;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+          setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        }
+        if (typeof window.showAppToast === 'function') {
+          window.showAppToast('Link copied to clipboard! 📋');
+        } else if (typeof window.showToast === 'function') {
+          window.showToast('Link copied to clipboard! 📋');
+        }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(notify).catch(() => fallback());
+      } else {
+        fallback();
+      }
+      function fallback() {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); notify(); } catch (_) {}
+        document.body.removeChild(ta);
+      }
+    };
   }
 
   window.openOrdersDrawer = openOrdersDrawer;
@@ -2726,6 +2854,66 @@
   document.addEventListener('DOMContentLoaded', updateOrdersBadge);
   setTimeout(updateOrdersBadge, 1200);
 
+  // LinkAdda Signature Smart Sticky Header Controller
+  // Scroll down: top branding row collapses so search row & category pills stay fixed
+  // Scroll up / return to top: full header expands back ("saare waps dikhe")
+  (function initSmartStickyHeader() {
+    const header = document.getElementById('fkHeader');
+    const spacer = document.getElementById('fkHeaderSpacer');
+    if (!header) return;
+
+    function syncSpacer() {
+      if (spacer && header.offsetHeight > 0) {
+        if (!header.classList.contains('fk-header-compact')) {
+          const h = header.offsetHeight;
+          spacer.style.setProperty('height', h + 'px', 'important');
+          document.documentElement.style.setProperty('--header-actual-height', h + 'px');
+        }
+      }
+    }
+    syncSpacer();
+    window.addEventListener('resize', syncSpacer, { passive: true });
+    window.addEventListener('load', syncSpacer);
+    setTimeout(syncSpacer, 150);
+    setTimeout(syncSpacer, 600);
+    setTimeout(syncSpacer, 1500);
+    if (window.ResizeObserver) {
+      try {
+        const ro = new ResizeObserver(() => syncSpacer());
+        ro.observe(header);
+      } catch (_) {}
+    }
+
+    let lastY = window.scrollY || 0;
+    let ticking = false;
+
+    function onScroll() {
+      const currentY = window.scrollY || 0;
+      const diff = currentY - lastY;
+
+      if (currentY <= 25) {
+        // At the very top: always show full header ("saare waps dikhe")
+        header.classList.remove('fk-header-compact');
+      } else if (diff > 5 && currentY > 40) {
+        // Scrolling down: collapse top row so only search + pills remain pinned ("ye itna fix ho jaye")
+        header.classList.add('fk-header-compact');
+      } else if (diff < -8) {
+        // Scrolling up: reveal top row smoothly
+        header.classList.remove('fk-header-compact');
+      }
+
+      lastY = currentY;
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(onScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+  })();
+
   // Card Action Button Handlers
   window.handleCardAddToCart = function(e, btn) {
     if (e) {
@@ -2733,21 +2921,44 @@
       e.preventDefault();
     }
     if (!btn) return;
-    if (btn.classList.contains('added')) return;
 
-    const meta = extractProductMetaFromCard(btn);
-    addToCart(meta);
+    // If item is already added / in-cart: directly open cart drawer!
+    if (btn.classList.contains('in-cart') || btn.classList.contains('added')) {
+      if (typeof window.openCartDrawer === 'function') {
+        window.openCartDrawer();
+      }
+      return;
+    }
+
+    const meta = (typeof extractProductMetaFromCard === 'function') ? extractProductMetaFromCard(btn) : null;
+    const cart = (typeof window.getCart === 'function') ? window.getCart() : [];
+    if (meta) {
+      const itemId = String(meta.id) + (meta.tier ? `_${String(meta.tier).replace(/\s+/g, '')}` : '');
+      const alreadyInCart = cart.some(i => String(i.id).toLowerCase() === String(meta.id).toLowerCase() || i.cartItemId === itemId);
+      if (alreadyInCart) {
+        if (typeof window.syncCartButtonsUI === 'function') window.syncCartButtonsUI();
+        if (typeof window.openCartDrawer === 'function') {
+          window.openCartDrawer();
+        }
+        return;
+      }
+      if (typeof window.addToCart === 'function') {
+        window.addToCart(meta);
+      } else if (typeof addToCart === 'function') {
+        addToCart(meta);
+      }
+    }
 
     if (!btn.dataset.origHtml) {
       btn.dataset.origHtml = btn.innerHTML;
     }
-    btn.classList.add('added');
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+    btn.classList.add('added', 'in-cart');
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+    btn.setAttribute('title', 'Item in cart - Click to view cart');
 
-    setTimeout(() => {
-      btn.classList.remove('added');
-      btn.innerHTML = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add';
-    }, 1500);
+    if (typeof window.syncCartButtonsUI === 'function') {
+      window.syncCartButtonsUI();
+    }
   };
 
   window.handleCardBuyNow = function(e, btn, link) {
@@ -2816,7 +3027,9 @@
   // -- BUILD CARD (AUTHENTIC LUXURY E-COMMERCE CARD) --
   function buildCard(id, cat) {
     const media = resolveMediaList(cat);
-    const firstImg = (media.images && media.images[0]) || '';
+    const images = (media.images || []).filter(Boolean);
+    const firstImg = images[0] || '';
+    const hasMultipleImgs = images.length > 1;
     const cleanINR = cat.priceINR ? String(cat.priceINR).replace(/[^\d]/g, '') : '399';
     const cleanUSD = cat.priceUSD ? String(cat.priceUSD).replace(/[^\d]/g, '') : '14';
 
@@ -2874,14 +3087,35 @@
           <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
         </button>
       </div>
+      ${hasMultipleImgs ? `
+      <div class="fk-card-media fk-card-slideshow" data-card-id="${esc(id)}" data-slide-count="${images.length}" data-active-idx="0" onclick="window.openFkProductPage('${esc(id)}')">
+        <div class="fk-card-slides-track">
+          ${images.map((imgUrl, idx) => `
+            <div class="fk-card-slide${idx === 0 ? ' is-active' : ''}" data-idx="${idx}">
+              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.onerror=null; this.src='/favicon.svg';" />
+            </div>
+          `).join('')}
+        </div>
+        <div class="fk-card-media-gradient"></div>
+        <div class="fk-card-slideshow-indicators" onclick="event.stopPropagation();">
+          ${images.map((_, idx) => `
+            <span class="fk-slide-bar${idx === 0 ? ' is-active' : ''}" data-idx="${idx}" onclick="event.stopPropagation(); window.setCardSlide('${esc(id)}', ${idx});"></span>
+          `).join('')}
+        </div>
+        <button type="button" class="fk-card-slide-nav fk-slide-prev" aria-label="Previous image" onclick="event.stopPropagation(); window.stepCardSlide('${esc(id)}', -1);"><i class="fa-solid fa-chevron-left"></i></button>
+        <button type="button" class="fk-card-slide-nav fk-slide-next" aria-label="Next image" onclick="event.stopPropagation(); window.stepCardSlide('${esc(id)}', 1);"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="fk-card-quick-view-overlay"><i class="fa-solid fa-expand"></i> Quick View</div>
+      </div>
+      ` : `
       <div class="fk-card-media" onclick="window.openFkProductPage('${esc(id)}')">
         ${firstImg ? `<img src="${esc(firstImg)}" alt="${esc(baseTitle)}" loading="lazy" />` : '<div class="fk-card-no-img"><i class="fa-solid fa-film"></i> Exclusive Pack</div>'}
         <div class="fk-card-media-gradient"></div>
         <div class="fk-card-quick-view-overlay"><i class="fa-solid fa-expand"></i> Quick View</div>
       </div>
+      `}
       <div class="fk-card-body">
         <div class="fk-card-seller-row">
-          <span class="fk-card-seller"><i class="fa-solid fa-circle-check"></i> LinkAdda<span class="fk-seller-verified-txt"> Verified</span></span>
+          <span class="fk-card-seller" title="Sold by ${esc(cat.sellerName || 'LinkAdda')} • Verified Creator"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> ${esc(cat.sellerName || 'LinkAdda')}<span class="fk-seller-verified-txt"> Verified</span></span>
         </div>
         <h3 class="fk-card-title" onclick="window.openFkProductPage('${esc(id)}')">${esc(baseTitle)}</h3>
         <div class="fk-card-rating-row">
@@ -2901,14 +3135,15 @@
           </div>
         </div>
         <div class="fk-card-actions-row">
-          <button type="button" class="fk-card-btn-cart btn-add-cart" 
+          <button type="button" class="${(typeof window.getCart === 'function' && window.getCart().some(i => String(i.id).toLowerCase() === String(id).toLowerCase())) ? 'fk-card-btn-cart btn-add-cart added in-cart' : 'fk-card-btn-cart btn-add-cart'}" 
             data-product-id="${esc(id)}" 
             data-name="${esc(baseTitle)}" 
             data-inr="${cleanINR}" 
             data-usd="${cleanUSD}" 
             data-img="${esc(firstImg)}"
+            title="${(typeof window.getCart === 'function' && window.getCart().some(i => String(i.id).toLowerCase() === String(id).toLowerCase())) ? 'Item in cart - Click to view cart' : 'Add to cart'}"
             onclick="window.handleCardAddToCart(event, this);">
-            <i class="fa-solid fa-cart-shopping"></i> Add
+            ${(typeof window.getCart === 'function' && window.getCart().some(i => String(i.id).toLowerCase() === String(id).toLowerCase())) ? '<i class="fa-solid fa-check"></i> Added' : '<i class="fa-solid fa-cart-shopping"></i> Add'}
           </button>
           <a href="${esc(orderLink)}" class="fk-card-btn-buy" 
             data-product-id="${esc(id)}" 
@@ -3184,8 +3419,180 @@
     });
   }
 
+  // ══════════════════════════════════════════════════════════════════
+  // CARD AUTO-SLIDESHOW CONTROLLER FOR MULTI-IMAGE PRODUCTS
+  // ══════════════════════════════════════════════════════════════════
+  let activeCardSlideshowObserver = null;
+
+  function goToCardSlide(mediaEl, targetIdx) {
+    if (!mediaEl) return;
+    const slides = mediaEl.querySelectorAll('.fk-card-slide');
+    const bars = mediaEl.querySelectorAll('.fk-slide-bar');
+    const total = slides.length;
+    if (total <= 1) return;
+
+    let nextIdx = targetIdx;
+    if (nextIdx < 0) nextIdx = total - 1;
+    if (nextIdx >= total) nextIdx = 0;
+
+    slides.forEach((s, idx) => {
+      if (idx === nextIdx) {
+        s.classList.add('is-active');
+      } else {
+        s.classList.remove('is-active');
+      }
+    });
+
+    bars.forEach((b, idx) => {
+      if (idx === nextIdx) {
+        b.classList.add('is-active');
+      } else {
+        b.classList.remove('is-active');
+      }
+    });
+
+    mediaEl.dataset.activeIdx = String(nextIdx);
+  }
+
+  function stopCardTimer(mediaEl) {
+    if (mediaEl._cardTimer) {
+      clearInterval(mediaEl._cardTimer);
+      mediaEl._cardTimer = null;
+    }
+    if (mediaEl._cardDelayTimeout) {
+      clearTimeout(mediaEl._cardDelayTimeout);
+      mediaEl._cardDelayTimeout = null;
+    }
+  }
+
+  function startCardTimer(mediaEl, staggerDelay = 3200) {
+    stopCardTimer(mediaEl);
+    const slides = mediaEl.querySelectorAll('.fk-card-slide');
+    if (slides.length <= 1) return;
+
+    mediaEl._cardDelayTimeout = setTimeout(() => {
+      if (mediaEl._isHovered) return;
+      const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+      goToCardSlide(mediaEl, curIdx + 1);
+
+      mediaEl._cardTimer = setInterval(() => {
+        if (mediaEl._isHovered) return;
+        const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+        goToCardSlide(mediaEl, cIdx + 1);
+      }, 3500);
+    }, staggerDelay);
+  }
+
+  function restartCardTimer(mediaEl) {
+    stopCardTimer(mediaEl);
+    const slides = mediaEl.querySelectorAll('.fk-card-slide');
+    if (slides.length <= 1) return;
+    mediaEl._cardTimer = setInterval(() => {
+      if (mediaEl._isHovered) return;
+      const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+      goToCardSlide(mediaEl, cIdx + 1);
+    }, 3500);
+  }
+
+  window.stepCardSlide = function(cardId, delta) {
+    const card = document.getElementById(`product-${cardId}`);
+    if (!card) return;
+    const mediaEl = card.querySelector('.fk-card-slideshow');
+    if (!mediaEl) return;
+    const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+    goToCardSlide(mediaEl, curIdx + delta);
+    restartCardTimer(mediaEl);
+  };
+
+  window.setCardSlide = function(cardId, targetIdx) {
+    const card = document.getElementById(`product-${cardId}`);
+    if (!card) return;
+    const mediaEl = card.querySelector('.fk-card-slideshow');
+    if (!mediaEl) return;
+    goToCardSlide(mediaEl, targetIdx);
+    restartCardTimer(mediaEl);
+  };
+
+  function initCardSlideshows() {
+    if (activeCardSlideshowObserver) {
+      activeCardSlideshowObserver.disconnect();
+    }
+
+    const cardSlideshows = document.querySelectorAll('.fk-card-slideshow');
+    if (!cardSlideshows.length) return;
+
+    if ('IntersectionObserver' in window) {
+      activeCardSlideshowObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const mediaEl = entry.target;
+          if (entry.isIntersecting) {
+            const cardIdx = parseInt(mediaEl.dataset.cardOrder || '0', 10);
+            const stagger = 2200 + ((cardIdx % 5) * 600);
+            startCardTimer(mediaEl, stagger);
+          } else {
+            stopCardTimer(mediaEl);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      cardSlideshows.forEach((mediaEl, index) => {
+        mediaEl.dataset.cardOrder = String(index);
+        activeCardSlideshowObserver.observe(mediaEl);
+
+        // Hover pause listeners
+        if (!mediaEl._hasHoverListener) {
+          mediaEl._hasHoverListener = true;
+          mediaEl.addEventListener('mouseenter', () => {
+            mediaEl._isHovered = true;
+          });
+          mediaEl.addEventListener('mouseleave', () => {
+            mediaEl._isHovered = false;
+          });
+        }
+
+        // Mobile touch swipe listener
+        if (!mediaEl._hasTouchListener) {
+          mediaEl._hasTouchListener = true;
+          let touchStartX = 0;
+          let touchStartY = 0;
+          mediaEl.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches[0]) {
+              touchStartX = e.touches[0].screenX;
+              touchStartY = e.touches[0].screenY;
+            }
+          }, { passive: true });
+
+          mediaEl.addEventListener('touchend', (e) => {
+            if (e.changedTouches && e.changedTouches[0]) {
+              const touchEndX = e.changedTouches[0].screenX;
+              const touchEndY = e.changedTouches[0].screenY;
+              const diffX = touchEndX - touchStartX;
+              const diffY = touchEndY - touchStartY;
+              if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+                const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+                if (diffX < 0) {
+                  goToCardSlide(mediaEl, cIdx + 1);
+                } else {
+                  goToCardSlide(mediaEl, cIdx - 1);
+                }
+                restartCardTimer(mediaEl);
+              }
+            }
+          }, { passive: true });
+        }
+      });
+    } else {
+      cardSlideshows.forEach((mediaEl, index) => {
+        const stagger = 2200 + ((index % 5) * 600);
+        startCardTimer(mediaEl, stagger);
+      });
+    }
+  }
+
   // -- VIEWPORT-AWARE ULTRA-FAST SLIDESHOW INIT (Zero Mobile Lag) --
   function initSlideshows() {
+    initCardSlideshows();
+
     if (activeSlideshowObserver) {
       activeSlideshowObserver.disconnect();
     }
@@ -3427,29 +3834,53 @@
         const wishlist = getWishlist();
         records = records.filter(item => wishlist.includes(String(item.id)));
       } else if (activeCategoryFilter !== 'all') {
-        const selectedCat = liveCollections.categories[activeCategoryFilter] || {};
+        const selectedCat = (liveCollections.categories && liveCollections.categories[activeCategoryFilter]) || {};
         const catTitleLower = String(selectedCat.title || activeCategoryFilter).trim().toLowerCase();
         const catSlugLower = String(selectedCat.slug || activeCategoryFilter).trim().toLowerCase();
         const catIdLower = String(activeCategoryFilter).trim().toLowerCase();
+        const catRefLower = String(selectedCat.productRef || '').trim().toLowerCase();
+        const catDescLower = String(selectedCat.description || '').trim().toLowerCase();
 
-        records = records.filter(item => {
+        let filtered = records.filter(item => {
           if (String(item.id) === String(activeCategoryFilter)) return true;
+          if (catRefLower && (
+            String(item.id).toLowerCase() === catRefLower ||
+            String(item.slug || '').toLowerCase() === catRefLower ||
+            String(item.category || '').toLowerCase() === catRefLower
+          )) return true;
+
           const itemCatLower = String(item.category || '').trim().toLowerCase();
           const itemTitleLower = String(item.title || '').trim().toLowerCase();
           const itemSlugLower = String(item.slug || '').trim().toLowerCase();
 
-          return (
-            (itemCatLower && (
-              itemCatLower === catTitleLower || 
-              itemCatLower === catSlugLower || 
-              itemCatLower === catIdLower ||
-              itemCatLower.includes(catTitleLower) ||
-              catTitleLower.includes(itemCatLower)
-            )) ||
-            (itemSlugLower && (itemSlugLower === catSlugLower || itemSlugLower === catIdLower)) ||
-            (catTitleLower && itemTitleLower.includes(catTitleLower))
-          );
+          if (itemCatLower && (
+            itemCatLower === catTitleLower || 
+            itemCatLower === catSlugLower || 
+            itemCatLower === catIdLower ||
+            (catRefLower && itemCatLower === catRefLower) ||
+            (catDescLower && (itemCatLower === catDescLower || catDescLower.includes(itemCatLower) || itemCatLower.includes(catDescLower))) ||
+            itemCatLower.includes(catTitleLower) ||
+            catTitleLower.includes(itemCatLower)
+          )) return true;
+
+          if (itemSlugLower && (
+            itemSlugLower === catSlugLower ||
+            itemSlugLower === catIdLower ||
+            (catRefLower && itemSlugLower === catRefLower)
+          )) return true;
+
+          if (catTitleLower && itemTitleLower.includes(catTitleLower)) return true;
+          if (catDescLower && itemTitleLower.includes(catDescLower)) return true;
+
+          return false;
         });
+
+        // Fail-safe: If no sub-products exist, display the category pack card itself!
+        if (!filtered.length && (selectedCat.title || selectedCat.id)) {
+          filtered = [Object.assign({ id: activeCategoryFilter }, selectedCat)];
+        }
+
+        records = filtered;
       }
 
       if (!records.length) {
@@ -3465,7 +3896,15 @@
             </div>
           `;
         } else {
-          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
+          // If a category has no products, fallback to showing all products with a friendly hint
+          records = getLiveRecords();
+          if (records.length) {
+            grid.innerHTML = records.map(item => {
+              try { return buildCard(item.id, item); } catch (e) { return ''; }
+            }).join('');
+          } else {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
+          }
         }
       } else {
         grid.innerHTML = records.map(item => {
@@ -3495,6 +3934,7 @@
       focusSharedProduct();
       if (typeof focusSharedCategory === 'function') focusSharedCategory();
       if (typeof restoreReturnPosition === 'function') restoreReturnPosition();
+      if (typeof window.renderSearchDiscovery === 'function') window.renderSearchDiscovery();
     } catch (err) {
       console.error('Failed to render live grid:', err);
     }
@@ -3711,8 +4151,16 @@
       }
     }
 
-    // 4. Do not auto-open modal overlay on navigation
-    // Product details sheet will only open when customer explicitly clicks the card media/title
+    // 4. Directly open full product details sheet when shared link is visited
+    const prodIdToOpen = foundProdId || (targetCard ? (targetCard.dataset.fbId || targetCard.dataset.productId || targetCard.id.replace('product-', '')) : '');
+    if (prodIdToOpen && !window.__sharedProductModalOpened) {
+      window.__sharedProductModalOpened = true;
+      setTimeout(() => {
+        if (typeof window.openFkProductPage === 'function') {
+          window.openFkProductPage(prodIdToOpen);
+        }
+      }, 250);
+    }
   }
 
   let sharedCategoryDone = false;
@@ -3953,10 +4401,70 @@
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
       updateCartBadges();
       renderCartDrawer();
+      syncCartButtonsUI();
     } catch (e) {
       console.warn('Error saving cart to localStorage', e);
     }
   }
+
+  function syncCartButtonsUI() {
+    const cart = getCart();
+    const cartProductIds = new Set();
+    const cartItemIds = new Set();
+
+    cart.forEach(item => {
+      if (item.id) cartProductIds.add(String(item.id).toLowerCase());
+      if (item.cartItemId) cartItemIds.add(String(item.cartItemId).toLowerCase());
+    });
+
+    // 1. Sync all product card Add to Cart buttons
+    const allCardBtns = document.querySelectorAll('.btn-add-cart, .cpb-btn-cart, .fk-card-btn-cart, .vid-tier-cart-btn');
+    allCardBtns.forEach(btn => {
+      const card = btn.closest('.fk-card') || btn.closest('.pcard') || btn.closest('.collection-pack-banner');
+      const prodId = String(btn.dataset.productId || card?.dataset?.productId || card?.dataset?.fbId || '').toLowerCase();
+      const cartItemId = String(btn.dataset.cartItemId || '').toLowerCase();
+
+      if (!btn.dataset.origHtml) {
+        btn.dataset.origHtml = btn.innerHTML;
+      }
+
+      const isInCart = (prodId && cartProductIds.has(prodId)) || (cartItemId && cartItemIds.has(cartItemId));
+
+      if (isInCart) {
+        btn.classList.add('added', 'in-cart');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Added';
+        btn.setAttribute('title', 'Item in cart - Click to view cart');
+      } else {
+        btn.classList.remove('added', 'in-cart');
+        btn.innerHTML = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add';
+        btn.removeAttribute('title');
+      }
+    });
+
+    // 2. Sync Flipkart Product Page Overlay action button
+    const fkActiveProduct = window.__fkActiveProduct;
+    const fkCartBtns = document.querySelectorAll('.fk-btn-cart-action');
+    if (fkCartBtns.length) {
+      const activeId = fkActiveProduct ? String(fkActiveProduct.id).toLowerCase() : '';
+      const isFkInCart = activeId && cartProductIds.has(activeId);
+      fkCartBtns.forEach(btn => {
+        if (!btn.dataset.origHtml) {
+          btn.dataset.origHtml = btn.innerHTML;
+        }
+        if (isFkInCart) {
+          btn.classList.add('added', 'in-cart');
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Added · View Cart';
+          btn.setAttribute('title', 'Item in cart - Click to open cart');
+        } else {
+          btn.classList.remove('added', 'in-cart');
+          btn.innerHTML = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add to Cart';
+          btn.removeAttribute('title');
+        }
+      });
+    }
+  }
+  window.syncCartButtonsUI = syncCartButtonsUI;
+  window.getCart = getCart;
 
   function parseMoneyNumber(val) {
     if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
@@ -4019,11 +4527,12 @@
   function addToCart(item) {
     const cart = getCart();
     const itemId = String(item.id) + (item.tier ? `_${String(item.tier).replace(/\s+/g, '')}` : '');
-    const existing = cart.find(i => i.cartItemId === itemId);
+    const existing = cart.find(i => i.cartItemId === itemId || String(i.id).toLowerCase() === String(item.id).toLowerCase());
     
     if (existing) {
       showCartToast(item.name || 'Product', true);
       animateCartBadges();
+      syncCartButtonsUI();
       return;
     }
 
@@ -4041,6 +4550,7 @@
     saveCart(cart);
     showCartToast(item.name || 'Product', false);
     animateCartBadges();
+    syncCartButtonsUI();
   }
 
   function removeCartItem(cartItemId) {
@@ -4073,12 +4583,14 @@
       document.getElementById('cartBadgeMob'),
       document.getElementById('cartBadgePv'),
       document.getElementById('fkAppbarCartBadge'),
+      document.getElementById('cartBadgeAccount'),
+      document.getElementById('cartBadgeOrders'),
     ];
     
     badges.forEach(b => {
       if (b) {
         b.textContent = totalCount;
-        b.style.display = totalCount > 0 ? 'flex' : 'none';
+        b.style.display = totalCount > 0 ? 'inline-flex' : 'none';
       }
     });
     
@@ -4094,6 +4606,8 @@
       document.getElementById('cartBadgeLeft'),
       document.getElementById('cartBadgePv'),
       document.getElementById('fkAppbarCartBadge'),
+      document.getElementById('cartBadgeAccount'),
+      document.getElementById('cartBadgeOrders'),
     ];
     badges.forEach(b => {
       if (b) {
@@ -4252,6 +4766,22 @@
   async function checkoutCart() {
     const cart = getCart();
     if (cart.length === 0) return;
+
+    // REQUIRE LOGIN BEFORE CHECKING OUT FROM CART (User can add to cart freely, but buying requires login)
+    const userSession = window.getCustomerSession ? window.getCustomerSession() : null;
+    if (!userSession) {
+      sessionStorage.setItem('pending_checkout_action', 'cart');
+      if (typeof window.closeCartDrawer === 'function') {
+        window.closeCartDrawer();
+      }
+      if (typeof window.openAuthModal === 'function') {
+        window.openAuthModal('input');
+        if (typeof window.showAuthToast === 'function') {
+          window.showAuthToast('Please sign in to proceed to checkout');
+        }
+      }
+      return;
+    }
     
     const checkoutBtn = document.getElementById('cartCheckoutBtn');
     if (checkoutBtn) {
@@ -4329,28 +4859,42 @@
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-add-cart, .cpb-btn-cart');
     if (!btn) return;
-    if (btn.classList.contains('added')) return;
     
     e.preventDefault();
-    const meta = extractProductMetaFromCard(btn);
-    addToCart(meta);
-    
-    // Temporary visual state on button
-    if (!btn.dataset.origHtml) {
-      btn.dataset.origHtml = btn.innerHTML;
+    e.stopPropagation();
+
+    // If already added or in-cart: directly open cart drawer!
+    if (btn.classList.contains('in-cart') || btn.classList.contains('added')) {
+      if (typeof window.openCartDrawer === 'function') {
+        window.openCartDrawer();
+      }
+      return;
     }
-    const origHtml = btn.dataset.origHtml || '<i class="fa-solid fa-cart-shopping"></i> Add to Cart';
-    btn.classList.add('added');
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
-    setTimeout(() => {
-      btn.classList.remove('added');
-      btn.innerHTML = btn.dataset.origHtml || origHtml;
-    }, 1400);
+
+    const meta = extractProductMetaFromCard(btn);
+    const cart = getCart();
+    const itemId = String(meta.id) + (meta.tier ? `_${String(meta.tier).replace(/\s+/g, '')}` : '');
+    const alreadyInCart = cart.some(i => String(i.id).toLowerCase() === String(meta.id).toLowerCase() || i.cartItemId === itemId);
+    if (alreadyInCart) {
+      syncCartButtonsUI();
+      if (typeof window.openCartDrawer === 'function') {
+        window.openCartDrawer();
+      }
+      return;
+    }
+
+    addToCart(meta);
+    syncCartButtonsUI();
   });
 
   // Initial cart and wishlist badges update on page load
   updateCartBadges();
+  syncCartButtonsUI();
   if (typeof updateWishlistUI === 'function') updateWishlistUI();
+  window.addEventListener('storage', () => {
+    updateCartBadges();
+    syncCartButtonsUI();
+  });
   </script>
 
   <style>
@@ -4383,427 +4927,1446 @@
     .media-viewer-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(255,255,255,.28);cursor:pointer;}
   </style>
 
-  <!-- ===== UNIVERSAL SEARCH OVERLAY MODAL ===== -->
-  <div class="search-overlay-modal" id="searchOverlayModal" aria-hidden="true">
-    <div class="search-overlay-backdrop" id="searchOverlayBackdrop"></div>
-    <div class="search-modal-container">
-      <div class="search-modal-header">
-        <div class="search-modal-title">
-          <i class="fa-solid fa-fire-flame-curved search-modal-icon"></i>
-          <span>Linkadda <strong>Universal Search</strong></span>
-        </div>
-        <div class="search-modal-right">
-          <span class="search-esc-hint"><kbd>ESC</kbd> to close</span>
-          <button type="button" class="search-modal-close" id="searchModalClose" aria-label="Close search">
+  <!-- ===== APP SEARCH ENGINE CONTROLLER ===== -->
+  <script>
+  (function initAppSearchEngine() {
+    const RECENT_KEY = 'linkadda_recent_searches';
+    let isRendering = false;
+
+    // --- RECENT SEARCHES (NAME ONLY) STORAGE ---
+    function getRecentSearches() {
+      try {
+        const raw = localStorage.getItem(RECENT_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list.filter(item => typeof item === 'string' && item.trim()) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveRecentSearch(term) {
+      if (!term || typeof term !== 'string') return;
+      const clean = term.trim().slice(0, 40);
+      if (!clean) return;
+
+      let list = getRecentSearches().filter(item => item.toLowerCase() !== clean.toLowerCase());
+      list.unshift(clean);
+      if (list.length > 8) list = list.slice(0, 8);
+
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+      } catch (_) {}
+
+      renderRecentSearches();
+    }
+
+    function removeRecentSearch(term) {
+      if (!term) return;
+      let list = getRecentSearches().filter(item => item.toLowerCase() !== term.toLowerCase());
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+      } catch (_) {}
+      renderRecentSearches();
+    }
+
+    function clearAllRecentSearches() {
+      try {
+        localStorage.removeItem(RECENT_KEY);
+      } catch (_) {}
+      renderRecentSearches();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Render Recent Searches as clean "name only" chips
+    function renderRecentSearches() {
+      const block = document.getElementById('searchRecentBlock');
+      const listEl = document.getElementById('searchRecentChipsList');
+      if (!block || !listEl) return;
+
+      const recents = getRecentSearches();
+      if (!recents.length) {
+        block.style.display = 'none';
+        listEl.innerHTML = '';
+        return;
+      }
+
+      block.style.display = 'block';
+      listEl.innerHTML = recents.map(term => `
+        <div class="search-recent-chip" role="button" tabindex="0">
+          <span class="recent-chip-label" data-query="${escapeHtml(term)}">
+            <i class="fa-solid fa-clock-rotate-left"></i> ${escapeHtml(term)}
+          </span>
+          <button type="button" class="btn-remove-recent" data-remove="${escapeHtml(term)}" aria-label="Remove ${escapeHtml(term)} from recent searches" title="Remove">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-      </div>
+      `).join('');
 
-      <div class="search-modal-input-wrap">
-        <i class="fa-solid fa-magnifying-glass search-modal-input-icon"></i>
-        <input type="text" id="navSearchInput" placeholder="Search categories, products, FAQs, reviews, creators, price..." autocomplete="off" />
-        <button type="button" class="search-modal-input-clear" id="navSearchClear" style="display: none;" title="Clear search">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="search-quick-tags">
-        <span class="search-tags-label"><i class="fa-solid fa-bolt"></i> Popular:</span>
-        <button type="button" class="search-tag-btn" data-query="Mom Son">Mom Son</button>
-        <button type="button" class="search-tag-btn" data-query="Sis Bro">Sis Bro</button>
-        <button type="button" class="search-tag-btn" data-query="Teen">Teen Videos</button>
-        <button type="button" class="search-tag-btn" data-query="4K">4K Quality</button>
-        <button type="button" class="search-tag-btn" data-query="Payment">FAQ: Payment</button>
-      </div>
-
-      <div class="search-modal-stats-bar" id="navSearchStats" style="display: none;"></div>
-
-      <div class="search-modal-results" id="navSearchResults">
-        <!-- Result items dynamically generated -->
-      </div>
-
-      <div class="search-modal-empty" id="navSearchNoResults" style="display: none;">
-        <div class="sme-icon"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
-        <h4>No results found for "<span id="navSearchNoTerm"></span>"</h4>
-        <p>Try searching another keyword like "Mom", "Sis", "4K", "Payment", or "Telegram".</p>
-      </div>
-    </div>
-  </div>
-
-  <script>
-  (function initUniversalSearchEngine() {
-    function setup() {
-      const openBtnHeader = document.getElementById('headerSearchBtn');
-      const openBtnMob    = document.getElementById('mobSearchBtn');
-      const modal         = document.getElementById('searchOverlayModal');
-      const backdrop      = document.getElementById('searchOverlayBackdrop');
-      const closeBtn      = document.getElementById('searchModalClose');
-      const searchInput   = document.getElementById('navSearchInput');
-      const searchClear   = document.getElementById('navSearchClear');
-      const statsBar      = document.getElementById('navSearchStats');
-      const resultsContainer = document.getElementById('navSearchResults');
-      const noResults     = document.getElementById('navSearchNoResults');
-      const noResultsTerm = document.getElementById('navSearchNoTerm');
-
-      if (!modal || !searchInput) return;
-
-      function openModal() {
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        setTimeout(() => searchInput.focus(), 150);
-        executeSearch();
-      }
-
-      function closeModal() {
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-      }
-
-      window.openUniversalSearch = openModal;
-      window.closeUniversalSearch = closeModal;
-
-      if (openBtnHeader) openBtnHeader.addEventListener('click', openModal);
-      const fkSearchIn = document.getElementById('fkSearchInput');
-      const fkSearchBtn = document.getElementById('fkSearchBtn');
-      const fkSearchBox = document.querySelector('.fk-search-box');
-
-      // Live In-Page Grid Search Filtering (Instant, no page hijack)
-      window.filterFkCardsBySearch = function(query) {
-        const term = (query || '').trim().toLowerCase();
-        const cards = document.querySelectorAll('#categoriesGrid .fk-card, #categoriesGrid .pcard');
-        let visibleCount = 0;
-        cards.forEach(card => {
-          const text = (card.textContent || '').toLowerCase();
-          const id = (card.dataset?.productId || card.dataset?.fbId || card.id || '').toLowerCase();
-          const slug = (card.dataset?.slug || '').toLowerCase();
-          const match = !term || text.includes(term) || id.includes(term) || slug.includes(term);
-          card.style.display = match ? '' : 'none';
-          if (match) visibleCount++;
-        });
-
-        let noResultsEl = document.getElementById('fkGridNoSearch');
-        if (visibleCount === 0 && term) {
-          if (!noResultsEl) {
-            noResultsEl = document.createElement('div');
-            noResultsEl.id = 'fkGridNoSearch';
-            noResultsEl.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 45px 16px; color: var(--la-text-muted); font-size: 14px;';
-            const grid = document.getElementById('categoriesGrid');
-            if (grid) grid.appendChild(noResultsEl);
-          }
-          noResultsEl.innerHTML = `
-            <div style="font-size: 2.5rem; color: #f43f5e; margin-bottom: 12px;"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--la-text); margin-bottom: 6px;">No packs found matching "${escapeHtml(query)}"</h4>
-            <p style="font-size: 0.9rem; color: var(--la-text-muted); margin-bottom: 16px;">Try searching with different keywords like Indian, Leaks, 4K, VIP, etc.</p>
-            <button type="button" class="btn-primary" onclick="window.clearFkSearch()" style="padding: 8px 20px; font-size: 13px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto; cursor: pointer;">
-              <i class="fa-solid fa-rotate-left"></i> Reset Search
-            </button>
-          `;
-          noResultsEl.style.display = 'block';
-        } else if (noResultsEl) {
-          noResultsEl.style.display = 'none';
-        }
-      };
-
-      window.clearFkSearch = function() {
-        if (fkSearchIn) fkSearchIn.value = '';
-        window.filterFkCardsBySearch('');
-      };
-
-      if (fkSearchIn) {
-        fkSearchIn.addEventListener('click', (e) => {
-          e.preventDefault();
-          searchInput.value = '';
-          openModal();
-        });
-        fkSearchIn.addEventListener('focus', (e) => {
-          e.preventDefault();
-          fkSearchIn.blur();
-          searchInput.value = '';
-          openModal();
-        });
-      }
-      if (fkSearchBox) {
-        fkSearchBox.addEventListener('click', () => {
-          searchInput.value = '';
-          openModal();
-        });
-      }
-      if (fkSearchBtn) {
-        fkSearchBtn.addEventListener('click', (e) => {
+      // Chip click handlers
+      listEl.querySelectorAll('.recent-chip-label').forEach(el => {
+        el.addEventListener('click', (e) => {
           e.stopPropagation();
-          searchInput.value = '';
-          openModal();
+          const query = el.getAttribute('data-query') || '';
+          const input = document.getElementById('appSearchInput');
+          if (input) input.value = query;
+          executeSearch(query);
+          saveRecentSearch(query);
         });
+      });
+
+      // Remove single chip handler
+      listEl.querySelectorAll('.btn-remove-recent').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const term = btn.getAttribute('data-remove') || '';
+          removeRecentSearch(term);
+        });
+      });
+    }
+
+    // Safe stringifier for search matching (handles strings, arrays like creators/tags, and nested objects)
+    function toSearchableString(val) {
+      if (!val) return '';
+      if (Array.isArray(val)) return val.map(v => toSearchableString(v)).join(' ').toLowerCase();
+      if (typeof val === 'object') return Object.values(val).map(v => toSearchableString(v)).join(' ').toLowerCase();
+      return String(val).toLowerCase();
+    }
+
+    // Build Product Card HTML for Search Screen (Trending / New / Results)
+    function buildSearchProductCard(item, badgeType = '') {
+      if (!item) return '';
+      const id = item.id || '';
+      const title = item.title || item.name || 'VIP Pack';
+      const inr = item.priceINR ? String(item.priceINR).replace(/[^\d]/g, '') : '499';
+      const usd = item.priceUSD ? String(item.priceUSD).replace(/[^\d]/g, '') : '19';
+
+      // Resolve thumbnail image with robust multi-tier fallback
+      let imgSrc = '';
+      if (item.images && Array.isArray(item.images) && item.images[0]) imgSrc = item.images[0];
+      if (!imgSrc && item.galleryImages && Array.isArray(item.galleryImages) && item.galleryImages[0]) imgSrc = item.galleryImages[0];
+      if (!imgSrc && item.image) imgSrc = item.image;
+      if (!imgSrc && item.thumbnail) imgSrc = item.thumbnail;
+      if (!imgSrc) imgSrc = 'favicon.svg';
+
+      if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:') && !imgSrc.startsWith('/') && !imgSrc.startsWith('images/')) {
+        imgSrc = 'images/' + imgSrc;
       }
 
-      if (openBtnMob) openBtnMob.addEventListener('click', () => {
-        const mobNav = document.getElementById('mobileNav');
-        if (mobNav) mobNav.classList.remove('open');
-        openModal();
-      });
-      if (closeBtn) closeBtn.addEventListener('click', closeModal);
-      if (backdrop) backdrop.addEventListener('click', closeModal);
+      let categoryName = 'VIP Collection';
+      const catKey = item.category || '';
+      const catMap = window.liveCollections?.categories || window.__preloadedCatalog?.categories || {};
+      if (catKey && catMap[catKey]) {
+        categoryName = catMap[catKey].title || catMap[catKey].name || categoryName;
+      } else if (typeof catKey === 'string' && catKey.trim()) {
+        categoryName = catKey;
+      }
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-          closeModal();
+      // Calculate realistic MRP & discount
+      const numInr = parseInt(inr, 10) || 399;
+      let mrp = item.mrp || item.originalPrice;
+      if (!mrp) {
+        if (numInr <= 300) mrp = 799;
+        else if (numInr <= 450) mrp = 999;
+        else if (numInr <= 650) mrp = 1499;
+        else if (numInr <= 900) mrp = 1999;
+        else mrp = Math.round(numInr * 2.2);
+      }
+      mrp = String(mrp).replace(/[^\d]/g, '');
+      const numMrp = parseInt(mrp, 10) || (numInr * 2);
+      const discountPercent = Math.max(35, Math.min(85, Math.round(((numMrp - numInr) / numMrp) * 100)));
+
+      // High offer detection: discount >= 50%, or price <= 499, or tagged trending/offer
+      const isHighOffer = discountPercent >= 50 || numInr <= 499 || !!item.trending || (item.badge && /offer|sale|deal|hot/i.test(String(item.badge)));
+
+      let badgeHtml = '';
+      if (isHighOffer) {
+        badgeHtml = '<span class="spc-badge high-offer"><i class="fa-solid fa-fire-flame-curved"></i> High Offer</span>';
+      } else if (badgeType === 'trending' || item.trending) {
+        badgeHtml = '<span class="spc-badge trending"><i class="fa-solid fa-fire"></i> Trending</span>';
+      } else if (badgeType === 'new' || item.isNew) {
+        badgeHtml = '<span class="spc-badge new"><i class="fa-solid fa-sparkles"></i> New</span>';
+      } else if (item.badge) {
+        badgeHtml = `<span class="spc-badge">${escapeHtml(item.badge)}</span>`;
+      }
+
+      return `
+        <div class="search-product-card ${isHighOffer ? 'has-high-offer' : ''}" data-product-id="${escapeHtml(id)}" onclick="window.openFkProductPage && window.openFkProductPage('${escapeHtml(id)}')" role="button" tabindex="0">
+          <div class="spc-thumb-wrap">
+            <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(title)}" class="spc-thumb" loading="lazy" onerror="this.onerror=null; this.src='favicon.svg';" />
+            ${badgeHtml}
+          </div>
+          <div class="spc-content">
+            <h4 class="spc-title" title="${escapeHtml(title)}">${escapeHtml(title)}</h4>
+            <div class="spc-meta">
+              <span class="spc-category"><i class="fa-solid fa-folder-open"></i> ${escapeHtml(categoryName)}</span>
+              <span class="spc-perk"><i class="fa-solid fa-bolt"></i> Instant Mega</span>
+            </div>
+            <div class="spc-price-container ${isHighOffer ? 'high-offer-pricing' : ''}">
+              <div class="spc-price-line">
+                <span class="spc-price-inr ${isHighOffer ? 'color-high-offer' : ''}">₹${inr}</span>
+                <span class="spc-mrp">₹${mrp}</span>
+                <span class="spc-discount-pill ${isHighOffer ? 'pill-high-offer' : ''}">${discountPercent}% OFF</span>
+              </div>
+              <div class="spc-sub-price">
+                <span class="spc-price-usd">$${usd} USD</span>
+                <span class="spc-tap-hint">View Pack <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Helper to get catalog records with live Firebase synchronization & 0ms preloaded snapshot
+    function getCatalogRecords() {
+      // 1. Direct from window.liveCollections.products (live realtime Firebase catalog)
+      if (window.liveCollections && window.liveCollections.products && typeof window.liveCollections.products === 'object') {
+        const prods = Object.entries(window.liveCollections.products)
+          .map(([id, item]) => ({ id, ...(item || {}) }))
+          .filter(item => item && (item.status === undefined || item.status === 'active'));
+        if (prods.length > 0) return prods;
+      }
+
+      // 2. Preloaded catalog snapshot (0ms instant availability)
+      if (window.__preloadedCatalog && window.__preloadedCatalog.products && typeof window.__preloadedCatalog.products === 'object') {
+        const prods = Object.entries(window.__preloadedCatalog.products)
+          .map(([id, item]) => ({ id, ...(item || {}) }))
+          .filter(item => item && (item.status === undefined || item.status === 'active'));
+        if (prods.length > 0) return prods;
+      }
+
+      // 3. LocalStorage cached live catalog
+      try {
+        const raw = localStorage.getItem('linkadda_cached_live_data_v4') || localStorage.getItem('linkadda_cached_live_data');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.products && typeof parsed.products === 'object') {
+            const prods = Object.entries(parsed.products)
+              .map(([id, item]) => ({ id, ...(item || {}) }))
+              .filter(item => item && (item.status === undefined || item.status === 'active'));
+            if (prods.length > 0) return prods;
+          }
+        }
+      } catch (_) {}
+
+      // 4. Fallback to getLiveRecords helper
+      if (typeof window.getLiveRecords === 'function') {
+        const recs = window.getLiveRecords();
+        if (recs && recs.length) return recs;
+      }
+
+      // 5. DOM fallback from #categoriesGrid
+      const records = [];
+      document.querySelectorAll('#categoriesGrid .fk-card, #categoriesGrid .pcard').forEach(card => {
+        const id = card.dataset?.productId || card.dataset?.fbId || card.id;
+        const title = card.querySelector('.fk-card-title, .pcard-title')?.textContent?.trim();
+        if (id && title && !records.some(r => r.id === id)) {
+          const inr = card.querySelector('.fk-card-price, .pcard-price')?.textContent?.replace(/[^\d]/g, '') || '499';
+          const usd = card.querySelector('.fk-card-price-usd, .pcard-price-usd')?.textContent?.replace(/[^\d]/g, '') || '19';
+          const img = card.querySelector('img')?.getAttribute('src') || '';
+          const isVip = card.querySelector('.fk-card-badge-vip, .pcard-pill')?.textContent?.toLowerCase().includes('vip');
+          records.push({ id, title, priceINR: inr, priceUSD: usd, images: [img], trending: true, vip: isVip });
         }
       });
+      return records;
+    }
 
-      function executeSearch() {
-        const term = searchInput.value.trim().toLowerCase();
-        if (searchClear) searchClear.style.display = term ? 'flex' : 'none';
+    // Render Curated Discovery (Trending Picks + New Releases - NOT all products at once)
+    function renderCuratedDiscovery() {
+      renderRecentSearches();
 
-        resultsContainer.innerHTML = '';
-        let matchedCategoryPills = [];
-        let matchedProducts = [];
-        let matchedFaqs = [];
+      const trendingGrid = document.getElementById('searchTrendingPicksGrid');
+      const newGrid = document.getElementById('searchNewReleasesGrid');
+      if (!trendingGrid || !newGrid) return;
 
-        // 1. Search Category Filters (liveCollections.categories + DOM Pills)
-        const categoriesList = typeof liveCollections !== 'undefined' && liveCollections.categories
-          ? Object.entries(liveCollections.categories).map(([id, cat]) => ({ id, title: cat.title || id }))
-          : [];
+      const records = getCatalogRecords();
+      if (!records.length) return;
 
-        document.querySelectorAll('#categoryFilterPills .category-pill, .category-select-element option').forEach(pill => {
-          const id = pill.dataset?.catId || pill.value;
-          const title = (pill.textContent || pill.innerText || '').trim();
-          if (id && id !== 'all' && title && !categoriesList.some(c => c.id === id)) {
-            categoriesList.push({ id, title });
-          }
-        });
+      // Pick 4-6 curated Trending items
+      const trendingItems = records.filter(item => item.trending || item.vip || (item.badge && String(item.badge).toLowerCase().includes('trend')));
+      const picks = (trendingItems.length >= 4 ? trendingItems : records).slice(0, 6);
+      trendingGrid.innerHTML = picks.map(item => buildSearchProductCard(item, 'trending')).join('');
 
-        categoriesList.forEach(cat => {
-          if (term && (cat.title.toLowerCase().includes(term) || cat.id.toLowerCase().includes(term))) {
-            if (!matchedCategoryPills.some(c => c.id === cat.id)) {
-              matchedCategoryPills.push(cat);
-            }
-          }
-        });
+      // Pick 4 curated New Releases
+      const newItems = records.filter(item => item.isNew || (item.badge && String(item.badge).toLowerCase().includes('new')));
+      const newPicks = (newItems.length >= 4 ? newItems : records.slice().reverse()).slice(0, 4);
+      newGrid.innerHTML = newPicks.map(item => buildSearchProductCard(item, 'new')).join('');
+    }
 
-        // 2. Search Categories & Products (.pcard only - excluding pinned banner)
-        const productCards = Array.from(document.querySelectorAll('.pcard, .fk-card'));
-        productCards.forEach((card) => {
-          const title = (card.querySelector('.pcard-title, .fk-card-title')?.textContent || '').toLowerCase();
-          const creators = (card.querySelector('.pcard-creators, .fk-card-seller')?.textContent || '').toLowerCase();
-          const features = (card.querySelector('.pcard-features, .fk-card-meta-perks')?.textContent || '').toLowerCase();
-          const platforms = (card.querySelector('.pcard-platforms')?.textContent || '').toLowerCase();
-          const price = (card.querySelector('.pcard-price, .fk-card-price-row')?.textContent || '').toLowerCase();
-          const pill = (card.querySelector('.pcard-pill, .fk-card-badge-vip')?.textContent || '').toLowerCase();
+    // Execute Real-Time Search (Products + Categories ONLY - Zero FAQs!)
+    function executeSearch(query) {
+      const term = (query || '').trim().toLowerCase();
+      const discoverySec = document.getElementById('searchDiscoverySection');
+      const resultsSec = document.getElementById('searchResultsSection');
+      const clearBtn = document.getElementById('appSearchClear');
+      const catWrap = document.getElementById('searchCategoriesWrap');
+      const catList = document.getElementById('searchCategoriesList');
+      const catCount = document.getElementById('searchCategoriesCount');
+      const prodWrap = document.getElementById('searchProductsWrap');
+      const prodList = document.getElementById('searchProductsList');
+      const prodCount = document.getElementById('searchProductsCount');
+      const emptyState = document.getElementById('searchEmptyState');
+      const emptyTerm = document.getElementById('searchEmptyTerm');
 
-          const isMatch = !term ||
-            title.includes(term) ||
-            creators.includes(term) ||
-            features.includes(term) ||
-            platforms.includes(term) ||
-            price.includes(term) ||
-            pill.includes(term);
+      if (clearBtn) clearBtn.style.display = term ? 'flex' : 'none';
 
-          if (isMatch) matchedProducts.push(card);
-        });
+      // If empty query, show Discovery sections
+      if (!term) {
+        if (discoverySec) discoverySec.style.display = 'block';
+        if (resultsSec) resultsSec.style.display = 'none';
+        renderCuratedDiscovery();
+        return;
+      }
 
-        // 3. Search FAQs (.faq-item)
-        const faqItems = Array.from(document.querySelectorAll('.faq-item'));
-        faqItems.forEach((faq) => {
-          const qText = (faq.querySelector('.faq-q')?.textContent || '').toLowerCase();
-          const aText = (faq.querySelector('.faq-a')?.textContent || '').toLowerCase();
-          if (term && (qText.includes(term) || aText.includes(term))) {
-            matchedFaqs.push(faq);
-          }
-        });
+      // Hide Discovery, show Results
+      if (discoverySec) discoverySec.style.display = 'none';
+      if (resultsSec) resultsSec.style.display = 'block';
 
-        const totalCount = matchedCategoryPills.length + matchedProducts.length + matchedFaqs.length;
-
-        if (term && statsBar) {
-          statsBar.style.display = 'block';
-          statsBar.textContent = `Found ${matchedCategoryPills.length} Category(ies), ${matchedProducts.length} Pack(s) & ${matchedFaqs.length} FAQ Answer(s)`;
-        } else if (statsBar) {
-          statsBar.style.display = 'none';
+      // 1. MATCH CATEGORIES ONLY
+      const matchedCategories = [];
+      const categoriesMap = window.liveCollections?.categories || window.__preloadedCatalog?.categories || {};
+      Object.entries(categoriesMap).forEach(([id, cat]) => {
+        if (!cat) return;
+        const catText = [id, cat.title, cat.name, cat.slug, cat.description].map(toSearchableString).join(' ');
+        if (catText.includes(term)) {
+          matchedCategories.push({ id, title: cat.title || cat.name || id });
         }
+      });
 
-        if (totalCount === 0 && term) {
-          if (noResults) {
-            noResults.style.display = 'flex';
-            if (noResultsTerm) noResultsTerm.textContent = searchInput.value.trim();
-          }
-          return;
-        } else {
-          if (noResults) noResults.style.display = 'none';
-        }
+      // 2. MATCH PRODUCTS ONLY (Strictly Categories + Products - ZERO FAQs!)
+      const records = getCatalogRecords();
+      const matchedProducts = records.filter(item => {
+        if (!item) return false;
+        const textPool = [
+          item.id,
+          item.title,
+          item.name,
+          item.category,
+          item.badge,
+          item.description,
+          item.slug,
+          item.creators,
+          item.tags,
+          item.features
+        ].map(toSearchableString).join(' ');
 
-        // Render Category Filter Chips
-        if (matchedCategoryPills.length > 0 && term) {
-          const catHeader = document.createElement('div');
-          catHeader.className = 'search-group-title';
-          catHeader.innerHTML = `<i class="fa-solid fa-tags"></i> Categories Found (${matchedCategoryPills.length})`;
-          resultsContainer.appendChild(catHeader);
+        return textPool.includes(term);
+      });
 
-          const catWrap = document.createElement('div');
-          catWrap.className = 'search-categories-chip-wrap';
+      // Render Categories Pills
+      if (matchedCategories.length > 0) {
+        if (catWrap) catWrap.style.display = 'block';
+        if (catCount) catCount.textContent = matchedCategories.length;
+        if (catList) {
+          catList.innerHTML = matchedCategories.map(cat => `
+            <button type="button" class="search-cat-pill" data-cat-id="${escapeHtml(cat.id)}">
+              <i class="fa-solid fa-folder-open"></i>
+              <span>${escapeHtml(cat.title)}</span>
+            </button>
+          `).join('');
 
-          matchedCategoryPills.forEach(cat => {
-            const chip = document.createElement('button');
-            chip.type = 'button';
-            chip.className = 'search-cat-chip';
-            chip.innerHTML = `<i class="fa-solid fa-folder-open"></i> ${cat.title}`;
-
-            chip.addEventListener('click', () => {
-              closeModal();
+          catList.querySelectorAll('.search-cat-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const catId = btn.getAttribute('data-cat-id');
+              window.hideSearchPage && window.hideSearchPage();
               if (typeof activeCategoryFilter !== 'undefined') {
-                activeCategoryFilter = cat.id;
+                activeCategoryFilter = catId;
                 if (typeof renderCategoryFilters === 'function') renderCategoryFilters();
                 if (typeof renderLiveGrid === 'function') renderLiveGrid();
               }
               const servicesSec = document.getElementById('services');
-              if (servicesSec) {
-                servicesSec.scrollIntoView({ behavior: 'smooth' });
-              }
+              if (servicesSec) servicesSec.scrollIntoView({ behavior: 'smooth' });
             });
-
-            catWrap.appendChild(chip);
-          });
-
-          resultsContainer.appendChild(catWrap);
-        }
-
-        // Render Category Product Cards
-        if (matchedProducts.length > 0) {
-          const groupHeader = document.createElement('div');
-          groupHeader.className = 'search-group-title';
-          groupHeader.innerHTML = `<i class="fa-solid fa-layer-group"></i> Categories & Products (${matchedProducts.length})`;
-          resultsContainer.appendChild(groupHeader);
-
-          matchedProducts.forEach((card) => {
-            const title = card.querySelector('.pcard-title, .fk-card-title')?.textContent || 'Product';
-            const creators = card.querySelector('.pcard-creators, .fk-card-seller')?.textContent || '';
-            const price = card.querySelector('.pcard-price, .fk-card-price-row')?.textContent || '';
-            const orderHref = card.querySelector('.btn-order-now, .fk-card-btn-buy')?.getAttribute('href') || 'payment.html';
-
-            // Multi-tier Image Extractor
-            let imgSrc = '';
-            const imgEl = card.querySelector('.fb-slide-active img, .fb-slide img, .pslide-active img, .pcard-img-wrap img, .pcard-img, .fk-card-media img, img');
-            if (imgEl && imgEl.getAttribute('src') && !imgEl.getAttribute('src').includes('undefined')) {
-              imgSrc = imgEl.getAttribute('src');
-            }
-            if (!imgSrc) {
-              const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn, .fk-card-btn-cart');
-              if (cartBtn && cartBtn.dataset && cartBtn.dataset.img) {
-                imgSrc = cartBtn.dataset.img;
-              }
-            }
-
-            const thumbMarkup = imgSrc
-              ? `<img src="${imgSrc}" alt="${title}" class="src-thumb" onerror="this.onerror=null; this.outerHTML='<div class=\\'src-thumb-fallback\\'><i class=\\'fa-solid fa-fire-flame-curved\\'></i></div>';" />`
-              : `<div class="src-thumb-fallback"><i class="fa-solid fa-fire-flame-curved"></i></div>`;
-
-            const cartBtn = card.querySelector('.btn-add-cart, .cpb-btn-cart, .vid-tier-cart-btn, .fk-card-btn-cart');
-            const productId = cartBtn?.getAttribute('data-product-id') || card.getAttribute('data-product-id') || title.toLowerCase().replace(/\s+/g, '-');
-            const productInr = cartBtn?.getAttribute('data-inr') || price.replace(/[^\d]/g, '') || '599';
-            const productUsd = cartBtn?.getAttribute('data-usd') || '39';
-
-            const itemEl = document.createElement('div');
-            itemEl.className = 'search-result-card';
-            itemEl.innerHTML = `
-              <div class="src-left">
-                ${thumbMarkup}
-                <div class="src-info">
-                  <div class="src-title">${title}</div>
-                  <div class="src-creators">${creators}</div>
-                </div>
-              </div>
-              <div class="src-right">
-                <div class="src-price-box">
-                  <div class="src-price">${price}</div>
-                </div>
-                <div class="src-actions">
-                  <a href="${orderHref}" class="src-btn-order">Order <i class="fa-solid fa-arrow-right"></i></a>
-                  <button type="button" class="src-btn-cart btn-add-cart" 
-                    data-product-id="${productId}" 
-                    data-name="${title}" 
-                    data-inr="${productInr}" 
-                    data-usd="${productUsd}">🛒 Add</button>
-                </div>
-              </div>
-            `;
-
-            itemEl.addEventListener('click', (e) => {
-              if (e.target.closest('.src-actions')) return;
-              closeModal();
-              if (typeof window.openFkProductPage === 'function' && card.dataset?.productId) {
-                window.openFkProductPage(card.dataset.productId);
-              } else {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                card.classList.add('search-highlight');
-                setTimeout(() => card.classList.remove('search-highlight'), 1400);
-              }
-            });
-
-            resultsContainer.appendChild(itemEl);
           });
         }
-
-        // Render FAQ Results
-        if (matchedFaqs.length > 0) {
-          const faqHeader = document.createElement('div');
-          faqHeader.className = 'search-group-title';
-          faqHeader.style.marginTop = '16px';
-          faqHeader.innerHTML = `<i class="fa-solid fa-circle-question"></i> Help & FAQs (${matchedFaqs.length})`;
-          resultsContainer.appendChild(faqHeader);
-
-          matchedFaqs.forEach((faq) => {
-            const question = faq.querySelector('.faq-q span')?.textContent || 'FAQ Question';
-            const answer = faq.querySelector('.faq-a p')?.textContent || '';
-
-            const faqEl = document.createElement('div');
-            faqEl.className = 'faq-result-card';
-            faqEl.innerHTML = `
-              <div class="frc-q"><i class="fa-solid fa-question-circle"></i> ${question}</div>
-              <div class="frc-a">${answer}</div>
-            `;
-
-            faqEl.addEventListener('click', () => {
-              closeModal();
-              faq.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              faq.classList.add('active');
-              faq.classList.add('search-highlight');
-              setTimeout(() => faq.classList.remove('search-highlight'), 1400);
-            });
-
-            resultsContainer.appendChild(faqEl);
-          });
-        }
+      } else {
+        if (catWrap) catWrap.style.display = 'none';
       }
 
-      searchInput.addEventListener('input', executeSearch);
+      // Render Products Grid
+      if (matchedProducts.length > 0) {
+        if (prodWrap) prodWrap.style.display = 'block';
+        if (prodCount) prodCount.textContent = matchedProducts.length;
+        if (prodList) {
+          prodList.innerHTML = matchedProducts.map(item => buildSearchProductCard(item)).join('');
+        }
+        if (emptyState) emptyState.style.display = 'none';
+      } else {
+        if (prodWrap) prodWrap.style.display = 'none';
+        if (matchedCategories.length === 0) {
+          if (emptyState) {
+            emptyState.style.display = 'flex';
+            if (emptyTerm) emptyTerm.textContent = query.trim();
+          }
+        } else {
+          if (emptyState) emptyState.style.display = 'none';
+        }
+      }
+    }
 
-      if (searchClear) {
-        searchClear.addEventListener('click', () => {
-          searchInput.value = '';
-          executeSearch();
-          searchInput.focus();
+    // --- APP SCREEN ROUTER (SHOW & HIDE SEARCH VIEW) ---
+    let searchPreviousScreen = 'store';
+
+    function showSearchPage(initialQuery = '', fromScreen = 'store') {
+      searchPreviousScreen = fromScreen;
+      const storefrontView = document.getElementById('appStorefrontView');
+      const accountView = document.getElementById('appAccountView');
+      const notifsView = document.getElementById('appNotificationsView');
+      const searchView = document.getElementById('appSearchView');
+      if (!searchView) return;
+
+      if (storefrontView) storefrontView.style.display = 'none';
+      if (accountView) accountView.style.display = 'none';
+      if (notifsView) notifsView.style.display = 'none';
+      searchView.style.display = 'block';
+
+      // Hide storefront header, header spacer, marquee and floating cart on ALL devices during dedicated search
+      const fkHeader = document.getElementById('fkHeader');
+      const fkHeaderSpacer = document.getElementById('fkHeaderSpacer');
+      const marqueeWrap = document.querySelector('.marquee-wrap');
+      const floatingCart = document.getElementById('leftFloatingCart');
+      const appbar = document.getElementById('fkMobileAppbar');
+      if (fkHeader) fkHeader.style.display = 'none';
+      if (fkHeaderSpacer) fkHeaderSpacer.style.display = 'none';
+      if (marqueeWrap) marqueeWrap.style.display = 'none';
+      if (floatingCart) floatingCart.style.display = 'none';
+      if (appbar) appbar.style.display = 'none';
+      document.body.classList.add('in-search-view');
+
+      document.body.style.overflow = '';
+      window.scrollTo(0, 0);
+
+      const input = document.getElementById('appSearchInput');
+      if (initialQuery && typeof initialQuery === 'string') {
+        if (input) input.value = initialQuery;
+        executeSearch(initialQuery);
+        saveRecentSearch(initialQuery);
+      } else {
+        if (input) input.value = '';
+        executeSearch('');
+      }
+
+      if (window.location.hash !== '#search') {
+        window.history.pushState({ screen: 'search', from: fromScreen }, '', '#search');
+      }
+
+      setTimeout(() => {
+        if (input) input.focus();
+      }, 120);
+    }
+
+    function hideSearchPage(preventHistoryBack = false) {
+      const searchView = document.getElementById('appSearchView');
+      if (searchView) searchView.style.display = 'none';
+
+      const appbar = document.getElementById('fkMobileAppbar');
+      if (appbar) appbar.style.display = '';
+      document.body.classList.remove('in-search-view');
+
+      if (searchPreviousScreen === 'profile') {
+        if (typeof window.showProfilePage === 'function') window.showProfilePage();
+      } else if (searchPreviousScreen === 'notifications') {
+        if (typeof window.showNotificationsPage === 'function') window.showNotificationsPage('store');
+      } else {
+        const storefrontView = document.getElementById('appStorefrontView');
+        if (storefrontView) storefrontView.style.display = 'block';
+        const fkHeader = document.getElementById('fkHeader');
+        const fkHeaderSpacer = document.getElementById('fkHeaderSpacer');
+        const marqueeWrap = document.querySelector('.marquee-wrap');
+        const floatingCart = document.getElementById('leftFloatingCart');
+        if (fkHeader) fkHeader.style.display = '';
+        if (fkHeaderSpacer) fkHeaderSpacer.style.display = '';
+        if (marqueeWrap) marqueeWrap.style.display = '';
+        if (floatingCart) floatingCart.style.display = '';
+        if (typeof window.syncSpacer === 'function') window.syncSpacer();
+      }
+
+      document.body.style.overflow = '';
+
+      if (!preventHistoryBack && window.location.hash === '#search') {
+        window.history.back();
+      }
+    }
+
+    // Expose global methods
+    window.showSearchPage = showSearchPage;
+    window.hideSearchPage = hideSearchPage;
+    window.openUniversalSearch = showSearchPage; // Full backward compatibility
+    window.closeUniversalSearch = hideSearchPage;
+    window.saveRecentSearch = saveRecentSearch;
+    window.removeRecentSearch = removeRecentSearch;
+    window.clearAllRecentSearches = clearAllRecentSearches;
+    window.renderSearchDiscovery = renderCuratedDiscovery;
+
+    // --- BIND EVENT LISTENERS ---
+    function setupEvents() {
+      const input = document.getElementById('appSearchInput');
+      const clearBtn = document.getElementById('appSearchClear');
+      const submitBtn = document.getElementById('appSearchSubmitBtn');
+      const resetBtn = document.getElementById('btnSearchReset');
+      const clearRecentBtn = document.getElementById('btnClearAllRecentSearches');
+
+      // Input typing with debounce
+      let debounceTimer = null;
+      if (input) {
+        input.addEventListener('input', () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            executeSearch(input.value);
+          }, 100);
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const q = input.value.trim();
+            if (q) {
+              executeSearch(q);
+              saveRecentSearch(q);
+            }
+          }
         });
       }
 
-      document.querySelectorAll('.search-tag-btn').forEach((tagBtn) => {
-        tagBtn.addEventListener('click', () => {
-          searchInput.value = tagBtn.getAttribute('data-query') || '';
-          executeSearch();
-          searchInput.focus();
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+          executeSearch('');
+        });
+      }
+
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          const q = input ? input.value.trim() : '';
+          if (q) {
+            executeSearch(q);
+            saveRecentSearch(q);
+          }
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (input) input.value = '';
+          executeSearch('');
+        });
+      }
+
+      if (clearRecentBtn) {
+        clearRecentBtn.addEventListener('click', () => {
+          clearAllRecentSearches();
+        });
+      }
+
+      // Trending search tag buttons
+      document.querySelectorAll('.search-trend-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const q = tag.getAttribute('data-query') || '';
+          if (input) input.value = q;
+          executeSearch(q);
+          saveRecentSearch(q);
         });
       });
+
+      // Header Search Triggers
+      const fkSearchIn = document.getElementById('fkSearchInput');
+      const fkSearchBtn = document.getElementById('fkSearchBtn');
+      const fkSearchBox = document.querySelector('.fk-search-box');
+      const mobSearchBtn = document.getElementById('mobSearchBtn');
+
+      if (fkSearchIn) {
+        fkSearchIn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showSearchPage('', 'store');
+        });
+        fkSearchIn.addEventListener('focus', (e) => {
+          e.preventDefault();
+          fkSearchIn.blur();
+          showSearchPage('', 'store');
+        });
+      }
+
+      if (fkSearchBox) {
+        fkSearchBox.addEventListener('click', () => {
+          showSearchPage('', 'store');
+        });
+      }
+
+      if (fkSearchBtn) {
+        fkSearchBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showSearchPage('', 'store');
+        });
+      }
+
+      if (mobSearchBtn) {
+        mobSearchBtn.addEventListener('click', () => {
+          const mobNav = document.getElementById('mobileNav');
+          if (mobNav) mobNav.classList.remove('open');
+          showSearchPage('', 'store');
+        });
+      }
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', setup);
+      document.addEventListener('DOMContentLoaded', setupEvents);
     } else {
-      setup();
+      setupEvents();
     }
   })();
   </script>
+  </main>
+  <!-- ===== END APP STOREFRONT VIEW ===== -->
+
+  <!-- ===== LUXURY USER AUTH MODAL ===== -->
+  <div class="auth-modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="auth-modal-card">
+      <button type="button" class="auth-modal-close-btn" id="authModalCloseBtn" aria-label="Close modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Status notification banner -->
+      <div class="auth-msg-banner" id="authMsgBanner"></div>
+
+      <!-- VIEW 1: Initial Input & Google Method View -->
+      <div class="auth-input-view" id="authInputView">
+        <div class="auth-modal-header">
+          <div class="auth-brand-badge">
+            LinkAdda <i class="fa-solid fa-crown"></i> Shop
+          </div>
+          <h2 class="auth-modal-title" id="authModalTitle">Welcome Back</h2>
+          <p class="auth-modal-subtitle">Sign in or register to manage orders & access instant downloads</p>
+        </div>
+
+        <!-- Google Sign-In Button -->
+        <button type="button" class="btn-google-auth" id="btnGoogleAuth">
+          <svg class="google-icon-svg" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <div class="auth-divider">
+          <span>or continue with email</span>
+        </div>
+
+        <!-- Email Input & Send OTP -->
+        <div class="auth-form-group">
+          <label class="auth-input-label" for="authEmailInput">Email Address</label>
+          <div class="auth-input-wrap">
+            <input type="email" id="authEmailInput" class="auth-text-input" placeholder="name@example.com" autocomplete="email" required />
+            <i class="fa-solid fa-envelope auth-input-icon"></i>
+          </div>
+        </div>
+
+        <!-- Terms & Privacy Agreement -->
+        <div class="auth-terms-row" style="display:flex;align-items:flex-start;gap:9px;margin:14px 0 16px;font-size:12px;color:#94a3b8;line-height:1.45;">
+          <input type="checkbox" id="authTermsCheckbox" checked style="accent-color:#ff2a8d;width:16px;height:16px;margin-top:2px;cursor:pointer;flex-shrink:0;" />
+          <label for="authTermsCheckbox" style="cursor:pointer;user-select:none;">
+            By continuing, I agree to LinkAdda <a href="/terms.html" target="_blank" style="color:#ff2a8d;text-decoration:none;font-weight:600;">Terms</a> &amp; <a href="/privacy.html" target="_blank" style="color:#ff2a8d;text-decoration:none;font-weight:600;">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="button" class="btn-auth-primary" id="btnSendOtp">
+          <span>Send Verification Code</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- VIEW 2: 6-Digit OTP Verification View -->
+      <div class="otp-view-wrap" id="authOtpView">
+        <div class="auth-modal-header">
+          <div class="auth-brand-badge">
+            LinkAdda <i class="fa-solid fa-crown"></i> Security
+          </div>
+          <h2 class="auth-modal-title">Enter 6-Digit Code</h2>
+          <p class="auth-modal-subtitle">
+            We sent a verification code to <span class="otp-target-email" id="otpTargetEmail">your email</span>
+          </p>
+        </div>
+
+        <!-- 6 Digit Input Boxes -->
+        <div class="otp-inputs-grid" id="otpInputsGrid">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="0" autofocus />
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="1" />
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="2" />
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="3" />
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="4" />
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit-box" data-index="5" />
+        </div>
+
+        <div style="text-align: center; font-size: 0.78rem; color: #94a3b8; margin: -6px 0 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <i class="fa-regular fa-clock" style="color: #ff2a8d;"></i>
+          <span>Verification code expires in <strong style="color: #cbd5e1;">5 minutes</strong></span>
+        </div>
+
+        <div class="otp-timer-row">
+          <button type="button" class="btn-edit-email" id="btnEditEmail">
+            <i class="fa-solid fa-pen-to-square"></i> Change email
+          </button>
+          <button type="button" class="btn-resend-otp" id="btnResendOtp" disabled>
+            Resend in 60s
+          </button>
+        </div>
+
+        <button type="button" class="btn-auth-primary" id="btnVerifyOtp">
+          <span>Verify & Continue</span>
+          <i class="fa-solid fa-check"></i>
+        </button>
+      </div>
+
+      <!-- VIEW 3: Name Setup View -->
+      <div class="auth-name-view" id="authNameView">
+        <div class="auth-modal-header">
+          <div class="auth-brand-badge">
+            LinkAdda <i class="fa-solid fa-crown"></i> Shop
+          </div>
+          <h2 class="auth-modal-title">What is your name?</h2>
+          <p class="auth-modal-subtitle">Enter your name for personalized orders and downloads</p>
+        </div>
+
+        <div class="auth-form-group">
+          <label class="auth-input-label" for="authSetupNameInput">Your Full Name</label>
+          <div class="auth-input-wrap">
+            <input type="text" id="authSetupNameInput" class="auth-text-input" placeholder="e.g. Hardik Patel" autofocus />
+            <i class="fa-solid fa-user auth-input-icon"></i>
+          </div>
+        </div>
+
+        <button type="button" class="btn-auth-primary" id="btnSaveSetupName">
+          <span>Save & Continue</span>
+          <i class="fa-solid fa-check"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FULL-SCREEN NATIVE E-COMMERCE PROFILE PAGE ===== -->
+  <!-- ===== FULL-PAGE NATIVE E-COMMERCE ACCOUNT VIEW (LINKADDA NATIVE STANDARD) ===== -->
+  <div id="appAccountView" style="display: none;">
+    <!-- Account Top App Bar -->
+    <div class="app-screen-topbar">
+      <button type="button" class="btn-app-screen-back" id="btnBackFromProfile" onclick="window.hideProfilePage && window.hideProfilePage()">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Store</span>
+      </button>
+      <div class="app-screen-title-group">
+        <h1 class="app-screen-title">My Account</h1>
+      </div>
+      <div class="app-screen-top-actions">
+        <button type="button" class="btn-app-screen-icon" id="btnTopAccountNotif" onclick="window.showNotificationsPage ? window.showNotificationsPage('profile') : (window.location.hash = '#notifications')" aria-label="Notifications" title="Notifications">
+          <i class="fa-solid fa-bell"></i>
+          <span class="appbar-notif-dot" id="appbarNotifDot"></span>
+        </button>
+        <button type="button" class="btn-app-screen-icon" onclick="window.openCartDrawer && window.openCartDrawer()" aria-label="Cart" title="Shopping Cart" style="position: relative;">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="appbar-cart-badge" id="cartBadgeAccount" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Account Page Container (Responsive 2-Column Desktop Grid / 1-Column Mobile Flow) -->
+    <div class="app-profile-container">
+      
+      <!-- ━━ COLUMN A: Profile Identity, Settings & Support Sidebar (Sticky on PC) ━━ -->
+      <div class="profile-col-sidebar">
+
+        <!-- 1. Premium Customer Identity Card -->
+        <div class="profile-hero-card">
+          <!-- Centered Avatar with Glow -->
+          <div class="profile-hero-center">
+            <div class="profile-avatar-wrapper" id="profileAvatarWrap">
+              <div class="profile-avatar-disc" id="profileAvatarDisc">
+                <span class="profile-avatar-initials" id="profileAvatarInitials"><i class="fa-solid fa-crown"></i></span>
+              </div>
+              <div class="profile-avatar-status-badge" id="profileAvatarStatus" title="Verified Customer">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+
+            <!-- Name + Edit -->
+            <div class="profile-hero-name-wrap">
+              <h2 class="profile-greeting-title"><span id="profileGreetingName">Customer</span></h2>
+              <button type="button" class="btn-name-edit-inline" id="btnEditProfileName" onclick="window.openEditProfileModal && window.openEditProfileModal()" title="Edit Profile" aria-label="Edit Profile">
+                <i class="fa-solid fa-user-pen"></i>
+              </button>
+            </div>
+
+            <!-- Single Verified Member Badge (Only 1 instance, no duplicate subtitle!) -->
+            <div class="profile-status-wrap">
+              <span class="profile-single-verified-badge" id="profileVerifiedBadge" style="display: none;">
+                <i class="fa-solid fa-circle-check"></i> Verified Member
+              </span>
+              <!-- Subtitle used strictly for Guest when logged out -->
+              <p class="profile-member-status" id="profileDisplaySubtitle" style="display: none;"></p>
+              <p class="profile-email-text" id="profileDisplayEmail" style="display: none;"></p>
+            </div>
+
+            <!-- Single Joined Date (Only 1 instance) -->
+            <div class="profile-joined-text" id="profileJoinedText" style="display: none;">
+              <i class="fa-regular fa-calendar-check"></i> Member since <span id="profileJoinedDateText">16 September</span>
+            </div>
+          </div>
+
+          <!-- Account ID + Feature Pills -->
+          <div class="profile-hero-badges">
+            <div class="profile-id-badge-group">
+              <span class="profile-pill-badge id-pill" id="profileDisplayId">#LA-STORE</span>
+              <button type="button" class="btn-copy-id-chip" id="btnCopyProfileId" onclick="window.copyProfileAccountId && window.copyProfileAccountId()" title="Copy Account ID" aria-label="Copy Account ID">
+                <i class="fa-regular fa-copy"></i>
+                <span class="copy-id-label">Copy</span>
+              </button>
+            </div>
+            <span class="profile-pill-badge access-pill">
+              <i class="fa-solid fa-bolt"></i> Instant Access
+            </span>
+          </div>
+
+          <!-- Strictly hidden compatibility anchor -->
+          <div style="display: none !important;" aria-hidden="true">
+            <span id="profileJoinedBadge"><span id="profileJoinedDatePill"></span></span>
+          </div>
+
+          <!-- Guest Sign-In Invitation Box (Visible when not logged in) -->
+          <div id="profileGuestCtaWrap" class="profile-guest-cta-box" style="display: none;">
+            <div class="guest-cta-benefits">
+              <div class="guest-benefit-item"><i class="fa-solid fa-check"></i> <span>Instant access to purchased packs & downloads</span></div>
+              <div class="guest-benefit-item"><i class="fa-solid fa-check"></i> <span>Lifetime order history & cloud synchronization</span></div>
+              <div class="guest-benefit-item"><i class="fa-solid fa-check"></i> <span>Exclusive member deals & Telegram priority support</span></div>
+            </div>
+            <button type="button" class="btn-profile-login-cta" onclick="window.openAuthModal && window.openAuthModal('input')">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              <span>Sign In / Create Account</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- LinkAdda Creator & Seller Hub Card (Protected: Visible Only for Logged-In Members) -->
+        <div class="profile-seller-card" id="profileSellerSection" style="display: none;">
+          <div class="seller-card-badge-row">
+            <span class="seller-gold-tag"><i class="fa-solid fa-crown"></i> Content Partner Program</span>
+            <span class="seller-status-indicator" id="profileSellerStatusIndicator" style="display: none;"></span>
+          </div>
+          <h3 class="seller-card-title" id="profileSellerTitle">Become a LinkAdda Seller</h3>
+          <p class="seller-card-desc" id="profileSellerDesc">
+            Monetize your exclusive Mega & Google Drive collections, viral Telegram packs, and private vaults. Earn 100% creator share settled within 7 days of verified customer purchase.
+          </p>
+          <div class="seller-card-action-wrap">
+            <a href="./seller/index.html" id="profileSellerActionBtn" class="btn-profile-seller-action">
+              <span id="profileSellerBtnText">Become a Seller</span>
+              <i class="fa-solid fa-arrow-right" id="profileSellerBtnIcon"></i>
+            </a>
+            <a href="./seller/login.html" id="profileSellerLoginLink" class="seller-login-sublink">
+              Already approved? Seller Login →
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. App Settings & Preferences -->
+        <div class="account-section-card app-settings-card">
+          <div class="account-section-header">
+            <div>
+              <h3 class="account-section-title">
+                <i class="fa-solid fa-sliders" style="color: #a855f7;"></i> App Settings
+              </h3>
+              <p class="account-section-sub">Customize notification alerts, display theme & store currency</p>
+            </div>
+          </div>
+
+          <div class="profile-options-list">
+            <!-- Option 1: Notifications & Alerts -->
+            <div class="profile-option-item clickable" onclick="window.showNotificationsPage && window.showNotificationsPage('profile')" role="button" tabindex="0">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap notifs">
+                  <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Notifications & Alerts</strong>
+                  <span class="opt-sub">Instant delivery links, welcome perks & order updates</span>
+                </div>
+              </div>
+              <div class="profile-option-right">
+                <span class="profile-notif-pill-badge" id="profileOptionNotifBadge">0 New</span>
+                <i class="fa-solid fa-chevron-right opt-chevron"></i>
+              </div>
+            </div>
+
+            <!-- Option 2: Appearance Theme -->
+            <div class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap theme">
+                  <i class="fa-solid fa-circle-half-stroke"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Appearance Theme</strong>
+                  <span class="opt-sub">Switch between Dark Obsidian and Pristine Light</span>
+                </div>
+              </div>
+              <div class="profile-option-right">
+                <label class="profile-theme-switch" title="Toggle Light/Dark Theme">
+                  <input type="checkbox" id="profileThemeSwitch" />
+                  <span class="profile-theme-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Option 3: Store Currency -->
+            <div class="profile-option-item clickable" onclick="document.getElementById('mobCurrencyToggle')?.click()" role="button" tabindex="0">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap currency">
+                  <i class="fa-solid fa-coins"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Store Currency</strong>
+                  <span class="opt-sub">Indian Rupee (₹ INR) / Global Dollar ($ USD)</span>
+                </div>
+              </div>
+              <div class="profile-option-right">
+                <span class="profile-currency-pill">₹ INR</span>
+                <i class="fa-solid fa-chevron-right opt-chevron"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Help, FAQs & Policies -->
+        <div class="account-section-card profile-support-card">
+          <div class="account-section-header">
+            <div>
+              <h3 class="account-section-title">
+                <i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> Support & Store Policies
+              </h3>
+              <p class="account-section-sub">Help guide, discrete billing policies & terms</p>
+            </div>
+          </div>
+          <div class="profile-options-list">
+            <a href="about.html" class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap info">
+                  <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">About LinkAdda</strong>
+                  <span class="opt-sub">Authentic creator marketplace & vision</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right opt-chevron"></i>
+            </a>
+
+            <a href="./seller/index.html" class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                  <i class="fa-solid fa-crown"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Creator Partner Hub</strong>
+                  <span class="opt-sub">Sell digital packs & earn 100% via 7-day UPI</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right opt-chevron"></i>
+            </a>
+
+            <a href="about.html#faq" class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap faq">
+                  <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Frequently Asked Questions</strong>
+                  <span class="opt-sub">Instant answers & payment verification</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right opt-chevron"></i>
+            </a>
+
+            <a href="legal.html" class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap legal">
+                  <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Terms & Privacy Policy</strong>
+                  <span class="opt-sub">Discrete billing & refund rules</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right opt-chevron"></i>
+            </a>
+
+            <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="profile-option-item">
+              <div class="profile-option-left">
+                <div class="profile-opt-icon-wrap telegram">
+                  <i class="fa-brands fa-telegram"></i>
+                </div>
+                <div class="profile-option-text">
+                  <strong class="opt-title">Direct Telegram Concierge</strong>
+                  <span class="opt-sub">@TRUSTED_BROTHER1234 (24/7 Live Desk)</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right opt-chevron"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. Sign Out & Account Controls -->
+        <div id="profileLogoutWrap" class="profile-logout-box" style="margin-top: 6px;">
+          <button type="button" class="btn-profile-logout" id="profileLogoutBtn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Sign Out of Account</span>
+          </button>
+
+          <!-- Delete Account (Disabled / Coming Soon) -->
+          <div class="profile-delete-account-disabled" id="profileDeleteAccountWrap" title="Account deletion is coming soon" aria-disabled="true">
+            <div class="delete-account-content">
+              <i class="fa-regular fa-trash-can"></i>
+              <span>Delete Account</span>
+            </div>
+            <span class="badge-coming-soon">Coming Soon</span>
+          </div>
+        </div>
+
+    <!-- ━━ LOGOUT CONFIRMATION MODAL ━━ -->
+    <div id="logoutConfirmModal" class="logout-confirm-overlay" style="display: none;">
+      <div class="logout-confirm-backdrop" onclick="window.closeLogoutModal && window.closeLogoutModal()"></div>
+      <div class="logout-confirm-card">
+        <div class="logout-confirm-icon-wrap">
+          <div class="logout-confirm-icon-circle">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </div>
+        </div>
+        <h3 class="logout-confirm-title">Sign Out?</h3>
+        <p class="logout-confirm-desc">Are you sure you want to sign out of your LinkAdda account? You can always sign back in anytime.</p>
+        <div class="logout-confirm-actions">
+          <button type="button" class="btn-logout-cancel" id="btnLogoutCancel" onclick="window.closeLogoutModal && window.closeLogoutModal()">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Cancel</span>
+          </button>
+          <button type="button" class="btn-logout-confirm" id="btnLogoutConfirm" onclick="window.confirmLogout && window.confirmLogout()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Yes, Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+      </div>
+
+      <!-- ━━ COLUMN B: Quick Hub Matrix & Orders Activity Center ━━ -->
+      <div class="profile-col-main">
+
+        <!-- 1. Bento 4-Tile Quick Hub -->
+        <div class="fk-hub-grid">
+          <div class="fk-hub-card orders-tile" onclick="window.showOrdersPage ? window.showOrdersPage('profile') : (window.location.hash = '#orders')" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap orders">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">My Orders</div>
+              <div class="fk-hub-badge" id="profileOrdersCount">0 Orders</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <div class="fk-hub-card likes-tile" onclick="window.openWishlistDrawer && window.openWishlistDrawer()" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap likes">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">Wishlist</div>
+              <div class="fk-hub-badge" id="profileLikedCount">0 Saved</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <div class="fk-hub-card notif-tile" id="profileNotifCard" onclick="window.showNotificationsPage && window.showNotificationsPage('profile')" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap notif">
+              <i class="fa-solid fa-bell"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">Notifications</div>
+              <div class="fk-hub-badge notif-badge-pill" id="profileNotifCount">0 New</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="fk-hub-card help-tile">
+            <div class="fk-hub-icon-wrap help">
+              <i class="fa-brands fa-telegram"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">24/7 Support</div>
+              <div class="fk-hub-badge" style="color: #60a5fa;">Direct TG</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Edit Profile Modal (Name + Email + Joined Date) -->
+    <div id="appEditProfileModal" class="la-auth-modal" style="display: none;">
+      <div class="la-auth-overlay" onclick="window.closeEditProfileModal && window.closeEditProfileModal()"></div>
+      <div class="la-auth-card edit-profile-card">
+        <div class="la-auth-header">
+          <div class="la-auth-title-wrap">
+            <h3 class="la-auth-title"><i class="fa-solid fa-user-pen" style="color: #ff2a8d; margin-right: 8px;"></i> Edit Profile</h3>
+            <p class="la-auth-sub">Update your account full name and email address</p>
+          </div>
+          <button type="button" class="btn-auth-close" onclick="window.closeEditProfileModal && window.closeEditProfileModal()" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="edit-profile-form">
+          <div class="edit-profile-field">
+            <label for="editProfileNameInput" class="edit-profile-label">Full Name</label>
+            <div class="edit-profile-input-wrap">
+              <i class="fa-solid fa-user edit-input-icon"></i>
+              <input type="text" id="editProfileNameInput" class="edit-profile-input" placeholder="Enter your full name" maxlength="40" autocomplete="name" />
+            </div>
+          </div>
+          <div class="edit-profile-field">
+            <label for="editProfileEmailInput" class="edit-profile-label">Email Address</label>
+            <div class="edit-profile-input-wrap">
+              <i class="fa-solid fa-envelope edit-input-icon"></i>
+              <input type="email" id="editProfileEmailInput" class="edit-profile-input" placeholder="name@example.com" maxlength="80" autocomplete="email" />
+            </div>
+          </div>
+          <div class="edit-profile-joined-info" id="editProfileJoinedInfo">
+            <i class="fa-regular fa-calendar-check" style="color: #ff2a8d;"></i>
+            <span>Joined on <strong id="editProfileJoinedDate">16 September 2026</strong></span>
+          </div>
+          <div id="editProfileFeedback" class="edit-profile-feedback"></div>
+          <div class="edit-profile-actions">
+            <button type="button" class="btn-cancel-edit" onclick="window.closeEditProfileModal && window.closeEditProfileModal()">Cancel</button>
+            <button type="button" class="btn-save-profile-full" id="btnSaveFullProfile">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Save Changes</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LINKADDA MOBILE STICKY APP BAR (5 NATIVE TABS - PERSISTENT ACROSS APP) ===== -->
+  <nav class="fk-mobile-appbar" id="fkMobileAppbar" aria-label="Mobile Navigation">
+    <a href="#home" class="fk-appbar-item active" id="appbarHomeTab" onclick="window.hideProfilePage && window.hideProfilePage()">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#categoryFilterPills" class="fk-appbar-item" id="appbarCategoriesTab" onclick="window.hideProfilePage && window.hideProfilePage()">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Categories</span>
+    </a>
+    <button type="button" class="fk-appbar-item" id="fkAppbarWishlistBtn" onclick="openWishlistDrawer()" aria-label="Liked Items">
+      <i class="fa-solid fa-heart" style="color:#f43f5e;"></i>
+      <span class="fk-appbar-badge" id="fkAppbarWishlistBadge" style="display:none;background:#e11d48;">0</span>
+      <span>Liked</span>
+    </button>
+    <button type="button" class="fk-appbar-item" id="fkAppbarCartBtn" onclick="openCartDrawer()" aria-label="Shopping Cart">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="fk-appbar-badge" id="fkAppbarCartBadge" style="display:none;">0</span>
+      <span>Cart</span>
+    </button>
+    <button type="button" class="fk-appbar-item" id="appbarAccountBtn" aria-label="My Account" onclick="window.showProfilePage ? window.showProfilePage() : (window.location.hash = '#profile')">
+      <i class="fa-solid fa-circle-user" id="appbarAccountIcon"></i>
+      <span id="appbarAccountLabel">Account</span>
+    </button>
+  </nav>
+
+  <!-- ===== FULL-PAGE NATIVE NOTIFICATIONS SCREEN (PAGE TYPE ROUTER) ===== -->
+  <div id="appNotificationsView" style="display: none;">
+    <!-- Notifications Top App Bar -->
+    <div class="app-screen-topbar">
+      <button type="button" class="btn-app-screen-back" id="btnBackFromNotifs" onclick="window.hideNotificationsPage && window.hideNotificationsPage()">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="notifsBackBtnLabel">Profile</span>
+      </button>
+      <h1 class="app-screen-title">Notifications</h1>
+      <button type="button" class="btn-notif-mark-read-top" id="btnTopMarkNotifsRead" onclick="window.markNotificationsAsRead && window.markNotificationsAsRead()" title="Mark all as read">
+        <i class="fa-solid fa-check-double"></i>
+        <span>Mark all</span>
+      </button>
+    </div>
+
+    <!-- Notifications Page Body -->
+    <div class="app-notif-page-container">
+      <div class="notif-page-header-card">
+        <div class="notif-page-header-info">
+          <div class="notif-page-icon-box">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div>
+            <h2 class="notif-page-headline">Notifications & Alerts</h2>
+            <p class="notif-page-subtext">Order receipts, delivery links and account notifications</p>
+          </div>
+        </div>
+        <span class="notif-page-unread-pill" id="notifPageUnreadCount">0 Unread</span>
+      </div>
+
+      <!-- Live Dynamic Notifications Feed -->
+      <div class="notif-page-list" id="notifPageList">
+        <!-- Injected dynamically via auth-modal.js with welcome notification on login! -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FULL-PAGE NATIVE ORDERS SCREEN (DEDICATED VIEW) ===== -->
+  <div id="appOrdersView" style="display: none;">
+    <!-- Orders Top App Bar -->
+    <div class="app-screen-topbar">
+      <button type="button" class="btn-app-screen-back" id="btnBackFromOrders" onclick="window.hideOrdersPage && window.hideOrdersPage()">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="ordersBackBtnLabel">Profile</span>
+      </button>
+      <div class="app-screen-title-group">
+        <h1 class="app-screen-title">My Orders</h1>
+      </div>
+      <div class="app-screen-top-actions">
+        <button type="button" class="btn-app-screen-icon" onclick="window.openCartDrawer && window.openCartDrawer()" aria-label="Cart" title="Shopping Cart" style="position: relative;">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="appbar-cart-badge" id="cartBadgeOrders" style="display: none;">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Orders Page Body -->
+    <div class="app-orders-page-container">
+      <div class="orders-page-header-card">
+        <div class="orders-page-header-info">
+          <div class="orders-page-icon-box">
+            <i class="fa-solid fa-bag-shopping"></i>
+          </div>
+          <div>
+            <h2 class="orders-page-headline">My Orders & Purchases</h2>
+            <p class="orders-page-subtext">Instant digital download links, Telegram access & official receipts</p>
+          </div>
+        </div>
+        <span class="orders-page-count-pill" id="ordersPageCountPill">0 Orders</span>
+      </div>
+
+      <!-- Filter / Search Row -->
+      <div class="orders-filter-row">
+        <div class="orders-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="ordersSearchInput" placeholder="Search orders by title or Order ID..." oninput="window.filterOrdersList && window.filterOrdersList(this.value)" />
+        </div>
+        <button type="button" class="btn-refresh-orders" onclick="window.refreshUserOrders && window.refreshUserOrders()" title="Refresh order status">
+          <i class="fa-solid fa-arrows-rotate"></i> <span>Refresh</span>
+        </button>
+      </div>
+
+      <!-- Live Dynamic Orders Feed -->
+      <div class="app-orders-page-list" id="appOrdersPageList">
+        <!-- Injected dynamically via auth-modal.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTIFICATION DETAIL MESSAGE MODAL (POPUP / DRAWER) ===== -->
+  <div id="notifDetailModal" class="notif-detail-modal" style="display: none;" onclick="if(event.target === this) window.closeNotificationDetailModal && window.closeNotificationDetailModal()">
+    <div class="notif-detail-card" role="dialog" aria-modal="true">
+      <div class="notif-detail-header">
+        <div class="notif-detail-head-meta">
+          <div class="notif-detail-icon-wrap" id="notifDetailIcon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <h3 class="notif-detail-title" id="notifDetailTitle">Order Approved! 🎉</h3>
+            <span class="notif-detail-time" id="notifDetailTime">Just now</span>
+          </div>
+        </div>
+        <button type="button" class="btn-notif-detail-close" onclick="window.closeNotificationDetailModal && window.closeNotificationDetailModal()" aria-label="Close message">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="notif-detail-body">
+        <div class="notif-detail-status-pill" id="notifDetailStatusPill">
+          <i class="fa-solid fa-circle-check"></i> <span id="notifDetailStatusText">Order Verified &amp; Approved</span>
+        </div>
+
+        <div class="notif-detail-order-box" id="notifDetailOrderBox" style="display: none;">
+          <div class="notif-detail-row">
+            <span class="notif-detail-lbl">Purchased Item</span>
+            <strong class="notif-detail-val" id="notifDetailItemName">—</strong>
+          </div>
+          <div class="notif-detail-row">
+            <span class="notif-detail-lbl">Order Ref</span>
+            <code class="notif-detail-code" id="notifDetailOrderId">—</code>
+          </div>
+        </div>
+
+        <div class="notif-detail-desc-box">
+          <p class="notif-detail-message-text" id="notifDetailMessageText">
+            Aapka order approve ho gaya hai! VIP Telegram Group / Channel access link unlock ho chuka hai.
+          </p>
+        </div>
+
+        <!-- TELEGRAM VIP GROUP / CHANNEL ACTION -->
+        <div class="notif-detail-action-container" id="notifDetailActionContainer" style="display: none;">
+          <a href="#" target="_blank" rel="noopener" id="notifDetailVipLinkBtn" class="btn-vip-channel-direct">
+            <i class="fa-brands fa-telegram"></i>
+            <span id="notifDetailVipBtnLabel">Join Telegram VIP Channel / Group</span>
+          </a>
+          <button type="button" id="notifDetailCopyBtn" class="btn-vip-copy-link" onclick="window.copyNotifVipLink && window.copyNotifVipLink(this)">
+            <i class="fa-regular fa-clone"></i>
+            <span>Copy VIP Link</span>
+          </button>
+          <div class="notif-detail-guarantee">
+            <i class="fa-solid fa-shield-halved" style="color:#10b981;"></i>
+            <span>100% Verified VIP Channel Access • Private &amp; Discrete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LINKADDA FULL-PAGE NATIVE APP SEARCH VIEW ===== -->
+  <div id="appSearchView" class="app-search-view" style="display: none;">
+    <!-- Search Top App Bar -->
+    <header class="app-search-topbar">
+      <button type="button" class="btn-search-top-back" id="btnBackFromSearch" onclick="window.hideSearchPage && window.hideSearchPage()" aria-label="Back to store">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="back-btn-text">Store</span>
+      </button>
+
+      <div class="app-search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+        <input type="search" id="appSearchInput" class="app-search-input" placeholder="Search products, categories..." autocomplete="off" spellcheck="false" enterkeyhint="search" />
+        <button type="button" class="btn-search-clear" id="appSearchClear" style="display: none;" aria-label="Clear search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <button type="button" class="btn-search-action" id="appSearchSubmitBtn" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass search-submit-icon"></i>
+        <span class="search-submit-text">Search</span>
+      </button>
+    </header>
+
+    <!-- Search Scrollable Content -->
+    <main class="app-search-body">
+      <!-- 1. DISCOVERY CONTAINER (Visible when query is empty: Recent + Trending Searches + Trending Picks + New Releases) -->
+      <div id="searchDiscoverySection" class="search-discovery-section">
+        <!-- A. Recent Searches (Name Only Chips) -->
+        <section class="search-section-block" id="searchRecentBlock" style="display: none;">
+          <div class="search-section-head">
+            <h3 class="search-section-title">
+              <i class="fa-solid fa-clock-rotate-left"></i> Recent Searches
+            </h3>
+            <button type="button" class="btn-search-clear-recent" id="btnClearAllRecentSearches">
+              Clear All
+            </button>
+          </div>
+          <div class="search-recent-chips" id="searchRecentChipsList">
+            <!-- Dynamically populated name-only chips with remove buttons -->
+          </div>
+        </section>
+
+        <!-- B. Trending Searches Quick Tags -->
+        <section class="search-section-block">
+          <div class="search-section-head">
+            <h3 class="search-section-title">
+              <i class="fa-solid fa-fire-flame-curved" style="color: #f43f5e;"></i> Trending Searches
+            </h3>
+          </div>
+          <div class="search-tags-cloud" id="searchTrendingTags">
+            <button type="button" class="search-trend-tag" data-query="Trending">
+              <i class="fa-solid fa-arrow-trend-up"></i> Trending Now
+            </button>
+            <button type="button" class="search-trend-tag" data-query="Indian">
+              <span>🇮🇳</span> Indian Exclusive
+            </button>
+            <button type="button" class="search-trend-tag" data-query="VIP">
+              <i class="fa-solid fa-crown" style="color: #eab308;"></i> VIP Packs
+            </button>
+            <button type="button" class="search-trend-tag" data-query="4K">
+              <i class="fa-solid fa-film" style="color: #06b6d4;"></i> 4K Ultra HD
+            </button>
+            <button type="button" class="search-trend-tag" data-query="New">
+              <i class="fa-solid fa-sparkles" style="color: #ec4899;"></i> New Drops
+            </button>
+          </div>
+        </section>
+
+        <!-- C. Curated Trending Picks (4-6 Curated Items) -->
+        <section class="search-section-block">
+          <div class="search-section-head">
+            <h3 class="search-section-title">
+              <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Trending Picks
+            </h3>
+            <span class="search-section-badge">Hot</span>
+          </div>
+          <div class="search-cards-grid" id="searchTrendingPicksGrid">
+            <!-- Injected dynamically: 4-6 cards only -->
+          </div>
+        </section>
+
+        <!-- D. Curated New Releases (4 Curated Items) -->
+        <section class="search-section-block">
+          <div class="search-section-head">
+            <h3 class="search-section-title">
+              <i class="fa-solid fa-star" style="color: #a855f7;"></i> New Releases
+            </h3>
+            <span class="search-section-badge new">Fresh</span>
+          </div>
+          <div class="search-cards-grid" id="searchNewReleasesGrid">
+            <!-- Injected dynamically: 4 newest cards only -->
+          </div>
+        </section>
+      </div>
+
+      <!-- 2. ACTIVE SEARCH RESULTS CONTAINER (Products + Categories ONLY) -->
+      <div id="searchResultsSection" class="search-results-section" style="display: none;">
+        <!-- Matched Categories -->
+        <div id="searchCategoriesWrap" class="search-categories-block" style="display: none;">
+          <div class="search-group-header">
+            <i class="fa-solid fa-layer-group"></i> Categories (<span id="searchCategoriesCount">0</span>)
+          </div>
+          <div class="search-categories-list" id="searchCategoriesList"></div>
+        </div>
+
+        <!-- Matched Products -->
+        <div id="searchProductsWrap" class="search-products-block" style="display: none;">
+          <div class="search-group-header">
+            <i class="fa-solid fa-bag-shopping"></i> Products (<span id="searchProductsCount">0</span>)
+          </div>
+          <div class="search-cards-grid" id="searchProductsList"></div>
+        </div>
+
+        <!-- No Results Fallback -->
+        <div id="searchEmptyState" class="search-empty-card" style="display: none;">
+          <div class="search-empty-icon"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
+          <h4 class="search-empty-title">No matching packs found</h4>
+          <p class="search-empty-sub">We couldn't find anything matching "<strong id="searchEmptyTerm"></strong>". Try searching for "Indian", "VIP", "4K", or explore Trending picks.</p>
+          <button type="button" class="btn-search-reset" id="btnSearchReset">
+            <i class="fa-solid fa-rotate-left"></i> View Trending
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <script type="module" src="media-resolver.js"></script>
-  <script src="flipkart-store.js?v=12"></script>
+  <script src="live-ticker.js?v=20260916a"></script>
+  <script src="linkadda-store.js?v=12"></script>
+  <script type="module" src="auth-modal.js?v=20260916m"></script>
 </body>
 </html>

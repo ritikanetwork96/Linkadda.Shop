@@ -1,5 +1,17 @@
 import { RUSTFS_CONFIG, SUPABASE_CONFIG } from './config.js';
 import { uid } from './utils.js';
+import { auth } from './firebase.js';
+
+async function getUploadAuthHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  try {
+    if (auth && auth.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (_) {}
+  return headers;
+}
 
 const SUPABASE_STORAGE_ROOT = `${SUPABASE_CONFIG.url}/storage/v1/object`;
 const RUSTFS_STORAGE_ROOT = `${RUSTFS_CONFIG.endpoint}/${encodeURIComponent(RUSTFS_CONFIG.bucket)}`;
@@ -217,11 +229,10 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
     let data = null;
 
     try {
+      const authHeaders = await getUploadAuthHeaders();
       const res = await fetch('/api/upload', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: authHeaders,
         body: JSON.stringify({
           folder,
           filename: fileName,
@@ -276,11 +287,10 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
     const slice = fileToUpload.slice(start, end);
     const chunkDataUrl = await readFileAsDataUrl(slice);
 
+    const chunkAuthHeaders = await getUploadAuthHeaders();
     const chunkRes = await fetch('/api/upload', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: chunkAuthHeaders,
       body: JSON.stringify({
         action: 'chunk',
         uploadId,
@@ -305,11 +315,10 @@ export async function uploadAsset(file, folder = 'products', onProgress) {
   // Final Assembly Step
   if (typeof onProgress === 'function') onProgress(93);
 
+  const assembleAuthHeaders = await getUploadAuthHeaders();
   const assembleRes = await fetch('/api/upload', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: assembleAuthHeaders,
     body: JSON.stringify({
       action: 'assemble',
       uploadId,

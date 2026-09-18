@@ -283,54 +283,72 @@ function updateImage(el) {
     return;
   }
 
-  const next = resolveValue(current);
-  if (next && next !== current && el.dataset.resolvedSrc !== next) {
-    el.dataset.resolvedSrc = next;
-    el.setAttribute('src', next);
-  }
-}
-
-function syncDocument() {
-  document.querySelectorAll('img, source').forEach(updateImage);
-}
-
-function scheduleSync() {
-  if (rafId) return;
-  rafId = window.requestAnimationFrame(() => {
-    rafId = 0;
-    syncDocument();
-  });
-}
-
-// Global capture error listener for image load failures
-if (typeof document !== 'undefined') {
-  document.addEventListener('error', (e) => {
-    if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'SOURCE')) {
-      updateImage(e.target);
+    const next = resolveValue(current);
+    if (next && next !== current && el.dataset.resolvedSrc !== next && el.getAttribute('src') !== next) {
+      el.dataset.resolvedSrc = next;
+      el.setAttribute('src', next);
     }
-  }, true);
-}
+  }
 
-function startResolver(db) {
-  if (!db || window.__mediaResolverActive) return;
-  window.__mediaResolverActive = true;
+  function syncDocument() {
+    document.querySelectorAll('img, source').forEach(updateImage);
+  }
 
-  try {
-    onValue(ref(db, 'media'), (snap) => {
-      rebuildIndex(snap.val() || {});
+  let syncTimeout = null;
+  function scheduleSync() {
+    if (syncTimeout) return;
+    syncTimeout = setTimeout(() => {
+      syncTimeout = null;
+      syncDocument();
+    }, 120);
+  }
+
+  // Global capture error listener for image load failures
+  if (typeof document !== 'undefined') {
+    document.addEventListener('error', (e) => {
+      if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'SOURCE')) {
+        updateImage(e.target);
+      }
+    }, true);
+  }
+
+  function startResolver(db) {
+    if (!db || window.__mediaResolverActive) return;
+    window.__mediaResolverActive = true;
+
+    try {
+      onValue(ref(db, 'media'), (snap) => {
+        rebuildIndex(snap.val() || {});
+        scheduleSync();
+      });
+
+      if (!observer) {
+        observer = new MutationObserver((mutations) => {
+          let hasMedia = false;
+          for (let i = 0; i < mutations.length; i++) {
+            const added = mutations[i].addedNodes;
+            if (!added) continue;
+            for (let j = 0; j < added.length; j++) {
+              const node = added[j];
+              if (node.nodeType === 1) {
+                if (node.tagName === 'IMG' || node.tagName === 'SOURCE' || (node.firstElementChild && node.querySelector('img, source'))) {
+                  hasMedia = true;
+                  break;
+                }
+              }
+            }
+            if (hasMedia) break;
+          }
+          if (hasMedia) scheduleSync();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+
       scheduleSync();
-    });
-
-    if (!observer) {
-      observer = new MutationObserver(() => scheduleSync());
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+    } catch (e) {
+      console.warn('Media resolver init warning:', e);
     }
-
-    scheduleSync();
-  } catch (e) {
-    console.warn('Media resolver init warning:', e);
   }
-}
 
 function checkAndInit() {
   // Always initialize fallback index immediately (0ms synchronous)

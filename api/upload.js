@@ -1,19 +1,46 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import https from 'node:https';
+import { getClientIp, handleCors, verifyAdminRequest, getAuthSecret } from './_utils.js';
+import { verifySellerToken } from './seller/auth.js';
 
 const customHttpsAgent = new https.Agent({
-  rejectUnauthorized: false,
+  rejectUnauthorized: true,
   keepAlive: true,
 });
 
 function getEnvConfig() {
-  const endpoint = String(process.env.RUSTFS_ENDPOINT || 'https://rustfs-mi5c.srv1942099.hstgr.cloud').replace(/\/+$/, '');
+  const endpoint = String(process.env.RUSTFS_ENDPOINT || '').replace(/\/+$/, '');
   const bucket = String(process.env.RUSTFS_BUCKET || 'linkadda-media').trim();
   const region = String(process.env.RUSTFS_REGION || 'us-east-1').trim();
-  const accessKeyId = String(process.env.RUSTFS_ACCESS_KEY || 'nEY6aqQXNtIKoOL2xm8b').trim();
-  const secretAccessKey = String(process.env.RUSTFS_SECRET_KEY || 'KxnOyOR6scFpsBZmrKsyUE9oUt1aZfpWSWw5NJFX').trim();
+  const accessKeyId = String(process.env.RUSTFS_ACCESS_KEY || '').trim();
+  const secretAccessKey = String(process.env.RUSTFS_SECRET_KEY || '').trim();
+
+  if (!endpoint || !accessKeyId || !secretAccessKey) {
+    throw new Error('RustFS storage credentials are not properly configured on server.');
+  }
 
   return { endpoint, bucket, region, accessKeyId, secretAccessKey };
+}
+
+const uploadRateLimitMap = new Map();
+const MAX_UPLOADS_PER_MIN = 25;
+
+const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'webp']);
+
+function isAllowedExtension(filename) {
+  const ext = String(filename || '').split('.').pop().toLowerCase();
+  return ALLOWED_EXTENSIONS.has(ext);
+}
+
+function isValidImageBuffer(buf) {
+  if (!buf || buf.length < 12) return false;
+  // JPEG: FF D8 FF
+  if (buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return true;
+  // PNG: 89 50 4E 47
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) return true;
+  // WEBP: 'RIFF' ... 'WEBP'
+  if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return true;
+  return false;
 }
 
 export const config = {
@@ -49,19 +76,42 @@ function parseBase64(rawBase64, fallbackMime = 'image/png') {
 
 export default async function handler(req, res) {
   // CORS Headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-folder, x-filename, x-action');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (handleCors(req, res, 'POST, OPTIONS')) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
+    const body = req.body || {};
+
+    // ━━ SECURITY CHECK: Caller must be verified Admin or Authenticated Seller ━━
+    const isAdmin = await verifyAdminRequest(req);
+    let isSeller = false;
+
+    const authHeader = req.headers.authorization || req.headers.Authorization || '';
+    const bearerToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+    const sellerId = String(body.sellerId || req.headers['x-seller-id'] || '').trim();
+    const sellerToken = String(body.sellerToken || body.token || bearerToken || '').trim();
+    const secret = getAuthSecret();
+
+    if (sellerId && sellerToken && verifySellerToken(sellerId, sellerToken, secret)) {
+      isSeller = true;
+    }
+
+    if (!isAdmin && !isSeller) {
+      return res.status(401).json({ error: 'Unauthorized: Authentication required to upload files.' });
+    }
+
+    const clientIp = getClientIp(req);
+    const now = Date.now();
+    let timestamps = (uploadRateLimitMap.get(clientIp) || []).filter(ts => now - ts < 60000);
+    if (timestamps.length >= MAX_UPLOADS_PER_MIN) {
+      return res.status(429).json({ error: 'Too many upload requests. Please wait a minute.' });
+    }
+    timestamps.push(now);
+    uploadRateLimitMap.set(clientIp, timestamps);
+
     const config = getEnvConfig();
     const s3 = new S3Client({
       endpoint: config.endpoint,
@@ -76,7 +126,6 @@ export default async function handler(req, res) {
       },
     });
 
-    const body = req.body || {};
     const action = String(body.action || '').toLowerCase();
 
     // ━━ 1. CHUNK UPLOAD MODE ━━
@@ -112,7 +161,7 @@ export default async function handler(req, res) {
     if (action === 'assemble') {
       const uploadId = String(body.uploadId || '').replace(/[^a-zA-Z0-9_-]/g, '');
       const totalParts = Number(body.totalParts);
-      const folder = String(body.folder || 'products').replace(/^\/+|\/+$/g, '');
+      const folder = String(body.folder || 'products').replace(/[^a-zA-Z0-9_-]/g, '') || 'products';
       const filename = String(body.filename || `${Date.now()}_asset.png`).replace(/[^a-zA-Z0-9_.-]/g, '_');
       const contentType = String(body.contentType || 'application/octet-stream');
 
@@ -133,6 +182,14 @@ export default async function handler(req, res) {
       }
 
       const combinedBuffer = Buffer.concat(partBuffers);
+
+      if (!isAllowedExtension(filename)) {
+        return res.status(400).json({ error: 'Invalid file extension. Only images (.png, .jpg, .jpeg, .webp) are allowed.' });
+      }
+      if (!isValidImageBuffer(combinedBuffer)) {
+        return res.status(400).json({ error: 'Uploaded file content is not a valid image format.' });
+      }
+
       const key = `${folder}/${filename}`;
 
       // Put the final assembled object to RustFS S3
@@ -174,7 +231,7 @@ export default async function handler(req, res) {
     let filename = `asset_${Date.now()}.png`;
 
     if (typeof body === 'object' && body !== null) {
-      folder = String(body.folder || 'products').replace(/^\/+|\/+$/g, '');
+      folder = String(body.folder || 'products').replace(/[^a-zA-Z0-9_-]/g, '') || 'products';
       filename = String(body.filename || `${Date.now()}_asset.png`).replace(/[^a-zA-Z0-9_.-]/g, '_');
       contentType = String(body.contentType || 'image/png');
 
@@ -189,6 +246,14 @@ export default async function handler(req, res) {
 
     if (!bodyBuffer || bodyBuffer.length === 0) {
       return res.status(400).json({ error: 'No image or file data provided.' });
+    }
+
+    if (!isAllowedExtension(filename)) {
+      return res.status(400).json({ error: 'Invalid file extension. Only images (.png, .jpg, .jpeg, .webp) are allowed.' });
+    }
+
+    if (!isValidImageBuffer(bodyBuffer)) {
+      return res.status(400).json({ error: 'Uploaded file content is not a valid image format.' });
     }
 
     const key = `${folder}/${filename}`;

@@ -43,7 +43,7 @@ body[data-theme="light"] {
 
 html {
   -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100%;
   overscroll-behavior-x: none;
 }
@@ -59,7 +59,7 @@ body {
   font-family: 'Montserrat', sans-serif;
   background: var(--bg);
   color: var(--text);
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: none;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;

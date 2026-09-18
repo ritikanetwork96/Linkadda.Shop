@@ -1,4 +1,4 @@
-import { db, ref, onValue, get, set, update, remove, push, auth, onAuthStateChanged } from './firebase.js';
+import { db, ref, onValue, get, set, update, remove, auth, onAuthStateChanged } from './firebase.js';
 import { RTDB_NODES } from './config.js';
 import { safeJson, slugify, uid } from './utils.js';
 
@@ -19,6 +19,9 @@ function loadCachedStore() {
     analytics: {},
     media: {},
     visitors: {},
+    customers: {},
+    sellers: {},
+    seller_applications: {},
   };
 
   try {
@@ -82,7 +85,10 @@ function saveStoreCache() {
         orders: STORE.orders || {},
         events: STORE.events || {},
         visitors: STORE.visitors || {},
+        customers: STORE.customers || {},
         analytics: STORE.analytics || {},
+        sellers: STORE.sellers || {},
+        seller_applications: STORE.seller_applications || {},
         timestamp: Date.now(),
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
@@ -179,6 +185,9 @@ export function startRealtime(force = false) {
   attachNode('media');
   attachNode('visitors');
   attachNode('reviews');
+  attachNode('customers');
+  attachNode('sellers');
+  attachNode('seller_applications');
 }
 
 // Automatically bind listeners to auth state transitions

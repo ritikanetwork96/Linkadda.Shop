@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <script>
     (function() {
-      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-      if (isLocal) return;
+      if (window.location.protocol === 'file:') return;
       var path = window.location.pathname;
       var cleanPath = null;
       if (path.endsWith('/index.html')) {
@@ -23,8 +22,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/admin/assets/admin.css?v=22" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="stylesheet" href="./assets/admin.css?v=26" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
@@ -61,12 +60,23 @@
           </div>
         </div>
         <div class="topbar-right">
-          <button class="chip" id="notifyBtn" type="button" title="View notifications"><i data-lucide="bell"></i><span id="notifyCount">0</span></button>
-          <button class="chip" id="themeBtn" type="button" title="Toggle Light/Dark Theme"><i data-lucide="sun-moon"></i></button>
-          <div class="user-pill">
+          <div class="realtime-badge active" id="connectionStatus" title="Realtime Firebase DB connected">
+            <span class="pulse"></span> Connected
+          </div>
+          <button class="btn btn-ghost icon-only" id="quickPaletteBtn" type="button" title="Quick Search (Ctrl+K)">
+            <i data-lucide="command"></i>
+          </button>
+          <button class="btn btn-ghost icon-only" id="themeBtn" type="button" title="Toggle color scheme">
+            <i data-lucide="sun"></i>
+          </button>
+          <button class="btn btn-ghost icon-only" id="notifyBtn" type="button" title="Recent Activity" style="position: relative;">
+            <i data-lucide="bell"></i>
+            <span class="badge badge-primary" id="notifyCount" style="position: absolute; top: -4px; right: -4px; font-size: 10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center;">0</span>
+          </button>
+          <div class="admin-profile" id="adminProfile">
             <div class="avatar" id="userAvatar">A</div>
             <div>
-              <strong id="userName">Admin</strong>
+              <span id="userName">Admin</span>
               <span id="userEmail">connected</span>
             </div>
           </div>
@@ -99,6 +109,6 @@
     </div>
   </div>
 
-  <script type="module" src="/admin/js/app.js?v=22"></script>
+  <script type="module" src="./js/app.js?v=29"></script>
 </body>
 </html>

@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <script>
     (function() {
-      var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-      if (isLocal) return;
+      if (window.location.protocol === 'file:') return;
       var path = window.location.pathname;
       var cleanPath = null;
       if (path.endsWith('/index.html')) {
@@ -33,8 +32,7 @@
     const mount = document.getElementById('authMount');
     whenAuthenticated((user) => {
       if (user) {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
-        window.location.href = isLocal ? '/admin/index.html' : '/admin';
+        window.location.href = '/admin';
       }
     });
     mountLoginPage(mount);

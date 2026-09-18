@@ -47,6 +47,9 @@ export const RTDB_NODES = {
   media: 'media',
   visitors: 'visitors',
   reviews: 'reviews',
+  customers: 'customers',
+  sellers: 'events/sellers',
+  seller_applications: 'events/seller_applications',
 };
 
 export const NAV_ITEMS = [
@@ -61,6 +64,8 @@ export const NAV_ITEMS = [
   { key: 'settings', label: 'Settings', icon: 'settings-2' },
   { key: 'payment', label: 'Payment', icon: 'credit-card' },
   { key: 'orders', label: 'Orders', icon: 'receipt-text' },
+  { key: 'users', label: 'Users', icon: 'users' },
+  { key: 'sellers', label: 'Sellers', icon: 'store' },
   { key: 'screenshots', label: 'Screenshots', icon: 'image' },
   { key: 'analytics', label: 'Analytics', icon: 'bar-chart-3' },
 ];
