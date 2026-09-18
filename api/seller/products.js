@@ -174,6 +174,8 @@ export default async function handler(req, res) {
         }
       }
 
+      const isEditing = Boolean(body.isEditing || body.isEditingMode || existingProduct);
+
       if (!productId) {
         const slug = String(product.slug || product.title || product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         productId = slug ? `prod_${slug}_${Date.now().toString(36)}` : `prod_${Date.now().toString(36)}_${crypto.randomBytes(3).toString('hex')}`;
