@@ -41,11 +41,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260920b" />
-  <link rel="stylesheet" href="linkadda-store.css?v=20260920b" />
+  <link rel="stylesheet" href="style.css?v=20260920c" />
+  <link rel="stylesheet" href="linkadda-store.css?v=20260920c" />
   <link rel="stylesheet" href="auth-modal.css?v=20260916a" />
-  <link rel="stylesheet" href="mobile-app.css?v=20260920b" />
-  <script src="preload.js"></script>
+  <link rel="stylesheet" href="mobile-app.css?v=20260920c" />
+  <script src="preload.js?v=20260920c"></script>
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
     .hero-title,
@@ -3107,7 +3107,7 @@
         <div class="fk-card-slides-track">
           ${images.map((imgUrl, idx) => `
             <div class="fk-card-slide${idx === 0 ? ' is-active' : ''}" data-idx="${idx}">
-              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="eager" draggable="false" onerror="if(!this._failed){this._failed=true; this.src='/favicon.svg';}" />
+              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" draggable="false" onerror="if(!this._failed){this._failed=true; this.src='/favicon.svg';}" />
             </div>
           `).join('')}
         </div>
@@ -3474,7 +3474,7 @@
 
     mediaEl.dataset.activeIdx = String(nextIdx);
 
-    // After fade duration completes (450ms), cleanly remove 'was-active' from the old slide
+    // After fade duration completes (380ms), cleanly remove 'was-active' from the old slide
     clearTimeout(mediaEl._cleanupSlideTimeout);
     mediaEl._cleanupSlideTimeout = setTimeout(() => {
       slides.forEach((s, idx) => {
@@ -3482,7 +3482,15 @@
           s.classList.remove('was-active');
         }
       });
-    }, 500);
+    }, 400);
+
+    // Just-in-time lightweight pre-warming of the very next slide
+    const followingIdx = (nextIdx + 1) % total;
+    const followingImg = slides[followingIdx]?.querySelector('img');
+    if (followingImg && followingImg.src && !followingImg.complete) {
+      const p = new Image();
+      p.src = followingImg.src;
+    }
   }
 
   function stopCardTimer(mediaEl) {
@@ -3559,12 +3567,12 @@
           if (entry.isIntersecting) {
             const cardIdx = parseInt(mediaEl.dataset.cardOrder || '0', 10);
             const stagger = 2200 + ((cardIdx % 5) * 600);
-            mediaEl.querySelectorAll('.fk-card-slide img').forEach(img => {
-              if (img.src && !img.complete) {
-                const pre = new Image();
-                pre.src = img.src;
-              }
-            });
+            // Pre-warm only slide 1 for this card so it transitions instantly when timer fires
+            const slideImages = mediaEl.querySelectorAll('.fk-card-slide img');
+            if (slideImages[1] && slideImages[1].src && !slideImages[1].complete) {
+              const pre = new Image();
+              pre.src = slideImages[1].src;
+            }
             startCardTimer(mediaEl, stagger);
           } else {
             stopCardTimer(mediaEl);
