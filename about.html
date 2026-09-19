@@ -25,6 +25,7 @@
         var theme = 'light';
         if (manual && saved) { theme = saved; }
         document.documentElement.setAttribute('data-theme', theme);
+        if (document.body) document.body.setAttribute('data-theme', theme);
       } catch (_) {}
     })();
   </script>
@@ -1380,13 +1381,15 @@
       if (!btn) return;
       btn.addEventListener('click', function(e) {
         e.preventDefault();
-        var cur = document.documentElement.getAttribute('data-theme') || 'light';
+        var cur = document.documentElement.getAttribute('data-theme') || (document.body ? document.body.getAttribute('data-theme') : null) || 'light';
         var next = cur === 'light' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', next);
+        if (document.body) document.body.setAttribute('data-theme', next);
         try {
           localStorage.setItem('linkadda_theme', next);
           localStorage.setItem('linkadda_theme_manual', 'true');
         } catch (_) {}
+        window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme: next } }));
       });
     })();
 

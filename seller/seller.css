@@ -8,7 +8,10 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
 /* ━━ LINKADDA SIGNATURE DESIGN TOKENS (FROM ABOUT.HTML) ━━ */
-:root {
+:root,
+[data-theme="light"],
+html[data-theme="light"],
+body[data-theme="light"] {
   --ab-bg: #f8fafc;
   --ab-bg2: #ffffff;
   --ab-card: #ffffff;
@@ -73,7 +76,9 @@
   --sd-modal-header: #f8fafc;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+html[data-theme="dark"],
+body[data-theme="dark"] {
   --ab-bg: #07080c;
   --ab-bg2: #0e0f18;
   --ab-card: rgba(18, 17, 28, 0.85);
@@ -271,6 +276,12 @@ body.seller-body {
   font-size: 0.95rem;
   box-shadow: var(--ab-shadow-sm);
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ab-theme-btn * {
+  pointer-events: none !important;
 }
 
 .ab-theme-btn:hover {
@@ -279,10 +290,24 @@ body.seller-body {
   transform: scale(1.05);
 }
 
-.ab-theme-btn .fa-sun { display: none; }
-.ab-theme-btn .fa-moon { display: inline; }
-[data-theme="dark"] .ab-theme-btn .fa-sun { display: inline; }
-[data-theme="dark"] .ab-theme-btn .fa-moon { display: none; }
+.ab-theme-btn .fa-sun { display: none !important; }
+.ab-theme-btn .fa-moon { display: inline-block !important; }
+
+[data-theme="dark"] .ab-theme-btn .fa-sun,
+html[data-theme="dark"] .ab-theme-btn .fa-sun,
+body[data-theme="dark"] .ab-theme-btn .fa-sun { display: inline-block !important; }
+
+[data-theme="dark"] .ab-theme-btn .fa-moon,
+html[data-theme="dark"] .ab-theme-btn .fa-moon,
+body[data-theme="dark"] .ab-theme-btn .fa-moon { display: none !important; }
+
+[data-theme="light"] .ab-theme-btn .fa-sun,
+html[data-theme="light"] .ab-theme-btn .fa-sun,
+body[data-theme="light"] .ab-theme-btn .fa-sun { display: none !important; }
+
+[data-theme="light"] .ab-theme-btn .fa-moon,
+html[data-theme="light"] .ab-theme-btn .fa-moon,
+body[data-theme="light"] .ab-theme-btn .fa-moon { display: inline-block !important; }
 
 .nav-ghost-link,
 .ab-btn-secondary-nav {
@@ -6657,6 +6682,12 @@ body.seller-body {
   justify-content: center;
   font-size: 0.95rem;
   transition: all 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-footer-actions .ab-theme-btn * {
+  pointer-events: none !important;
 }
 
 .sidebar-footer-actions .ab-theme-btn:hover {

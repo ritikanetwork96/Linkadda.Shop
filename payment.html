@@ -25,6 +25,7 @@
         var theme = 'light';
         if (manual && saved) { theme = saved; }
         document.documentElement.setAttribute('data-theme', theme);
+        if (document.body) document.body.setAttribute('data-theme', theme);
       } catch (_) {}
     })();
   </script>

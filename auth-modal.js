@@ -540,7 +540,7 @@ export function showProfilePage() {
   if (fkHeader) fkHeader.style.display = isDesktop ? '' : 'none';
   if (fkHeaderSpacer) fkHeaderSpacer.style.display = isDesktop ? '' : 'none';
   if (marqueeWrap) marqueeWrap.style.display = 'none';
-  if (floatingCart) floatingCart.style.display = isDesktop ? '' : 'none';
+  if (floatingCart) floatingCart.style.display = 'none';
 
   // 2. Populate Customer Info / Guest State (Strictly Verified Member - No VIP!)
   const greetingEl = document.getElementById('profileGreetingName');

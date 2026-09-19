@@ -3,7 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <script>
-    // Theme Bootstrap — sync with index.html & about.html
+    // Bulletproof Theme Controller & Bootstrap — sync with index.html, about.html, seller hub
+    var _themeToggleLocked = false;
+    window.toggleSellerTheme = function(e) {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      }
+      if (_themeToggleLocked) return;
+      _themeToggleLocked = true;
+      setTimeout(function() { _themeToggleLocked = false; }, 350);
+
+      var doc = document.documentElement;
+      var body = document.body;
+      var cur = doc.getAttribute('data-theme') || (body ? body.getAttribute('data-theme') : null) || 'light';
+      var next = (cur === 'dark') ? 'light' : 'dark';
+
+      doc.setAttribute('data-theme', next);
+      if (body) body.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('linkadda_theme', next);
+        localStorage.setItem('linkadda_theme_manual', 'true');
+        localStorage.setItem('linkadda_theme_manual_1', '1');
+      } catch (_) {}
+
+      document.querySelectorAll('.ab-theme-btn').forEach(function(btn) {
+        var moon = btn.querySelector('.fa-moon');
+        var sun = btn.querySelector('.fa-sun');
+        if (moon && sun) {
+          if (next === 'light') {
+            moon.style.setProperty('display', 'inline-block', 'important');
+            sun.style.setProperty('display', 'none', 'important');
+          } else {
+            moon.style.setProperty('display', 'none', 'important');
+            sun.style.setProperty('display', 'inline-block', 'important');
+          }
+        }
+      });
+
+      window.dispatchEvent(new CustomEvent('linkadda:themechange', { detail: { theme: next } }));
+    };
+
     (function() {
       try {
         var manual = localStorage.getItem('linkadda_theme_manual');
@@ -11,8 +52,27 @@
         var theme = 'light';
         if (manual && saved) { theme = saved; }
         document.documentElement.setAttribute('data-theme', theme);
+        if (document.body) document.body.setAttribute('data-theme', theme);
       } catch (_) {}
     })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var theme = document.documentElement.getAttribute('data-theme') || 'light';
+      if (document.body) document.body.setAttribute('data-theme', theme);
+      document.querySelectorAll('.ab-theme-btn').forEach(function(btn) {
+        var moon = btn.querySelector('.fa-moon');
+        var sun = btn.querySelector('.fa-sun');
+        if (moon && sun) {
+          if (theme === 'light') {
+            moon.style.setProperty('display', 'inline-block', 'important');
+            sun.style.setProperty('display', 'none', 'important');
+          } else {
+            moon.style.setProperty('display', 'none', 'important');
+            sun.style.setProperty('display', 'inline-block', 'important');
+          }
+        }
+      });
+    });
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Become a Verified Seller • LinkAdda Content Hub</title>
@@ -22,7 +82,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/seller/seller.css">
+  <link rel="stylesheet" href="/seller/seller.css?v=3.7">
 </head>
 <body class="seller-body">
   <div class="seller-glow-bg"></div>
@@ -37,7 +97,7 @@
       </div>
     </a>
     <div class="auth-nav-links">
-      <button type="button" class="ab-theme-btn" id="sellerThemeToggle" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
+      <button type="button" class="ab-theme-btn" id="sellerThemeToggle" onclick="window.toggleSellerTheme(event)" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
         <i class="fa-solid fa-moon"></i>
         <i class="fa-solid fa-sun"></i>
       </button>
@@ -302,20 +362,6 @@
   </footer>
 
   <script type="module">
-    // 1. Theme Toggle Logic
-    const themeBtn = document.getElementById('sellerThemeToggle');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme') || 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        try {
-          localStorage.setItem('linkadda_theme', next);
-          localStorage.setItem('linkadda_theme_manual', '1');
-        } catch (_) {}
-      });
-    }
-
     // 2. Custom 3D Select Picker Interactive Logic
     const select3d = document.getElementById('category3dSelect');
     const trigger = document.getElementById('category3dTrigger');

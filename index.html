@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="style.css?v=20260920c" />
   <link rel="stylesheet" href="linkadda-store.css?v=20260920c" />
   <link rel="stylesheet" href="auth-modal.css?v=20260916a" />
-  <link rel="stylesheet" href="mobile-app.css?v=20260920c" />
+  <link rel="stylesheet" href="mobile-app.css?v=20260920d" />
   <script src="preload.js?v=20260920c"></script>
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
@@ -5801,6 +5801,99 @@
           </div>
         </div>
 
+        <!-- 4. Sign Out & Account Controls -->
+        <div id="profileLogoutWrap" class="profile-logout-box" style="margin-top: 6px;">
+          <button type="button" class="btn-profile-logout" id="profileLogoutBtn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Sign Out of Account</span>
+          </button>
+
+          <!-- Delete Account (Disabled / Coming Soon) -->
+          <div class="profile-delete-account-disabled" id="profileDeleteAccountWrap" title="Account deletion is coming soon" aria-disabled="true">
+            <div class="delete-account-content">
+              <i class="fa-regular fa-trash-can"></i>
+              <span>Delete Account</span>
+            </div>
+            <span class="badge-coming-soon">Coming Soon</span>
+          </div>
+        </div>
+
+        <!-- ━━ LOGOUT CONFIRMATION MODAL ━━ -->
+        <div id="logoutConfirmModal" class="logout-confirm-overlay" style="display: none;">
+          <div class="logout-confirm-backdrop" onclick="window.closeLogoutModal && window.closeLogoutModal()"></div>
+          <div class="logout-confirm-card">
+            <div class="logout-confirm-icon-wrap">
+              <div class="logout-confirm-icon-circle">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              </div>
+            </div>
+            <h3 class="logout-confirm-title">Sign Out?</h3>
+            <p class="logout-confirm-desc">Are you sure you want to sign out of your LinkAdda account? You can always sign back in anytime.</p>
+            <div class="logout-confirm-actions">
+              <button type="button" class="btn-logout-cancel" id="btnLogoutCancel" onclick="window.closeLogoutModal && window.closeLogoutModal()">
+                <i class="fa-solid fa-xmark"></i>
+                <span>Cancel</span>
+              </button>
+              <button type="button" class="btn-logout-confirm" id="btnLogoutConfirm" onclick="window.confirmLogout && window.confirmLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Yes, Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ━━ COLUMN B: Quick Hub Matrix & Orders Activity Center ━━ -->
+      <div class="profile-col-main">
+
+        <!-- 1. Bento 4-Tile Quick Hub -->
+        <div class="fk-hub-grid">
+          <div class="fk-hub-card orders-tile" id="profileOrdersCard" onclick="window.showOrdersPage ? window.showOrdersPage('profile') : (window.location.hash = '#orders')" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap orders">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">My Orders</div>
+              <div class="fk-hub-badge" id="profileOrdersCount">0 Orders</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <div class="fk-hub-card likes-tile" id="profileLikedCard" onclick="window.openWishlistDrawer && window.openWishlistDrawer()" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap likes">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">Wishlist</div>
+              <div class="fk-hub-badge" id="profileLikedCount">0 Saved</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <div class="fk-hub-card notif-tile" id="profileNotifCard" onclick="window.showNotificationsPage && window.showNotificationsPage('profile')" role="button" tabindex="0">
+            <div class="fk-hub-icon-wrap notif">
+              <i class="fa-solid fa-bell"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">Notifications</div>
+              <div class="fk-hub-badge notif-badge-pill" id="profileNotifCount">0 New</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="fk-hub-card help-tile">
+            <div class="fk-hub-icon-wrap help">
+              <i class="fa-brands fa-telegram"></i>
+            </div>
+            <div class="fk-hub-content">
+              <div class="fk-hub-title">24/7 Support</div>
+              <div class="fk-hub-badge" style="color: #60a5fa;">Direct TG</div>
+            </div>
+            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+          </a>
+        </div>
+
         <!-- LinkAdda Creator & Seller Hub Card (Protected: Visible Only for Logged-In Members) -->
         <div class="profile-seller-card" id="profileSellerSection" style="display: none;">
           <div class="seller-card-badge-row">
@@ -5965,99 +6058,6 @@
               <i class="fa-solid fa-chevron-right opt-chevron"></i>
             </a>
           </div>
-        </div>
-
-        <!-- 4. Sign Out & Account Controls -->
-        <div id="profileLogoutWrap" class="profile-logout-box" style="margin-top: 6px;">
-          <button type="button" class="btn-profile-logout" id="profileLogoutBtn">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            <span>Sign Out of Account</span>
-          </button>
-
-          <!-- Delete Account (Disabled / Coming Soon) -->
-          <div class="profile-delete-account-disabled" id="profileDeleteAccountWrap" title="Account deletion is coming soon" aria-disabled="true">
-            <div class="delete-account-content">
-              <i class="fa-regular fa-trash-can"></i>
-              <span>Delete Account</span>
-            </div>
-            <span class="badge-coming-soon">Coming Soon</span>
-          </div>
-        </div>
-
-    <!-- ━━ LOGOUT CONFIRMATION MODAL ━━ -->
-    <div id="logoutConfirmModal" class="logout-confirm-overlay" style="display: none;">
-      <div class="logout-confirm-backdrop" onclick="window.closeLogoutModal && window.closeLogoutModal()"></div>
-      <div class="logout-confirm-card">
-        <div class="logout-confirm-icon-wrap">
-          <div class="logout-confirm-icon-circle">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          </div>
-        </div>
-        <h3 class="logout-confirm-title">Sign Out?</h3>
-        <p class="logout-confirm-desc">Are you sure you want to sign out of your LinkAdda account? You can always sign back in anytime.</p>
-        <div class="logout-confirm-actions">
-          <button type="button" class="btn-logout-cancel" id="btnLogoutCancel" onclick="window.closeLogoutModal && window.closeLogoutModal()">
-            <i class="fa-solid fa-xmark"></i>
-            <span>Cancel</span>
-          </button>
-          <button type="button" class="btn-logout-confirm" id="btnLogoutConfirm" onclick="window.confirmLogout && window.confirmLogout()">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            <span>Yes, Sign Out</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-      </div>
-
-      <!-- ━━ COLUMN B: Quick Hub Matrix & Orders Activity Center ━━ -->
-      <div class="profile-col-main">
-
-        <!-- 1. Bento 4-Tile Quick Hub -->
-        <div class="fk-hub-grid">
-          <div class="fk-hub-card orders-tile" onclick="window.showOrdersPage ? window.showOrdersPage('profile') : (window.location.hash = '#orders')" role="button" tabindex="0">
-            <div class="fk-hub-icon-wrap orders">
-              <i class="fa-solid fa-bag-shopping"></i>
-            </div>
-            <div class="fk-hub-content">
-              <div class="fk-hub-title">My Orders</div>
-              <div class="fk-hub-badge" id="profileOrdersCount">0 Orders</div>
-            </div>
-            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-          </div>
-
-          <div class="fk-hub-card likes-tile" onclick="window.openWishlistDrawer && window.openWishlistDrawer()" role="button" tabindex="0">
-            <div class="fk-hub-icon-wrap likes">
-              <i class="fa-solid fa-heart"></i>
-            </div>
-            <div class="fk-hub-content">
-              <div class="fk-hub-title">Wishlist</div>
-              <div class="fk-hub-badge" id="profileLikedCount">0 Saved</div>
-            </div>
-            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-          </div>
-
-          <div class="fk-hub-card notif-tile" id="profileNotifCard" onclick="window.showNotificationsPage && window.showNotificationsPage('profile')" role="button" tabindex="0">
-            <div class="fk-hub-icon-wrap notif">
-              <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="fk-hub-content">
-              <div class="fk-hub-title">Notifications</div>
-              <div class="fk-hub-badge notif-badge-pill" id="profileNotifCount">0 New</div>
-            </div>
-            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-right"></i></span>
-          </div>
-
-          <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" rel="noopener" class="fk-hub-card help-tile">
-            <div class="fk-hub-icon-wrap help">
-              <i class="fa-brands fa-telegram"></i>
-            </div>
-            <div class="fk-hub-content">
-              <div class="fk-hub-title">24/7 Support</div>
-              <div class="fk-hub-badge" style="color: #60a5fa;">Direct TG</div>
-            </div>
-            <span class="fk-hub-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
-          </a>
         </div>
 
       </div>
