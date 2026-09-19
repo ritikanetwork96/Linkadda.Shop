@@ -4501,7 +4501,7 @@ body.in-search-view #fkMobileAppbar,
   align-items: center;
   gap: 16px;
   width: max-content;
-  animation: marqueeTrackGlide 48s linear infinite;
+  animation: marqueeTrackGlide 90s linear infinite;
   white-space: nowrap;
   will-change: transform;
 }

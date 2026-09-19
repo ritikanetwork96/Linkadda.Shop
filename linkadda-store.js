@@ -174,7 +174,7 @@
     const key = `la_viewed_${pid}`;
     const now = Date.now();
     const last = Number(sessionStorage.getItem(key) || 0);
-    if (now - last < 45000) return;
+    if (now - last < 10000) return;
     sessionStorage.setItem(key, String(now));
 
     let p = window.liveCollections?.products?.[pid];
@@ -193,6 +193,7 @@
       }).catch(() => {});
     } catch (_) {}
   }
+  window.trackProductView = trackProductView;
 
   function trackProductLike(productId, isLiked) {
     if (!productId) return;

@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/seller/seller.css?v=2.5">
+  <link rel="stylesheet" href="/seller/seller.css?v=2.6">
 </head>
 <body class="seller-body">
   <div class="seller-glow-bg"></div>
@@ -85,6 +85,10 @@
         <p class="hero-creator-desc">Manage your digital packs, upload media, customize pricing, and track your rolling 7-day UPI payouts in real time.</p>
       </div>
       <div class="hero-creator-actions">
+        <button type="button" id="btn-hero-sync-stats" class="btn-hero-sync-stats" title="Sync live likes, views & orders">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Sync Live Stats</span>
+        </button>
         <button type="button" id="btn-hero-add-pack" class="btn-hero-add-pack">
           <i class="fa-solid fa-plus"></i>
           <span>Add New Pack</span>
@@ -179,10 +183,15 @@
           <h2 class="section-title">My Published Packs</h2>
           <p class="section-subtitle">Manage, edit, or delete your digital creator assets listed on LinkAdda marketplace</p>
         </div>
-        <button id="btn-add-pack" class="btn-seller-primary">
-          <i class="fa-solid fa-plus"></i>
-          <span>Add New Pack</span>
-        </button>
+        <div class="toolbar-actions-group" style="display:flex; gap:10px; align-items:center;">
+          <button type="button" id="btn-sync-packs" class="btn-seller-sync" title="Sync live likes, views & orders">
+            <i class="fa-solid fa-arrows-rotate"></i> <span>Sync Stats</span>
+          </button>
+          <button id="btn-add-pack" class="btn-seller-primary">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add New Pack</span>
+          </button>
+        </div>
       </div>
 
       <!-- Realtime Search & Category Filters Toolbar -->
@@ -622,8 +631,17 @@
 
                 <div class="form-grid-2">
                   <div class="form-group">
-                    <label for="product-category">Category <span class="req">*</span></label>
+                    <div class="field-label-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label for="product-category" style="margin-bottom: 0;">Category <span class="req">*</span></label>
+                      <button type="button" id="btn-toggle-custom-category" class="btn-cat-toggle-link" style="background: none; border: none; color: var(--ab-pink, #ff2a8d); font-size: 0.78rem; font-weight: 750; cursor: pointer; padding: 2px 6px; display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; transition: all 0.2s ease;">
+                        <i class="fa-solid fa-pen-nib"></i> + Custom Category
+                      </button>
+                    </div>
                     <select id="product-category" name="category" class="editor-select" required></select>
+                    <div id="custom-category-wrap" style="display: none; margin-top: 8px;">
+                      <input type="text" id="product-custom-category" class="editor-input" placeholder="Type your custom category (e.g. 4K Special, Anime, Web Series...)" maxlength="45" style="border-color: rgba(255, 42, 141, 0.45); background: rgba(255, 42, 141, 0.03);" />
+                      <span class="field-hint" style="margin-top: 4px; display: block; color: var(--ab-pink, #ff2a8d);">✨ Your custom category will be created and displayed live on the storefront.</span>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label for="modal-price">Selling Price (₹ INR) <span class="req">*</span></label>
@@ -976,7 +994,7 @@
 
   <!-- Script Initialization -->
   <script type="module">
-    import { initSellerDashboard } from '/seller/js/seller-dashboard.js?v=2.5';
+    import { initSellerDashboard } from '/seller/js/seller-dashboard.js?v=2.6';
 
     // Theme Toggle Logic
     const themeBtn = document.getElementById('sellerThemeToggle');

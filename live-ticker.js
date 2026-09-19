@@ -217,8 +217,8 @@
     const duplicated = [...items, ...items];
     track.innerHTML = duplicated.join('');
 
-    // Adjust animation speed proportionally to item count so it glides comfortably
-    const duration = Math.max(38, Math.min(75, Math.round(items.length * 4.2)));
+    // Adjust animation speed proportionally to item count so it glides comfortably and slowly
+    const duration = Math.max(80, Math.min(140, Math.round(items.length * 8)));
     track.style.animationDuration = duration + 's';
   }
 

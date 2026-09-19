@@ -2516,6 +2516,21 @@
       window.showToast(nowLiked ? 'Pack saved to Liked collection ❤️' : 'Removed from Liked collection');
     }
 
+    // Persist real-time like in database for verified creator analytics
+    try {
+      fetch('/api/seller/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle_like', productId: pid, isLiked: nowLiked }),
+      }).then(res => res.json()).then(data => {
+        if (data && data.success && data.likes !== undefined) {
+          if (window.liveCollections?.products?.[pid]) {
+            window.liveCollections.products[pid].likes = data.likes;
+          }
+        }
+      }).catch(() => {});
+    } catch (_) {}
+
     // Re-render if currently filtered to liked tab
     if (activeCategoryFilter === 'liked') {
       renderLiveGrid();
@@ -6365,8 +6380,8 @@
   </div>
 
   <script type="module" src="media-resolver.js"></script>
-  <script src="live-ticker.js?v=20260916a"></script>
-  <script src="linkadda-store.js?v=12"></script>
+  <script src="live-ticker.js?v=20260919b"></script>
+  <script src="linkadda-store.js?v=13"></script>
   <script type="module" src="auth-modal.js?v=20260916m"></script>
 </body>
 </html>

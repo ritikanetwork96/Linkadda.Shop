@@ -211,7 +211,9 @@ async function loadCategories() {
   // Populate editor category dropdown
   const catSelect = document.getElementById('product-category');
   if (catSelect) {
-    catSelect.innerHTML = allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    const opts = allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`);
+    opts.push('<option value="__custom__">➕ + Custom Category (Type your own)...</option>');
+    catSelect.innerHTML = opts.join('');
   }
 
   // Populate toolbar category filter
@@ -893,10 +895,17 @@ function updateLivePreview() {
     prevImg.src = mainMedia.url;
   }
 
-  // Update bullet tags preview
+  // Update bullet tags preview (reflecting category & features)
   if (prevTags) {
-    const displayTags = editorFeatures.slice(0, 2);
-    if (displayTags.length === 0) displayTags.push('4K Ultra HD', 'Fast Delivery');
+    let catVal = form.elements['category']?.value?.trim() || '';
+    if (catVal === '__custom__') {
+      const customInput = document.getElementById('product-custom-category');
+      catVal = customInput ? customInput.value.trim() : '';
+    }
+    const displayTags = [];
+    if (catVal) displayTags.push(catVal);
+    editorFeatures.slice(0, 1).forEach(f => displayTags.push(f));
+    if (displayTags.length === 0) displayTags.push('4K Ultra HD', 'Mega.nz Direct');
     prevTags.innerHTML = displayTags.map(t => `<span class="live-tag">${escapeHtml(t)}</span>`).join('');
   }
 }
@@ -1231,10 +1240,27 @@ export function openProductModal(product = null) {
 
   // Category options
   const catSelect = document.getElementById('product-category');
+  const customCatWrap = document.getElementById('custom-category-wrap');
+  const customCatInput = document.getElementById('product-custom-category');
+  const productCategory = (product ? (product.category || '') : '').trim();
+  const isExistingCategoryKnown = Boolean(productCategory && allCategories.includes(productCategory));
+
   if (catSelect) {
-    catSelect.innerHTML = allCategories.map(c => `
-      <option value="${escapeHtml(c)}" ${product && (product.category === c) ? 'selected' : ''}>${escapeHtml(c)}</option>
-    `).join('');
+    const opts = allCategories.map(c => `
+      <option value="${escapeHtml(c)}" ${product && (productCategory === c) ? 'selected' : ''}>${escapeHtml(c)}</option>
+    `);
+    opts.push(`<option value="__custom__" ${product && productCategory && !isExistingCategoryKnown ? 'selected' : ''}>➕ + Custom Category (Type your own)...</option>`);
+    catSelect.innerHTML = opts.join('');
+  }
+
+  if (customCatWrap && customCatInput) {
+    if (product && productCategory && !isExistingCategoryKnown) {
+      customCatWrap.style.display = 'block';
+      customCatInput.value = productCategory;
+    } else {
+      customCatWrap.style.display = 'none';
+      customCatInput.value = '';
+    }
   }
 
   if (product) {
@@ -1247,7 +1273,7 @@ export function openProductModal(product = null) {
     form.elements['originalPriceUSD'].value = product.originalPriceUSD || '';
     form.elements['badge'].value = product.badge || 'TRENDING PACK';
     form.elements['badgeStyle'].value = product.badgeStyle || 'pink';
-    form.elements['category'].value = product.category || allCategories[0] || 'General';
+    form.elements['category'].value = isExistingCategoryKnown ? productCategory : (productCategory ? '__custom__' : (allCategories[0] || 'General'));
     form.elements['description'].value = product.description || '';
     form.elements['downloadLink'].value = product.downloadLink || product.fileUrl || product.orderLink || '';
     form.elements['rating'].value = product.rating || '4.9';
@@ -1373,6 +1399,10 @@ export function closeProductModal() {
   editingProductId = null;
   isSubmittingProduct = false;
   setPublishingState(false, false);
+  const customCatWrap = document.getElementById('custom-category-wrap');
+  const customCatInput = document.getElementById('product-custom-category');
+  if (customCatWrap) customCatWrap.style.display = 'none';
+  if (customCatInput) customCatInput.value = '';
   const modal = document.getElementById('product-modal');
   if (modal) modal.classList.remove('active');
   document.body.style.overflow = '';
@@ -1382,6 +1412,82 @@ export function closeProductModal() {
 // GLOBAL EVENT LISTENERS & FORM BINDINGS
 // ══════════════════════════════════════════════════════════════════
 function setupEventListeners() {
+  // Sync live stats helper (likes, views, orders)
+  const handleSyncStats = async (btn) => {
+    if (btn) btn.classList.add('syncing');
+    showToast('Syncing real-time likes, views & orders...', 'info');
+    try {
+      await Promise.all([loadSellerProducts(), loadSellerOrders()]);
+      showToast('✓ Live stats synced from database!', 'success');
+    } catch (e) {
+      showToast('Stats sync note: ' + (e.message || 'Updated'), 'info');
+    } finally {
+      if (btn) btn.classList.remove('syncing');
+    }
+  };
+
+  const btnHeroSync = document.getElementById('btn-hero-sync-stats');
+  if (btnHeroSync) btnHeroSync.addEventListener('click', () => handleSyncStats(btnHeroSync));
+
+  const btnPacksSync = document.getElementById('btn-sync-packs');
+  if (btnPacksSync) btnPacksSync.addEventListener('click', () => handleSyncStats(btnPacksSync));
+
+  // Auto-refresh stats when seller switches back to dashboard tab / focuses window
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && currentSeller) {
+      loadSellerProducts();
+      loadSellerOrders();
+    }
+  });
+  window.addEventListener('focus', () => {
+    if (currentSeller) {
+      loadSellerProducts();
+      loadSellerOrders();
+    }
+  });
+
+  // Custom Category toggling & input listeners
+  const catSelect = document.getElementById('product-category');
+  const customCatWrap = document.getElementById('custom-category-wrap');
+  const customCatInput = document.getElementById('product-custom-category');
+  const btnToggleCustomCat = document.getElementById('btn-toggle-custom-category');
+
+  if (catSelect) {
+    catSelect.addEventListener('change', (e) => {
+      if (e.target.value === '__custom__') {
+        if (customCatWrap) customCatWrap.style.display = 'block';
+        if (customCatInput) customCatInput.focus();
+      } else {
+        if (customCatWrap) customCatWrap.style.display = 'none';
+      }
+      updateLivePreview();
+    });
+  }
+
+  if (btnToggleCustomCat) {
+    btnToggleCustomCat.addEventListener('click', () => {
+      if (!customCatWrap) return;
+      const isShowing = customCatWrap.style.display !== 'none';
+      if (isShowing) {
+        customCatWrap.style.display = 'none';
+        if (catSelect && catSelect.value === '__custom__') {
+          catSelect.value = allCategories[0] || '';
+        }
+      } else {
+        customCatWrap.style.display = 'block';
+        if (catSelect) catSelect.value = '__custom__';
+        if (customCatInput) customCatInput.focus();
+      }
+      updateLivePreview();
+    });
+  }
+
+  if (customCatInput) {
+    customCatInput.addEventListener('input', () => {
+      updateLivePreview();
+    });
+  }
+
   // Add pack buttons
   const btnAddPack = document.getElementById('btn-add-pack');
   if (btnAddPack) btnAddPack.addEventListener('click', () => openProductModal(null));
@@ -1675,7 +1781,23 @@ function setupEventListeners() {
       }
 
       const titleVal = form.elements['name']?.value?.trim();
-      const categoryVal = form.elements['category']?.value?.trim();
+      let categoryVal = form.elements['category']?.value?.trim();
+      const customCatWrap = document.getElementById('custom-category-wrap');
+      const customCatInput = document.getElementById('product-custom-category');
+      const isCustomCatActive = categoryVal === '__custom__' || (customCatWrap && customCatWrap.style.display !== 'none');
+
+      if (isCustomCatActive) {
+        categoryVal = (customCatInput ? customCatInput.value : '').trim();
+        if (!categoryVal) {
+          showToast('Please enter your custom category name.', 'error');
+          if (customCatInput) customCatInput.focus();
+          return;
+        }
+        if (!allCategories.includes(categoryVal)) {
+          allCategories.push(categoryVal);
+          syncToolbarCategoryFilter();
+        }
+      }
       const priceVal = form.elements['price']?.value?.trim();
       const origPriceVal = form.elements['originalPrice']?.value?.trim();
       const priceUSDVal = form.elements['priceUSD']?.value?.trim();
