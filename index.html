@@ -41,10 +41,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260915f" />
-  <link rel="stylesheet" href="linkadda-store.css?v=20260917a" />
+  <link rel="stylesheet" href="style.css?v=20260920b" />
+  <link rel="stylesheet" href="linkadda-store.css?v=20260920b" />
   <link rel="stylesheet" href="auth-modal.css?v=20260916a" />
-  <link rel="stylesheet" href="mobile-app.css?v=20260916m" />
+  <link rel="stylesheet" href="mobile-app.css?v=20260920b" />
   <script src="preload.js"></script>
   <style id="critical-hero-toast-fix">
     /* Hero Title: White top line, neon glowing gradient for second line */
@@ -3107,7 +3107,7 @@
         <div class="fk-card-slides-track">
           ${images.map((imgUrl, idx) => `
             <div class="fk-card-slide${idx === 0 ? ' is-active' : ''}" data-idx="${idx}">
-              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.onerror=null; this.src='/favicon.svg';" />
+              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="eager" draggable="false" onerror="if(!this._failed){this._failed=true; this.src='/favicon.svg';}" />
             </div>
           `).join('')}
         </div>
@@ -3450,23 +3450,39 @@
     if (nextIdx < 0) nextIdx = total - 1;
     if (nextIdx >= total) nextIdx = 0;
 
+    const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+    if (curIdx === nextIdx) return;
+
+    // Layered zero-flash crossfade:
+    // Outgoing slide becomes 'was-active' (remains 100% visible at z-index: 1 underneath)
+    // Incoming slide becomes 'is-active' (sits on top at z-index: 2 and fades in smoothly)
     slides.forEach((s, idx) => {
-      if (idx === nextIdx) {
-        s.classList.add('is-active');
-      } else {
+      if (idx === curIdx) {
+        s.classList.add('was-active');
         s.classList.remove('is-active');
+      } else if (idx === nextIdx) {
+        s.classList.add('is-active');
+        s.classList.remove('was-active');
+      } else {
+        s.classList.remove('is-active', 'was-active');
       }
     });
 
     bars.forEach((b, idx) => {
-      if (idx === nextIdx) {
-        b.classList.add('is-active');
-      } else {
-        b.classList.remove('is-active');
-      }
+      b.classList.toggle('is-active', idx === nextIdx);
     });
 
     mediaEl.dataset.activeIdx = String(nextIdx);
+
+    // After fade duration completes (450ms), cleanly remove 'was-active' from the old slide
+    clearTimeout(mediaEl._cleanupSlideTimeout);
+    mediaEl._cleanupSlideTimeout = setTimeout(() => {
+      slides.forEach((s, idx) => {
+        if (idx !== nextIdx) {
+          s.classList.remove('was-active');
+        }
+      });
+    }, 500);
   }
 
   function stopCardTimer(mediaEl) {
@@ -3543,6 +3559,12 @@
           if (entry.isIntersecting) {
             const cardIdx = parseInt(mediaEl.dataset.cardOrder || '0', 10);
             const stagger = 2200 + ((cardIdx % 5) * 600);
+            mediaEl.querySelectorAll('.fk-card-slide img').forEach(img => {
+              if (img.src && !img.complete) {
+                const pre = new Image();
+                pre.src = img.src;
+              }
+            });
             startCardTimer(mediaEl, stagger);
           } else {
             stopCardTimer(mediaEl);
@@ -4531,7 +4553,7 @@
     
     let img = btn.dataset.img || '';
     if (!img && card) {
-      const imgEl = card.querySelector('.fk-card-media img, .pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
+      const imgEl = card.querySelector('.fk-card-slide.is-active img, .fk-card-media img, .pslide-active img, .fb-slide-active img, .pcard-img, .pslide img, .fb-slide img');
       img = imgEl?.getAttribute('src') || '';
     }
 

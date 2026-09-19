@@ -1385,12 +1385,17 @@ body.linkadda-store {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   CARD MULTI-IMAGE AUTO-SLIDESHOW SYSTEM
+   CARD MULTI-IMAGE AUTO-SLIDESHOW SYSTEM (ZERO-FLASH / ULTRA SMOOTH)
    ══════════════════════════════════════════════════════════════════ */
-.fk-card-media.fk-card-slideshow {
-  position: relative;
-  overflow: hidden;
-  user-select: none;
+.fk-card-media.fk-card-slideshow,
+[data-theme="light"] .fk-card-media.fk-card-slideshow,
+[data-theme="dark"] .fk-card-media.fk-card-slideshow {
+  position: relative !important;
+  overflow: hidden !important;
+  user-select: none !important;
+  background: #090a12 !important;
+  background-color: #090a12 !important;
+  touch-action: pan-y;
 }
 
 .fk-card-slides-track {
@@ -1398,6 +1403,8 @@ body.linkadda-store {
   inset: 0;
   width: 100%;
   height: 100%;
+  background: #090a12;
+  overflow: hidden;
 }
 
 .fk-card-slide {
@@ -1407,17 +1414,29 @@ body.linkadda-store {
   height: 100%;
   opacity: 0;
   visibility: hidden;
-  transform: scale(1.02);
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
-  will-change: opacity, transform;
+  z-index: 0;
+  pointer-events: none;
+  background: #090a12;
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity;
 }
 
+/* The previous slide stays 100% visible at z-index: 1 underneath with no transition so zero white or black flash! */
+.fk-card-slide.was-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  transition: none !important;
+}
+
+/* The incoming slide sits on top at z-index: 2 and smoothly dissolves over the previous slide */
 .fk-card-slide.is-active {
-  opacity: 1;
-  visibility: visible;
-  transform: scale(1);
-  z-index: 2;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2 !important;
+  pointer-events: auto;
+  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
 .fk-card-slide img {
@@ -1426,13 +1445,17 @@ body.linkadda-store {
   object-fit: cover !important;
   border-radius: 16px !important;
   display: block !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .fk-card:hover .fk-card-slide.is-active img {
-  transform: scale(1.06);
+  transform: scale(1.04);
+  transition: transform 0.4s ease;
 }
 
-/* Indicators bar at bottom of card */
+/* Indicators bar at bottom of card (sleek glass pill directly on image) */
 .fk-card-slideshow-indicators {
   position: absolute;
   bottom: 8px;
@@ -1440,14 +1463,14 @@ body.linkadda-store {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   z-index: 4;
-  background: rgba(15, 23, 42, 0.62);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 3px 8px;
+  background: rgba(10, 15, 29, 0.6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 3px 6px;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   pointer-events: auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   transition: opacity 0.25s ease;
@@ -1456,11 +1479,11 @@ body.linkadda-store {
 .fk-slide-bar {
   display: inline-block;
   height: 4px;
-  width: 9px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.45);
+  width: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .fk-slide-bar:hover {
@@ -1468,9 +1491,9 @@ body.linkadda-store {
 }
 
 .fk-slide-bar.is-active {
-  width: 18px;
+  width: 14px;
   background: #ffffff;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
 }
 
 /* Desktop hover navigation arrows */
@@ -1481,11 +1504,11 @@ body.linkadda-store {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(10, 15, 29, 0.65) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1493,49 +1516,51 @@ body.linkadda-store {
   cursor: pointer;
   z-index: 5;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.25s ease, background 0.2s, transform 0.2s;
-  pointer-events: auto;
-}
-
-.fk-card-slide-nav:hover {
-  background: rgba(15, 23, 42, 0.95);
-  transform: translateY(-50%) scale(1.1);
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.5);
-}
-
-.fk-slide-prev {
-  left: 7px;
-}
-
-.fk-slide-next {
-  right: 7px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .fk-card:hover .fk-card-slide-nav {
   opacity: 1;
+  pointer-events: auto;
 }
 
-/* Light mode adjustments */
+.fk-card-slide-nav:hover {
+  background: rgba(10, 15, 29, 0.92) !important;
+  transform: translateY(-50%) scale(1.12);
+  color: #ff2a55 !important;
+  border-color: rgba(255, 42, 85, 0.5) !important;
+}
+
+.fk-slide-prev {
+  left: 8px;
+}
+
+.fk-slide-next {
+  right: 8px;
+}
+
+/* Unified styles in both themes so it NEVER turns into a harsh white patch */
 [data-theme="light"] .fk-card-slideshow-indicators {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: rgba(10, 15, 29, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 [data-theme="light"] .fk-slide-bar {
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 [data-theme="light"] .fk-slide-bar.is-active {
-  background: #0f172a;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="light"] .fk-card-slide-nav {
-  background: rgba(255, 255, 255, 0.9);
-  color: #0f172a;
-  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(10, 15, 29, 0.65) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
 @media (max-width: 768px) {
@@ -1544,15 +1569,15 @@ body.linkadda-store {
   }
   .fk-card-slideshow-indicators {
     bottom: 6px;
-    padding: 2px 6px;
-    gap: 4px;
+    padding: 2px 5px;
+    gap: 3px;
   }
   .fk-slide-bar {
     height: 3px;
-    width: 7px;
+    width: 6px;
   }
   .fk-slide-bar.is-active {
-    width: 14px;
+    width: 12px;
   }
 }
 
