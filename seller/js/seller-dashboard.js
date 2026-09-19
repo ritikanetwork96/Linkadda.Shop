@@ -234,7 +234,7 @@ function syncToolbarCategoryFilter() {
 // Load Seller Products
 async function loadSellerProducts() {
   try {
-    const res = await fetch(`${RTDB_URL}/products.json?_t=${Date.now()}`);
+    const res = await fetch(`${RTDB_URL}/products.json?_t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch products');
     const data = await res.json();
 
@@ -315,9 +315,19 @@ async function loadSellerOrders() {
         }
 
         if (isSellerOrder) {
+          const statusVal = String(ord.status || ord.orderStatus || ord.paymentStatus || '').toLowerCase();
+          const isApproved = statusVal === 'approved' || statusVal === 'completed' || statusVal === 'paid' || statusVal === 'verified' || ord.verified === true;
+
+          // STRICT SECURITY RULE: If admin has not approved the order, do NOT show to seller
+          if (!isApproved) continue;
+
           sellerOrders.push({
             id,
             ...ord,
+            isApproved: true,
+            customerName: 'Verified Buyer', // PRIVACY: Anonymize buyer for seller
+            customerEmail: '',
+            customerPhone: '',
             matchedItem: matchedItem || {},
           });
         }
@@ -748,14 +758,10 @@ function renderOrders() {
     tbody.innerHTML = sellerOrders.map(o => {
       const itemName = o.matchedItem?.name || o.productName || 'Creator Pack';
       const amount = Number(o.matchedItem?.price || o.amount || 0);
-      const isApproved = o.isApproved !== false && (o.status === 'approved' || o.orderStatus === 'approved' || o.paymentStatus === 'approved' || o.payoutStatus === 'settled' || o.payoutStatus === 'escrow');
-      const creatorShare = isApproved ? Number(o.creatorEarnings || amount) : 0;
-      const buyer = o.customerName || o.customerEmail || o.email || 'Customer';
+      const creatorShare = Number(o.creatorEarnings || amount);
       const isSettled = o.payoutStatus === 'settled';
-      const payoutBadge = !isApproved
-        ? `<span class="badge-status-pending" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800;">⏳ Awaiting Admin Approval</span>`
-        : isSettled
-        ? `<span class="badge-status-completed" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800;">✓ Settled</span>`
+      const payoutBadge = isSettled
+        ? `<span class="badge-status-completed" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800;">✓ Completed & Settled</span>`
         : `<span class="badge-status-pending" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800;">⏳ 7-Day Escrow (${o.daysRemaining || 7}d left)</span>`;
 
       return `
@@ -763,9 +769,13 @@ function renderOrders() {
           <td class="order-id" style="font-family: monospace; font-weight: 700; color: #93c5fd;">#${String(o.id).slice(-8).toUpperCase()}</td>
           <td class="order-date">${formatDate(o.createdAt || o.date)}</td>
           <td class="order-product"><strong>${escapeHtml(itemName)}</strong></td>
-          <td class="order-buyer">${escapeHtml(buyer)}</td>
+          <td class="order-buyer">
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #10b981;">
+              <i class="fa-solid fa-circle-check"></i> Verified Buyer
+            </span>
+          </td>
           <td class="order-amount" style="font-weight: 800; color: #fff;">₹${amount}</td>
-          <td class="order-share" style="font-weight: 800; color: ${isApproved ? '#34d399' : '#94a3b8'};">${isApproved ? `₹${creatorShare}` : 'Pending'}</td>
+          <td class="order-share" style="font-weight: 800; color: #34d399;">₹${creatorShare}</td>
           <td class="order-status">${payoutBadge}</td>
         </tr>
       `;
@@ -777,13 +787,9 @@ function renderOrders() {
     cardsContainer.innerHTML = sellerOrders.map(o => {
       const itemName = o.matchedItem?.name || o.productName || 'Creator Pack';
       const amount = Number(o.matchedItem?.price || o.amount || 0);
-      const isApproved = o.isApproved !== false && (o.status === 'approved' || o.orderStatus === 'approved' || o.paymentStatus === 'approved' || o.payoutStatus === 'settled' || o.payoutStatus === 'escrow');
-      const creatorShare = isApproved ? Number(o.creatorEarnings || amount) : 0;
-      const buyer = o.customerName || o.customerEmail || o.email || 'Customer';
+      const creatorShare = Number(o.creatorEarnings || amount);
       const isSettled = o.payoutStatus === 'settled';
-      const payoutBadge = !isApproved
-        ? `<span class="badge-status-pending" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">⏳ Awaiting Admin Approval</span>`
-        : isSettled
+      const payoutBadge = isSettled
         ? `<span class="badge-status-completed" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">✓ Settled</span>`
         : `<span class="badge-status-pending" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">⏳ Escrow (${o.daysRemaining || 7}d left)</span>`;
 
@@ -795,7 +801,9 @@ function renderOrders() {
           </div>
           <div class="mobile-order-pack">${escapeHtml(itemName)}</div>
           <div class="mobile-order-meta">
-            <span class="mobile-order-buyer"><i class="fa-solid fa-user-check"></i> ${escapeHtml(buyer)}</span>
+            <span class="mobile-order-buyer" style="display: inline-flex; align-items: center; gap: 5px; color: #10b981; font-weight: 700;">
+              <i class="fa-solid fa-circle-check"></i> Verified Buyer
+            </span>
             ${payoutBadge}
           </div>
           <div class="mobile-order-finance">
@@ -805,7 +813,7 @@ function renderOrders() {
             </div>
             <div class="creator-share-pill">
               <span class="lbl">Your 100%:</span>
-              <strong style="color: ${isApproved ? '#34d399' : '#94a3b8'};">${isApproved ? `₹${creatorShare}` : 'Pending'}</strong>
+              <strong style="color: #34d399;">₹${creatorShare}</strong>
             </div>
           </div>
         </div>
@@ -1445,6 +1453,14 @@ function setupEventListeners() {
       loadSellerOrders();
     }
   });
+
+  // ━━ REAL-TIME PERIODIC SYNC (Every 20s while dashboard is active) ━━
+  setInterval(() => {
+    if (currentSeller && document.visibilityState === 'visible') {
+      loadSellerProducts();
+      loadSellerOrders();
+    }
+  }, 20000);
 
   // Custom Category toggling & input listeners
   const catSelect = document.getElementById('product-category');

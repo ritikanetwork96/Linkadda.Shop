@@ -171,11 +171,21 @@
   function trackProductView(productId) {
     if (!productId) return;
     const pid = String(productId);
-    const key = `la_viewed_${pid}`;
-    const now = Date.now();
-    const last = Number(sessionStorage.getItem(key) || 0);
-    if (now - last < 10000) return;
-    sessionStorage.setItem(key, String(now));
+
+    // Calendar Date-based unique daily view tracker:
+    // User views on date 17 -> +1 view recorded.
+    // User returns on date 19 -> +1 view recorded (Total = 2 views!).
+    // Within the same calendar day, repeated page reloads do not spam views.
+    const key = `la_vdate_${pid}`;
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const lastDate = localStorage.getItem(key);
+
+    if (lastDate === today) {
+      // Already counted as an organic impression for today
+      return;
+    }
+
+    localStorage.setItem(key, today);
 
     let p = window.liveCollections?.products?.[pid];
     if (!p && window.liveCollections?.products) {
@@ -212,6 +222,11 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'toggle_like', productId: pid, isLiked: Boolean(isLiked) }),
+      }).then(r => r.json()).then(data => {
+        if (data && data.success && data.likes !== undefined) {
+          if (p) p.likes = data.likes;
+          window.dispatchEvent(new CustomEvent('product_likes_updated', { detail: { productId: pid, likes: data.likes } }));
+        }
       }).catch(() => {});
     } catch (_) {}
   }

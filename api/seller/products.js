@@ -75,37 +75,74 @@ export default async function handler(req, res) {
     }
 
     // ━━ PUBLIC ENGAGEMENT: TRACK VIEW & TOGGLE LIKE (NO SELLER LOGIN NEEDED) ━━
+    // Helper to resolve correct product key in RTDB
+    async function resolveProductKey(pId, aQuery) {
+      if (!pId) return '';
+      try {
+        const directRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(pId)}.json${aQuery}`, {
+          signal: AbortSignal.timeout(6000),
+        });
+        if (directRes.ok) {
+          const d = await directRes.json();
+          if (d && typeof d === 'object') return pId;
+        }
+      } catch (_) {}
+
+      try {
+        const allRes = await fetch(`${RTDB_URL}/products.json${aQuery}`, {
+          signal: AbortSignal.timeout(10000),
+        });
+        if (allRes.ok) {
+          const allP = await allRes.json();
+          if (allP && typeof allP === 'object') {
+            for (const [k, v] of Object.entries(allP)) {
+              if (k === pId || v?.id === pId || String(v?.id).toLowerCase() === pId.toLowerCase() || v?.slug === pId) {
+                return k;
+              }
+            }
+          }
+        }
+      } catch (_) {}
+      return pId;
+    }
+
+    // ━━ 1. TRACK VIEW (PUBLIC/BUYER ENGAGEMENT) ━━
     if (action === 'track_view' || action === 'view') {
-      const clientIp = getClientIp(req);
-      if (isEngagementRateLimited(clientIp)) {
-        return res.status(429).json({ error: 'Rate limit exceeded for views.' });
-      }
       const productId = String(body.productId || '').trim();
       if (!productId) return res.status(400).json({ error: 'Missing productId' });
+
+      const clientIp = getClientIp(req);
+      if (isEngagementRateLimited(clientIp)) {
+        return res.status(200).json({ success: true, rateLimited: true });
+      }
 
       const adminToken = await getFirebaseAdminToken();
       const authQuery = adminToken ? `?auth=${encodeURIComponent(adminToken)}` : '';
 
       try {
-        const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}/views.json${authQuery}`, { signal: AbortSignal.timeout(5000) });
+        const targetKey = await resolveProductKey(productId, authQuery);
+        const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/views.json${authQuery}`, {
+          signal: AbortSignal.timeout(12000),
+        });
         let curViews = 0;
         if (getRes.ok) {
           const val = await getRes.json();
-          curViews = Number(val || 0);
+          curViews = Math.max(0, Number(val || 0));
         }
         const newViews = curViews + 1;
-        await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}/views.json${authQuery}`, {
+        await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/views.json${authQuery}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newViews),
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(12000),
         });
-        return res.status(200).json({ success: true, views: newViews });
+        return res.status(200).json({ success: true, views: newViews, productId: targetKey });
       } catch (err) {
         return res.status(200).json({ success: false, error: err.message });
       }
     }
 
+    // ━━ 2. TOGGLE LIKE / APPRECIATION (PUBLIC/BUYER ENGAGEMENT) ━━
     if (action === 'toggle_like' || action === 'like') {
       const productId = String(body.productId || '').trim();
       const isLiked = body.isLiked !== false && body.isLiked !== 'false';
@@ -115,20 +152,23 @@ export default async function handler(req, res) {
       const authQuery = adminToken ? `?auth=${encodeURIComponent(adminToken)}` : '';
 
       try {
-        const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}/likes.json${authQuery}`, { signal: AbortSignal.timeout(5000) });
+        const targetKey = await resolveProductKey(productId, authQuery);
+        const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/likes.json${authQuery}`, {
+          signal: AbortSignal.timeout(12000),
+        });
         let curLikes = 0;
         if (getRes.ok) {
           const val = await getRes.json();
-          curLikes = Number(val || 0);
+          curLikes = Math.max(0, Number(val || 0));
         }
         const newLikes = Math.max(0, isLiked ? curLikes + 1 : Math.max(0, curLikes - 1));
-        await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}/likes.json${authQuery}`, {
+        await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/likes.json${authQuery}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newLikes),
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(12000),
         });
-        return res.status(200).json({ success: true, likes: newLikes });
+        return res.status(200).json({ success: true, likes: newLikes, productId: targetKey });
       } catch (err) {
         return res.status(200).json({ success: false, error: err.message });
       }
@@ -348,7 +388,12 @@ export default async function handler(req, res) {
             }
 
             if (isMatch) {
-              const isApproved = o.status === 'approved' || o.orderStatus === 'approved' || o.paymentStatus === 'approved' || o.verified === true;
+              const statusVal = String(o.status || o.orderStatus || o.paymentStatus || '').toLowerCase();
+              const isApproved = statusVal === 'approved' || statusVal === 'completed' || statusVal === 'paid' || statusVal === 'verified' || o.verified === true;
+
+              // STRICT RULE: If order has NOT been approved by admin, it must NOT appear in seller dashboard or revenue!
+              if (!isApproved) continue;
+
               const creatorEarnings = itemPrice;
               const orderTime = Number(o.createdAt || o.timestamp || Date.now());
               const ageMs = Math.max(0, now - orderTime);
@@ -357,29 +402,28 @@ export default async function handler(req, res) {
                 day: 'numeric', month: 'short', year: 'numeric'
               });
 
-              if (isApproved) {
-                totalGross += itemPrice;
-                totalCreatorEarnings += creatorEarnings;
+              totalGross += itemPrice;
+              totalCreatorEarnings += creatorEarnings;
 
-                if (isSettled) {
-                  settledEarnings += creatorEarnings;
-                } else {
-                  escrowEarnings += creatorEarnings;
-                }
+              if (isSettled) {
+                settledEarnings += creatorEarnings;
+              } else {
+                escrowEarnings += creatorEarnings;
               }
 
               ordersList.push({
                 id: oId,
                 productName: matchedName,
                 amount: itemPrice,
-                creatorEarnings: isApproved ? creatorEarnings : 0,
-                isApproved,
-                customerName: o.customerName || o.name || 'Verified Buyer',
-                customerEmail: o.customerEmail || o.email || '',
+                creatorEarnings: creatorEarnings,
+                isApproved: true,
+                customerName: 'Verified Buyer', // PRIVACY: Seller never sees buyer's personal real name
+                customerEmail: '', // PRIVACY: No personal contact info exposed
+                customerPhone: '',
                 createdAt: orderTime,
-                payoutStatus: !isApproved ? 'pending_approval' : isSettled ? 'settled' : 'in_escrow',
-                payoutDueDate: isApproved ? payoutDate : 'Pending Admin Verification',
-                daysRemaining: !isApproved ? null : isSettled ? 0 : Math.max(0, Math.ceil((SEVEN_DAYS_MS - ageMs) / (24 * 60 * 60 * 1000))),
+                payoutStatus: isSettled ? 'settled' : 'in_escrow',
+                payoutDueDate: payoutDate,
+                daysRemaining: isSettled ? 0 : Math.max(0, Math.ceil((SEVEN_DAYS_MS - ageMs) / (24 * 60 * 60 * 1000))),
               });
             }
           }

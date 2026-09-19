@@ -22,162 +22,290 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/seller/seller.css?v=2.6">
+  <link rel="stylesheet" href="/seller/seller.css?v=3.5">
 </head>
 <body class="seller-body">
   <div class="seller-glow-bg"></div>
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Dashboard Top Navigation Bar -->
-  <header class="seller-dashboard-header">
-    <div class="header-left">
-      <a href="/seller" class="seller-logo-brand">
-        <i class="fa-solid fa-crown brand-sparkle"></i>
-        <div class="brand-title-wrap">
-          <span class="brand-text">LinkAdda</span>
-          <span class="brand-hub-tag">SELLER HUB</span>
-        </div>
-      </a>
-      <div class="header-store-badge">
-        <span class="status-dot"></span>
-        <span id="seller-store-name">Loading Store...</span>
-      </div>
-    </div>
-
-    <div class="header-right">
-      <!-- Theme Toggle Button -->
-      <button type="button" class="ab-theme-btn" id="sellerThemeToggle" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
-        <i class="fa-solid fa-moon"></i>
-        <i class="fa-solid fa-sun"></i>
-      </button>
-
-      <a href="../" target="_blank" class="nav-btn-link" title="Open Public Storefront">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        <span>Live Store</span>
-      </a>
-      
-      <div class="seller-user-dropdown" id="header-user-profile-btn" style="cursor: pointer;" title="View & Edit My Profile">
-        <div class="seller-avatar" id="seller-avatar">S</div>
-        <div class="seller-user-info">
-          <span class="user-name" id="seller-owner-name">Partner</span>
-          <span class="user-email" id="seller-email">partner@linkadda.shop</span>
-        </div>
-      </div>
-
-      <button id="btn-seller-logout" class="header-logout-btn" title="Log Out">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span>Sign Out</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="seller-dashboard-layout">
+  <!-- Executive SaaS App Shell -->
+  <div class="seller-app-shell">
     
-    <!-- Creator Welcome Hero Banner -->
-    <section class="creator-welcome-hero">
-      <div class="hero-creator-details">
-        <div class="hero-creator-badges">
-          <span class="hero-badge-verified"><i class="fa-solid fa-shield-halved"></i> Verified Creator Partner</span>
-          <span class="hero-badge-cut"><i class="fa-solid fa-gem"></i> 100% Creator Share Guaranteed</span>
-        </div>
-        <h1 class="hero-creator-title">Welcome, <span id="hero-store-name" class="gradient-name">Creator Store</span></h1>
-        <p class="hero-creator-desc">Manage your digital packs, upload media, customize pricing, and track your rolling 7-day UPI payouts in real time.</p>
-      </div>
-      <div class="hero-creator-actions">
-        <button type="button" id="btn-hero-sync-stats" class="btn-hero-sync-stats" title="Sync live likes, views & orders">
-          <i class="fa-solid fa-arrows-rotate"></i>
-          <span>Sync Live Stats</span>
-        </button>
-        <button type="button" id="btn-hero-add-pack" class="btn-hero-add-pack">
-          <i class="fa-solid fa-plus"></i>
-          <span>Add New Pack</span>
+    <!-- EXECUTIVE SIDEBAR (DESKTOP & MOBILE DRAWER) -->
+    <aside class="seller-sidebar" id="seller-sidebar">
+      <div class="sidebar-header">
+        <a href="/seller" class="sidebar-brand">
+          <div class="sidebar-brand-icon">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div class="sidebar-brand-text">
+            <span class="brand-title">LinkAdda</span>
+            <span class="brand-badge">STUDIO</span>
+          </div>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="btn-sidebar-close" aria-label="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-    </section>
 
-    <!-- Top Stat Cards (App Bento Grid) -->
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-header">
-          <span class="metric-label">Live Packs</span>
-          <div class="metric-squircle-icon icon-pink">
-            <i class="fa-solid fa-box-archive"></i>
-          </div>
+      <!-- Live Store Identity Chip -->
+      <div class="sidebar-store-status">
+        <span class="store-status-indicator"></span>
+        <div class="store-status-info">
+          <span class="store-status-label">Active Store</span>
+          <span class="store-status-name" id="seller-store-name">Loading Store...</span>
         </div>
-        <div class="metric-value" id="stat-total-products">0</div>
-        <div class="metric-sub"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Active in marketplace</div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-header">
-          <span class="metric-label">Total Impressions</span>
-          <div class="metric-squircle-icon icon-cyan" style="background: rgba(56, 189, 248, 0.16); color: #38bdf8;">
-            <i class="fa-solid fa-eye"></i>
+      <!-- Main Navigation -->
+      <nav class="sidebar-nav">
+        <div class="sidebar-nav-section-title">CREATOR WORKSPACE</div>
+
+        <button type="button" class="seller-nav-item active" data-tab="dashboard">
+          <div class="nav-item-icon"><i class="fa-solid fa-chart-pie"></i></div>
+          <span class="nav-item-label">Dashboard</span>
+        </button>
+
+        <button type="button" class="seller-nav-item" data-tab="products">
+          <div class="nav-item-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+          <span class="nav-item-label">Published Packs</span>
+          <span class="nav-counter-pill" id="tab-prod-count">0</span>
+        </button>
+
+        <button type="button" class="seller-nav-item" data-tab="orders">
+          <div class="nav-item-icon"><i class="fa-solid fa-receipt"></i></div>
+          <span class="nav-item-label">Sales & Orders</span>
+          <span class="nav-counter-pill" id="tab-orders-count">0</span>
+        </button>
+
+        <button type="button" class="seller-nav-item" data-tab="payouts">
+          <div class="nav-item-icon"><i class="fa-solid fa-wallet"></i></div>
+          <span class="nav-item-label">7-Day Payouts & UPI</span>
+          <span class="nav-item-chip">100% Share</span>
+        </button>
+
+        <button type="button" class="seller-nav-item" data-tab="profile">
+          <div class="nav-item-icon"><i class="fa-solid fa-user-gear"></i></div>
+          <span class="nav-item-label">Profile & Settings</span>
+        </button>
+
+        <div class="sidebar-nav-section-title" style="margin-top: 24px;">QUICK ACCESS</div>
+
+        <a href="../" target="_blank" class="sidebar-link-item" title="Open Public Storefront">
+          <div class="nav-item-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+          <span class="nav-item-label">Live Storefront</span>
+          <i class="fa-solid fa-arrow-right mini-ext-icon"></i>
+        </a>
+
+        <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="sidebar-link-item" title="Chat with Finance & Admin on Telegram">
+          <div class="nav-item-icon"><i class="fa-brands fa-telegram"></i></div>
+          <span class="nav-item-label">Telegram VIP Desk</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer / User Profile Card -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card" id="header-user-profile-btn" style="cursor: pointer;" title="View & Edit My Profile">
+          <div class="seller-avatar" id="seller-avatar">S</div>
+          <div class="sidebar-user-details">
+            <span class="user-name" id="seller-owner-name">Partner</span>
+            <span class="user-email" id="seller-email">partner@linkadda.shop</span>
           </div>
         </div>
-        <div class="metric-value" id="stat-total-views">0</div>
-        <div class="metric-sub"><i class="fa-solid fa-chart-line" style="color: #38bdf8;"></i> Storefront pack views</div>
-      </div>
 
-      <div class="metric-card">
-        <div class="metric-header">
-          <span class="metric-label">Customer Orders</span>
-          <div class="metric-squircle-icon icon-purple">
-            <i class="fa-solid fa-cart-shopping"></i>
+        <div class="sidebar-footer-actions">
+          <button type="button" class="ab-theme-btn" id="sellerThemeToggle" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
+            <i class="fa-solid fa-moon"></i>
+            <i class="fa-solid fa-sun"></i>
+          </button>
+          <button id="btn-seller-logout" class="sidebar-logout-btn" title="Log Out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SIDEBAR BACKDROP (FOR MOBILE) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- MAIN WORKSPACE WRAPPER -->
+    <div class="seller-main-wrapper">
+      
+      <!-- TOP EXECUTIVE HEADER BAR -->
+      <header class="seller-executive-header">
+        <div class="header-left-col">
+          <button type="button" class="btn-sidebar-mobile-toggle" id="btn-sidebar-toggle" aria-label="Toggle Sidebar Menu">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+
+          <!-- Desktop Context Title -->
+          <div class="header-desktop-context">
+            <span class="header-context-sub">CREATOR HUB</span>
+            <h2 class="header-context-title">Marketplace Overview</h2>
+          </div>
+
+          <!-- Mobile Compact Brand (Only visible on mobile) -->
+          <div class="header-mobile-brand">
+            <i class="fa-solid fa-crown mobile-crown-icon" style="color: var(--ab-pink);"></i>
+            <span class="mobile-brand-title">LinkAdda</span>
+            <span class="mobile-brand-tag">STUDIO</span>
           </div>
         </div>
-        <div class="metric-value" id="stat-total-orders">0</div>
-        <div class="metric-sub"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Cloud delivery fulfilled</div>
-      </div>
 
-      <div class="metric-card gold-metric">
-        <div class="metric-header">
-          <span class="metric-label">Creator Share (100%)</span>
-          <div class="metric-squircle-icon icon-gold">
-            <i class="fa-solid fa-sack-dollar"></i>
-          </div>
+        <div class="header-right-col">
+          <a href="../" target="_blank" class="header-mobile-store-link" title="Open Public Storefront">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <button type="button" id="btn-hero-sync-stats" class="btn-executive-sync" title="Sync live stats from database">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span class="btn-sync-label">Sync Live Stats</span>
+          </button>
+          <button type="button" id="btn-hero-add-pack" class="btn-executive-primary" title="Create New Digital Pack">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add New Pack</span>
+          </button>
         </div>
-        <div class="metric-value" id="stat-total-revenue">₹0</div>
-        <div class="metric-sub"><i class="fa-solid fa-clock-rotate-left" style="color: #fbbf24;"></i> 7-day rolling UPI payout</div>
-      </div>
+      </header>
 
-      <div class="metric-card">
-        <div class="metric-header">
-          <span class="metric-label">Appreciations</span>
-          <div class="metric-squircle-icon icon-rose">
-            <i class="fa-solid fa-heart"></i>
+      <!-- Main Container -->
+      <main class="seller-dashboard-layout">
+        
+        <!-- TAB 0: MAIN DASHBOARD OVERVIEW (ALL STATS & SUMMARY LIVE HERE) -->
+        <section id="section-dashboard" class="tab-section active">
+          
+          <!-- Creator Welcome Hero Card (Full Width in body so never squished!) -->
+          <div class="creator-welcome-hero">
+            <div class="hero-creator-details">
+              <div class="hero-creator-badges">
+                <span class="hero-badge-verified micro-badge-verified"><i class="fa-solid fa-shield-halved"></i> Verified Creator Partner</span>
+                <span class="hero-badge-cut micro-badge-cut"><i class="fa-solid fa-gem"></i> 100% Creator Share</span>
+              </div>
+              <h1 class="hero-creator-title">Welcome, <span id="hero-store-name" class="gradient-name">Creator Store</span></h1>
+              <p class="hero-creator-desc">Manage your digital packs, upload media, customize pricing, and track your rolling 7-day UPI payouts in real time.</p>
+            </div>
+            <div class="hero-creator-actions">
+              <button type="button" onclick="document.getElementById('btn-hero-add-pack').click()" class="btn-hero-add-pack" title="Create New Digital Pack">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add New Pack</span>
+              </button>
+              <button type="button" onclick="document.getElementById('btn-hero-sync-stats').click()" class="btn-hero-sync-stats" title="Sync live stats">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Sync Live Stats</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="metric-value" id="stat-total-likes">0</div>
-        <div class="metric-sub"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Buyer likes received</div>
-      </div>
-    </section>
+          
+          <!-- 5-Metric Executive Bento Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Live Packs</span>
+                <div class="metric-squircle-icon icon-pink">
+                  <i class="fa-solid fa-box-archive"></i>
+                </div>
+              </div>
+              <div class="metric-value" id="stat-total-products">0</div>
+              <div class="metric-sub"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> Active in marketplace</div>
+            </div>
 
-    <!-- Navigation Tabs -->
-    <nav class="seller-tabs-nav">
-      <button class="seller-nav-item active" data-tab="products">
-        <i class="fa-solid fa-boxes-stacked"></i>
-        <span>My Published Packs</span>
-        <span class="nav-counter-pill" id="tab-prod-count">0</span>
-      </button>
-      <button class="seller-nav-item" data-tab="profile">
-        <i class="fa-solid fa-id-card"></i>
-        <span>My Profile & Settings</span>
-      </button>
-      <button class="seller-nav-item" data-tab="payouts">
-        <i class="fa-solid fa-wallet"></i>
-        <span>7-Day Payouts & UPI</span>
-      </button>
-      <button class="seller-nav-item" data-tab="orders">
-        <i class="fa-solid fa-receipt"></i>
-        <span>Sales & Orders</span>
-        <span class="nav-counter-pill" id="tab-orders-count">0</span>
-      </button>
-    </nav>
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Total Impressions</span>
+                <div class="metric-squircle-icon icon-cyan" style="background: rgba(56, 189, 248, 0.16); color: #38bdf8;">
+                  <i class="fa-solid fa-eye"></i>
+                </div>
+              </div>
+              <div class="metric-value" id="stat-total-views">0</div>
+              <div class="metric-sub"><i class="fa-solid fa-chart-line" style="color: #38bdf8;"></i> Storefront pack views</div>
+            </div>
 
-    <!-- TAB 1: PRODUCTS -->
-    <section id="section-products" class="tab-section active">
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Customer Orders</span>
+                <div class="metric-squircle-icon icon-purple">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+              </div>
+              <div class="metric-value" id="stat-total-orders">0</div>
+              <div class="metric-sub"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Cloud delivery fulfilled</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-header">
+                <span class="metric-label">Appreciations</span>
+                <div class="metric-squircle-icon icon-rose">
+                  <i class="fa-solid fa-heart"></i>
+                </div>
+              </div>
+              <div class="metric-value" id="stat-total-likes">0</div>
+              <div class="metric-sub"><i class="fa-solid fa-fire" style="color: #ef4444;"></i> Buyer likes received</div>
+            </div>
+
+            <!-- Revenue VIP Hero Card -->
+            <div class="metric-card gold-metric hero-revenue-card">
+              <div class="revenue-card-left">
+                <div class="metric-header" style="margin-bottom: 6px;">
+                  <span class="metric-label" style="color: #f59e0b;">Creator Share (100% Payout)</span>
+                  <div class="metric-squircle-icon icon-gold">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                  </div>
+                </div>
+                <div class="metric-value revenue-gold-text" id="stat-total-revenue">₹0</div>
+                <div class="metric-sub"><i class="fa-solid fa-clock-rotate-left" style="color: #fbbf24;"></i> Automated 7-day rolling UPI settlements</div>
+              </div>
+              <div class="revenue-card-right">
+                <button type="button" class="btn-revenue-payout-shortcut" onclick="switchToTab('payouts')">
+                  <span>Manage UPI Address</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Hub -->
+          <div class="dashboard-hub-grid">
+            <div class="hub-action-card" onclick="switchToTab('products')">
+              <div class="hub-card-icon icon-pink"><i class="fa-solid fa-boxes-stacked"></i></div>
+              <div class="hub-card-info">
+                <h4>Published Packs Catalog</h4>
+                <p>Manage, edit, customize prices or create new digital packs.</p>
+              </div>
+              <i class="fa-solid fa-chevron-right hub-card-arrow"></i>
+            </div>
+
+            <div class="hub-action-card" onclick="switchToTab('orders')">
+              <div class="hub-card-icon icon-purple"><i class="fa-solid fa-receipt"></i></div>
+              <div class="hub-card-info">
+                <h4>Verified Sales & Orders</h4>
+                <p>Monitor real-time purchases and verified buyer transactions.</p>
+              </div>
+              <i class="fa-solid fa-chevron-right hub-card-arrow"></i>
+            </div>
+
+            <div class="hub-action-card" onclick="switchToTab('payouts')">
+              <div class="hub-card-icon icon-emerald"><i class="fa-solid fa-wallet"></i></div>
+              <div class="hub-card-info">
+                <h4>7-Day Payouts & Escrow</h4>
+                <p>Track automated weekly payouts sent directly to your UPI ID.</p>
+              </div>
+              <i class="fa-solid fa-chevron-right hub-card-arrow"></i>
+            </div>
+
+            <div class="hub-action-card" onclick="switchToTab('profile')">
+              <div class="hub-card-icon icon-cyan"><i class="fa-solid fa-user-gear"></i></div>
+              <div class="hub-card-info">
+                <h4>Store Profile & Settings</h4>
+                <p>Customize store brand name, contact handles, and passwords.</p>
+              </div>
+              <i class="fa-solid fa-chevron-right hub-card-arrow"></i>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- TAB 1: PRODUCTS (ONLY PUBLISHED PACKS, SEARCH & ADD PACK) -->
+        <section id="section-products" class="tab-section" style="display: none;">
       <div class="section-toolbar">
         <div class="toolbar-title-box">
           <h2 class="section-title">My Published Packs</h2>
@@ -221,7 +349,7 @@
         </div>
         <h3>No Digital Packs Listed Yet</h3>
         <p>Start monetizing your exclusive creations! Click the button below to open the luxury product editor and publish your first pack.</p>
-        <button onclick="document.getElementById('btn-add-pack').click()" class="btn-seller-primary" style="margin-top: 16px;">
+        <button onclick="document.getElementById('btn-add-pack').click()" class="btn-seller-primary" style="margin: 22px auto 0; width: fit-content; max-width: 280px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
           <i class="fa-solid fa-plus"></i>
           <span>Create Your First Pack</span>
         </button>
@@ -474,24 +602,25 @@
       </form>
     </section>
 
-  </main>
+      </main>
+    </div> <!-- .seller-main-wrapper -->
+  </div> <!-- .seller-app-shell -->
 
   <!-- FLOATING MOBILE APP BOTTOM DOCK (NATIVE APP FEEL) -->
-  <nav class="mobile-app-bottom-dock" aria-label="Mobile Navigation Dock">
-    <button type="button" class="dock-nav-item active" data-tab="products" title="My Published Packs">
+  <nav class="mobile-app-bottom-dock" id="mobileAppBottomDock" aria-label="Mobile Navigation Dock">
+    <button type="button" class="dock-nav-item active" data-tab="dashboard" title="Dashboard Overview">
+      <div class="dock-icon-wrap">
+        <i class="fa-solid fa-chart-pie"></i>
+      </div>
+      <span class="dock-label">Home</span>
+    </button>
+
+    <button type="button" class="dock-nav-item" data-tab="products" title="My Published Packs">
       <div class="dock-icon-wrap">
         <i class="fa-solid fa-boxes-stacked"></i>
         <span class="dock-badge" id="mobile-tab-prod-count">0</span>
       </div>
       <span class="dock-label">Packs</span>
-    </button>
-    
-    <button type="button" class="dock-nav-item" data-tab="orders" title="Sales & Customer Orders">
-      <div class="dock-icon-wrap">
-        <i class="fa-solid fa-receipt"></i>
-        <span class="dock-badge" id="mobile-tab-orders-count">0</span>
-      </div>
-      <span class="dock-label">Orders</span>
     </button>
     
     <!-- Central Elevated Glowing Create FAB -->
@@ -504,11 +633,12 @@
       </button>
     </div>
 
-    <button type="button" class="dock-nav-item" data-tab="payouts" title="7-Day Rolling Payouts">
+    <button type="button" class="dock-nav-item" data-tab="orders" title="Sales & Customer Orders">
       <div class="dock-icon-wrap">
-        <i class="fa-solid fa-wallet"></i>
+        <i class="fa-solid fa-receipt"></i>
+        <span class="dock-badge" id="mobile-tab-orders-count">0</span>
       </div>
-      <span class="dock-label">Payouts</span>
+      <span class="dock-label">Orders</span>
     </button>
     
     <button type="button" class="dock-nav-item" data-tab="profile" title="Creator Profile & Settings">
@@ -1009,6 +1139,28 @@
         } catch (_) {}
       });
     }
+
+    // Mobile Sidebar Drawer Toggle
+    const toggleBtn = document.getElementById('btn-sidebar-toggle');
+    const closeBtn = document.getElementById('btn-sidebar-close');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const sidebar = document.getElementById('seller-sidebar');
+
+    function toggleSidebar(open) {
+      if (sidebar) sidebar.classList.toggle('open', open);
+      if (backdrop) backdrop.classList.toggle('active', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', () => toggleSidebar(true));
+    if (closeBtn) closeBtn.addEventListener('click', () => toggleSidebar(false));
+    if (backdrop) backdrop.addEventListener('click', () => toggleSidebar(false));
+
+    document.querySelectorAll('.seller-sidebar .seller-nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) toggleSidebar(false);
+      });
+    });
 
     initSellerDashboard();
   </script>

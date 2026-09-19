@@ -1,4 +1,9 @@
 import crypto from 'node:crypto';
+import dns from 'node:dns';
+
+if (dns.setDefaultResultOrder) {
+  try { dns.setDefaultResultOrder('ipv4first'); } catch (_) {}
+}
 
 /**
  * Shared Backend Utilities for LinkAdda Serverless APIs
