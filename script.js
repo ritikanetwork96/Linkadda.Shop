@@ -1045,35 +1045,125 @@ document.head.appendChild(burstStyle);
 
 // ===== EXIT INTENT POPUP =====
 (function() {
-  // Don't show again in same session if already seen
-  if (sessionStorage.getItem('exitShown')) return;
-
-  // Build popup HTML
+  // Build popup HTML — always constructed so elements and listeners exist permanently
   const overlay = document.createElement('div');
   overlay.className = 'exit-overlay';
   overlay.innerHTML = `
-    <div class="exit-popup">
-      <button class="exit-close" id="exitClose"><i class="fa-solid fa-xmark"></i></button>
-      <span class="exit-popup-icon">
-        <i class="fa-solid fa-gem" style="background:linear-gradient(135deg,#f59e0b,#e84393);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
-      </span>
-      <h2>Wait! Don't <span class="gradient-text">Miss This</span></h2>
-      <p>You're leaving without grabbing the best deal in the market. Mega Pack — 3 Lac+ videos at an unbeatable price. Only for today!</p>
-      <div class="exit-discount-box">
-        <div class="old-price">Original Price: ₹10,900 / $392</div>
-        <div class="new-price">₹4,399 <span style="font-size:1.1rem;opacity:0.8;">/ $109</span></div>
-        <div class="save-tag">You save ₹6,501 — Cheapest in the market!</div>
+    <div class="exit-popup-vip">
+      <!-- Ribbon Tag (Top Left) -->
+      <div class="exit-ribbon-tag">
+        <i class="fa-solid fa-crown exit-ribbon-crown"></i>
+        <span class="exit-ribbon-text">LIMITED<br>TIME<br>OFFER</span>
       </div>
-      <a href="https://t.me/TRUSTED_BROTHER1234" target="_blank" class="btn-primary">
-        <i class="fa-brands fa-telegram"></i> Claim Deal on Telegram
-      </a>
-      <button class="exit-skip" id="exitSkip">No thanks, I'll pay full price later</button>
+
+      <!-- Top Right Script & Close Button -->
+      <div class="exit-top-right">
+        <div class="exit-cursive-script">Premium Content<br>For You</div>
+        <button class="exit-close" id="exitClose" aria-label="Close offer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Avatar with Glowing White Ring (Verified badge is already in the asset) -->
+      <div class="exit-avatar-area">
+        <div class="exit-avatar-glow-ring">
+          <img src="images/popup-avatar-circle.png" alt="Trusted Brother" class="exit-avatar-img" />
+        </div>
+      </div>
+
+      <!-- Brand Header -->
+      <div class="exit-brand-header">
+        <span class="exit-brand-wing">&#x2039;&#x2605;&#x203A;</span>
+        <span class="exit-brand-title">TRUSTED BROTHER</span>
+        <span class="exit-brand-wing">&#x2039;&#x2605;&#x203A;</span>
+        <span class="exit-brand-gem"><i class="fa-solid fa-shield"></i></span>
+      </div>
+      <div class="exit-brand-sub">PREMIUM CONTENT MARKETPLACE</div>
+
+      <!-- Confetti Particles -->
+      <div class="exit-confetti-wrap" aria-hidden="true">
+        <span class="confetti c1"></span>
+        <span class="confetti c2"></span>
+        <span class="confetti c3"></span>
+        <span class="confetti c4"></span>
+        <span class="confetti c5"></span>
+        <span class="confetti c6"></span>
+      </div>
+
+      <!-- Inner Deal Card -->
+      <div class="exit-card-inner">
+        <!-- Floating 3D Gift on Left -->
+        <div class="exit-float-gift" aria-hidden="true">
+          <img src="images/popup-gift-3d.png" alt="Special Offer" />
+        </div>
+
+        <!-- Floating 3D Medal Badge on Right -->
+        <div class="exit-float-badge" aria-hidden="true">
+          <img src="images/popup-badge-3d.png" alt="Trusted Brother Badge" />
+        </div>
+
+        <!-- Pinned Deal Tag -->
+        <div class="exit-deal-pill"><i class="fa-solid fa-thumbtack"></i> PINNED DEAL</div>
+
+        <!-- Diamond App Icon -->
+        <div class="exit-diamond-tile">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+
+        <!-- Deal Title -->
+        <h2 class="exit-deal-title">All Collection Pack</h2>
+
+        <!-- Deal Subtitle -->
+        <p class="exit-deal-desc"><span class="exit-fire">&#x1F525;</span> Mega Pack &#8212; 3Lakh + Videos | Every category bundled together &#8212; the ultimate deal.</p>
+
+        <!-- Pricing Section -->
+        <div class="exit-discount-box">
+          <div class="old-price">&#8377;35000+</div>
+          <div class="new-price">
+            <span class="price-inr">&#8377;27000</span>
+            <span class="price-sep"> / </span>
+            <span class="price-usd">$1499</span>
+          </div>
+          <div class="save-tag" style="display:none;"></div>
+        </div>
+
+        <!-- Main Claim Deal Button -->
+        <a href="payment.html?productId=all-collection-pack&slug=all-collection-pack&name=All%20Collection%20Pack&inr=27000&usd=1499" class="btn-claim-deal" id="exitClaimBtn">
+          <i class="fa-solid fa-gem"></i> Claim Deal <i class="fa-solid fa-chevron-right"></i>
+        </a>
+
+        <!-- Like Pill Button -->
+        <button type="button" class="btn-like-pill" id="exitLikeBtn">
+          <span class="like-heart">&#x2764;&#xFE0F;</span> Like <strong class="like-count">12.4K</strong>
+        </button>
+
+        <!-- 4 Perks Grid -->
+        <div class="exit-perks-row">
+          <div class="exit-perk-col">
+            <div class="perk-icon perk-private"><i class="fa-solid fa-shield-halved"></i></div>
+            <span>100%<br>Private</span>
+          </div>
+          <div class="exit-perk-col">
+            <div class="perk-icon perk-access"><i class="fa-solid fa-bolt"></i></div>
+            <span>Instant<br>Access</span>
+          </div>
+          <div class="exit-perk-col">
+            <div class="perk-icon perk-categories"><i class="fa-solid fa-infinity"></i></div>
+            <span>All<br>Categories</span>
+          </div>
+          <div class="exit-perk-col">
+            <div class="perk-icon perk-value"><i class="fa-solid fa-heart"></i></div>
+            <span>Best<br>Value</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden skip button for existing JS compatibility -->
+      <button class="exit-skip" id="exitSkip" style="display:none;" aria-hidden="true"></button>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  function showExitPopup() {
-    if (sessionStorage.getItem('exitShown')) return;
+  function showExitPopup(force = false) {
+    if (!force && sessionStorage.getItem('exitShown')) return;
     try {
       let b = window.liveCollections?.banner;
       if (!b) {
@@ -1085,19 +1175,26 @@ document.head.appendChild(burstStyle);
       }
       if (b && (b.priceOfferINR || b.priceOriginal)) {
         const oldEl = overlay.querySelector('.old-price');
-        const newEl = overlay.querySelector('.new-price');
-        const saveEl = overlay.querySelector('.save-tag');
-        const inr = b.priceOfferINR ? (String(b.priceOfferINR).startsWith('₹') ? b.priceOfferINR : '₹' + b.priceOfferINR) : '';
-        const usd = b.priceOfferUSD ? (String(b.priceOfferUSD).startsWith('$') ? b.priceOfferUSD : '$' + b.priceOfferUSD) : '';
-        const orig = b.priceOriginal ? (String(b.priceOriginal).startsWith('₹') ? b.priceOriginal : '₹' + b.priceOriginal) : '';
-        if (orig && oldEl) oldEl.textContent = `Original Price: ${orig}`;
-        if (inr && newEl) newEl.innerHTML = `${inr} ${usd ? `<span style="font-size:1.1rem;opacity:0.8;">/ ${usd}</span>` : ''}`;
-        if (saveEl) saveEl.textContent = 'Special Mega Pack Deal — Cheapest in the market!';
+        const inrEl = overlay.querySelector('.price-inr');
+        const usdEl = overlay.querySelector('.price-usd');
+        const titleEl = overlay.querySelector('.exit-deal-title');
+        const descEl = overlay.querySelector('.exit-deal-desc');
+        const inr = b.priceOfferINR ? (String(b.priceOfferINR).startsWith('₹') ? b.priceOfferINR : '₹' + b.priceOfferINR) : '₹27000';
+        const usd = b.priceOfferUSD ? (String(b.priceOfferUSD).startsWith('$') ? b.priceOfferUSD : '$' + b.priceOfferUSD) : '$1499';
+        const orig = b.priceOriginal ? (String(b.priceOriginal).startsWith('₹') ? b.priceOriginal : '₹' + b.priceOriginal) : '₹35000+';
+        if (orig && oldEl) oldEl.textContent = `${orig}`;
+        if (inr && inrEl) inrEl.textContent = `${inr}`;
+        if (usd && usdEl) usdEl.textContent = `${usd}`;
+        if (b.title && titleEl) titleEl.textContent = b.title;
+        if (b.subtitle && descEl) descEl.innerHTML = `<span class="exit-fire">&#x1F525;</span> ${b.subtitle}`;
       }
     } catch (_) {}
     overlay.classList.add('active');
     sessionStorage.setItem('exitShown', '1');
   }
+  window.openOfferPopup = function(force = true) {
+    showExitPopup(force);
+  };
 
   function closeExitPopup() {
     overlay.classList.remove('active');
@@ -1109,13 +1206,86 @@ document.head.appendChild(burstStyle);
   });
 
   // Close buttons
-  document.getElementById('exitClose').addEventListener('click', closeExitPopup);
-  document.getElementById('exitSkip').addEventListener('click', closeExitPopup);
+  document.getElementById('exitClose')?.addEventListener('click', closeExitPopup);
+  document.getElementById('exitSkip')?.addEventListener('click', closeExitPopup);
 
   // Close on overlay click outside popup
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeExitPopup();
   });
+
+  // Interactive Like Button
+  const likeBtn = overlay.querySelector('#exitLikeBtn');
+  if (likeBtn) {
+    let likes = parseInt(localStorage.getItem('exit_deal_likes') || '12400', 10);
+    let isLiked = localStorage.getItem('exit_deal_is_liked') === '1';
+    const countEl = likeBtn.querySelector('.like-count');
+    const heartEl = likeBtn.querySelector('.like-heart');
+
+    function renderLikeState() {
+      likeBtn.classList.toggle('liked', isLiked);
+      if (heartEl) {
+        heartEl.innerHTML = isLiked ? '&#x2764;&#xFE0F;' : '&#x2661;';
+      }
+      if (countEl) {
+        countEl.textContent = isLiked ? '12.5K' : '12.4K';
+      }
+    }
+    renderLikeState();
+
+    likeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isLiked = !isLiked;
+      likes = isLiked ? 12500 : 12400;
+      localStorage.setItem('exit_deal_likes', String(likes));
+      localStorage.setItem('exit_deal_is_liked', isLiked ? '1' : '0');
+
+      likeBtn.classList.add('like-pop');
+      setTimeout(() => likeBtn.classList.remove('like-pop'), 350);
+
+      renderLikeState();
+    });
+  }
+
+  // Main Claim Deal Button — redirect directly to payment page with full details
+  const claimBtn = overlay.querySelector('#exitClaimBtn');
+  if (claimBtn) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const ext = isLocal ? '.html' : '';
+    const targetUrl = `payment${ext}?productId=all-collection-pack&slug=all-collection-pack&name=${encodeURIComponent('All Collection Pack')}&inr=27000&usd=1499`;
+    claimBtn.setAttribute('href', targetUrl);
+    claimBtn.dataset.productId = 'all-collection-pack';
+    claimBtn.dataset.name = 'All Collection Pack';
+    claimBtn.dataset.inr = '27000';
+    claimBtn.dataset.usd = '1499';
+
+    claimBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        if (window.__linkaddaDb && window.__linkaddaDbRef && window.__linkaddaDbPush) {
+          const todayDateStr = new Date().toISOString().slice(0, 10);
+          const clickMeta = {
+            type: 'order_click',
+            page: 'exit_offer_popup',
+            productId: 'all-collection-pack',
+            productName: 'All Collection Pack',
+            amountINR: 27000,
+            amountUSD: 1499,
+            date: todayDateStr,
+            timestamp: Date.now()
+          };
+          window.__linkaddaDbPush(window.__linkaddaDbRef(window.__linkaddaDb, 'events'), clickMeta);
+          window.__linkaddaDbPush(window.__linkaddaDbRef(window.__linkaddaDb, 'visitors'), clickMeta);
+        }
+      } catch (_) {}
+
+      closeExitPopup();
+      window.location.href = targetUrl;
+    });
+  }
 
   // Also trigger on mobile with back button / visibility change
   document.addEventListener('visibilitychange', () => {

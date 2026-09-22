@@ -3086,7 +3086,8 @@ async function loadProductsCatalog() {
 
         const currId = normalizeLookupValue(orderData.id || requestedCheckout.productId);
         const currName = normalizeLookupValue(orderData.name);
-        if (currId === 'pinned-deal' || currId === 'all-collection-pack' || currName.includes('collection') || !orderData.id) {
+        const hasExplicitUrlPrice = Boolean(params.get('inr') || params.get('price') || params.get('amount'));
+        if (!hasExplicitUrlPrice && (currId === 'pinned-deal' || currId === 'all-collection-pack' || currName.includes('collection') || !orderData.id)) {
           applyOrderToUI({
             id: 'pinned-deal',
             slug: 'all-collection-pack',

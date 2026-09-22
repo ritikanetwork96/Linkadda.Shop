@@ -1556,133 +1556,509 @@ body::before {
 .exit-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(6px);
-  z-index: 99999;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
+  padding: 16px;
+  box-sizing: border-box;
 }
 .exit-overlay.active {
   opacity: 1;
   pointer-events: all;
 }
-.exit-popup {
-  background: var(--card);
-  border: 1px solid rgba(245,158,11,0.35);
-  border-radius: 20px;
-  padding: 44px 40px 36px;
-  max-width: 460px;
-  width: 90%;
-  text-align: center;
+
+/* ===== LUXURY VIP EXIT INTENT POPUP (100% MATCHES REFERENCE DESIGN) ===== */
+.exit-popup-vip {
+  width: 100%;
+  max-width: 440px;
+  background: radial-gradient(circle at 50% 8%, #26032a 0%, #100115 60%, #060009 100%);
+  border: 2.5px solid #ff1168;
+  border-radius: 36px;
+  box-shadow: 0 0 22px #ff1168, 0 0 50px rgba(255, 17, 104, 0.45), 0 35px 80px rgba(0, 0, 0, 0.9);
   position: relative;
-  transform: scale(0.85) translateY(30px);
-  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(232,67,147,0.12);
+  padding: 24px 18px 22px;
+  transform: scale(0.85) translateY(24px);
+  transition: transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+  overflow: visible;
+  box-sizing: border-box;
 }
-.exit-overlay.active .exit-popup {
+.exit-overlay.active .exit-popup-vip {
   transform: scale(1) translateY(0);
 }
-.exit-popup::before {
-  content: '';
+
+/* 1. Ribbon Tag (Top Left) */
+.exit-ribbon-tag {
   position: absolute;
-  inset: -1px;
-  border-radius: 21px;
-  background: conic-gradient(from 0deg, #f59e0b, #e84393, #7c3aed, #f59e0b);
-  z-index: -1;
-  opacity: 0.5;
-  animation: rotateBorder 4s linear infinite;
+  top: 0;
+  left: 24px;
+  width: 62px;
+  background: linear-gradient(180deg, #d3002f 0%, #9e001c 100%);
+  color: #ffffff;
+  padding: 10px 4px 16px;
+  text-align: center;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 50% 100%, 0 calc(100% - 10px));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+}
+.exit-ribbon-crown {
+  color: #ffd700;
+  font-size: 15px;
+  display: block;
+  margin-bottom: 3px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+.exit-ribbon-text {
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  display: block;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 2. Top Right Script & Close Button */
+.exit-top-right {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  z-index: 10;
+}
+.exit-cursive-script {
+  font-family: 'Caveat', 'Dancing Script', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fed766;
+  line-height: 1.05;
+  text-align: right;
+  letter-spacing: 0.5px;
+  transform: rotate(-3deg);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+  user-select: none;
 }
 .exit-close {
-  position: absolute;
-  top: 14px; right: 16px;
-  background: rgba(255,255,255,0.06);
-  border: none;
-  color: var(--text-muted);
-  font-size: 1rem;
-  width: 30px; height: 30px;
+  background: #060009;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  color: #ffffff;
+  font-size: 16px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8);
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+  padding: 0;
+  flex-shrink: 0;
 }
-.exit-close:hover { background: rgba(232,67,147,0.15); color: var(--primary); }
-.exit-popup-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  display: block;
-  animation: cpbIconPulse 2s ease-in-out infinite;
+.exit-close:hover {
+  background: #ff1168;
+  border-color: #ff1168;
+  transform: scale(1.1) rotate(90deg);
 }
-.exit-popup h2 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.9rem;
-  font-weight: 700;
+
+/* 3. Avatar Section */
+.exit-avatar-area {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
   margin-bottom: 8px;
-  line-height: 1.2;
 }
-.exit-popup p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 24px;
-  line-height: 1.6;
+.exit-avatar-glow-ring {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  border: 3.5px solid #ffffff;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.85), 0 0 35px rgba(255, 17, 104, 0.45), 0 8px 24px rgba(0, 0, 0, 0.6);
+  background: #000000;
 }
-.exit-discount-box {
-  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(232,67,147,0.12));
-  border: 1px solid rgba(245,158,11,0.3);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
+.exit-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
-.exit-discount-box .old-price {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  text-decoration: line-through;
-  margin-bottom: 4px;
+
+/* 4. Brand Header */
+.exit-brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #ffffff;
+  margin-bottom: 3px;
 }
-.exit-discount-box .new-price {
-  font-size: 2rem;
+.exit-brand-wing {
+  color: #ffffff;
+  font-size: 13px;
+  letter-spacing: -1px;
+  opacity: 0.9;
+}
+.exit-brand-title {
+  font-family: 'Montserrat', sans-serif;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b, #e84393);
+  font-size: 17px;
+  letter-spacing: 2px;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+.exit-brand-gem {
+  color: #ffd700;
+  font-size: 14px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+.exit-brand-sub {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 2.8px;
+  color: #e5a751;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* 5. Inner Card */
+.exit-card-inner {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 22px 18px 18px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 14px 45px rgba(0, 0, 0, 0.5);
+}
+
+/* Floating 3D Assets on the edges */
+.exit-float-gift {
+  position: absolute;
+  left: -36px;
+  top: 10%;
+  width: 106px;
+  height: auto;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.55));
+  animation: exitFloatSlow 4s ease-in-out infinite;
+}
+.exit-float-gift img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.exit-float-badge {
+  position: absolute;
+  right: -32px;
+  top: 12%;
+  width: 96px;
+  height: auto;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.55));
+  animation: exitFloatAlt 4.2s ease-in-out infinite alternate;
+}
+.exit-float-badge img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes exitFloatSlow {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+@keyframes exitFloatAlt {
+  0% { transform: translateY(0) rotate(2deg); }
+  100% { transform: translateY(-7px) rotate(-2deg); }
+}
+
+/* Pinned Deal Pill */
+.exit-deal-pill {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #ff8c1a;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 4.5px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 3px 8px rgba(255, 140, 26, 0.35);
+  z-index: 2;
+}
+
+/* Diamond App Tile */
+.exit-diamond-tile {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff7a29 0%, #ff176b 100%);
+  color: #ffffff;
+  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(255, 23, 107, 0.4);
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+/* Deal Title & Desc */
+.exit-deal-title {
+  font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  font-size: 25px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #ff6b00 0%, #e60067 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1;
+  margin: 6px 0 6px;
+  line-height: 1.2;
 }
-.exit-discount-box .save-tag {
-  font-size: 0.8rem;
-  color: #4ade80;
+.exit-deal-desc {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.45;
   font-weight: 600;
-  margin-top: 6px;
+  max-width: 320px;
+  margin: 0 auto 10px;
 }
-.exit-popup .btn-primary {
-  width: 100%;
+.exit-fire {
+  font-size: 13px;
+}
+
+/* Pricing Section */
+.exit-discount-box {
+  margin-bottom: 12px;
+}
+.exit-discount-box .old-price {
+  font-size: 15px;
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-weight: 800;
+  margin-bottom: 1px;
+}
+.exit-discount-box .new-price {
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
   justify-content: center;
-  font-size: 1rem;
-  padding: 15px 20px;
-  background: linear-gradient(135deg, #f59e0b, #e84393);
-  box-shadow: 0 6px 24px rgba(245,158,11,0.35);
+  gap: 4px;
 }
-.exit-popup .btn-primary:hover {
-  box-shadow: 0 10px 36px rgba(245,158,11,0.55);
+.exit-discount-box .price-inr {
+  color: #ff6b00;
 }
-.exit-skip {
-  display: block;
-  margin-top: 14px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: var(--transition);
-  background: none;
+.exit-discount-box .price-sep {
+  color: #9ca3af;
+  font-size: 24px;
+  font-weight: 400;
+  margin: 0 4px;
+}
+.exit-discount-box .price-usd {
+  color: #e60067;
+}
+
+/* Claim Deal Button */
+.btn-claim-deal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 330px;
+  margin: 0 auto 12px;
+  height: 50px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ff1744 0%, #d8004b 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 17.5px;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(255, 23, 68, 0.6), 0 0 35px rgba(255, 23, 68, 0.35);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.25), box-shadow 0.2s;
   border: none;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  cursor: pointer;
+  user-select: none;
 }
-.exit-skip:hover { color: var(--primary); }
+.btn-claim-deal:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 26px rgba(255, 23, 68, 0.7), 0 0 40px rgba(255, 23, 68, 0.45);
+  color: #ffffff;
+}
+.btn-claim-deal i {
+  font-size: 15px;
+}
+
+/* Like Button */
+.btn-like-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 24px;
+  border-radius: 9999px;
+  border: 1.5px solid #ff2675;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 800;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(255, 38, 117, 0.12);
+  user-select: none;
+}
+.btn-like-pill:hover {
+  transform: scale(1.05);
+  background: #fff5f8;
+  box-shadow: 0 4px 14px rgba(255, 38, 117, 0.25);
+}
+.btn-like-pill.liked {
+  background: #ffeef3;
+  border-color: #ff0055;
+  color: #e6004c;
+  box-shadow: 0 4px 16px rgba(255, 0, 85, 0.25);
+}
+.btn-like-pill.like-pop {
+  transform: scale(1.18);
+}
+.btn-like-pill .like-heart {
+  font-size: 15px;
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-like-pill.liked .like-heart {
+  transform: scale(1.25);
+}
+
+/* 4 Perks Grid with Vertical Separators */
+.exit-perks-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.exit-perk-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  position: relative;
+}
+.exit-perk-col:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.perk-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.perk-private {
+  background: #ffe5ec;
+  color: #e60050;
+}
+.perk-access {
+  background: #f1e8ff;
+  color: #7c3aed;
+}
+.perk-categories {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+.perk-value {
+  background: #ffe4e6;
+  color: #f43f5e;
+}
+.exit-perk-col span {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.15;
+}
+
+/* Confetti flakes */
+.exit-confetti-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 36px;
+  z-index: 1;
+}
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  background: #ffd700;
+  opacity: 0.85;
+  border-radius: 2px;
+}
+.c1 { top: 60px; left: 14px; transform: rotate(25deg); background: #ffaa00; }
+.c2 { top: 120px; left: 8px; transform: rotate(-15deg); width: 6px; height: 12px; background: #ffd700; }
+.c3 { top: 220px; left: 16px; transform: rotate(45deg); width: 10px; height: 6px; background: #ffdd44; }
+.c4 { top: 80px; right: 18px; transform: rotate(35deg); width: 7px; height: 13px; background: #ffbe26; }
+.c5 { top: 150px; right: 12px; transform: rotate(-30deg); background: #ffd700; }
+.c6 { top: 260px; right: 16px; transform: rotate(50deg); width: 8px; height: 12px; background: #ffaa00; }
+
+@media (max-width: 480px) {
+  .exit-popup-vip {
+    max-width: 360px;
+    padding: 20px 14px 18px;
+    border-radius: 30px;
+  }
+  .exit-float-gift {
+    left: -22px;
+    width: 80px;
+    top: 14%;
+  }
+  .exit-float-badge {
+    right: -20px;
+    width: 76px;
+    top: 16%;
+  }
+  .exit-deal-title {
+    font-size: 21px;
+  }
+  .exit-discount-box .new-price {
+    font-size: 28px;
+  }
+  .exit-deal-desc {
+    font-size: 11px;
+  }
+}
 
 /* ===== VERIFIED BADGE ===== */
 .verified-badge {
