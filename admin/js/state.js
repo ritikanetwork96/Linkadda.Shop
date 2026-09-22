@@ -29,11 +29,14 @@ function loadCachedStore() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        Object.keys(initial).forEach((k) => {
-          if (parsed[k] && typeof parsed[k] === 'object' && Object.keys(parsed[k]).length > 0) {
-            initial[k] = parsed[k];
-          }
-        });
+        const isStale = parsed.timestamp && (Date.now() - Number(parsed.timestamp) > 24 * 3600 * 1000);
+        if (!isStale) {
+          Object.keys(initial).forEach((k) => {
+            if (parsed[k] && typeof parsed[k] === 'object' && Object.keys(parsed[k]).length > 0) {
+              initial[k] = parsed[k];
+            }
+          });
+        }
       }
     }
   } catch (_) {}
@@ -98,8 +101,9 @@ function saveStoreCache() {
 }
 
 function emit() {
-  if (emitTimer) cancelAnimationFrame(emitTimer);
-  emitTimer = requestAnimationFrame(() => {
+  if (emitTimer) clearTimeout(emitTimer);
+  emitTimer = setTimeout(() => {
+    emitTimer = null;
     saveStoreCache();
     const snapshot = getSnapshot();
     subscribers.forEach((fn) => {
@@ -109,7 +113,7 @@ function emit() {
         console.error('Subscriber error:', err);
       }
     });
-  });
+  }, 200);
 }
 
 export function getSnapshot() {
@@ -139,67 +143,131 @@ function attachNode(key, mode = 'collection') {
   }
 
   try {
-    get(ref(db, nodeName))
-      .then((snap) => {
-        if (snap.exists()) {
-          STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
-          emit();
-        }
-      })
-      .catch(() => {});
-
     const unsub = onValue(
       ref(db, nodeName),
       (snap) => {
-        STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
+        const val = snap.val();
+        STORE[key] = val !== null && val !== undefined ? val : (mode === 'singleton' ? {} : {});
         emit();
       },
       (err) => {
-        // Silently catch permission errors until auth resolves
+        // If permission denied before auth completes, remove from activeUnsubs so authenticated startRealtime can re-attach!
+        activeUnsubs.delete(key);
         if (err?.code !== 'PERMISSION_DENIED') {
           console.warn(`RTDB node ${key} notice:`, err?.message || err);
         }
       }
     );
     activeUnsubs.set(key, unsub);
+
+    // Initial query to fetch live data immediately
+    get(ref(db, nodeName))
+      .then((snap) => {
+        if (snap.exists()) {
+          STORE[key] = snap.val() || (mode === 'singleton' ? {} : {});
+        } else {
+          STORE[key] = mode === 'singleton' ? {} : {};
+        }
+        emit();
+      })
+      .catch(() => {});
   } catch (err) {
     console.warn(`Attach node ${key} error:`, err);
   }
+}
+
+function isSingleton(node) {
+  return ['hero', 'banner', 'settings', 'payment', 'analytics'].includes(node);
+}
+
+// Nodes required by specific view routes — prioritized for fast initial load
+export const ROUTE_NODE_REQUIREMENTS = {
+  dashboard: ['settings', 'orders', 'visitors', 'products', 'categories', 'events'],
+  catalog: ['products', 'categories', 'media'],
+  products: ['products', 'categories', 'media'],
+  categories: ['categories', 'products'],
+  reviews: ['reviews'],
+  media: ['media'],
+  hero: ['hero'],
+  banner: ['banner'],
+  faq: ['faq'],
+  testimonials: ['testimonials'],
+  settings: ['settings'],
+  payment: ['payment'],
+  orders: ['orders'],
+  screenshots: ['orders'],
+  users: ['customers'],
+  sellers: ['sellers', 'seller_applications'],
+  analytics: ['analytics', 'visitors', 'orders', 'events'],
+};
+
+// All available nodes in Linkadda RTDB
+const ALL_RTDB_NODES = [
+  'settings', 'orders', 'visitors', 'products', 'categories', 'events',
+  'media', 'reviews', 'faq', 'testimonials', 'hero', 'banner',
+  'payment', 'customers', 'sellers', 'seller_applications', 'analytics'
+];
+
+export function ensureNodesForRoute(route = 'dashboard') {
+  const cleanRoute = (route || 'dashboard').replace(/^#\/?/, '').trim() || 'dashboard';
+  const nodes = ROUTE_NODE_REQUIREMENTS[cleanRoute] || ROUTE_NODE_REQUIREMENTS.dashboard;
+  nodes.forEach((key) => {
+    if (!activeUnsubs.has(key)) {
+      attachNode(key, isSingleton(key) ? 'singleton' : 'collection');
+    }
+  });
+}
+
+let backgroundWarmupTimer = null;
+export function scheduleBackgroundNodes() {
+  if (backgroundWarmupTimer) clearTimeout(backgroundWarmupTimer);
+  backgroundWarmupTimer = setTimeout(() => {
+    backgroundWarmupTimer = null;
+    let delay = 0;
+    ALL_RTDB_NODES.forEach((key) => {
+      if (!activeUnsubs.has(key)) {
+        setTimeout(() => {
+          if (!activeUnsubs.has(key)) {
+            attachNode(key, isSingleton(key) ? 'singleton' : 'collection');
+          }
+        }, delay);
+        delay += 60;
+      }
+    });
+  }, 150);
 }
 
 let isRealtimeStarted = false;
 export function startRealtime(force = false) {
   if (isRealtimeStarted && !force) return;
   isRealtimeStarted = true;
-  attachNode('hero', 'singleton');
-  attachNode('categories');
-  attachNode('products');
-  attachNode('events');
-  attachNode('banner', 'singleton');
-  attachNode('faq');
-  attachNode('testimonials');
-  attachNode('settings', 'singleton');
-  attachNode('payment', 'singleton');
-  attachNode('orders');
-  attachNode('analytics', 'singleton');
-  attachNode('media');
-  attachNode('visitors');
-  attachNode('reviews');
-  attachNode('customers');
-  attachNode('sellers');
-  attachNode('seller_applications');
+
+  if (force) {
+    // When forced (e.g. user authenticated or explicit refresh), cancel old unsubs and re-attach all nodes cleanly
+    activeUnsubs.forEach((unsub) => {
+      try { unsub(); } catch (_) {}
+    });
+    activeUnsubs.clear();
+  }
+
+  // Connect active route nodes first
+  const currentRoute = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+  ensureNodesForRoute(currentRoute);
+
+  // Attach all remaining nodes progressively
+  scheduleBackgroundNodes();
 }
 
-// Automatically bind listeners to auth state transitions
+// On startup: immediately connect public nodes needed for fast catalog / settings rendering
+const initialRoute = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+ensureNodesForRoute(initialRoute);
+
+// Automatically bind authenticated listeners to auth state transitions
 onAuthStateChanged(auth, (user) => {
   if (user) {
     startRealtime(true);
   }
 });
-
-function isSingleton(node) {
-  return ['hero', 'banner', 'settings', 'payment', 'analytics'].includes(node);
-}
 
 function nodeRef(node, id = null) {
   if (!RTDB_NODES[node]) throw new Error(`Unknown node: ${node}`);
@@ -324,7 +392,7 @@ export function getItem(node, id) {
 }
 
 export function stats() {
-  const products = listCollection('products').filter((item) => item.status !== 'deleted').length;
+  const products = listCollection('products').filter((item) => item.status !== 'deleted');
   const categories = listCollection('categories').filter((item) => item.status !== 'deleted').length;
   const orders = listCollection('orders');
   const visitors = listCollection('visitors');
@@ -333,19 +401,23 @@ export function stats() {
   const isOrderClick = (item) => {
     const t = String(item.type || '').toLowerCase();
     if (t === 'telegram_click' || t === 'review_submission' || t === 'visitor') return false;
-    return t.includes('order') || t.includes('click') || Boolean(item.productId || item.package || item.productName);
+    return t.includes('order') || t.includes('click') || t.includes('buy') || Boolean(item.productId || item.package || item.productName);
   };
   const todaysOrders = orders.filter((item) => String(item.date || '').slice(0, 10) === today).length;
-  const todaysVisitors = visitors.filter((item) => String(item.date || '').slice(0, 10) === today).length;
-  const todaysClicks = events.filter((item) => String(item.date || '').slice(0, 10) === today && isOrderClick(item)).length;
+  const pureVisitors = visitors.filter((item) => !isOrderClick(item));
+  const todaysVisitors = pureVisitors.filter((item) => String(item.date || '').slice(0, 10) === today).length;
+  const allClicks = [...events, ...visitors.filter(isOrderClick)];
+  const directProductClicks = products.reduce((sum, p) => sum + Number(p.clicks || p.orderClicks || 0), 0);
+  const eventsClicks = allClicks.filter(isOrderClick).length;
+  const todaysClicks = allClicks.filter((item) => String(item.date || '').slice(0, 10) === today && isOrderClick(item)).length;
   return {
-    products,
+    products: products.length,
     categories,
     orders: orders.length,
     todaysOrders,
-    visitors: visitors.length,
+    visitors: pureVisitors.length,
     todaysVisitors,
-    clicks: events.filter(isOrderClick).length,
+    clicks: eventsClicks > 0 ? eventsClicks : directProductClicks,
     todaysClicks,
   };
 }

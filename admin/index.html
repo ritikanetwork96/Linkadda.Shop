@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="stylesheet" href="/admin/assets/admin.css?v=26" />
+  <link rel="stylesheet" href="/admin/assets/admin.css?v=36" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 </head>
@@ -56,7 +56,7 @@
           </button>
           <div class="searchbox">
             <i data-lucide="search"></i>
-            <input id="commandInput" type="search" placeholder="Search commands, sections, records..." />
+            <input id="commandInput" type="search" placeholder="Search... (Ctrl+K)" />
           </div>
         </div>
         <div class="topbar-right">
@@ -84,11 +84,66 @@
         </div>
       </header>
 
-      <div class="view-root" id="viewRoot"></div>
+      <div class="view-root" id="viewRoot">
+        <div class="view-loading-shell" style="min-height: 520px;">
+          <div class="view-loading-card glass">
+            <div class="view-loading-spinner"></div>
+            <div class="view-loading-title">Linkadda Admin</div>
+            <div class="view-loading-sub">Connecting to live store...</div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
   <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+  <nav class="mobile-app-dock glass" id="mobileAppDock" aria-label="Mobile Navigation">
+    <a class="dock-item active" href="#/dashboard" data-route-match="dashboard" title="Dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>Home</span>
+    </a>
+    <a class="dock-item" href="#/catalog" data-route-match="catalog" title="Catalog">
+      <i data-lucide="package"></i>
+      <span>Catalog</span>
+    </a>
+    <a class="dock-item" href="#/orders" data-route-match="orders" title="Orders">
+      <i data-lucide="receipt"></i>
+      <span>Orders</span>
+    </a>
+    <a class="dock-item" href="#/analytics" data-route-match="analytics" title="Analytics">
+      <i data-lucide="trending-up"></i>
+      <span>Analytics</span>
+    </a>
+    <button class="dock-item" type="button" id="dockMenuToggleBtn" onclick="document.getElementById('mobileMenuBtn')?.click()" title="Menu">
+      <i data-lucide="menu"></i>
+      <span>Menu</span>
+    </button>
+  </nav>
+
+  <script>
+    (function() {
+      function syncDock() {
+        var h = (window.location.hash || '#/dashboard').replace(/^#\/?/, '').split('/')[0] || 'dashboard';
+        if (h === 'products' || h === 'categories') h = 'catalog';
+        document.querySelectorAll('.dock-item[data-route-match]').forEach(function(el) {
+          if (el.getAttribute('data-route-match') === h) {
+            el.classList.add('active');
+          } else {
+            el.classList.remove('active');
+          }
+        });
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          var dock = document.getElementById('mobileAppDock');
+          if (dock) window.lucide.createIcons({ node: dock });
+        }
+      }
+      window.addEventListener('hashchange', syncDock);
+      window.addEventListener('DOMContentLoaded', syncDock);
+      setTimeout(syncDock, 150);
+      setTimeout(syncDock, 600);
+    })();
+  </script>
 
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal glass" id="modalRoot"></div>
@@ -109,6 +164,6 @@
     </div>
   </div>
 
-  <script type="module" src="/admin/js/app.js?v=29"></script>
+  <script type="module" src="/admin/js/app.js?v=36"></script>
 </body>
 </html>

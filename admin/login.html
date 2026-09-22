@@ -10,6 +10,7 @@
       if (path.endsWith('/index.html')) {
         cleanPath = path.substring(0, path.length - 10) || '/';
       } else if (path.endsWith('.html')) {
+        
         cleanPath = path.substring(0, path.length - 5);
       }
       if (cleanPath !== null) {
@@ -32,7 +33,7 @@
     const mount = document.getElementById('authMount');
     whenAuthenticated((user) => {
       if (user) {
-        window.location.href = '/admin';
+        window.location.href = '/admin/';
       }
     });
     mountLoginPage(mount);

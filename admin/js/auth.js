@@ -260,7 +260,7 @@ export function mountLoginPage(root) {
       localStorage.setItem('linkadda_remember_admin_email', email);
       await registerAdminSession(userCredential.user);
       note.textContent = 'Success! Opening admin center...';
-      window.location.href = '/admin';
+      window.location.href = '/admin/';
     } catch (error) {
       if (submitBtn) {
         submitBtn.disabled = false;

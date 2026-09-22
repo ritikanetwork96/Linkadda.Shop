@@ -39,6 +39,7 @@ export async function sendAdminNotificationEmail(payload) {
 }
 import {
   startRealtime,
+  ensureNodesForRoute,
   subscribe,
   stats,
   recentActivity,
@@ -110,7 +111,7 @@ const catalogPrefs = readCatalogPrefs();
 const ui = {
   route: 'dashboard',
   catalogTab: 'products',
-  dashboardRange: 'day',
+  dashboardRange: 'all',
   dashboardMetric: 'visitors',
   media: {
     search: '',
@@ -2819,6 +2820,7 @@ function openSingleEditor(node, schema, record = {}) {
 }
 
 function getRangeDays(range = ui.dashboardRange) {
+  if (range === 'all') return 365;
   if (range === 'week') return 7;
   if (range === 'month') return 30;
   return 1;
@@ -2840,6 +2842,7 @@ function recordTimestamp(item) {
 }
 
 function isInRange(timestamp, range) {
+  if (range === 'all') return true;
   const days = getRangeDays(range);
   const stamp = typeof timestamp === 'object' ? recordTimestamp(timestamp) : (Number(timestamp) || recordTimestamp({ date: timestamp }));
   return stamp >= Date.now() - (days * 86400000);
@@ -2854,6 +2857,12 @@ function parseMetricNumber(value) {
 }
 
 function getRangeWindow(range, offset = 0) {
+  if (range === 'all') {
+    return {
+      start: 0,
+      end: Date.now() + 86400000,
+    };
+  }
   const days = getRangeDays(range);
   const end = Date.now() - (offset * days * 86400000);
   return {
@@ -2885,6 +2894,33 @@ function dayKey(timestamp) {
 }
 
 function buildSeries(items, range, predicate = () => true) {
+  if (range === 'all') {
+    const valid = items.filter(predicate);
+    const stamps = valid.map(recordTimestamp).filter((s) => s > 0);
+    const now = Date.now();
+    const minStamp = stamps.length ? Math.min(...stamps) : now - (90 * 86400000);
+    const span = Math.max(86400000 * 7, now - minStamp);
+    const bucketCount = 14;
+    const bucketSize = span / bucketCount;
+    const series = [];
+    for (let index = 0; index < bucketCount; index += 1) {
+      const stamp = minStamp + (index * bucketSize);
+      const date = new Date(stamp);
+      series.push({
+        label: `${date.getMonth() + 1}/${date.getDate()}`,
+        date: dayKey(stamp),
+        timestamp: stamp,
+        count: 0,
+      });
+    }
+    valid.forEach((item) => {
+      const stamp = recordTimestamp(item);
+      const index = Math.floor((stamp - minStamp) / bucketSize);
+      const bucket = series[Math.min(series.length - 1, Math.max(0, index))];
+      if (bucket) bucket.count += 1;
+    });
+    return series;
+  }
   const { start, end } = getRangeWindow(range);
   const bucketSize = range === 'day' ? 3600000 : 86400000;
   const bucketCount = range === 'day' ? 24 : getRangeDays(range);
@@ -2912,6 +2948,33 @@ function buildSeries(items, range, predicate = () => true) {
 }
 
 function buildValueSeries(items, range, valueFn = () => 0, predicate = () => true) {
+  if (range === 'all') {
+    const valid = items.filter(predicate);
+    const stamps = valid.map(recordTimestamp).filter((s) => s > 0);
+    const now = Date.now();
+    const minStamp = stamps.length ? Math.min(...stamps) : now - (90 * 86400000);
+    const span = Math.max(86400000 * 7, now - minStamp);
+    const bucketCount = 14;
+    const bucketSize = span / bucketCount;
+    const series = [];
+    for (let index = 0; index < bucketCount; index += 1) {
+      const stamp = minStamp + (index * bucketSize);
+      const date = new Date(stamp);
+      series.push({
+        label: `${date.getMonth() + 1}/${date.getDate()}`,
+        date: dayKey(stamp),
+        timestamp: stamp,
+        count: 0,
+      });
+    }
+    valid.forEach((item) => {
+      const stamp = recordTimestamp(item);
+      const index = Math.floor((stamp - minStamp) / bucketSize);
+      const bucket = series[Math.min(series.length - 1, Math.max(0, index))];
+      if (bucket) bucket.count += parseMetricNumber(valueFn(item));
+    });
+    return series;
+  }
   const { start, end } = getRangeWindow(range);
   const bucketSize = range === 'day' ? 3600000 : 86400000;
   const bucketCount = range === 'day' ? 24 : getRangeDays(range);
@@ -2948,7 +3011,7 @@ function percentChange(current, previous) {
 }
 
 function summarizeDashboard(range = ui.dashboardRange) {
-  const visitors = listCollection('visitors');
+  const rawVisitors = listCollection('visitors');
   const orders = listCollection('orders');
   const events = listCollection('events');
   const products = listCollection('products');
@@ -2957,16 +3020,30 @@ function summarizeDashboard(range = ui.dashboardRange) {
   const clickPredicate = (item) => {
     const type = String(item.type || '').toLowerCase();
     if (type === 'telegram_click' || type === 'review_submission' || type === 'visitor') return false;
-    return type.includes('order') || type.includes('click') || Boolean(item.productId || item.package || item.productName);
+    return type.includes('order') || type.includes('click') || type.includes('buy') || Boolean(item.productId || item.package || item.productName);
   };
-  const currentVisitors = countInWindow(visitors, currentWindow.start, currentWindow.end);
-  const currentOrders = countInWindow(orders, currentWindow.start, currentWindow.end);
-  const currentClicks = countInWindow(events, currentWindow.start, currentWindow.end, clickPredicate);
-  const currentRevenue = sumInWindow(orders, currentWindow.start, currentWindow.end, (item) => item.amount, isPaidOrder);
+  const isPureVisitor = (item) => !clickPredicate(item);
+  const visitors = rawVisitors.filter(isPureVisitor);
+  const allClicks = [...events, ...rawVisitors.filter(clickPredicate)];
+  const directProductClicks = products.reduce((sum, p) => sum + Number(p.clicks || p.orderClicks || 0), 0);
+
+  // Cumulative all-time real metrics from linkadda.shop RTDB
+  const lifetimeClicks = allClicks.filter(clickPredicate).length || directProductClicks;
+  const lifetimeOrders = orders.length;
+  const lifetimeVisitors = visitors.length;
+  const lifetimeRevenue = orders.reduce((sum, item) => isPaidOrder(item) ? sum + parseMetricNumber(item.amount || item.amountINR || item.inr) : sum, 0);
+
+  const currentVisitors = range === 'all' ? lifetimeVisitors : countInWindow(visitors, currentWindow.start, currentWindow.end);
+  const currentOrders = range === 'all' ? lifetimeOrders : countInWindow(orders, currentWindow.start, currentWindow.end);
+  const eventsCount = range === 'all' ? lifetimeClicks : countInWindow(allClicks, currentWindow.start, currentWindow.end, clickPredicate);
+  const currentClicks = eventsCount > 0 ? eventsCount : (range === 'all' ? directProductClicks : 0);
+  const currentRevenue = range === 'all' ? lifetimeRevenue : sumInWindow(orders, currentWindow.start, currentWindow.end, (item) => item.amount, isPaidOrder);
+
   const prevVisitors = countInWindow(visitors, previousWindow.start, previousWindow.end);
   const prevOrders = countInWindow(orders, previousWindow.start, previousWindow.end);
-  const prevClicks = countInWindow(events, previousWindow.start, previousWindow.end, clickPredicate);
+  const prevClicks = countInWindow(allClicks, previousWindow.start, previousWindow.end, clickPredicate);
   const prevRevenue = sumInWindow(orders, previousWindow.start, previousWindow.end, (item) => item.amount, isPaidOrder);
+
   const topProducts = buildTopProducts({ range, clicks: currentClicks });
   const top = topProducts[0] ? [topProducts[0].title || topProducts[0].name, topProducts[0].clicks] : [];
   return {
@@ -2974,27 +3051,33 @@ function summarizeDashboard(range = ui.dashboardRange) {
     rangeDays: getRangeDays(range),
     visitors: currentVisitors,
     visitorsPrev: prevVisitors,
-    visitorsTrend: percentChange(currentVisitors, prevVisitors),
+    visitorsTrend: range === 'all' ? 100 : percentChange(currentVisitors, prevVisitors),
     clicks: currentClicks,
     clicksPrev: prevClicks,
-    clicksTrend: percentChange(currentClicks, prevClicks),
+    clicksTrend: range === 'all' ? 100 : percentChange(currentClicks, prevClicks),
     orders: currentOrders,
     ordersPrev: prevOrders,
-    ordersTrend: percentChange(currentOrders, prevOrders),
+    ordersTrend: range === 'all' ? 100 : percentChange(currentOrders, prevOrders),
     revenue: currentRevenue,
     revenuePrev: prevRevenue,
-    revenueTrend: percentChange(currentRevenue, prevRevenue),
+    revenueTrend: range === 'all' ? 100 : percentChange(currentRevenue, prevRevenue),
     visitorSeries: buildSeries(visitors, range),
-    clickSeries: buildSeries(events, range, clickPredicate),
+    clickSeries: buildSeries(allClicks, range, clickPredicate),
     orderSeries: buildSeries(orders, range),
     revenueSeries: buildValueSeries(orders, range, (item) => item.amount, isPaidOrder),
     topClicked: topProducts.map((p) => [p.title || p.name, p.clicks]),
     topProductName: top[0] || 'None',
     topProductClicks: top[1] || 0,
-    totals: stats(),
+    totals: {
+      ...stats(),
+      lifetimeClicks,
+      lifetimeOrders,
+      lifetimeVisitors,
+      lifetimeRevenue,
+    },
     liveProducts: products.length,
     liveCategories: listCollection('categories').length,
-    mediaAssets: getAllUnifiedMediaItems(ui.data || getSnapshot()).length,
+    mediaAssets: listCollection('media').length,
   };
 }
 
@@ -3002,9 +3085,10 @@ function renderRangeSwitch() {
   return `
     <div class="range-switch">
       ${[
-        ['day', '24H'],
-        ['week', '7D'],
+        ['all', 'All Time'],
         ['month', '30D'],
+        ['week', '7D'],
+        ['day', '24H'],
       ].map(([range, label]) => `
         <button class="range-pill ${ui.dashboardRange === range ? 'active' : ''}" data-action="set-range" data-range="${range}">
           ${escapeHtml(label)}
@@ -3250,9 +3334,10 @@ function buildTopProducts(summary = {}) {
   const isOrderClick = (item) => {
     const type = String(item.type || '').toLowerCase();
     if (type === 'telegram_click' || type === 'review_submission' || type === 'visitor') return false;
-    return type.includes('order') || type.includes('click') || Boolean(item.productId || item.package || item.productName);
+    return type.includes('order') || type.includes('click') || type.includes('buy') || Boolean(item.productId || item.package || item.productName);
   };
-  const events = listCollection('events').filter((item) => isInRange(recordTimestamp(item), range) && isOrderClick(item));
+  const allClickEvents = [...listCollection('events'), ...listCollection('visitors').filter(isOrderClick)];
+  const events = allClickEvents.filter((item) => isInRange(recordTimestamp(item), range) && isOrderClick(item));
   const orders = listCollection('orders').filter((item) => isInRange(recordTimestamp(item), range));
   const allOrders = listCollection('orders');
   const products = listCollection('products').filter((item) => item.status !== 'deleted');
@@ -3269,9 +3354,9 @@ function buildTopProducts(summary = {}) {
     return {
       ...prod,
       image: prod.image || (Array.isArray(prod.galleryImages) ? prod.galleryImages[0] : '') || '',
-      clicks: matchedEvs.length,
+      clicks: Math.max(matchedEvs.length, Number(prod.clicks || prod.orderClicks || 0)),
       orders: orderCount,
-      score: (orderCount * 3) + matchedEvs.length,
+      score: (orderCount * 3) + Math.max(matchedEvs.length, Number(prod.clicks || prod.orderClicks || 0)),
     };
   });
 
@@ -4571,7 +4656,7 @@ function renderDashboard(data) {
               label: 'Visitors',
               value: formatNumber(summary.visitors),
               change: summary.visitorsTrend,
-              note: `vs previous ${summary.range}`,
+              note: summary.range === 'all' ? 'All-time verified store traffic' : `${formatNumber(summary.totals.visitors || summary.totals.lifetimeVisitors || 0)} total all-time`,
               icon: 'users',
               series: summary.visitorSeries,
               tone: 'primary',
@@ -4580,7 +4665,7 @@ function renderDashboard(data) {
               label: 'Order Clicks',
               value: formatNumber(summary.clicks),
               change: summary.clicksTrend,
-              note: `vs previous ${summary.range}`,
+              note: summary.range === 'all' ? 'All-time checkout click intent' : `${formatNumber(summary.totals.clicks || summary.totals.lifetimeClicks || 0)} total all-time`,
               icon: 'mouse-pointer-click',
               series: summary.clickSeries,
               tone: 'secondary',
@@ -4589,7 +4674,7 @@ function renderDashboard(data) {
               label: 'Orders',
               value: formatNumber(summary.orders),
               change: summary.ordersTrend,
-              note: `vs previous ${summary.range}`,
+              note: summary.range === 'all' ? 'All-time customer orders' : `${formatNumber(summary.totals.orders || summary.totals.lifetimeOrders || 0)} total all-time`,
               icon: 'receipt-text',
               series: summary.orderSeries,
               tone: 'success',
@@ -4598,7 +4683,7 @@ function renderDashboard(data) {
               label: 'Revenue',
               value: formatNumber(summary.revenue),
               change: summary.revenueTrend,
-              note: 'From paid / completed orders',
+              note: summary.range === 'all' ? 'From paid / completed orders' : `₹${formatNumber(summary.totals.lifetimeRevenue || summary.revenue || 0)} total all-time`,
               icon: 'banknote',
               series: summary.revenueSeries,
               tone: 'accent',
@@ -8617,7 +8702,15 @@ function mediaSortValue(item = {}) {
   return Number(item.deletedAt || item.updatedAt || item.createdAt || 0);
 }
 
+let _unifiedMediaCache = null;
+let _unifiedMediaCacheRef = null;
+
 function getAllUnifiedMediaItems(data = {}) {
+  const currentData = data || ui.data || {};
+  if (_unifiedMediaCache && _unifiedMediaCacheRef === currentData) {
+    return _unifiedMediaCache;
+  }
+
   const mediaMap = new Map();
 
   // 1. Scan explicit records from 'media' node in Firebase
@@ -8748,7 +8841,10 @@ function getAllUnifiedMediaItems(data = {}) {
     recordAssetUsage(t.image, `Testimonial: ${t.name || 'User'}`, 'testimonials');
   }
 
-  return Array.from(mediaMap.values());
+  const result = Array.from(mediaMap.values());
+  _unifiedMediaCache = result;
+  _unifiedMediaCacheRef = currentData;
+  return result;
 }
 
 function filterMediaItems(items = []) {
@@ -9503,45 +9599,55 @@ function renderAnalyticsView(data) {
   `;
 }
 
+let _renderViewFrame = null;
 function renderView(data) {
-  try {
-    ui.data = data;
-    sideNav.innerHTML = navMarkup();
-    const current = ui.route;
-    let html = '';
-    if (current === 'dashboard') html = renderDashboard(data);
-    else if (current === 'catalog' || current === 'products' || current === 'categories') html = renderCatalogView(data);
-    else if (current === 'faq') html = renderCollection('faq', collectionSchemas.faq, listCollection('faq'));
-    else if (current === 'testimonials') html = renderCollection('testimonials', collectionSchemas.testimonials, listCollection('testimonials'));
-    else if (current === 'media') html = renderMediaView(getAllUnifiedMediaItems(data || {}));
-    else if (current === 'settings') html = renderSettingsManagementView(data.settings || {}, data || {});
-    else if (current === 'payment') html = renderPaymentManagementView(data.payment || {}, data || {});
-    else if (current === 'orders') html = renderOrdersManagementView(data.orders || {}, data || {});
-    else if (current === 'reviews') html = renderReviewsManagementView(data.reviews || {}, data || {});
-    else if (current === 'screenshots') html = renderScreenshotsGalleryView(data.orders || {}, data || {});
-    else if (current === 'users') html = renderUsersManagementView(data || {});
-    else if (current === 'sellers') html = renderSellersManagementView(data || {}, data || {});
-    else if (current === 'analytics') html = renderAnalyticsView(data);
-    else if (current === 'hero') html = renderSingleEditorPage('hero', singleEditors.hero, data.hero || {});
-    else if (current === 'banner') html = renderSingleEditorPage('banner', singleEditors.banner, data.banner || {});
-    else html = renderDashboard(data);
-    viewRoot.innerHTML = html;
-    if (window.lucide) lucide.createIcons();
-    initCatalogDragAndDrop();
-    if (current === 'analytics') mountAnalyticsCharts();
-    if (notifyCount) {
-      notifyCount.textContent = String(recentActivity(12).length);
+  ui.data = data;
+  // Cancel any pending render frame to avoid double-renders
+  if (_renderViewFrame) cancelAnimationFrame(_renderViewFrame);
+  _renderViewFrame = requestAnimationFrame(() => {
+    _renderViewFrame = null;
+    try {
+      sideNav.innerHTML = navMarkup();
+      if (window.lucide) lucide.createIcons({ node: sideNav });
+      const current = ui.route;
+      let html = '';
+      if (current === 'dashboard') html = renderDashboard(data);
+      else if (current === 'catalog' || current === 'products' || current === 'categories') html = renderCatalogView(data);
+      else if (current === 'faq') html = renderCollection('faq', collectionSchemas.faq, listCollection('faq'));
+      else if (current === 'testimonials') html = renderCollection('testimonials', collectionSchemas.testimonials, listCollection('testimonials'));
+      else if (current === 'media') html = renderMediaView(getAllUnifiedMediaItems(data || {}));
+      else if (current === 'settings') html = renderSettingsManagementView(data.settings || {}, data || {});
+      else if (current === 'payment') html = renderPaymentManagementView(data.payment || {}, data || {});
+      else if (current === 'orders') html = renderOrdersManagementView(data.orders || {}, data || {});
+      else if (current === 'reviews') html = renderReviewsManagementView(data.reviews || {}, data || {});
+      else if (current === 'screenshots') html = renderScreenshotsGalleryView(data.orders || {}, data || {});
+      else if (current === 'users') html = renderUsersManagementView(data || {});
+      else if (current === 'sellers') html = renderSellersManagementView(data || {}, data || {});
+      else if (current === 'analytics') html = renderAnalyticsView(data);
+      else if (current === 'hero') html = renderSingleEditorPage('hero', singleEditors.hero, data.hero || {});
+      else if (current === 'banner') html = renderSingleEditorPage('banner', singleEditors.banner, data.banner || {});
+      else html = renderDashboard(data);
+      viewRoot.innerHTML = html;
+      // Defer icon rendering to let browser paint HTML first — prevents thread block
+      setTimeout(() => {
+        if (window.lucide) lucide.createIcons({ node: viewRoot });
+      }, 0);
+      initCatalogDragAndDrop();
+      if (current === 'analytics') mountAnalyticsCharts();
+      if (notifyCount) {
+        notifyCount.textContent = String(recentActivity(12).length);
+      }
+    } catch (error) {
+      viewRoot.innerHTML = `
+        <div class="page active">
+          <section class="panel glass">
+            <h2 class="section-title">Render Error</h2>
+            <p class="section-subtitle">${escapeHtml(error?.message || 'Unknown error')}</p>
+          </section>
+        </div>
+      `;
     }
-  } catch (error) {
-    viewRoot.innerHTML = `
-      <div class="page active">
-        <section class="panel glass">
-          <h2 class="section-title">Render Error</h2>
-          <p class="section-subtitle">${escapeHtml(error?.message || 'Unknown error')}</p>
-        </section>
-      </div>
-    `;
-  }
+  });
 }
 
 let _searchDebounceTimer = null;
@@ -9601,7 +9707,9 @@ function softUpdateCatalog() {
       </div>
     `;
   }
-  if (window.lucide) lucide.createIcons();
+  setTimeout(() => {
+    if (window.lucide) lucide.createIcons({ node: viewRoot });
+  }, 0);
   initCatalogDragAndDrop();
 }
 
@@ -9624,6 +9732,23 @@ function triggerRouteProgressBar() {
   });
 }
 
+function hasDataForRoute(route) {
+  const data = ui.data || {};
+  if (route === 'catalog' || route === 'products' || route === 'categories') {
+    return Array.isArray(data.products) || (data.products && Object.keys(data.products).length > 0);
+  }
+  if (route === 'media') {
+    return Array.isArray(data.media) || (data.media && Object.keys(data.media).length > 0);
+  }
+  if (route === 'reviews') {
+    return Array.isArray(data.reviews) || (data.reviews && Object.keys(data.reviews).length > 0);
+  }
+  if (route === 'dashboard') {
+    return Boolean(data.products || data.orders || data.visitors);
+  }
+  return true;
+}
+
 function applyRoute(path) {
   const targetRoute = (path === 'products' || path === 'categories') ? 'catalog' : (NAV_ITEMS.some((item) => item.key === path) ? path : 'dashboard');
   if (path === 'products') {
@@ -9633,8 +9758,46 @@ function applyRoute(path) {
   }
   ui.route = targetRoute;
   ui.page = 1;
+
+  // 1. Ensure Firebase nodes required for this view are requested on-demand
+  ensureNodesForRoute(targetRoute);
+
+  // 2. Immediately update active sidebar link and trigger progress bar
+  sideNav.innerHTML = navMarkup();
+  if (window.lucide) lucide.createIcons({ node: sideNav });
   triggerRouteProgressBar();
-  renderView(ui.data || {});
+
+  // 3. Show a quick transition indicator FIRST so the UI never freezes
+  //    Then render the full view on the next animation frame
+  const dataReady = hasDataForRoute(targetRoute);
+  if (dataReady) {
+    // Add a brief opacity transition to prevent jarring content swap
+    viewRoot.style.opacity = '0.5';
+    viewRoot.style.pointerEvents = 'none';
+    requestAnimationFrame(() => {
+      renderView(ui.data || {});
+      // Restore visibility after DOM is painted
+      requestAnimationFrame(() => {
+        viewRoot.style.opacity = '1';
+        viewRoot.style.pointerEvents = '';
+      });
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    return;
+  }
+
+  // 4. Otherwise, show immediate sleek loading feedback while data streams in
+  const routeItem = NAV_ITEMS.find((item) => item.key === targetRoute);
+  const routeLabel = routeItem ? routeItem.label : (targetRoute.charAt(0).toUpperCase() + targetRoute.slice(1));
+  viewRoot.innerHTML = `
+    <div class="view-loading-shell">
+      <div class="view-loading-card glass">
+        <div class="view-loading-spinner"></div>
+        <div class="view-loading-title">Loading ${escapeHtml(routeLabel)}...</div>
+        <div class="view-loading-sub">Preparing live records</div>
+      </div>
+    </div>
+  `;
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -9761,12 +9924,12 @@ function attachGlobalHandlers() {
       return;
     }
     if (action === 'refresh') {
-      renderView(ui.data || {});
-      showToast('Dashboard refreshed');
+      showToast('Refreshing live data from database...', 'info');
+      startRealtime(true);
       return;
     }
     if (action === 'set-range') {
-      ui.dashboardRange = actionBtn.dataset.range || 'day';
+      ui.dashboardRange = actionBtn.dataset.range || 'all';
       renderView(ui.data || {});
       return;
     }
@@ -12067,21 +12230,26 @@ function syncRealApprovedOrdersToSettings(data) {
 // Instant initial render from cache (0ms - data never disappears on refresh)
 initTheme();
 attachGlobalHandlers();
-initRouteHandling();
 ui.data = getSnapshot();
-renderView(ui.data || {});
 
 // Subscribe to state updates for seamless live sync
+let isInitialBoot = true;
 subscribe((data) => {
   ui.data = data;
-  renderView(data);
-  syncRealApprovedOrdersToSettings(data);
+  if (!isInitialBoot) {
+    renderView(data);
+    syncRealApprovedOrdersToSettings(data);
+  }
 });
+
+// Initial route handling renders the active route cleanly ONCE from cache
+initRouteHandling();
+isInitialBoot = false;
 
 // Protect route verifies auth and activates authenticated realtime sync
 protectRoute((user) => {
   syncTopbar(user);
-  startRealtime();
+  startRealtime(true);
 });
 
 

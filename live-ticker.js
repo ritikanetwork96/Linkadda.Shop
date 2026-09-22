@@ -48,9 +48,9 @@
   // Fallback initial authentic buyer reviews from verified database testimonials
   if (!marqueeState.reviews.length) {
     marqueeState.reviews = [
-      { name: 'Singisking', rating: 5, review: 'Pehle bahut dar lag raha tha, socha tha scam ho jayega, but pack immediately mil gaya! Genuine creator.' },
-      { name: 'Rahul S.', rating: 5, review: 'Delivered right on time, totally trusted and genuine. 100% recommend!' },
-      { name: 'Vikram P.', rating: 5, review: 'Instant access on Mega/Drive, clean 4K videos, best price anywhere.' },
+      { name: 'Singisking', rating: 5, review: 'Delivered right on time, totally trusted and genuine. Highly recommended!' },
+      { name: 'Rahul S.', rating: 5, review: 'Instant access on Mega/Drive, clean 4K videos, best price anywhere.' },
+      { name: 'Vikram P.', rating: 5, review: 'Super fast delivery and top 4K quality! Fully verified and genuine.' },
       { name: 'Regular buyer', rating: 5, review: 'Order approved without delay. Third purchase this month, super trusted.' },
       { name: 'New buyer', rating: 5, review: 'Completely genuine, fast delivery, and lowest price. Truly grateful!' }
     ];

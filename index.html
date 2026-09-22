@@ -1523,7 +1523,7 @@
     if (!records || typeof records !== 'object') return [];
     return Object.entries(records)
       .map(([id, item]) => ({ id, ...(item || {}) }))
-      .filter(item => item && (item.status === undefined || item.status === 'active'))
+      .filter(item => item && (item.title || item.name) && (item.status === undefined || item.status === 'active'))
       .sort((a, b) => {
         const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
         const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
@@ -2041,6 +2041,13 @@
       const fallbackUrl = normalizeCheckoutUrl(href || `payment${ext}`, checkoutMeta);
       const targetUrl = targetHref || fallbackUrl;
 
+      // Track order button click intent before presenting sign-in prompt
+      try {
+        const clickMeta = getOrderClickMeta(link, checkoutMeta);
+        set(push(ref(db, 'visitors')), clickMeta).catch(() => {});
+        set(push(ref(db, 'events')), clickMeta).catch(() => {});
+      } catch (_) {}
+
       sessionStorage.setItem('pending_checkout_url', targetUrl);
       if (typeof window.openAuthModal === 'function') {
         window.openAuthModal('input');
@@ -2065,8 +2072,12 @@
       const fallbackUrl = normalizeCheckoutUrl(href || `payment${ext}`, checkoutMeta);
       const targetUrl = targetHref || fallbackUrl;
 
-      // Safe asynchronous click event logging without creating premature fake orders
-      const eventPromise = set(push(ref(db, 'events')), getOrderClickMeta(link, checkoutMeta)).catch(() => {});
+      // Safe asynchronous click event logging to both visitors and events nodes
+      const clickMeta = getOrderClickMeta(link, checkoutMeta);
+      const eventPromise = Promise.allSettled([
+        set(push(ref(db, 'visitors')), clickMeta),
+        set(push(ref(db, 'events')), clickMeta)
+      ]).catch(() => {});
 
       await Promise.race([
         eventPromise,
