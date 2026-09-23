@@ -1287,6 +1287,16 @@ document.head.appendChild(burstStyle);
     });
   }
 
+  // Wire click on Pinned Deal Banner on the page to open the VIP offer popup
+  document.addEventListener('click', (e) => {
+    const bannerTarget = e.target.closest('#pinnedDealWrapper, .collection-pack-banner');
+    if (bannerTarget && !e.target.closest('.cpb-btn-cart, .btn-add-cart')) {
+      e.preventDefault();
+      e.stopPropagation();
+      showExitPopup(true);
+    }
+  }, true);
+
   // Also trigger on mobile with back button / visibility change
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {

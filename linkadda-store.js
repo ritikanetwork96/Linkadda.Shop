@@ -256,12 +256,10 @@
     const sellerRow = document.getElementById('fkPvSellerRow');
     const sellerNamePill = document.getElementById('fkPvSellerName');
     if (sellerRow) {
-      if (prod.sellerName) {
-        if (sellerNamePill) sellerNamePill.textContent = prod.sellerName;
-        sellerRow.style.display = 'inline-flex';
-      } else {
-        sellerRow.style.display = 'none';
-      }
+      const earlyRaw = String(prod.sellerName || '').trim();
+      const earlySeller = (!earlyRaw || /linkadda/i.test(earlyRaw)) ? 'Trusted Brother' : earlyRaw;
+      if (sellerNamePill) sellerNamePill.textContent = earlySeller;
+      sellerRow.style.display = 'inline-flex';
     }
 
     // 2. Special Badge / Category Tag (Direct from Admin record)
@@ -457,8 +455,9 @@
     // 8. Seller Details
     const sellerNameEl = document.getElementById('fkPvSellerName');
     const sellerCardNameEl = document.getElementById('fkPvSellerCardName');
-    const siteName = (window.liveCollections?.settings?.siteName) || 'Linkadda Official';
-    const sellerName = prod.sellerName || siteName;
+    const siteName = (window.liveCollections?.settings?.siteName) || 'Trusted Brother';
+    const rawSellerName = String(prod.sellerName || '').trim();
+    const sellerName = (!rawSellerName || /linkadda/i.test(rawSellerName)) ? 'Trusted Brother' : rawSellerName;
     if (sellerNameEl) sellerNameEl.textContent = sellerName;
     if (sellerCardNameEl) sellerCardNameEl.textContent = sellerName;
     const sellerRatingEl = document.getElementById('fkPvSellerRating');
@@ -1443,7 +1442,7 @@
     if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
       navigator.share({
         title: prodTitle,
-        text: `Check out ${prodTitle} on LinkAdda!`,
+        text: `Check out ${prodTitle} on Trusted Brother!`,
         url: shareUrl,
       }).catch((err) => {
         if (err.name !== 'AbortError') {

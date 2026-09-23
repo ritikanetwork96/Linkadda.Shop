@@ -660,25 +660,26 @@ body.linkadda-store {
     margin: 6px 6px 0 6px !important;
     border-radius: 14px !important;
     aspect-ratio: 1 / 1 !important;
-    background: #090a12 !important;
+    background: #141523 !important;
     position: relative !important;
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
-  }
-  [data-theme="light"] .fk-card-media {
-    background: #f8fafc !important;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
   }
   .fk-card-media img {
+    background: transparent !important;
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
     display: block !important;
     border-radius: 14px !important;
-    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    opacity: 0;
+    transition: opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  .fk-card-media.is-img-loaded img {
+    opacity: 1 !important;
   }
   .fk-card-media-gradient {
     position: absolute !important;
@@ -1361,7 +1362,7 @@ body.linkadda-store {
 .fk-card-media {
   width: calc(100% - 14px);
   aspect-ratio: 1 / 1;
-  background: #090a12;
+  background: #141523 !important;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1369,7 +1370,29 @@ body.linkadda-store {
   justify-content: center;
   border-radius: 16px;
   margin: 7px 7px 0 7px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Flipkart / Apple Glass Shimmer Wave (shown while image is loading - NO DEAD BLACK BOX) */
+.fk-card-media:not(.is-img-loaded)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.02) 20%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.02) 80%
+  );
+  background-size: 200% 100%;
+  animation: fkShimmerWave 1.4s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@keyframes fkShimmerWave {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .fk-card-media img {
@@ -1377,7 +1400,13 @@ body.linkadda-store {
   height: 100%;
   object-fit: cover;
   border-radius: 16px;
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: transparent !important;
+  opacity: 0;
+  transition: opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fk-card-media.is-img-loaded img {
+  opacity: 1 !important;
 }
 
 .fk-card:hover .fk-card-media img {
@@ -1388,13 +1417,12 @@ body.linkadda-store {
    CARD MULTI-IMAGE AUTO-SLIDESHOW SYSTEM (ZERO-FLASH / ULTRA SMOOTH)
    ══════════════════════════════════════════════════════════════════ */
 .fk-card-media.fk-card-slideshow,
-[data-theme="light"] .fk-card-media.fk-card-slideshow,
 [data-theme="dark"] .fk-card-media.fk-card-slideshow {
   position: relative !important;
   overflow: hidden !important;
   user-select: none !important;
-  background: #090a12 !important;
-  background-color: #090a12 !important;
+  background: #141523 !important;
+  background-color: #141523 !important;
   touch-action: pan-y;
 }
 
@@ -1403,7 +1431,7 @@ body.linkadda-store {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #090a12;
+  background: transparent !important;
   overflow: hidden;
 }
 
@@ -1416,9 +1444,24 @@ body.linkadda-store {
   visibility: hidden;
   z-index: 0;
   pointer-events: none;
-  background: #090a12;
-  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: opacity;
+  background: transparent !important;
+  transition: opacity 0.38s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.fk-card-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 16px !important;
+  display: block !important;
+  background: transparent !important;
+  opacity: 0;
+  transition: opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fk-card-media.is-img-loaded .fk-card-slide.is-active img,
+.fk-card-slide.is-active img {
+  opacity: 1 !important;
 }
 
 /* The previous slide stays 100% visible at z-index: 1 underneath with no transition so zero white or black flash! */
@@ -1428,6 +1471,11 @@ body.linkadda-store {
   z-index: 1 !important;
   pointer-events: none;
   transition: none !important;
+  will-change: opacity;
+}
+
+.fk-card-slide.was-active img {
+  opacity: 1 !important;
 }
 
 /* The incoming slide sits on top at z-index: 2 and smoothly dissolves over the previous slide */
@@ -1436,7 +1484,8 @@ body.linkadda-store {
   visibility: visible !important;
   z-index: 2 !important;
   pointer-events: auto;
-  transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  transition: opacity 0.38s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  will-change: opacity;
 }
 
 .fk-card-slide img {

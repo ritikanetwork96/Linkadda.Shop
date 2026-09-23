@@ -42,7 +42,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="stylesheet" href="style.css?v=20260923b" />
-  <link rel="stylesheet" href="linkadda-store.css?v=20260920c" />
+  <link rel="stylesheet" href="linkadda-store.css?v=20260923d" />
   <link rel="stylesheet" href="auth-modal.css?v=20260916a" />
   <link rel="stylesheet" href="mobile-app.css?v=20260920d" />
   <script src="preload.js?v=20260920c"></script>
@@ -800,7 +800,7 @@
             <div class="fk-pv-rating-bar">
               <span class="fk-pv-rating-badge"><span id="fkPvRatingScore">4.9</span> <i class="fa-solid fa-star" style="color:var(--la-gold);font-size:11px;"></i></span>
               <span class="fk-pv-rating-text" id="fkPvRatingText">Verified VIP Access · 100% Genuine Media</span>
-              <span class="fk-verified-badge"><i class="fa-solid fa-shield-halved"></i> LinkAdda Verified</span>
+              <span class="fk-verified-badge"><i class="fa-solid fa-shield-halved"></i> Trusted Brother Verified</span>
             </div>
 
             <!-- Special Price Block (Simultaneous Dual Currency) -->
@@ -884,7 +884,7 @@
               </div>
               <div>
                 <div class="fk-seller-sub">OFFICIAL VERIFIED CREATOR</div>
-                <div class="fk-seller-name" id="fkPvSellerCardName">LinkAdda Verified Studio</div>
+                <div class="fk-seller-name" id="fkPvSellerCardName">Trusted Brother Verified Studio</div>
               </div>
             </div>
             <div class="fk-seller-rating" id="fkPvSellerRating">4.9 <i class="fa-solid fa-star"></i></div>
@@ -2115,6 +2115,14 @@
   document.addEventListener('click', async (event) => {
     const link = event.target.closest('a.btn-card, a.btn-order-now, a.cpb-btn, a.vid-tier-btn, a.fk-btn-buy-action');
     if (!link) return;
+    if (link.closest('#pinnedDealWrapper, .collection-pack-banner')) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof window.openOfferPopup === 'function') {
+        window.openOfferPopup(true);
+      }
+      return;
+    }
     event.preventDefault();
     await triggerCheckoutTracking(link);
   });
@@ -3051,7 +3059,7 @@
   };
 
   // -- BUILD CARD (AUTHENTIC LUXURY E-COMMERCE CARD) --
-  function buildCard(id, cat) {
+  function buildCard(id, cat, cardIndex = 0) {
     const media = resolveMediaList(cat);
     const images = (media.images || []).filter(Boolean);
     const firstImg = images[0] || '';
@@ -3106,6 +3114,10 @@
     const badgeIconHtml = `<i class="fa-solid ${esc(badgeIconClass)}" ${badgeIconStyle}></i>`;
     const badgeHtml = customBadge ? `<div class="fk-card-badges-row"><span class="fk-card-badge-vip${badgeColorClass}" ${badgeInlineStyle}>${badgeIconHtml} ${esc(customBadge)}</span></div>` : '';
 
+    const _rawSeller = String(cat.sellerName || '').trim();
+    const _isDefaultSeller = !_rawSeller || /linkadda/i.test(_rawSeller);
+    const _displaySeller = _isDefaultSeller ? 'Trusted Brother' : _rawSeller;
+
     return `<div class="fk-card" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
       ${badgeHtml}
       <div class="fk-card-top-actions">
@@ -3116,11 +3128,16 @@
       ${hasMultipleImgs ? `
       <div class="fk-card-media fk-card-slideshow" data-card-id="${esc(id)}" data-slide-count="${images.length}" data-active-idx="0" onclick="window.openFkProductPage('${esc(id)}')">
         <div class="fk-card-slides-track">
-          ${images.map((imgUrl, idx) => `
-            <div class="fk-card-slide${idx === 0 ? ' is-active' : ''}" data-idx="${idx}">
-              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" draggable="false" onerror="if(!this._failed){this._failed=true; this.src='/favicon.svg';}" />
+          ${images.map((imgUrl, idx) => {
+            const isFirstSlide = idx === 0;
+            const isTopCard = cardIndex < 8;
+            const loadingAttr = isFirstSlide ? (isTopCard ? 'loading="eager" fetchpriority="high"' : 'loading="eager"') : 'loading="lazy"';
+            return `
+            <div class="fk-card-slide${isFirstSlide ? ' is-active' : ''}" data-idx="${idx}">
+              <img src="${esc(imgUrl)}" alt="${esc(baseTitle)}" ${loadingAttr} decoding="async" draggable="false" onload="this.closest('.fk-card-media')?.classList.add('is-img-loaded')" onerror="if(!this._failed){this._failed=true; this.src='/favicon.svg';}" />
             </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
         <div class="fk-card-media-gradient"></div>
         <div class="fk-card-slideshow-indicators" onclick="event.stopPropagation();">
@@ -3134,14 +3151,14 @@
       </div>
       ` : `
       <div class="fk-card-media" onclick="window.openFkProductPage('${esc(id)}')">
-        ${firstImg ? `<img src="${esc(firstImg)}" alt="${esc(baseTitle)}" loading="lazy" />` : '<div class="fk-card-no-img"><i class="fa-solid fa-film"></i> Exclusive Pack</div>'}
+        ${firstImg ? `<img src="${esc(firstImg)}" alt="${esc(baseTitle)}" ${cardIndex < 8 ? 'loading="eager" fetchpriority="high"' : 'loading="eager"'} decoding="async" onload="this.closest('.fk-card-media')?.classList.add('is-img-loaded')" />` : '<div class="fk-card-no-img"><i class="fa-solid fa-film"></i> Exclusive Pack</div>'}
         <div class="fk-card-media-gradient"></div>
         <div class="fk-card-quick-view-overlay"><i class="fa-solid fa-expand"></i> Quick View</div>
       </div>
       `}
       <div class="fk-card-body">
         <div class="fk-card-seller-row">
-          <span class="fk-card-seller" title="Sold by ${esc(cat.sellerName || 'LinkAdda')} • Verified Creator"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> ${esc(cat.sellerName || 'LinkAdda')}<span class="fk-seller-verified-txt"> Verified</span></span>
+          <span class="fk-card-seller" title="Sold by ${esc(_displaySeller)} • Verified Creator"><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> <strong style="font-weight:800;">${esc(_displaySeller)}</strong><span class="fk-seller-verified-txt"> Verified</span></span>
         </div>
         <h3 class="fk-card-title" onclick="window.openFkProductPage('${esc(id)}')">${esc(baseTitle)}</h3>
         <div class="fk-card-rating-row">
@@ -3447,22 +3464,43 @@
 
   // ══════════════════════════════════════════════════════════════════
   // CARD AUTO-SLIDESHOW CONTROLLER FOR MULTI-IMAGE PRODUCTS
+  // (Optimized: pauses all timers during scroll for smooth 60fps)
   // ══════════════════════════════════════════════════════════════════
   let activeCardSlideshowObserver = null;
+  let _isScrollingGlobal = false;
+  let _scrollEndTimer = null;
+  let _visibleSlideshows = new Set();
 
-  function goToCardSlide(mediaEl, targetIdx) {
-    if (!mediaEl) return;
-    const slides = mediaEl.querySelectorAll('.fk-card-slide');
-    const bars = mediaEl.querySelectorAll('.fk-slide-bar');
-    const total = slides.length;
-    if (total <= 1) return;
+  // Global scroll-pause: freeze all card slideshows during scroll
+  window.addEventListener('scroll', () => {
+    if (!_isScrollingGlobal) {
+      _isScrollingGlobal = true;
+      // Pause all visible slideshows immediately during scroll
+      _visibleSlideshows.forEach(mediaEl => {
+        if (mediaEl._cardTimer) {
+          clearInterval(mediaEl._cardTimer);
+          mediaEl._cardTimer = null;
+        }
+        if (mediaEl._cardDelayTimeout) {
+          clearTimeout(mediaEl._cardDelayTimeout);
+          mediaEl._cardDelayTimeout = null;
+        }
+      });
+    }
+    clearTimeout(_scrollEndTimer);
+    _scrollEndTimer = setTimeout(() => {
+      _isScrollingGlobal = false;
+      // Resume slideshows for visible cards after scroll stops
+      _visibleSlideshows.forEach(mediaEl => {
+        if (!mediaEl._cardTimer && !mediaEl._cardDelayTimeout) {
+          startCardTimer(mediaEl, 1500);
+        }
+      });
+    }, 300);
+  }, { passive: true });
 
-    let nextIdx = targetIdx;
-    if (nextIdx < 0) nextIdx = total - 1;
-    if (nextIdx >= total) nextIdx = 0;
-
-    const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
-    if (curIdx === nextIdx) return;
+  function doCardSlideTransition(mediaEl, curIdx, nextIdx, slides, bars) {
+    if (!mediaEl || !mediaEl.isConnected) return;
 
     // Layered zero-flash crossfade:
     // Outgoing slide becomes 'was-active' (remains 100% visible at z-index: 1 underneath)
@@ -3485,7 +3523,7 @@
 
     mediaEl.dataset.activeIdx = String(nextIdx);
 
-    // After fade duration completes (380ms), cleanly remove 'was-active' from the old slide
+    // After fade duration completes (400ms), cleanly remove 'was-active' from the old slide
     clearTimeout(mediaEl._cleanupSlideTimeout);
     mediaEl._cleanupSlideTimeout = setTimeout(() => {
       slides.forEach((s, idx) => {
@@ -3493,15 +3531,86 @@
           s.classList.remove('was-active');
         }
       });
-    }, 400);
+    }, 420);
 
     // Just-in-time lightweight pre-warming of the very next slide
+    const total = slides.length;
     const followingIdx = (nextIdx + 1) % total;
     const followingImg = slides[followingIdx]?.querySelector('img');
     if (followingImg && followingImg.src && !followingImg.complete) {
       const p = new Image();
+      p.decoding = 'async';
       p.src = followingImg.src;
     }
+  }
+
+  function goToCardSlide(mediaEl, rawIdx, isUserClick = false) {
+    if (_isScrollingGlobal && !isUserClick) return; // Skip timer transitions during active scroll
+    if (!mediaEl) return;
+    const slides = mediaEl.querySelectorAll('.fk-card-slide');
+    const bars = mediaEl.querySelectorAll('.fk-slide-bar');
+    const total = slides.length;
+    if (total < 2) return;
+
+    let nextIdx = rawIdx % total;
+    if (nextIdx < 0) nextIdx += total;
+    if (nextIdx >= total) nextIdx = 0;
+
+    const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
+    if (curIdx === nextIdx) return;
+
+    const targetSlide = slides[nextIdx];
+    const targetImg = targetSlide ? targetSlide.querySelector('img') : null;
+
+    // ZERO-FLASH VERIFICATION (Flipkart standard):
+    // 1. If target image is already loaded & decoded, crossfade immediately!
+    if (!targetImg || (targetImg.complete && targetImg.naturalWidth > 0)) {
+      doCardSlideTransition(mediaEl, curIdx, nextIdx, slides, bars);
+      return;
+    }
+
+    // 2. If target image is not loaded yet:
+    // Outgoing slide remains 100% visible while incoming image loads in background.
+    // Transition ONLY fires after the image is fully ready!
+    let done = false;
+    const onLoaded = () => {
+      if (done) return;
+      done = true;
+      if (targetImg) {
+        targetImg.removeEventListener('load', onLoaded);
+        targetImg.removeEventListener('error', onFailed);
+      }
+      doCardSlideTransition(mediaEl, curIdx, nextIdx, slides, bars);
+    };
+
+    const onFailed = () => {
+      if (done) return;
+      done = true;
+      if (targetImg) {
+        targetImg.removeEventListener('load', onLoaded);
+        targetImg.removeEventListener('error', onFailed);
+      }
+      if (!isUserClick) {
+        const nextNext = (nextIdx + 1) % total;
+        if (nextNext !== curIdx) {
+          goToCardSlide(mediaEl, nextNext, false);
+        }
+      }
+    };
+
+    targetImg.addEventListener('load', onLoaded, { once: true });
+    targetImg.addEventListener('error', onFailed, { once: true });
+
+    // Fallback: don't leave it hanging forever on flaky network
+    setTimeout(() => {
+      if (!done) {
+        if (targetImg && targetImg.complete && targetImg.naturalWidth > 0) {
+          onLoaded();
+        } else if (isUserClick) {
+          onLoaded();
+        }
+      }
+    }, 1800);
   }
 
   function stopCardTimer(mediaEl) {
@@ -3517,19 +3626,20 @@
 
   function startCardTimer(mediaEl, staggerDelay = 3200) {
     stopCardTimer(mediaEl);
+    if (_isScrollingGlobal) return; // Don't start timers during scroll
     const slides = mediaEl.querySelectorAll('.fk-card-slide');
     if (slides.length <= 1) return;
 
     mediaEl._cardDelayTimeout = setTimeout(() => {
-      if (mediaEl._isHovered) return;
+      if (mediaEl._isHovered || _isScrollingGlobal) return;
       const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
-      goToCardSlide(mediaEl, curIdx + 1);
+      goToCardSlide(mediaEl, curIdx + 1, false);
 
       mediaEl._cardTimer = setInterval(() => {
-        if (mediaEl._isHovered) return;
+        if (mediaEl._isHovered || _isScrollingGlobal) return;
         const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
-        goToCardSlide(mediaEl, cIdx + 1);
-      }, 3500);
+        goToCardSlide(mediaEl, cIdx + 1, false);
+      }, 5000);
     }, staggerDelay);
   }
 
@@ -3538,10 +3648,10 @@
     const slides = mediaEl.querySelectorAll('.fk-card-slide');
     if (slides.length <= 1) return;
     mediaEl._cardTimer = setInterval(() => {
-      if (mediaEl._isHovered) return;
+      if (mediaEl._isHovered || _isScrollingGlobal) return;
       const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
-      goToCardSlide(mediaEl, cIdx + 1);
-    }, 3500);
+      goToCardSlide(mediaEl, cIdx + 1, false);
+    }, 5000);
   }
 
   window.stepCardSlide = function(cardId, delta) {
@@ -3550,7 +3660,7 @@
     const mediaEl = card.querySelector('.fk-card-slideshow');
     if (!mediaEl) return;
     const curIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
-    goToCardSlide(mediaEl, curIdx + delta);
+    goToCardSlide(mediaEl, curIdx + delta, true);
     restartCardTimer(mediaEl);
   };
 
@@ -3559,7 +3669,7 @@
     if (!card) return;
     const mediaEl = card.querySelector('.fk-card-slideshow');
     if (!mediaEl) return;
-    goToCardSlide(mediaEl, targetIdx);
+    goToCardSlide(mediaEl, targetIdx, true);
     restartCardTimer(mediaEl);
   };
 
@@ -3567,6 +3677,7 @@
     if (activeCardSlideshowObserver) {
       activeCardSlideshowObserver.disconnect();
     }
+    _visibleSlideshows.clear();
 
     const cardSlideshows = document.querySelectorAll('.fk-card-slideshow');
     if (!cardSlideshows.length) return;
@@ -3576,20 +3687,25 @@
         entries.forEach((entry) => {
           const mediaEl = entry.target;
           if (entry.isIntersecting) {
+            _visibleSlideshows.add(mediaEl);
             const cardIdx = parseInt(mediaEl.dataset.cardOrder || '0', 10);
-            const stagger = 2200 + ((cardIdx % 5) * 600);
-            // Pre-warm only slide 1 for this card so it transitions instantly when timer fires
+            const stagger = 2500 + ((cardIdx % 5) * 800);
+            // Pre-warm slide 1 for this card so it transitions instantly when timer fires
             const slideImages = mediaEl.querySelectorAll('.fk-card-slide img');
             if (slideImages[1] && slideImages[1].src && !slideImages[1].complete) {
               const pre = new Image();
+              pre.decoding = 'async';
               pre.src = slideImages[1].src;
             }
-            startCardTimer(mediaEl, stagger);
+            if (!_isScrollingGlobal) {
+              startCardTimer(mediaEl, stagger);
+            }
           } else {
+            _visibleSlideshows.delete(mediaEl);
             stopCardTimer(mediaEl);
           }
         });
-      }, { threshold: 0.15 });
+      }, { threshold: 0.25 });
 
       cardSlideshows.forEach((mediaEl, index) => {
         mediaEl.dataset.cardOrder = String(index);
@@ -3627,9 +3743,9 @@
               if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
                 const cIdx = parseInt(mediaEl.dataset.activeIdx || '0', 10);
                 if (diffX < 0) {
-                  goToCardSlide(mediaEl, cIdx + 1);
+                  goToCardSlide(mediaEl, cIdx + 1, true);
                 } else {
-                  goToCardSlide(mediaEl, cIdx - 1);
+                  goToCardSlide(mediaEl, cIdx - 1, true);
                 }
                 restartCardTimer(mediaEl);
               }
@@ -3639,10 +3755,113 @@
       });
     } else {
       cardSlideshows.forEach((mediaEl, index) => {
-        const stagger = 2200 + ((index % 5) * 600);
+        const stagger = 2500 + ((index % 5) * 800);
         startCardTimer(mediaEl, stagger);
       });
     }
+  }
+
+  // ── SMART 3-LAYER PRE-WARMING SYSTEM (FLIPKART-STYLE PRELOADING) ──
+  // ── SMART PIPELINE PRELOADER & SKELETON MANAGER (FLIPKART ARCHITECTURE) ──
+  let _aheadCardObserver = null;
+  const _prefetchedUrlSet = new Set();
+  const _highPriorityQueue = [];
+  const _backgroundQueue = [];
+  let _activeWorkers = 0;
+  const _MAX_CONCURRENT_WORKERS = 4;
+
+  function markLoadedMedia(mediaEl) {
+    if (mediaEl && !mediaEl.classList.contains('is-img-loaded')) {
+      mediaEl.classList.add('is-img-loaded');
+    }
+  }
+
+  function pumpWorkerQueue() {
+    while (_activeWorkers < _MAX_CONCURRENT_WORKERS && (_highPriorityQueue.length > 0 || _backgroundQueue.length > 0)) {
+      const url = _highPriorityQueue.shift() || _backgroundQueue.shift();
+      if (!url) continue;
+      if (_prefetchedUrlSet.has(url)) continue;
+      _prefetchedUrlSet.add(url);
+      _activeWorkers++;
+
+      const img = new Image();
+      img.decoding = 'async';
+      const onDone = () => {
+        _activeWorkers--;
+        // Mark all matching card media in DOM as loaded
+        document.querySelectorAll(`.fk-card-media img[src="${url}"]`).forEach(domImg => {
+          domImg.closest('.fk-card-media')?.classList.add('is-img-loaded');
+        });
+        pumpWorkerQueue();
+      };
+      img.onload = onDone;
+      img.onerror = onDone;
+      img.src = url;
+      if (typeof img.decode === 'function') {
+        img.decode().catch(() => {}).finally(() => {});
+      }
+    }
+  }
+
+  function queueAheadPreload(url, highPriority = false) {
+    if (!url || typeof url !== 'string') return;
+    const clean = url.trim();
+    if (!clean || _prefetchedUrlSet.has(clean)) return;
+    if (highPriority) {
+      _highPriorityQueue.push(clean);
+    } else {
+      _backgroundQueue.push(clean);
+    }
+    pumpWorkerQueue();
+  }
+
+  function startSmartImagePreloader() {
+    // 1. Immediately mark any images that are already in browser cache / complete
+    document.querySelectorAll('.fk-card-media').forEach(media => {
+      const img = media.querySelector('img');
+      if (img && img.complete && img.naturalWidth > 0) {
+        markLoadedMedia(media);
+      }
+    });
+
+    // 2. Setup 1200px Lookahead Observer (Loads cards 2-3 screens ahead of scroll position!)
+    if (_aheadCardObserver) _aheadCardObserver.disconnect();
+    if ('IntersectionObserver' in window) {
+      _aheadCardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const card = entry.target;
+            const imgs = card.querySelectorAll('img');
+            if (imgs[0] && imgs[0].src && !imgs[0].complete) {
+              queueAheadPreload(imgs[0].src, true); // High priority jump!
+              if (typeof imgs[0].decode === 'function') imgs[0].decode().catch(() => {});
+            }
+            if (imgs[1] && imgs[1].src && !imgs[1].complete) {
+              queueAheadPreload(imgs[1].src, true);
+            }
+            _aheadCardObserver.unobserve(card);
+          }
+        });
+      }, { rootMargin: '1200px 0px 1200px 0px' });
+
+      document.querySelectorAll('.fk-card').forEach(card => {
+        _aheadCardObserver.observe(card);
+      });
+    }
+
+    // 3. Continuous Background Pipeline: Silently downloads all remaining products in pipeline
+    setTimeout(() => {
+      const allCards = document.querySelectorAll('.fk-card');
+      allCards.forEach(card => {
+        const imgs = card.querySelectorAll('img');
+        if (imgs[0] && imgs[0].src) {
+          queueAheadPreload(imgs[0].src, false);
+        }
+        if (imgs[1] && imgs[1].src) {
+          queueAheadPreload(imgs[1].src, false);
+        }
+      });
+    }, 300);
   }
 
   // -- VIEWPORT-AWARE ULTRA-FAST SLIDESHOW INIT (Zero Mobile Lag) --
@@ -3955,17 +4174,17 @@
           // If a category has no products, fallback to showing all products with a friendly hint
           records = getLiveRecords();
           if (records.length) {
-            grid.innerHTML = records.map(item => {
-              try { return buildCard(item.id, item); } catch (e) { return ''; }
+            grid.innerHTML = records.map((item, index) => {
+              try { return buildCard(item.id, item, index); } catch (e) { return ''; }
             }).join('');
           } else {
             grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">No products found in this category.</div>';
           }
         }
       } else {
-        grid.innerHTML = records.map(item => {
+        grid.innerHTML = records.map((item, index) => {
           try {
-            return buildCard(item.id, item);
+            return buildCard(item.id, item, index);
           } catch (e) {
             console.error('Error rendering card for product:', item, e);
             return '';
@@ -3974,6 +4193,7 @@
       }
 
       initSlideshows();
+      startSmartImagePreloader();
       initVidTiers();
       syncCheckoutLinks();
 
