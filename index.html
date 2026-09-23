@@ -1523,7 +1523,7 @@
     if (!records || typeof records !== 'object') return [];
     return Object.entries(records)
       .map(([id, item]) => ({ id, ...(item || {}) }))
-      .filter(item => item && (item.title || item.name) && (item.status === undefined || item.status === 'active'))
+      .filter(item => item && (item.title || item.name) && (item.priceINR || item.price) && (item.status === undefined || item.status === 'active'))
       .sort((a, b) => {
         const orderA = a.displayOrder !== undefined && a.displayOrder !== null && a.displayOrder !== '' && !isNaN(Number(a.displayOrder)) ? Number(a.displayOrder) : 999999;
         const orderB = b.displayOrder !== undefined && b.displayOrder !== null && b.displayOrder !== '' && !isNaN(Number(b.displayOrder)) ? Number(b.displayOrder) : 999999;
@@ -3078,7 +3078,8 @@
     const h = hashId(id);
     const reviewsVal = cat.reviewsCount || `${(h % 600) + 820}`;
     const baseTitle = cat.title || 'Exclusive Pack';
-    const orderLink = normalizeCheckoutUrl('payment.html', {
+    const rawOrderLink = (cat.orderLink && cat.orderLink !== '#' && !cat.orderLink.startsWith('#')) ? cat.orderLink : 'payment.html';
+    const orderLink = normalizeCheckoutUrl(rawOrderLink, {
       id: id,
       title: baseTitle,
       inr: cleanINR,
@@ -3121,6 +3122,9 @@
     return `<div class="fk-card" data-fb-id="${esc(id)}" data-slug="${esc(cat.slug||'')}" data-product-id="${esc(id)}" id="product-${esc(id)}">
       ${badgeHtml}
       <div class="fk-card-top-actions">
+        <button type="button" class="fk-card-action-circle fk-card-share-btn" onclick="window.shareFkProductById(event, '${esc(id)}')" aria-label="Share this pack" title="Share Pack">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
         <button type="button" class="fk-card-action-circle fk-card-wishlist-btn${isLiked ? ' active' : ''}" data-id="${esc(id)}" onclick="window.toggleFkWishlist(event, '${esc(id)}')" aria-label="${isLiked ? 'Remove from Liked' : 'Save to Liked'}" title="${isLiked ? 'Liked Pack' : 'Like this Pack'}">
           <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
         </button>

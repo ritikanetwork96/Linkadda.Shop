@@ -44,11 +44,15 @@
     const collections = window.liveCollections || {};
     let prod = null;
 
+    function isValidProd(p) {
+      return Boolean(p && typeof p === 'object' && (p.title || p.name) && (p.priceINR || p.price || (Array.isArray(p.tiers) && p.tiers.length)));
+    }
+
     // 1. Check liveCollections.products by direct key
     if (collections.products) {
-      if (collections.products[rawId]) {
+      if (isValidProd(collections.products[rawId])) {
         prod = Object.assign({ id: rawId }, collections.products[rawId]);
-      } else if (collections.products[query]) {
+      } else if (isValidProd(collections.products[query])) {
         prod = Object.assign({ id: query }, collections.products[query]);
       }
     }
@@ -57,7 +61,7 @@
     if (!prod && collections.products) {
       const allProds = Object.values(collections.products);
       prod = allProds.find((p) => {
-        if (!p) return false;
+        if (!isValidProd(p)) return false;
         const pId = String(p.id || '').toLowerCase();
         const pKey = String(p.key || '').toLowerCase();
         const pSlug = String(p.slug || '').toLowerCase();
@@ -161,6 +165,12 @@
           };
         }
       }
+    }
+
+    if (prod) {
+      if (!prod.priceINR && !prod.price) prod.priceINR = '399';
+      if (!prod.priceUSD) prod.priceUSD = '14';
+      if (!prod.title && !prod.name) prod.title = 'Exclusive Pack';
     }
 
     // Zero fake dummy fallbacks! Return null if product does not exist in catalog.

@@ -19,6 +19,115 @@ function isEngagementRateLimited(ip) {
   return false;
 }
 
+// ━━ PRODUCT SCHEMA NORMALIZER & SANITIZER (ROCK-SOLID GUARANTEE) ━━
+export function sanitizeAndNormalizeProduct(product, existingData = {}, defaults = {}) {
+  if (!product || typeof product !== 'object') return null;
+
+  const rawTitle = String(product.title || product.name || existingData.title || existingData.name || 'Exclusive Pack').trim();
+  const title = rawTitle || 'Exclusive Pack';
+
+  let rawSlug = String(product.slug || existingData.slug || '').trim().toLowerCase();
+  if (!rawSlug) {
+    rawSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+  const slug = rawSlug || `pack-${Date.now().toString(36)}`;
+
+  let productId = String(product.id || existingData.id || '').trim();
+  if (!productId) {
+    productId = `prod_${slug}_${Date.now().toString(36)}`;
+  }
+
+  // Price sanitization: clean numeric strings
+  const rawINR = product.priceINR || product.price || existingData.priceINR || existingData.price || '399';
+  const cleanINR = String(rawINR).replace(/[^\d.]/g, '').trim() || '399';
+
+  const rawUSD = product.priceUSD || existingData.priceUSD || '14';
+  const cleanUSD = String(rawUSD).replace(/[^\d.]/g, '').trim() || '14';
+
+  const rawOrigINR = product.originalPriceINR || product.originalPrice || product.priceOriginal || existingData.originalPriceINR || existingData.priceOriginal;
+  const cleanOrigINR = rawOrigINR ? String(rawOrigINR).replace(/[^\d.]/g, '').trim() : String(Math.max(Number(cleanINR) + 100, Math.round(Number(cleanINR) * 1.8 / 10) * 10 - 1));
+
+  const rawOrigUSD = product.originalPriceUSD || product.originalPrice || existingData.originalPriceUSD;
+  const cleanOrigUSD = rawOrigUSD ? String(rawOrigUSD).replace(/[^\d.]/g, '').trim() : String(Math.max(Number(cleanUSD) + 5, Math.round(Number(cleanUSD) * 1.8)));
+
+  // Media sanitization
+  let images = [];
+  if (Array.isArray(product.images)) images = product.images.filter(Boolean);
+  else if (Array.isArray(existingData.images)) images = existingData.images.filter(Boolean);
+
+  const mainImage = product.image || product.thumbnail || existingData.image || existingData.thumbnail || (images[0] || '');
+  if (mainImage && !images.includes(mainImage)) images.unshift(mainImage);
+  if (!images.length && mainImage) images = [mainImage];
+
+  // Guaranteed Order / Checkout link
+  let orderLink = String(product.orderLink || existingData.orderLink || '').trim();
+  const rawDownloadLink = String(product.downloadLink || product.fileUrl || existingData.downloadLink || existingData.fileUrl || '').trim();
+
+  // If orderLink looks like a direct cloud drive download link (mega.nz, drive.google.com, etc.), preserve it in downloadLink and set orderLink to standard checkout
+  const isCloudDrive = /mega\.nz|drive\.google\.com|dropbox\.com|mediafire\.com|t\.me/i.test(orderLink);
+  let downloadLink = rawDownloadLink;
+  if (isCloudDrive) {
+    if (!downloadLink) downloadLink = orderLink;
+    orderLink = `payment.html?productId=${encodeURIComponent(productId)}&name=${encodeURIComponent(title)}&inr=${cleanINR}&usd=${cleanUSD}`;
+  } else if (!orderLink || orderLink === '#' || orderLink === '/payment.html' || orderLink === 'payment.html') {
+    orderLink = `payment.html?productId=${encodeURIComponent(productId)}&name=${encodeURIComponent(title)}&inr=${cleanINR}&usd=${cleanUSD}`;
+  }
+
+  // Guaranteed Engagement counters
+  const likes = Math.max(0, Number(product.likes !== undefined ? product.likes : (existingData.likes !== undefined ? existingData.likes : 0)));
+  const views = Math.max(0, Number(product.views !== undefined ? product.views : (existingData.views !== undefined ? existingData.views : 0)));
+
+  // Seller info
+  const sellerId = product.sellerId || existingData.sellerId || defaults.sellerId || 'master_admin';
+  const sellerName = String(product.sellerName || existingData.sellerName || defaults.sellerName || 'LinkAdda Official').trim();
+
+  // Tiers / sub-plans
+  let tiers = [];
+  if (Array.isArray(product.tiers)) {
+    tiers = product.tiers.map(t => ({
+      label: String(t.label || t.name || '').trim(),
+      inr: String(t.inr || '').replace(/[^\d.]/g, '').trim(),
+      usd: String(t.usd || '').replace(/[^\d.]/g, '').trim(),
+    })).filter(t => t.label || t.inr || t.usd);
+  } else if (Array.isArray(existingData.tiers)) {
+    tiers = existingData.tiers;
+  }
+
+  const now = Date.now();
+
+  return {
+    ...existingData,
+    ...product,
+    id: productId,
+    title,
+    name: title,
+    slug,
+    category: String(product.category || existingData.category || '').trim() || 'VIP Collection',
+    priceINR: cleanINR,
+    priceUSD: cleanUSD,
+    originalPriceINR: cleanOrigINR,
+    originalPriceUSD: cleanOrigUSD,
+    orderLink,
+    downloadLink: downloadLink || '',
+    fileUrl: downloadLink || '',
+    image: mainImage || '',
+    thumbnail: mainImage || '',
+    images,
+    tiers,
+    sellerId,
+    sellerName: sellerName || 'LinkAdda Official',
+    sellerVerified: true,
+    isVerified: true,
+    verified: true,
+    status: product.status || existingData.status || 'active',
+    rating: product.rating || existingData.rating || '4.9',
+    likes,
+    views,
+    createdAt: Number(product.createdAt || existingData.createdAt || now),
+    updatedAt: now,
+  };
+}
+
 export default async function handler(req, res) {
   if (handleCors(req, res, 'POST, OPTIONS')) return;
 
@@ -46,18 +155,26 @@ export default async function handler(req, res) {
       if (!product || typeof product !== 'object') {
         return res.status(400).json({ error: 'Missing product payload.' });
       }
-      let productId = String(product.id || '').trim();
-      if (!productId) {
-        const slug = String(product.slug || product.title || product.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        productId = slug ? `prod_${slug}_${Date.now().toString(36)}` : `prod_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 4)}`;
+
+      // Check existing product if any
+      let existingProduct = {};
+      if (product.id) {
+        try {
+          const exRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(product.id)}.json${authQuery}`, {
+            signal: AbortSignal.timeout(6000),
+          });
+          if (exRes.ok) {
+            existingProduct = (await exRes.json()) || {};
+          }
+        } catch (_) {}
       }
-      const payload = {
-        ...product,
-        id: productId,
-        createdAt: product.createdAt || Date.now(),
-        updatedAt: Date.now(),
-      };
-      const saveRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}.json${authQuery}`, {
+
+      const payload = sanitizeAndNormalizeProduct(product, existingProduct, {
+        sellerId: 'master_admin',
+        sellerName: 'LinkAdda Official',
+      });
+
+      const saveRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(payload.id)}.json${authQuery}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -70,12 +187,94 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         product: payload,
-        message: 'Product saved successfully!',
+        message: 'Product saved successfully with guaranteed button & checkout schema!',
+      });
+    }
+
+    // ━━ 0B. HEAL & REPAIR PRODUCTS (DATABASE INTEGRITY MAINTENANCE) ━━
+    if (action === 'heal_products' || action === 'repair_database') {
+      const isAuthorized = await verifyAdminRequest(req);
+      if (!isAuthorized) {
+        return res.status(401).json({ error: 'Unauthorized: Master administrator authentication required.' });
+      }
+
+      const adminToken = await getFirebaseAdminToken();
+      if (!adminToken) {
+        return res.status(500).json({ error: 'Database service unavailable. Please retry in a few moments.' });
+      }
+      const authQuery = `?auth=${encodeURIComponent(adminToken)}`;
+
+      const prodsRes = await fetch(`${RTDB_URL}/products.json${authQuery}`, {
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!prodsRes.ok) {
+        throw new Error('Failed to read products from database');
+      }
+
+      const allProds = (await prodsRes.json()) || {};
+      let healedCount = 0;
+      let deletedGhostCount = 0;
+      const patchTasks = [];
+
+      for (const [pId, p] of Object.entries(allProds)) {
+        if (!p || typeof p !== 'object') continue;
+
+        // 1. Ghost product detection (only views/likes without title or price)
+        const hasTitle = Boolean(p.title || p.name);
+        const hasPrice = Boolean(p.priceINR || p.price);
+        if (!hasTitle && !hasPrice) {
+          deletedGhostCount++;
+          patchTasks.push(
+            fetch(`${RTDB_URL}/products/${encodeURIComponent(pId)}.json${authQuery}`, {
+              method: 'DELETE',
+            }).catch(() => {})
+          );
+          continue;
+        }
+
+        // 2. Check if product is missing required fields for buttons
+        const needsHealing = (
+          p.likes === undefined ||
+          p.views === undefined ||
+          !p.orderLink ||
+          p.orderLink === '#' ||
+          p.orderLink === '/payment.html' ||
+          !p.priceINR ||
+          !p.status ||
+          !p.sellerVerified ||
+          !p.thumbnail
+        );
+
+        if (needsHealing) {
+          healedCount++;
+          const cleanProd = sanitizeAndNormalizeProduct(p, p, {
+            sellerId: p.sellerId || 'master_admin',
+            sellerName: p.sellerName || 'LinkAdda Official',
+          });
+          cleanProd.id = cleanProd.id || pId;
+          patchTasks.push(
+            fetch(`${RTDB_URL}/products/${encodeURIComponent(cleanProd.id)}.json${authQuery}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(cleanProd),
+            }).catch(() => {})
+          );
+        }
+      }
+
+      await Promise.allSettled(patchTasks);
+
+      return res.status(200).json({
+        success: true,
+        message: `Database healed: ${healedCount} products repaired, ${deletedGhostCount} ghost products removed.`,
+        healedCount,
+        deletedGhostCount,
+        totalChecked: Object.keys(allProds).length,
       });
     }
 
     // ━━ PUBLIC ENGAGEMENT: TRACK VIEW & TOGGLE LIKE (NO SELLER LOGIN NEEDED) ━━
-    // Helper to resolve correct product key in RTDB
+    // Helper to resolve correct product key in RTDB (Strict: Returns '' if product does not exist!)
     async function resolveProductKey(pId, aQuery) {
       if (!pId) return '';
       try {
@@ -84,7 +283,8 @@ export default async function handler(req, res) {
         });
         if (directRes.ok) {
           const d = await directRes.json();
-          if (d && typeof d === 'object') return pId;
+          // Ensure it's a real product, not an empty or ghost entry
+          if (d && typeof d === 'object' && (d.title || d.name || d.priceINR)) return pId;
         }
       } catch (_) {}
 
@@ -96,14 +296,16 @@ export default async function handler(req, res) {
           const allP = await allRes.json();
           if (allP && typeof allP === 'object') {
             for (const [k, v] of Object.entries(allP)) {
+              if (!v || typeof v !== 'object') continue;
               if (k === pId || v?.id === pId || String(v?.id).toLowerCase() === pId.toLowerCase() || v?.slug === pId) {
-                return k;
+                if (v.title || v.name || v.priceINR) return k;
               }
             }
           }
         }
       } catch (_) {}
-      return pId;
+      // STRICT: If not found, return empty string so we NEVER create a ghost product!
+      return '';
     }
 
     // ━━ 1. TRACK VIEW (PUBLIC/BUYER ENGAGEMENT) ━━
@@ -121,6 +323,11 @@ export default async function handler(req, res) {
 
       try {
         const targetKey = await resolveProductKey(productId, authQuery);
+        // If product does not exist, do not write anything!
+        if (!targetKey) {
+          return res.status(200).json({ success: false, notFound: true, message: 'Product does not exist' });
+        }
+
         const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/views.json${authQuery}`, {
           signal: AbortSignal.timeout(12000),
         });
@@ -153,6 +360,11 @@ export default async function handler(req, res) {
 
       try {
         const targetKey = await resolveProductKey(productId, authQuery);
+        // If product does not exist, do not write anything!
+        if (!targetKey) {
+          return res.status(200).json({ success: false, notFound: true, message: 'Product does not exist' });
+        }
+
         const getRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(targetKey)}/likes.json${authQuery}`, {
           signal: AbortSignal.timeout(12000),
         });
@@ -263,22 +475,21 @@ export default async function handler(req, res) {
         ? Number(product.views !== undefined ? product.views : existingViews)
         : Number(product.views !== undefined ? product.views : 0);
 
-      const payload = {
+      const rawPayload = {
         ...product,
         id: productId,
         sellerId,
         sellerName: sellerStoreName || product.sellerName || 'Creator Partner',
-        sellerVerified: true,
-        isVerified: true,
-        verified: true,
-        creatorBadge: 'Verified Creator',
-        likes: Math.max(0, finalLikes),
-        views: Math.max(0, finalViews),
-        createdAt: product.createdAt || Date.now(),
-        updatedAt: Date.now(),
+        likes: finalLikes,
+        views: finalViews,
       };
 
-      const saveRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(productId)}.json${authQuery}`, {
+      const payload = sanitizeAndNormalizeProduct(rawPayload, existingProduct || {}, {
+        sellerId,
+        sellerName: sellerStoreName || product.sellerName || 'Creator Partner',
+      });
+
+      const saveRes = await fetch(`${RTDB_URL}/products/${encodeURIComponent(payload.id)}.json${authQuery}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -293,7 +504,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         product: payload,
-        message: 'Pack saved and published successfully!',
+        message: 'Pack saved and published successfully with guaranteed button & checkout schema!',
       });
     }
 

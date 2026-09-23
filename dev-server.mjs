@@ -26,7 +26,7 @@ try {
   });
 } catch (_) {}
 
-const PORT = 8899;
+const PORT = process.env.PORT || 8899;
 
 const MIME_TYPES = {
   '.html': 'text/html',
